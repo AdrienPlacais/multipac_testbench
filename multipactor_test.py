@@ -7,47 +7,62 @@ from matplotlib.axes._axes import Axes
 from matplotlib.container import StemContainer
 import matplotlib.animation as animation
 
-from pick_up import PickUp
+from multipac_testbench.pick_up import PickUp
+from multipac_testbench.file_configuration import FileConfiguration
 
 
 class MultipactorTest:
     """Holds a mp test with several probes."""
 
-    def __init__(self, filepath: str) -> None:
-        """Load the file and create the pick-ups."""
-        data = np.loadtxt(filepath, skiprows=1, delimiter=';')
-        self.pick_ups = self._instantiate_pick_ups(data)
-        self._data = data
-
-    def _instantiate_pick_ups(self, data: np.ndarray) -> list[PickUp]:
+    def __init__(self,
+                 filepath: str,
+                 file_config: FileConfiguration,
+                 skiprows: int = 1,
+                 delimiter: str | None = None) -> None:
         """
-        Create the pick-ups.
+        Load the file and create the pick-ups.
+
+        filepath : str
+            The path to the file containing pick-up data. The first ``skiprow``
+            rows are ignored (header). You must ensure that there is no empty
+            column at the end of each line. Use ``.csv`` or ``.txt`` for file
+            format.
+        file_config : FileConfiguration
+            An object holding names and position of data in ``filepath`` for
+            every pick-up.
+        skiprows : int, optional
+            Number of header lines. The default is 1.
+        delimiter : str | None, optional
+            Column delimiter. The default is None, which corresponds to a
+            space.
 
         .. todo::
-            Avoid these hard-coded names, positions, indexes.
+            Proper data treatment to accept default file.
 
         """
-        pick_up_names = ('E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E7')
-        positions = {'E1': 0.,
-                     'E2': 1.,
-                     'E3': 2.,
-                     'E4': 3.,
-                     'E5': 4.,
-                     'E6': 5.,
-                     'E7': 6.,
-                     }
+        data = np.loadtxt(filepath, skiprows=skiprows, delimiter=delimiter)
+        self.pick_ups = self._instantiate_pick_ups(data, file_config)
+        self._data = data
+
+    def _instantiate_pick_ups(self,
+                              data: np.ndarray,
+                              file_config: FileConfiguration) -> list[PickUp]:
+        """Create the pick-ups."""
         pick_ups = []
-        for i, pick_up_name in enumerate(pick_up_names):
+        for i, pick_up_name in enumerate(file_config.names):
+            position = file_config.positions[i]
+            electric_field_idx = file_config.electric_field_idx[i]
+            mp_current_idx = file_config.mp_current_idx[i]
             pick_ups.append(PickUp(pick_up_name,
-                                   positions[pick_up_name],
+                                   position,
                                    data[:, 0],
-                                   data[:, i + 4],
-                                   data[:, i + 11],
+                                   data[:, electric_field_idx],
+                                   data[:, mp_current_idx],
                                    n_mp_zones=0)
                             )
         return pick_ups
 
-    def plot_pick_ups(self, to_exclude: tuple[str, ...] | None = None
+    def plot_pick_ups(self, to_exclude: tuple[str, ...] = ()
                       ) -> None:
         """Plot the measured current and voltage @ every pick-up."""
         fig = plt.figure(1)
@@ -59,7 +74,7 @@ class MultipactorTest:
         current_ax.set_ylabel('MP current (uA)')
 
         for pick_up in self.pick_ups:
-            if to_exclude is not None and pick_up.name in to_exclude:
+            if pick_up.name in to_exclude:
                 continue
 
             pick_up.plot_electric_field(field_ax)
@@ -69,7 +84,9 @@ class MultipactorTest:
         current_ax.grid(True)
         field_ax.legend()
 
-    def animate_pick_ups(self, to_exclude: tuple[str, ...] | None = None
+    def animate_pick_ups(self,
+                         to_exclude: tuple[str, ...] = (),
+                         gif_path: str = ''
                          ) -> None:
         """Plot what pick-up measure with time.
 
@@ -138,8 +155,6 @@ class MultipactorTest:
         )
         plt.show()
 
-        file = "/home/placais/Documents/test.gif"
-        writergif = animation.PillowWriter(fps=50)
-        ani.save(file, writer=writergif)
-
-
+        if gif_path != '':
+            writergif = animation.PillowWriter(fps=50)
+            ani.save(gif_path, writer=writergif)
