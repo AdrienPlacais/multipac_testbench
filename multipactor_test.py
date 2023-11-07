@@ -1,14 +1,26 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Define an object to store and treat data from pick-ups."""
+import os.path
 import numpy as np
+
 import matplotlib.pyplot as plt
 from matplotlib.axes._axes import Axes
 from matplotlib.container import StemContainer
 import matplotlib.animation as animation
 
+from palettable.colorbrewer.qualitative import Dark2_8
+from cycler import cycler
+
 from multipac_testbench.pick_up import PickUp
 from multipac_testbench.file_configuration import FileConfiguration
+
+
+font = {'family': 'serif', 'size': 12}
+plt.rc('font', **font)
+plt.rcParams['axes.prop_cycle'] = cycler(color=Dark2_8.mpl_colors)
+plt.rcParams["figure.figsize"] = (9.2, 5.62)
+plt.rcParams["figure.dpi"] = 100
 
 
 class MultipactorTest:
@@ -40,6 +52,7 @@ class MultipactorTest:
             Proper data treatment to accept default file.
 
         """
+        self._filepath = filepath
         data = np.loadtxt(filepath, skiprows=skiprows, delimiter=delimiter)
         self.pick_ups = self._instantiate_pick_ups(data, file_config)
         self._data = data
@@ -62,10 +75,13 @@ class MultipactorTest:
                             )
         return pick_ups
 
-    def plot_pick_ups(self, to_exclude: tuple[str, ...] = ()
+    def plot_pick_ups(self,
+                      to_exclude: tuple[str, ...] = (),
+                      png_path: str = '',
+                      **kwargs
                       ) -> None:
         """Plot the measured current and voltage @ every pick-up."""
-        fig = plt.figure(1)
+        fig = plt.figure(**kwargs)
         field_ax = fig.add_subplot(2, 1, 1)
         current_ax = fig.add_subplot(2, 1, 2, sharex=field_ax)
 
@@ -84,9 +100,15 @@ class MultipactorTest:
         current_ax.grid(True)
         field_ax.legend()
 
+        if png_path == '':
+            png_path = os.path.splitext(self._filepath)[0] + '.png'
+        fig.savefig(png_path)
+
     def animate_pick_ups(self,
                          to_exclude: tuple[str, ...] = (),
-                         gif_path: str = ''
+                         gif_path: str = '',
+                         fps: int = 50,
+                         **kwargs,
                          ) -> None:
         """Plot what pick-up measure with time.
 
@@ -94,7 +116,7 @@ class MultipactorTest:
             Name of pick-ups in x axis.
 
         """
-        fig = plt.figure(2)
+        fig = plt.figure(**kwargs)
         field_ax = fig.add_subplot(2, 1, 1)
         current_ax = fig.add_subplot(2, 1, 2, sharex=field_ax)
 
@@ -155,6 +177,7 @@ class MultipactorTest:
         )
         plt.show()
 
-        if gif_path != '':
-            writergif = animation.PillowWriter(fps=50)
-            ani.save(gif_path, writer=writergif)
+        if gif_path == '':
+            gif_path = os.path.splitext(self._filepath)[0] + '.gif'
+        writergif = animation.PillowWriter(fps=fps)
+        ani.save(gif_path, writer=writergif)
