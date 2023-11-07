@@ -5,6 +5,7 @@ import os.path
 import numpy as np
 
 import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
 from matplotlib.axes._axes import Axes
 from matplotlib.container import StemContainer
 import matplotlib.animation as animation
@@ -71,13 +72,8 @@ class MultipactorTest:
                       **kwargs
                       ) -> None:
         """Plot the measured current and voltage @ every pick-up."""
-        fig = plt.figure(**kwargs)
-        field_ax = fig.add_subplot(2, 1, 1)
-        current_ax = fig.add_subplot(2, 1, 2, sharex=field_ax)
-
-        field_ax.set_ylabel('Field probe (V)')
-        current_ax.set_xlabel('Measurement index')
-        current_ax.set_ylabel('MP current (uA)')
+        fig, field_ax, current_ax = self._electric_field_and_current_plots(
+            **kwargs)
 
         for pick_up in self.pick_ups:
             if pick_up.name in to_exclude:
@@ -98,6 +94,7 @@ class MultipactorTest:
                          to_exclude: tuple[str, ...] = (),
                          gif_path: str = '',
                          fps: int = 50,
+                         keep_one_frame_over: int = 1,
                          **kwargs,
                          ) -> None:
         """Plot what pick-up measure with time.
@@ -106,35 +103,29 @@ class MultipactorTest:
             Name of pick-ups in x axis.
 
         """
-        fig = plt.figure(**kwargs)
-        field_ax = fig.add_subplot(2, 1, 1)
-        current_ax = fig.add_subplot(2, 1, 2, sharex=field_ax)
-
-        field_ax.set_ylabel('Field probe (V)')
-        current_ax.set_xlabel('Probe position (m)')
-
-        current_ax.set_ylabel('MP current (uA)')
-
-        field_ax.grid(True)
-        current_ax.grid(True)
+        fig, field_ax, current_ax = self._electric_field_and_current_plots(
+            **kwargs)
+        current_ax.set_xlabel(r'Probe position $[m]$')
 
         def _plot_pick_ups_single_time_step(
                 step_idx: int
-                ) -> tuple[StemContainer, StemContainer]:
+                ) -> tuple[StemContainer, StemContainer] | None:
             """Plot as stem the current and voltage of pick ups at position.
 
             Parameters
             ----------
             field_ax : Axes
-                field_ax
+                Axes holding electric field plot.
             current_ax : Axes
-                current_ax
+                Axes holding MP current plot.
             step_idx : int
-                step_idx
+                Current measurement point.
             to_exclude : tuple[str, ...] | None
-                to_exclude
+                Name of the pick-ups to exclude from the plot.
 
             """
+            if step_idx % keep_one_frame_over != 0:
+                return
             field_ax.clear()
             current_ax.clear()
 
@@ -171,3 +162,18 @@ class MultipactorTest:
             gif_path = os.path.splitext(self._filepath)[0] + '.gif'
         writergif = animation.PillowWriter(fps=fps)
         ani.save(gif_path, writer=writergif)
+
+    def _electric_field_and_current_plots(self, **kwargs
+                                          ) -> tuple[Figure, Axes, Axes]:
+        """Set a figure with two Axes for electric field and MP current."""
+        fig = plt.figure(**kwargs)
+        field_ax = fig.add_subplot(2, 1, 1)
+        current_ax = fig.add_subplot(2, 1, 2, sharex=field_ax)
+
+        field_ax.set_ylabel(r'Field probe $[V]$')
+        current_ax.set_xlabel('Measurement index')
+        current_ax.set_ylabel(r'MP current $[\mu A]$')
+
+        field_ax.grid(True)
+        current_ax.grid(True)
+        return fig, field_ax, current_ax
