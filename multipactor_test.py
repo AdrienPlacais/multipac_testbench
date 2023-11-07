@@ -9,18 +9,8 @@ from matplotlib.axes._axes import Axes
 from matplotlib.container import StemContainer
 import matplotlib.animation as animation
 
-from palettable.colorbrewer.qualitative import Dark2_8
-from cycler import cycler
-
 from multipac_testbench.pick_up import PickUp
 from multipac_testbench.file_configuration import FileConfiguration
-
-
-font = {'family': 'serif', 'size': 12}
-plt.rc('font', **font)
-plt.rcParams['axes.prop_cycle'] = cycler(color=Dark2_8.mpl_colors)
-plt.rcParams["figure.figsize"] = (9.2, 5.62)
-plt.rcParams["figure.dpi"] = 100
 
 
 class MultipactorTest:
