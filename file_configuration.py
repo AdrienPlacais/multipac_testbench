@@ -6,7 +6,21 @@ from dataclasses import dataclass
 
 @dataclass
 class FileConfiguration:
-    """Store in a compact way the meaning of every mp test file column."""
+    """
+    Store in a compact way the meaning of every mp test file column.
+
+    Attributes
+    ----------
+    names: tuple[str, ...]
+        Name of pick-ups.
+    positions: tuple[float, ...]
+        Position in m of pick-ups.
+    electric_field_idx: tuple[int, ...]
+        Column index of electric field data.
+    mp_current_idx: tuple[int, ...]
+        Column index of multipactor current data.
+
+    """
 
     names: tuple[str, ...]
     positions: tuple[float, ...]
