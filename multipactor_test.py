@@ -152,7 +152,7 @@ class MultipactorTest:
 
         def _plot_pick_ups_single_time_step(
                 step_idx: int
-                ) -> tuple[StemContainer, StemContainer] | None:
+        ) -> tuple[StemContainer, StemContainer] | None:
             """Plot as stem the current and voltage of pick ups at position.
 
             Parameters
@@ -250,7 +250,7 @@ class MultipactorTest:
             sharex=True,
             subplot_kw=subplot_kw,
             **fig_kw,
-            )
+        )
 
         field_ax.set_ylabel(r'Field probe $[V]$')
         current_ax.set_ylabel(r'MP current $[\mu A]$')
