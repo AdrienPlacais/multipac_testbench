@@ -45,8 +45,14 @@ class MultipactorTest:
         """
         self._filepath = filepath
         data = np.loadtxt(filepath, skiprows=skiprows, delimiter=delimiter)
+
         self.pick_ups = self._instantiate_pick_ups(data, file_config)
         self._data = data
+
+    def __str__(self) -> str:
+        """Print the voltage of the MP zone of every pick-up."""
+        out = (pick_up.__str__() for pick_up in self.pick_ups)
+        return '\n'.join(out)
 
     def _instantiate_pick_ups(self,
                               data: np.ndarray,
@@ -62,9 +68,40 @@ class MultipactorTest:
                                    data[:, 0],
                                    data[:, electric_field_idx],
                                    data[:, mp_current_idx],
-                                   n_mp_zones=0)
+                                   )
                             )
         return pick_ups
+
+    def where_multipactor(self,
+                          current_threshold: float,
+                          consecutive_criterion: int,
+                          minimum_number_of_points: int,
+                          ) -> None:
+        """Determine for every pick-up where there is multipactor.
+
+        Parameters
+        ----------
+        current_threshold : float
+            Current above which multipactor is detected.
+        consecutive_criterion : int
+            Maximum number of measure points between two consecutive
+            multipactor zones. Useful for treating measure points that did not
+            reach the multipactor current criterion but are in the middle of a
+            multipacting zone.
+        minimum_number_of_points : int
+            Minimum number of consecutive points to consider that there is
+            multipactor. Useful for treating isolated measure points that did
+            reach the multipactor current criterion.
+
+        Returns
+        -------
+        None
+
+        """
+        for pick_up in self.pick_ups:
+            pick_up.determine_multipactor_zones(current_threshold,
+                                                consecutive_criterion,
+                                                minimum_number_of_points)
 
     def plot_pick_ups(self,
                       to_exclude: tuple[str, ...] = (),
@@ -81,8 +118,8 @@ class MultipactorTest:
             if pick_up.name in to_exclude:
                 continue
 
-            pick_up.plot_electric_field(field_ax)
-            pick_up.plot_mp_current(current_ax)
+            pick_up.plot_electric_field(field_ax, draw_mp_zones=False)
+            pick_up.plot_mp_current(current_ax, draw_mp_zones=True)
 
         field_ax.grid(True)
         current_ax.grid(True)
