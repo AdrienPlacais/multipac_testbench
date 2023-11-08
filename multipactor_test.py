@@ -69,11 +69,13 @@ class MultipactorTest:
     def plot_pick_ups(self,
                       to_exclude: tuple[str, ...] = (),
                       png_path: str = '',
-                      **kwargs
+                      **fig_kw
                       ) -> None:
         """Plot the measured current and voltage @ every pick-up."""
+        subplot_kw = {'xlabel': 'Measurement index'}
         fig, field_ax, current_ax = self._electric_field_and_current_plots(
-            **kwargs)
+            subplot_kw,
+            **fig_kw)
 
         for pick_up in self.pick_ups:
             if pick_up.name in to_exclude:
@@ -95,17 +97,35 @@ class MultipactorTest:
                          gif_path: str = '',
                          fps: int = 50,
                          keep_one_frame_over: int = 1,
-                         **kwargs,
+                         **fig_kw,
                          ) -> None:
-        """Plot what pick-up measure with time.
+        """Animate the pick-up measurements.
+
+        Parameters
+        ----------
+        to_exclude : tuple[str, ...]
+            The pick-ups that should not be measured.
+        gif_path : str, optional
+            The path where the resulting ``.gif`` will be saved. The optional
+            is an empty string, in which case the animation is not saved.
+        fps : int, optional
+            Number of frame per seconds in the save ``.gif``. The default is
+            50.
+        keep_one_frame_over : int, optional
+           To reduce memory consumption of the animation, plot only one frame
+           over ``keep_one_frame_over``. The default is 1, in which case all
+           frames are plotted.
+        fig_kw :
+            Keyword arguments given to the matplotlib ``Figure``.
 
         .. todo::
             Name of pick-ups in x axis.
 
         """
+        subplot_kw = {'xlabel': r'Probe position $[m]$'}
         fig, field_ax, current_ax = self._electric_field_and_current_plots(
-            **kwargs)
-        current_ax.set_xlabel(r'Probe position $[m]$')
+            subplot_kw,
+            **fig_kw)
 
         def _plot_pick_ups_single_time_step(
                 step_idx: int
@@ -145,8 +165,8 @@ class MultipactorTest:
                            for pick_up in self.pick_ups
                             if pick_up.name not in to_exclude
                            ]
-            field_line = field_ax.stem(heads_field)
-            current_line = current_ax.stem(heads_current)
+            field_line = field_ax.stem(locs, heads_field)
+            current_line = current_ax.stem(locs, heads_current)
             return field_line, current_line
 
         frames = len(self.pick_ups[0].electric_field_probe)
@@ -163,17 +183,22 @@ class MultipactorTest:
         writergif = animation.PillowWriter(fps=fps)
         ani.save(gif_path, writer=writergif)
 
-    def _electric_field_and_current_plots(self, **kwargs
+    def _electric_field_and_current_plots(self,
+                                          subplot_kw: dict[str, str],
+                                          **fig_kw
                                           ) -> tuple[Figure, Axes, Axes]:
         """Set a figure with two Axes for electric field and MP current."""
-        fig = plt.figure(**kwargs)
-        field_ax = fig.add_subplot(2, 1, 1)
-        current_ax = fig.add_subplot(2, 1, 2, sharex=field_ax)
+        fig, (field_ax, current_ax) = plt.subplots(
+            nrows=2,
+            ncols=1,
+            sharex=True,
+            subplot_kw=subplot_kw,
+            **fig_kw,
+            )
 
         field_ax.set_ylabel(r'Field probe $[V]$')
-        current_ax.set_xlabel('Measurement index')
         current_ax.set_ylabel(r'MP current $[\mu A]$')
 
-        field_ax.grid(True)
-        current_ax.grid(True)
+        for ax in (field_ax, current_ax):
+            ax.grid(True)
         return fig, field_ax, current_ax
