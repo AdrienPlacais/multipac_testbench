@@ -121,6 +121,8 @@ class MultipactorTest:
 
         .. todo::
             Name of pick-ups in x axis.
+            Optimize. Surely I do not need to redraw everything at every
+            iteration.
 
         """
         subplot_kw = {'xlabel': r'Probe position $[m]$'}
@@ -133,6 +135,21 @@ class MultipactorTest:
         y_lim1 = self._get_limits('electric_field_probe', to_ignore)
         y_lim2 = self._get_limits('mp_current_probe', to_ignore)
 
+        def _redraw() -> None:
+            """Redraw what does not change between two frames."""
+            field_ax.set_ylabel(r'Field probe $[V]$')
+            current_ax.set_ylabel(r'MP current $[\mu A]$')
+            current_ax.set_xlim(x_lim)
+            field_ax.set_ylim(y_lim1)
+            current_ax.set_ylim(y_lim2)
+            field_ax.grid(True)
+            current_ax.grid(True)
+
+        locs = [pick_up.position
+                for pick_up in self.pick_ups
+                if pick_up.name not in to_exclude
+                ]
+
         def _plot_pick_ups_single_time_step(
                 step_idx: int
                 ) -> tuple[StemContainer, StemContainer] | None:
@@ -140,38 +157,26 @@ class MultipactorTest:
 
             Parameters
             ----------
-            field_ax : Axes
-                Axes holding electric field plot.
-            current_ax : Axes
-                Axes holding MP current plot.
             step_idx : int
                 Current measurement point.
-            to_exclude : tuple[str, ...] | None
-                Name of the pick-ups to exclude from the plot.
 
             """
             if step_idx % keep_one_frame_over != 0:
                 return
+
             field_ax.clear()
             current_ax.clear()
+            _redraw()
 
-            current_ax.set_xlim(x_lim)
-            field_ax.set_ylim(y_lim1)
-            current_ax.set_ylim(y_lim2)
-
-            locs = [pick_up.position
-                    for pick_up in self.pick_ups
-                    if pick_up.name not in to_exclude
-                    ]
-            heads_current = [pick_up.mp_current_probe[step_idx]
-                             for pick_up in self.pick_ups
-                              if pick_up.name not in to_exclude
-                             ]
             heads_field = [pick_up.electric_field_probe[step_idx]
                            for pick_up in self.pick_ups
-                            if pick_up.name not in to_exclude
+                           if pick_up.name not in to_exclude
                            ]
             field_line = field_ax.stem(locs, heads_field)
+            heads_current = [pick_up.mp_current_probe[step_idx]
+                             for pick_up in self.pick_ups
+                             if pick_up.name not in to_exclude
+                             ]
             current_line = current_ax.stem(locs, heads_current)
             return field_line, current_line
 
