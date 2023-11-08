@@ -94,6 +94,7 @@ class MultipactorTest:
 
     def animate_pick_ups(self,
                          to_exclude: tuple[str, ...] = (),
+                         to_ignore_for_limits: tuple[str, ...] = (),
                          gif_path: str = '',
                          fps: int = 50,
                          keep_one_frame_over: int = 1,
@@ -127,6 +128,11 @@ class MultipactorTest:
             subplot_kw,
             **fig_kw)
 
+        to_ignore = to_exclude + to_ignore_for_limits
+        x_lim = self._get_limits('position', to_ignore)
+        y_lim1 = self._get_limits('electric_field_probe', to_ignore)
+        y_lim2 = self._get_limits('mp_current_probe', to_ignore)
+
         def _plot_pick_ups_single_time_step(
                 step_idx: int
                 ) -> tuple[StemContainer, StemContainer] | None:
@@ -149,9 +155,9 @@ class MultipactorTest:
             field_ax.clear()
             current_ax.clear()
 
-            field_ax.set_ylim([0., 0.25])
-            current_ax.set_xlim([-1., 7.])
-            current_ax.set_ylim([0., 90.])
+            current_ax.set_xlim(x_lim)
+            field_ax.set_ylim(y_lim1)
+            current_ax.set_ylim(y_lim2)
 
             locs = [pick_up.position
                     for pick_up in self.pick_ups
@@ -182,6 +188,51 @@ class MultipactorTest:
             gif_path = os.path.splitext(self._filepath)[0] + '.gif'
         writergif = animation.PillowWriter(fps=fps)
         ani.save(gif_path, writer=writergif)
+
+    def _get_limits(self,
+                    attribute: str,
+                    to_ignore: tuple[str, ...] = (),
+                    ) -> tuple[float, float]:
+        """Set limits for the plots.
+
+        Parameters
+        ----------
+        attribute : str
+            Name of the attribute. Must be in :class:`.PickUp` attributes.
+        to_ignore : tuple[str, ...]
+            Name of the pick-ups that should not be considered for the limits.
+
+        Returns
+        -------
+        tuple[float, float]
+            Lower and upper limits that should allow to visualize all data but
+            the one in pick-ups to ignore.
+
+        """
+        lower, upper = None, None
+        for pick_up in self.pick_ups:
+            if pick_up.name in to_ignore:
+                continue
+
+            if lower is None:
+                assert upper is None
+                lower = np.nanmin(getattr(pick_up, attribute))
+                upper = np.nanmax(getattr(pick_up, attribute))
+                continue
+
+            this_lower = np.nanmin(getattr(pick_up, attribute))
+            if this_lower < lower:
+                lower = this_lower
+            this_upper = np.nanmax(getattr(pick_up, attribute))
+            if this_upper > upper:
+                upper = this_upper
+
+        if lower is None:
+            lower = 0.
+        if upper is None:
+            upper = 1.
+        amplitude = abs(upper - lower)
+        return lower - .1 * amplitude, upper + .1 * amplitude
 
     def _electric_field_and_current_plots(self,
                                           subplot_kw: dict[str, str],
