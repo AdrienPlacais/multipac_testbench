@@ -72,13 +72,13 @@ class MultipactorTest:
         pick_ups = []
         for i, pick_up_name in enumerate(file_config.names):
             position = file_config.positions[i]
-            electric_field_idx = file_config.electric_field_idx[i]
-            mp_current_idx = file_config.mp_current_idx[i]
+            e_rf_idx = file_config.e_rf_idx[i]
+            i_mp_idx = file_config.i_mp_idx[i]
             pick_ups.append(PickUp(pick_up_name,
                                    position,
                                    data[:, 0],
-                                   data[:, electric_field_idx],
-                                   data[:, mp_current_idx],
+                                   data[:, e_rf_idx],
+                                   data[:, i_mp_idx],
                                    _smooth_kw=smooth_kw,
                                    )
                             )
@@ -141,7 +141,7 @@ class MultipactorTest:
 
         """
         subplot_kw = {'xlabel': 'Measurement index'}
-        fig, field_ax, current_ax = self._electric_field_and_current_plots(
+        fig, field_ax, current_ax = self._e_rf_and_i_mp_plots(
             subplot_kw,
             **fig_kw)
 
@@ -149,12 +149,12 @@ class MultipactorTest:
             if pick_up.name in to_exclude:
                 continue
 
-            pick_up.plot_electric_field(field_ax,
-                                        draw_mp_zones=False,
-                                        smoothed=smoothed[0])
-            pick_up.plot_mp_current(current_ax,
-                                    draw_mp_zones=True,
-                                    smoothed=smoothed[1])
+            pick_up.plot_e_rf(field_ax,
+                              draw_mp_zones=False,
+                              smoothed=smoothed[0])
+            pick_up.plot_i_mp(current_ax,
+                              draw_mp_zones=True,
+                              smoothed=smoothed[1])
 
         field_ax.grid(True)
         current_ax.grid(True)
@@ -198,14 +198,14 @@ class MultipactorTest:
 
         """
         subplot_kw = {'xlabel': r'Probe position $[m]$'}
-        fig, field_ax, current_ax = self._electric_field_and_current_plots(
+        fig, field_ax, current_ax = self._e_rf_and_i_mp_plots(
             subplot_kw,
             **fig_kw)
 
         to_ignore = to_exclude + to_ignore_for_limits
         x_lim = self._get_limits('position', to_ignore)
-        y_lim1 = self._get_limits('electric_field_probe', to_ignore)
-        y_lim2 = self._get_limits('mp_current_probe', to_ignore)
+        y_lim1 = self._get_limits('e_rf_probe', to_ignore)
+        y_lim2 = self._get_limits('i_mp_probe', to_ignore)
 
         def _redraw() -> None:
             """Redraw what does not change between two frames."""
@@ -240,19 +240,19 @@ class MultipactorTest:
             current_ax.clear()
             _redraw()
 
-            heads_field = [pick_up.electric_field_probe[step_idx]
+            heads_field = [pick_up.e_rf_probe[step_idx]
                            for pick_up in self.pick_ups
                            if pick_up.name not in to_exclude
                            ]
             field_line = field_ax.stem(locs, heads_field)
-            heads_current = [pick_up.mp_current_probe[step_idx]
+            heads_current = [pick_up.i_mp_probe[step_idx]
                              for pick_up in self.pick_ups
                              if pick_up.name not in to_exclude
                              ]
             current_line = current_ax.stem(locs, heads_current)
             return field_line, current_line
 
-        frames = len(self.pick_ups[0].electric_field_probe)
+        frames = len(self.pick_ups[0].e_rf_probe)
         ani = animation.FuncAnimation(
             fig,
             _plot_pick_ups_single_time_step,
@@ -311,10 +311,10 @@ class MultipactorTest:
         amplitude = abs(upper - lower)
         return lower - .1 * amplitude, upper + .1 * amplitude
 
-    def _electric_field_and_current_plots(self,
-                                          subplot_kw: dict[str, str],
-                                          **fig_kw
-                                          ) -> tuple[Figure, Axes, Axes]:
+    def _e_rf_and_i_mp_plots(self,
+                                subplot_kw: dict[str, str],
+                                **fig_kw
+                                ) -> tuple[Figure, Axes, Axes]:
         """Set a figure with two Axes for electric field and MP current."""
         fig, (field_ax, current_ax) = plt.subplots(
             nrows=2,

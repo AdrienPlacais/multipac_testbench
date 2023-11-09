@@ -9,6 +9,7 @@ from matplotlib.axes._axes import Axes
 
 from multipac_testbench.filters import smooth
 
+
 @dataclass
 class PickUp:
     """Hold information on a single pick-up."""
@@ -16,16 +17,16 @@ class PickUp:
     name: str
     position: float
     _sample_index: np.ndarray
-    electric_field_probe: np.ndarray
-    mp_current_probe: np.ndarray
+    e_rf_probe: np.ndarray
+    i_mp_probe: np.ndarray
     _color: tuple[float, float, float] | None = None
     _smooth_kw: dict[str, Any] | None = None
 
     def __post_init__(self):
         """Declare multipactor limits."""
         self.idx_of_mp_zones: list[tuple[int, int]]
-        self._smoothed_electric_field_probe: np.ndarray
-        self._smoothed_mp_current_probe: np.ndarray
+        self._smoothed_e_rf_probe: np.ndarray
+        self._smoothed_i_mp_probe: np.ndarray
 
     def __str__(self) -> str:
         """Print the voltage of MP zones if defined."""
@@ -39,21 +40,25 @@ class PickUp:
                         for i, volt in enumerate(voltages, start=1))
         return '\n|\t'.join((out, *str_voltages))
 
+    def __hash__(self) -> int:
+        """Make this class hashable."""
+        return hash(repr(self))
+
     def _get_multipactor_voltage(self, mp_limits_idx: tuple[int, int]
                                  ) -> tuple[float, float]:
         """Compute multipactor voltage start and end."""
-        start = self.electric_field_probe[mp_limits_idx[0]]
-        end = self.electric_field_probe[mp_limits_idx[1]]
+        start = self.e_rf_probe[mp_limits_idx[0]]
+        end = self.e_rf_probe[mp_limits_idx[1]]
         return (start, end)
 
-    def plot_electric_field(self,
-                            axx: Axes,
-                            draw_mp_zones: bool = False,
-                            smoothed: bool = False) -> None:
+    def plot_e_rf(self,
+                  axx: Axes,
+                  draw_mp_zones: bool = False,
+                  smoothed: bool = False) -> None:
         """Plot the electric field as a function of sample index."""
-        data_to_plot = self.electric_field_probe
+        data_to_plot = self.e_rf_probe
         if smoothed:
-            data_to_plot = self.smoothed_electric_field_probe
+            data_to_plot = self.smoothed_e_rf_probe
         line, = axx.plot(self._sample_index,
                          data_to_plot,
                          label=self.name,
@@ -63,16 +68,16 @@ class PickUp:
 
         if draw_mp_zones:
             self.add_mp_zone(axx, y_zone=1.05 * np.nanmax(
-                self.electric_field_probe))
+                self.e_rf_probe))
 
-    def plot_mp_current(self,
-                        axx: Axes,
-                        draw_mp_zones: bool = True,
-                        smoothed: bool = True) -> None:
+    def plot_i_mp(self,
+                  axx: Axes,
+                  draw_mp_zones: bool = True,
+                  smoothed: bool = True) -> None:
         """Plot the electron pick-up current vs sample index."""
-        data_to_plot = self.mp_current_probe
+        data_to_plot = self.i_mp_probe
         if smoothed:
-            data_to_plot = self.smoothed_mp_current_probe
+            data_to_plot = self.smoothed_i_mp_probe
         line, = axx.plot(self._sample_index,
                          data_to_plot,
                          label=self.name,
@@ -82,7 +87,7 @@ class PickUp:
 
         if draw_mp_zones:
             self.add_mp_zone(axx, y_zone=1.05 * np.nanmax(
-                self.mp_current_probe))
+                self.i_mp_probe))
 
     def add_mp_zone(self, axx: Axes, y_zone: float) -> None:
         """Plot the MP zones on the given axe.
@@ -161,7 +166,7 @@ class PickUp:
             high enough to detect multipactor.
 
         """
-        mp_indexes = np.where(self.mp_current_probe > current_threshold)[0]
+        mp_indexes = np.where(self.i_mp_probe > current_threshold)[0]
         if print_info:
             print(f"{self.name}: detected {len(mp_indexes)} points with MP.")
         return mp_indexes
@@ -228,28 +233,28 @@ class PickUp:
     @property
     def mp_voltages(self) -> list[tuple[float, float]]:
         """Compute start and end voltage for each MP zone."""
-        voltages = [(self.electric_field_probe[idx[0]],
-                     self.electric_field_probe[idx[1]])
+        voltages = [(self.e_rf_probe[idx[0]],
+                     self.e_rf_probe[idx[1]])
                     for idx in self.idx_of_mp_zones]
         return voltages
 
     @property
-    def smoothed_electric_field_probe(self):
+    def smoothed_e_rf_probe(self):
         """Measured voltage on electric field probe, but with less noise."""
-        if not hasattr(self, '_smoothed_electric_field_probe'):
-            self._smoothed_electric_field_probe = smooth(
-                input_data=self.electric_field_probe,
+        if not hasattr(self, '_smoothed_e_rf_probe'):
+            self._smoothed_e_rf_probe = smooth(
+                input_data=self.e_rf_probe,
                 **self.smooth_kw)
-        return self._smoothed_electric_field_probe
+        return self._smoothed_e_rf_probe
 
     @property
-    def smoothed_mp_current_probe(self):
+    def smoothed_i_mp_probe(self):
         """Measured MP current, but with less noise."""
-        if not hasattr(self, '_smoothed_mp_current_probe'):
-            self._smoothed_mp_current_probe = smooth(
-                input_data=self.mp_current_probe,
+        if not hasattr(self, '_smoothed_i_mp_probe'):
+            self._smoothed_i_mp_probe = smooth(
+                input_data=self.i_mp_probe,
                 **self.smooth_kw)
-        return self._smoothed_mp_current_probe
+        return self._smoothed_i_mp_probe
 
     @property
     def smooth_kw(self) -> dict[str, Any]:
