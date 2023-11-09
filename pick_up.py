@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Define an object to keep measurements at a pick-up."""
+from typing import Any
 from dataclasses import dataclass
 
 import numpy as np
 from matplotlib.axes._axes import Axes
 
+from multipac_testbench.filters import smooth
 
 @dataclass
 class PickUp:
@@ -17,10 +19,13 @@ class PickUp:
     electric_field_probe: np.ndarray
     mp_current_probe: np.ndarray
     _color: tuple[float, float, float] | None = None
+    _smooth_kw: dict[str, Any] | None = None
 
     def __post_init__(self):
         """Declare multipactor limits."""
         self.idx_of_mp_zones: list[tuple[int, int]]
+        self._smoothed_electric_field_probe: np.ndarray
+        self._smoothed_mp_current_probe: np.ndarray
 
     def __str__(self) -> str:
         """Print the voltage of MP zones if defined."""
@@ -43,10 +48,14 @@ class PickUp:
 
     def plot_electric_field(self,
                             axx: Axes,
-                            draw_mp_zones: bool = False) -> None:
+                            draw_mp_zones: bool = False,
+                            smoothed: bool = False) -> None:
         """Plot the electric field as a function of sample index."""
+        data_to_plot = self.electric_field_probe
+        if smoothed:
+            data_to_plot = self.smoothed_electric_field_probe
         line, = axx.plot(self._sample_index,
-                         self.electric_field_probe,
+                         data_to_plot,
                          label=self.name,
                          color=self._color)
         if self._color is None:
@@ -58,10 +67,14 @@ class PickUp:
 
     def plot_mp_current(self,
                         axx: Axes,
-                        draw_mp_zones: bool = True) -> None:
+                        draw_mp_zones: bool = True,
+                        smoothed: bool = True) -> None:
         """Plot the electron pick-up current vs sample index."""
+        data_to_plot = self.mp_current_probe
+        if smoothed:
+            data_to_plot = self.smoothed_mp_current_probe
         line, = axx.plot(self._sample_index,
-                         self.mp_current_probe,
+                         data_to_plot,
                          label=self.name,
                          color=self._color)
         if self._color is None:
@@ -159,7 +172,7 @@ class PickUp:
             consecutive_criterion: int,
             minimum_number_of_points: int,
             print_info: bool = False
-            ) -> list[tuple[int, int]]:
+    ) -> list[tuple[int, int]]:
         """Calculate the different multipacting zones.
 
         Parameters
@@ -220,3 +233,36 @@ class PickUp:
                     for idx in self.idx_of_mp_zones]
         return voltages
 
+    @property
+    def smoothed_electric_field_probe(self):
+        """Measured voltage on electric field probe, but with less noise."""
+        if not hasattr(self, '_smoothed_electric_field_probe'):
+            self._smoothed_electric_field_probe = smooth(
+                input_data=self.electric_field_probe,
+                **self.smooth_kw)
+        return self._smoothed_electric_field_probe
+
+    @property
+    def smoothed_mp_current_probe(self):
+        """Measured MP current, but with less noise."""
+        if not hasattr(self, '_smoothed_mp_current_probe'):
+            self._smoothed_mp_current_probe = smooth(
+                input_data=self.mp_current_probe,
+                **self.smooth_kw)
+        return self._smoothed_mp_current_probe
+
+    @property
+    def smooth_kw(self) -> dict[str, Any]:
+        """Get the keyword arguments transmitted to the smoothing func.
+
+        Returns
+        -------
+        dict[str, Any]
+            Keyword arguments for the smoothing funuction.
+
+        """
+        if self._smooth_kw is None:
+            print("Warning!! smooth_kw not defined. Calling a smooth function "
+                  "will probably lead to error. Returning empty dict...")
+            return {}
+        return self._smooth_kw

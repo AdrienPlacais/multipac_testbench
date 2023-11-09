@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Define an object to store and treat data from pick-ups."""
+from typing import Any
 import os.path
 import numpy as np
 
@@ -21,7 +22,9 @@ class MultipactorTest:
                  filepath: str,
                  file_config: FileConfiguration,
                  skiprows: int = 1,
-                 delimiter: str | None = None) -> None:
+                 delimiter: str | None = None,
+                 smooth_kw: dict[str, Any] | None = None,
+                 ) -> None:
         """
         Load the file and create the pick-ups.
 
@@ -38,6 +41,10 @@ class MultipactorTest:
         delimiter : str | None, optional
             Column delimiter. The default is None, which corresponds to a
             space.
+        smooth_kw : dict[str, Any] | None, optional
+            Keyword passed to the smoothed function in :mod:`.filters`. The
+            default is None, in which case you shall not try to smooth your
+            data.
 
         .. todo::
             Proper data treatment to accept default file.
@@ -46,7 +53,9 @@ class MultipactorTest:
         self._filepath = filepath
         data = np.loadtxt(filepath, skiprows=skiprows, delimiter=delimiter)
 
-        self.pick_ups = self._instantiate_pick_ups(data, file_config)
+        self.pick_ups = self._instantiate_pick_ups(data,
+                                                   file_config,
+                                                   smooth_kw)
         self._data = data
 
     def __str__(self) -> str:
@@ -56,7 +65,9 @@ class MultipactorTest:
 
     def _instantiate_pick_ups(self,
                               data: np.ndarray,
-                              file_config: FileConfiguration) -> list[PickUp]:
+                              file_config: FileConfiguration,
+                              smooth_kw: dict[str, Any] | None,
+                              ) -> list[PickUp]:
         """Create the pick-ups."""
         pick_ups = []
         for i, pick_up_name in enumerate(file_config.names):
@@ -68,6 +79,7 @@ class MultipactorTest:
                                    data[:, 0],
                                    data[:, electric_field_idx],
                                    data[:, mp_current_idx],
+                                   _smooth_kw=smooth_kw,
                                    )
                             )
         return pick_ups
@@ -106,9 +118,28 @@ class MultipactorTest:
     def plot_pick_ups(self,
                       to_exclude: tuple[str, ...] = (),
                       png_path: str = '',
+                      smoothed: tuple[bool, bool] = (False, True),
                       **fig_kw
                       ) -> None:
-        """Plot the measured current and voltage @ every pick-up."""
+        """Plot the measured current and voltage @ every pick-up.
+
+        Parameters
+        ----------
+        to_exclude : tuple[str, ...], optional
+            Name of the pick-ups to exclude from the plot. The default is an
+            empty tuple.
+        png_path : str, optional
+            Filepath where plot will be saved. The default is an empty string,
+            in which case the name will be the one of the data file but with
+            `.png` instead of `.csv`.
+        smoothed : tuple[bool, bool]
+            If the data should be smoothed for the electric field probe (1st
+            element) and for the MP current (second element). The default is
+            (False, True).
+        fig_kw :
+            Keyword arguments passed to the ``plt.Figure``.
+
+        """
         subplot_kw = {'xlabel': 'Measurement index'}
         fig, field_ax, current_ax = self._electric_field_and_current_plots(
             subplot_kw,
@@ -118,8 +149,12 @@ class MultipactorTest:
             if pick_up.name in to_exclude:
                 continue
 
-            pick_up.plot_electric_field(field_ax, draw_mp_zones=False)
-            pick_up.plot_mp_current(current_ax, draw_mp_zones=True)
+            pick_up.plot_electric_field(field_ax,
+                                        draw_mp_zones=False,
+                                        smoothed=smoothed[0])
+            pick_up.plot_mp_current(current_ax,
+                                    draw_mp_zones=True,
+                                    smoothed=smoothed[1])
 
         field_ax.grid(True)
         current_ax.grid(True)
