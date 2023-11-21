@@ -6,6 +6,7 @@ Define object to keep a single instrument measurements.
 .. todo::
     Be more generic than "to smooth". Should be able to apply any number of
     transformations/transfer functions.
+    PostTreater object???
 
 """
 from typing import Any
@@ -15,7 +16,7 @@ from abc import ABC
 import numpy as np
 from matplotlib.axes._axes import Axes
 
-from multipac_testbench.filters import smooth
+from multipac_testbench.util.filters import smooth
 from multipac_testbench.util.multipactor_detectors import detect_multipactor
 
 

@@ -8,7 +8,7 @@ import numpy as np
 from matplotlib.axes._axes import Axes
 
 from multipac_testbench.instruments.instrument import Instrument
-from multipac_testbench.filters import smooth
+from multipac_testbench.util.filters import smooth
 
 
 @dataclass
