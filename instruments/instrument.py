@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Define object to keep a single instrument measurements."""
+"""
+Define object to keep a single instrument measurements.
+
+.. todo::
+    Be more generic than "to smooth". Should be able to apply any number of
+    transformations/transfer functions.
+
+"""
 from typing import Any
 from dataclasses import dataclass
 from abc import ABC
