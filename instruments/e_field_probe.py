@@ -3,6 +3,8 @@
 """Define field probe to measure electric field."""
 from dataclasses import dataclass
 
+import numpy as np
+
 from multipac_testbench.instruments.instrument import Instrument
 
 
@@ -11,3 +13,8 @@ class ElectricFieldProbe(Instrument):
     """A probe to measure electric field."""
 
     y_label: str = r"Voltage $[V]$"
+
+    @property
+    def mp_indexes(self) -> np.ndarray[np.int64]:
+        """Determine index of measurements where MP was detected."""
+        raise IOError("No detection of multipactor for {type(self)}.")
