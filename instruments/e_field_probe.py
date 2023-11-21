@@ -14,10 +14,13 @@ class ElectricFieldProbe(Instrument):
 
     y_label: str = r"Voltage $[V]$"
     numerical_e_limits: np.ndarray | None = None
+    analytical_e_limits: np.ndarray | None = None
 
     @property
     def mp_indexes(self) -> np.ndarray[np.int64]:
         """Determine index of measurements where MP should be detected."""
+        assert self.analytical_e_limits is not None, "You should give MP "\
+            "limits to allow comparison."
         assert self.numerical_e_limits is not None, "You should give MP "\
             "limits to allow comparison."
         raise NotImplementedError("to do")
