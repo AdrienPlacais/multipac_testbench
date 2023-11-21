@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Define current probe to measure multipactor cloud current."""
+from typing import Any
 from dataclasses import dataclass
+
 
 from multipac_testbench.instruments.instrument import Instrument
 
