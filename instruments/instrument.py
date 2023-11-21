@@ -9,6 +9,7 @@ import numpy as np
 from matplotlib.axes._axes import Axes
 
 from multipac_testbench.filters import smooth
+from multipac_testbench.util.multipactor_detectors import detect_multipactor
 
 
 @dataclass
@@ -44,11 +45,13 @@ class Instrument(ABC):
     x_label: str = "Measurement index"
     to_smooth: bool = False
     _smooth_kw: dict[str, Any] | None = None
+    _mp_detection_kw: dict[str, Any] | None = None
 
     def __post_init__(self) -> None:
         """Check inputs validity, declare attributes."""
         assert self.x_data.shape == self.y_data.shape
         self._smoothed: np.ndarray
+        self._mp_indexes: np.ndarray[np.int64]
 
     @property
     def smooth_kw(self) -> dict[str, Any]:
@@ -57,7 +60,7 @@ class Instrument(ABC):
         Returns
         -------
         dict[str, Any]
-            Keyword arguments for the smoothing funuction.
+            Keyword arguments for the smoothing function.
 
         """
         if self._smooth_kw is None:
@@ -65,6 +68,23 @@ class Instrument(ABC):
                   "will probably lead to error. Returning empty dict...")
             return {}
         return self._smooth_kw
+
+    @property
+    def mp_detection_kw(self) -> dict[str, Any]:
+        """Get the keyword arguments transmitted to the mp detection func.
+
+        Returns
+        -------
+        dict[str, Any]
+            Keyword arguments for the multipactor detection function.
+
+        """
+        if self._mp_detection_kw is None:
+            print("Warning!! mp_detection_kw not defined. Calling a "
+                  "mp_detection function will probably lead to error. "
+                  "Returning empty dict...")
+            return {}
+        return self._mp_detection_kw
 
     @property
     def y_data(self) -> np.ndarray:
@@ -80,6 +100,15 @@ class Instrument(ABC):
             self._smoothed = smooth(
                 input_data=self.raw_y_data, **self.smooth_kw)
         return self._smoothed
+
+    @property
+    def mp_indexes(self) -> np.ndarray[np.int64]:
+        """Determine index of measurements where MP was detected."""
+        if not hasattr(self, '__mp_indexes'):
+            mp_detection_kw = self.mp_detection_kw
+            self._mp_indexes = detect_multipactor(quantity=self.y_data,
+                                                  **mp_detection_kw)
+        return self._mp_indexes
 
     def plot(self, axe: Axes, **kwargs) -> None:
         """Plot what the instrument measured."""
