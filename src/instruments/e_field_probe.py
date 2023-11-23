@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Define field probe to measure electric field."""
-import numpy as np
 import pandas as pd
 
-from multipac_testbench.instruments.instrument import Instrument
+from multipac_testbench.src.instruments.instrument import Instrument
 
 
 class ElectricFieldProbe(Instrument):

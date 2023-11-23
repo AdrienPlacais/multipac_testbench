@@ -4,18 +4,18 @@
 from abc import ABCMeta
 from typing import Sequence
 from pathlib import Path
-import pandas as pd
+
 import numpy as np
+import pandas as pd
 
 import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
+from matplotlib import animation
 from matplotlib.axes._axes import Axes
 from matplotlib.container import StemContainer
-from matplotlib import animation
+from matplotlib.figure import Figure
 
-from multipac_testbench.pick_up import PickUp
-
-from multipac_testbench.instruments.factory import InstrumentFactory
+from multipac_testbench.src.instruments.factory import InstrumentFactory
+from multipac_testbench.src.pick_up import PickUp
 
 
 class MultipactorTest:

@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 """Define a class to create the proper :class:`.Instrument`."""
 from typing import Any
+
 import pandas as pd
 
-from multipac_testbench.instruments.instrument import Instrument
-from multipac_testbench.instruments.current_probe import CurrentProbe
-from multipac_testbench.instruments.e_field_probe import ElectricFieldProbe
+from multipac_testbench.src.instruments.current_probe import CurrentProbe
+from multipac_testbench.src.instruments.e_field_probe import ElectricFieldProbe
+from multipac_testbench.src.instruments.instrument import Instrument
 
 
 STRING_TO_INSTRUMENT_CLASS = {

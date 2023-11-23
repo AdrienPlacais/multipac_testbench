@@ -3,15 +3,14 @@
 """Define an object to keep measurements at a pick-up."""
 from abc import ABCMeta
 from typing import Callable, Sequence
+
+from matplotlib.axes._axes import Axes
+import numpy as np
 import pandas as pd
 
-import numpy as np
-from matplotlib.axes._axes import Axes
-
-from multipac_testbench.instruments.instrument import Instrument
-from multipac_testbench.instruments.factory import InstrumentFactory
-
-from multipac_testbench.util.multipactor_detectors import \
+from multipac_testbench.src.instruments.factory import InstrumentFactory
+from multipac_testbench.src.instruments.instrument import Instrument
+from multipac_testbench.src.util.multipactor_detectors import \
     start_and_end_of_contiguous_true_zones
 
 
