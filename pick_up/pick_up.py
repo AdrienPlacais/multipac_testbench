@@ -106,6 +106,13 @@ class PickUp:
                                 if isinstance(instrument, instrument_class)]
         return affected_instruments
 
+    def get_instrument_data(self, instrument_class: ABCMeta) -> np.ndarray:
+        """Get the ``ydata`` from first ``instrument_class`` instrument."""
+        instruments = self._get_affected_instruments(instrument_class)
+        assert len(instruments) < 2
+        instrument = instruments[0]
+        return instrument.ydata
+
     def plot_instruments(self,
                          axes: dict[ABCMeta, Axes],
                          instruments_to_plot: tuple[ABCMeta, ...] = (),
