@@ -70,6 +70,10 @@ class MultipactorTest:
     ) -> None:
         """Plot the different signals at the different pick-ups.
 
+        ..  todo::
+            ``instruments_to_plot`` should be mandatory, OR have a default
+            value that works
+
         Parameters
         ----------
         pick_up_to_exclude : tuple[str, ...], optional
@@ -171,6 +175,9 @@ class MultipactorTest:
                          **fig_kw,
                          ) -> None:
         """Animate the pick-up measurements.
+
+        .. todo::
+            not sure if ``keep_one_frame_over`` work as expected
 
         Parameters
         ----------
