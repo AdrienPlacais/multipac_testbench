@@ -17,9 +17,7 @@ import matplotlib.animation as animation
 from multipac_testbench.pick_up.pick_up import PickUp
 from multipac_testbench.file_configuration import FileConfiguration
 
-from multipac_testbench.instruments.factory import (STRING_TO_INSTRUMENT_CLASS,
-                                                    InstrumentFactory)
-from multipac_testbench.instruments.instrument import Instrument
+from multipac_testbench.instruments.factory import InstrumentFactory
 
 
 class MultipactorTest:
