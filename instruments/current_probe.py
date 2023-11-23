@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Define current probe to measure multipactor cloud current."""
-from typing import Any
-from dataclasses import dataclass
-
-
 from multipac_testbench.instruments.instrument import Instrument
 
 
-@dataclass
 class CurrentProbe(Instrument):
     """A probe to measure multipacting current."""
 
-    y_label: str = r"MP current $[\mu A]$"
+    def __init__(self, *args, **kwargs) -> None:
+        """Just instantiate."""
+        return super().__init__(*args, **kwargs)
+
+    @classmethod
+    def ylabel(cls) -> str:
+        """Label used for plots."""
+        return r"Multipactor current [$\mu$A]"

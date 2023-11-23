@@ -1,94 +1,132 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Define an object to keep measurements at a pick-up."""
-from typing import Any
+from typing import Any, Callable
 from dataclasses import dataclass
+import pandas as pd
 
 import numpy as np
 from matplotlib.axes._axes import Axes
 
 from multipac_testbench.instruments.instrument import Instrument
-from multipac_testbench.util.filters import smooth
+from multipac_testbench.instruments.factory import InstrumentFactory
+
+from multipac_testbench.instruments.current_probe import CurrentProbe
 
 
-@dataclass
-class NewPickUp:
-    """
-    Hold information on a single pick-up.
+class PickUp:
+    """Hold information on a single pick-up."""
 
-    Attributes
-    ----------
-    name : str
-        Name of the pick-up.
-    position : float
-        Position of the pick-up. Usually, reference is pick-up ``E1``.
-    instruments : list[Instrument]
-        The measurement instruments at this pick-up.
-    idx_of_mp_zones : list[tuple[int, int]]
-        List holding the multipacting starting and ending index for every
-        multipactor zone.
-    _sample_index : np.ndarray[np.int64]
-        Measurement indexes I guess???
-    _color : tuple[float, float, float] | None, optional
-        Color for the plots.
-    _smooth_kw : dict[str, Any] | None = None
-        Keywords passed to the smoothing function.
+    def __init__(self,
+                 name: str,
+                 df_data: pd.DataFrame,
+                 instrument_factory: InstrumentFactory,
+                 position: float,
+                 instruments_kw: dict,
+                 ) -> None:
+        """Create the pick-up with all its instruments.
 
-    """
-
-    name: str
-    position: float
-    _sample_index: np.ndarray[np.int64]
-    instruments: list[Instrument]
-    _color: tuple[float, float, float] | None = None
-    _smooth_kw: dict[str, Any] | None = None
-
-    def __post_init__(self):
-        """Declare multipactor limits."""
-        self.idx_of_mp_zones: list[tuple[int, int]]
-
-    def __str__(self) -> str:
-        """Print the voltage of MP zones if defined."""
-        if not hasattr(self, 'idx_of_mp_zones'):
-            return self.__repr__()
-        voltages = self.mp_voltages
-        out = self.name
-        if len(voltages) == 0:
-            return '\n|\t'.join((out, "no MP"))
-        str_voltages = (f"Zone {i}: {volt[0]} V to {volt[1]} V"
-                        for i, volt in enumerate(voltages, start=1))
-        return '\n|\t'.join((out, *str_voltages))
-
-    def __hash__(self) -> int:
-        """Make this class hashable."""
-        return hash(repr(self))
-
-    @property
-    def multipactor_voltages(self) -> list[tuple[float, float]]:
-        """Return the voltages for which multipactor was detected."""
-        raise NotImplementedError("not sure if it has a meaning... depends on "
-                                  "if this pick up has an electric field "
-                                  "probe...")
-
-    @property
-    def smooth_kw(self) -> dict[str, Any]:
-        """Get the keyword arguments transmitted to the smoothing func.
+        Parameters
+        ----------
+        name : str
+            Name of the pick-up.
+        df_data : pd.DataFrame
+            df_data
+        instrument_factory : InstrumentFactory
+            An object that creates :class:`.Instrument`.
+        position : float
+            position
+        instruments_kw : dict[str, dict]
+            Dictionary which keys are name of the column where the data from
+            the instrument is. Values are dictionaries with keyword arguments
+            passed to the proper :class:`.Instrument`.
 
         Returns
         -------
-        dict[str, Any]
-            Keyword arguments for the smoothing funuction.
+        None
 
         """
-        if self._smooth_kw is None:
-            print("Warning!! smooth_kw not defined. Calling a smooth function "
-                  "will probably lead to error. Returning empty dict...")
-            return {}
-        return self._smooth_kw
+        self.name = name
+        self.position = position
+        self.instruments = [
+            instrument_factory.run(instr_name, df_data, **instr_kw)
+            for instr_name, instr_kw in instruments_kw.items()
+        ]
+
+        self._color: tuple[float, float, float]
+        # doubt
+        self.idx_of_mp_zones: list[tuple[int, int]]
+
+    def add_post_treater(self,
+                         post_treater: Callable[[np.ndarray], np.ndarray],
+                         instrument_class_name: str = '',
+                         ) -> None:
+        """Add post-treatment functions to instruments."""
+        affected_instruments = self._get_affected_instruments(
+            instrument_class_name)
+
+        for instrument in affected_instruments:
+            instrument.add_post_treater(post_treater)
+
+    def _get_affected_instruments(self, instrument_class_name: str
+                                  ) -> list[Instrument]:
+        """Get all instruments which name of the class is in arg."""
+        if instrument_class_name in ('', 'Instrument'):
+            return self.instruments
+
+        affected_instruments = [
+            instrument for instrument in self.instruments
+            if instrument.instrument_class_name == instrument_class_name
+        ]
+        return affected_instruments
+
+    def set_multipac_detector(
+            self,
+            multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
+            instrument_class_name: str = '',
+            ) -> None:
+        """Add multipactor detection function to instruments."""
+        affected_instruments = self._get_affected_instruments(
+            instrument_class_name)
+
+        for instrument in affected_instruments:
+            instrument.multipac_detector = multipac_detector
+
+    def plot_instruments(self,
+                         axes: dict[Instrument, Axes],
+                         instruments_to_plot: tuple[str, ...] = (),
+                         raw: bool = False,
+                         **subplot_kw,
+                         ) -> None:
+        """Plot the signal of every instrument at this pick-up."""
+        for instrument in self.instruments:
+            if instrument.instrument_class_name not in instruments_to_plot:
+                continue
+
+            axe = axes[type(instrument)]
+            instrument.plot(axe, raw, **subplot_kw)
+
+        self._add_mp_zone(axes)
+
+    def _add_mp_zone(self, axes: dict[Instrument, Axes]):
+        instruments = self.instruments
+        if isinstance(instruments[0], CurrentProbe):
+            current_probe = instruments[0]
+            electric_field_probe = instruments[1]
+        else:
+            current_probe = instruments[1]
+            electric_field_probe = instruments[0]
+        multipactor = current_probe.multipactor
+        xdata = np.ma.masked_array(electric_field_probe.raw_data.index,
+                                   mask=multipactor)
+        ydata = np.ma.masked_array(electric_field_probe.ydata,
+                                   mask=multipactor)
+        axes[type(electric_field_probe)].plot(xdata, ydata,
+                                              alpha=.3, lw=6)
 
 
 @dataclass
-class PickUp:
+class OldPickUp:
     """Hold information on a single pick-up."""
 
     name: str

@@ -1,8 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Define an object to store and treat data from pick-ups."""
+"""
+Define an object to store and treat data from pick-ups.
+
+.. todo::
+    Avoid references to name of the instrument class. Just give the class
+    itself.
+
+"""
 from typing import Any
+from pathlib import Path
 import os.path
+import pandas as pd
 import numpy as np
 
 import matplotlib.pyplot as plt
@@ -11,11 +20,101 @@ from matplotlib.axes._axes import Axes
 from matplotlib.container import StemContainer
 import matplotlib.animation as animation
 
-from multipac_testbench.pick_up import PickUp
+from multipac_testbench.pick_up.pick_up import PickUp
 from multipac_testbench.file_configuration import FileConfiguration
+
+from multipac_testbench.instruments.factory import (STRING_TO_INSTRUMENT_CLASS,
+                                                    InstrumentFactory)
+from multipac_testbench.instruments.instrument import Instrument
 
 
 class MultipactorTest:
+    """Holds a mp test with several probes."""
+
+    def __init__(self,
+                 filepath: Path,
+                 config: dict,
+                 sep: str = ';') -> None:
+        """Create all the pick-ups."""
+        df_data = pd.read_csv(filepath, sep=sep, index_col="Sample index")
+        instrument_factory = InstrumentFactory()
+        self.pick_ups = [PickUp(key, df_data, instrument_factory, **value)
+                         for key, value in config.items()]
+
+    def add_post_treater(self,
+                         *args,
+                         only_pick_up_which_name_is: tuple[str, ...] = (),
+                         **kwargs) -> None:
+        """Add post-treatment functions to instruments."""
+        affected_pick_ups = self.pick_ups
+        if len(only_pick_up_which_name_is) > 0:
+            affected_pick_ups = [pick_up for pick_up in self.pick_ups
+                                 if pick_up.name in only_pick_up_which_name_is]
+
+        for pick_up in affected_pick_ups:
+            pick_up.add_post_treater(*args, **kwargs)
+
+    def set_multipac_detector(self,
+                              *args,
+                              only_pick_up_which_name_is: tuple[str, ...] = (),
+                              **kwargs) -> None:
+        """Set multipactor detection functions to instruments."""
+        affected_pick_ups = self.pick_ups
+        if len(only_pick_up_which_name_is) > 0:
+            affected_pick_ups = [pick_up for pick_up in self.pick_ups
+                                 if pick_up.name in only_pick_up_which_name_is]
+
+        for pick_up in affected_pick_ups:
+            pick_up.set_multipac_detector(*args, **kwargs)
+
+    def plot_pick_ups(self,
+                      pick_up_to_exclude: tuple[str, ...] = (),
+                      instruments_to_plot: tuple[str, ...] = (),
+                      png_path: Path | None = None,
+                      raw: bool = False,
+                      **fig_kw,
+                      ) -> None:
+        """Plot the different signals at the different pick-ups."""
+        fig, axes = self._create_fig(instruments_to_plot, **fig_kw)
+        for pick_up in self.pick_ups:
+            if pick_up.name in pick_up_to_exclude:
+                continue
+            pick_up.plot_instruments(axes, instruments_to_plot, raw=raw)
+
+        for axe in axes.values():
+            axe.legend()
+
+        if png_path is not None:
+            fig.savefig(png_path)
+
+    def _create_fig(self,
+                    instruments_to_plot: tuple[str, ...] = (),
+                    **fig_kw,
+                    ) -> tuple[Figure, dict[Instrument, Axes]]:
+        """Create the figure."""
+        instrument_classes = [STRING_TO_INSTRUMENT_CLASS[instrument]
+                              for instrument in instruments_to_plot]
+        fig, axes = plt.subplots(
+            nrows=len(instruments_to_plot),
+            ncols=1,
+            sharex=True,
+            **fig_kw
+        )
+        axes = {instrument_class: axe
+                for instrument_class, axe in zip(instrument_classes, axes)}
+
+        for instrument_class, axe in axes.items():
+            axe.grid(True)
+            axe.set_ylabel(instrument_class.ylabel())
+        assert isinstance(axe, Axes)
+        axe.set_xlabel("Measurement index")
+        return fig, axes
+
+    def animate_pick_ups(self) -> None:
+        raise NotImplementedError
+
+
+class OldMultipactorTest:
     """Holds a mp test with several probes."""
 
     def __init__(self,
@@ -312,9 +411,9 @@ class MultipactorTest:
         return lower - .1 * amplitude, upper + .1 * amplitude
 
     def _e_rf_and_i_mp_plots(self,
-                                subplot_kw: dict[str, str],
-                                **fig_kw
-                                ) -> tuple[Figure, Axes, Axes]:
+                             subplot_kw: dict[str, str],
+                             **fig_kw
+                             ) -> tuple[Figure, Axes, Axes]:
         """Set a figure with two Axes for electric field and MP current."""
         fig, (field_ax, current_ax) = plt.subplots(
             nrows=2,

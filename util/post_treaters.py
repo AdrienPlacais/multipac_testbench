@@ -4,25 +4,11 @@
 import numpy as np
 
 
-def smooth(smooth_function_name: str,
-           input_data: np.ndarray,
-           *args,
-           **kwargs) -> np.ndarray:
-    """Call the proper smoothing function."""
-    if smooth_function_name not in IMPLEMENTED:
-        print(f"Warning! {smooth_function_name = } is not in the list of "
-              f"implemented smooths, i.e. {tuple(IMPLEMENTED.keys())}."
-              "Falling back on 'running_mean'.")
-        smooth_function_name = 'running_mean'
-    smooth_function = IMPLEMENTED[smooth_function_name]
-    return smooth_function(input_data, *args, **kwargs)
-
-
-def _running_mean(input_data: np.ndarray,
-                  n_mean: int,
-                  mode: str = 'full',
-                  **kwargs
-                  ) -> np.ndarray:
+def running_mean(input_data: np.ndarray,
+                 n_mean: int,
+                 mode: str = 'full',
+                 **kwargs
+                 ) -> np.ndarray:
     """Compute the runnning mean. Taken from `this link`_.
 
     .. _this link: https://stackoverflow.com/questions/13728392/\
@@ -59,8 +45,3 @@ moving-average-or-running-mean
 
     """
     return np.convolve(input_data, np.ones(n_mean) / n_mean, mode=mode)
-
-
-IMPLEMENTED = {
-    'running_mean': _running_mean,
-}  #:
