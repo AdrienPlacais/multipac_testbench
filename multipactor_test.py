@@ -1,13 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Define an object to store and treat data from pick-ups.
-
-.. todo::
-    Avoid references to name of the instrument class. Just give the class
-    itself.
-
-"""
+"""Define an object to store and treat data from pick-ups."""
+from abc import ABCMeta
 from typing import Any
 from pathlib import Path
 import os.path
@@ -69,7 +63,7 @@ class MultipactorTest:
 
     def plot_pick_ups(self,
                       pick_up_to_exclude: tuple[str, ...] = (),
-                      instruments_to_plot: tuple[str, ...] = (),
+                      instruments_to_plot: tuple[ABCMeta, ...] = (),
                       png_path: Path | None = None,
                       raw: bool = False,
                       **fig_kw,
@@ -88,12 +82,10 @@ class MultipactorTest:
             fig.savefig(png_path)
 
     def _create_fig(self,
-                    instruments_to_plot: tuple[str, ...] = (),
+                    instruments_to_plot: tuple[ABCMeta, ...] = (),
                     **fig_kw,
-                    ) -> tuple[Figure, dict[Instrument, Axes]]:
+                    ) -> tuple[Figure, dict[ABCMeta, Axes]]:
         """Create the figure."""
-        instrument_classes = [STRING_TO_INSTRUMENT_CLASS[instrument]
-                              for instrument in instruments_to_plot]
         fig, axes = plt.subplots(
             nrows=len(instruments_to_plot),
             ncols=1,
@@ -101,12 +93,12 @@ class MultipactorTest:
             **fig_kw
         )
         axes = {instrument_class: axe
-                for instrument_class, axe in zip(instrument_classes, axes)}
+                for instrument_class, axe in zip(instruments_to_plot, axes)}
 
         for instrument_class, axe in axes.items():
+            assert isinstance(axe, Axes)
             axe.grid(True)
             axe.set_ylabel(instrument_class.ylabel())
-        assert isinstance(axe, Axes)
         axe.set_xlabel("Measurement index")
         return fig, axes
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Define an object to keep measurements at a pick-up."""
+from abc import ABCMeta
 from typing import Any, Callable
 from dataclasses import dataclass
 import pandas as pd
@@ -59,54 +60,53 @@ class PickUp:
 
     def add_post_treater(self,
                          post_treater: Callable[[np.ndarray], np.ndarray],
-                         instrument_class_name: str = '',
+                         instrument_class: ABCMeta = Instrument,
                          ) -> None:
         """Add post-treatment functions to instruments."""
         affected_instruments = self._get_affected_instruments(
-            instrument_class_name)
+            instrument_class)
 
         for instrument in affected_instruments:
             instrument.add_post_treater(post_treater)
 
-    def _get_affected_instruments(self, instrument_class_name: str
-                                  ) -> list[Instrument]:
-        """Get all instruments which name of the class is in arg."""
-        if instrument_class_name in ('', 'Instrument'):
-            return self.instruments
-
-        affected_instruments = [
-            instrument for instrument in self.instruments
-            if instrument.instrument_class_name == instrument_class_name
-        ]
-        return affected_instruments
-
     def set_multipac_detector(
             self,
             multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
-            instrument_class_name: str = '',
+            instrument_class: ABCMeta = Instrument,
             ) -> None:
         """Add multipactor detection function to instruments."""
         affected_instruments = self._get_affected_instruments(
-            instrument_class_name)
+            instrument_class)
 
         for instrument in affected_instruments:
             instrument.multipac_detector = multipac_detector
 
+    def _get_affected_instruments(self, instrument_class: ABCMeta
+                                  ) -> list[Instrument]:
+        """Get instruments which are (sub) classes of ``instrument_class``."""
+        affected_instruments = [instrument for instrument in self.instruments
+                                if isinstance(instrument, instrument_class)]
+        return affected_instruments
+
     def plot_instruments(self,
-                         axes: dict[Instrument, Axes],
-                         instruments_to_plot: tuple[str, ...] = (),
+                         axes: dict[ABCMeta, Axes],
+                         instruments_to_plot: tuple[ABCMeta, ...] = (),
                          raw: bool = False,
                          **subplot_kw,
                          ) -> None:
         """Plot the signal of every instrument at this pick-up."""
-        for instrument in self.instruments:
-            if instrument.instrument_class_name not in instruments_to_plot:
-                continue
+        for instrument_class in instruments_to_plot:
+            affected_instruments = self._get_affected_instruments(
+                instrument_class)
+            axe = axes[instrument_class]
 
-            axe = axes[type(instrument)]
-            line1 = instrument.plot(axe, raw, color=self._color, **subplot_kw)
-            if self._color is None:
-                self._color = line1.get_color()
+            for instrument in affected_instruments:
+                line1 = instrument.plot(axe,
+                                        raw,
+                                        color=self._color,
+                                        **subplot_kw)
+                if self._color is None:
+                    self._color = line1.get_color()
 
         self._add_mp_zone(axes)
 
@@ -114,7 +114,7 @@ class PickUp:
         """Add multipacting zone on a ``plot_instruments`` plot."""
         pass
 
-    def _add_mp_zone(self, axes: dict[Instrument, Axes]):
+    def _add_mp_zone(self, axes: dict[ABCMeta, Axes]):
         instruments = self.instruments
         if isinstance(instruments[0], CurrentProbe):
             current_probe = instruments[0]
