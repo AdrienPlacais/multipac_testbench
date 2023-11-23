@@ -10,8 +10,8 @@ Define object to keep a single instrument measurements.
 
 """
 from typing import Callable
-import pandas as pd
 from abc import ABC
+import pandas as pd
 
 import numpy as np
 from matplotlib.axes._axes import Axes
