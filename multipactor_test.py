@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.axes._axes import Axes
 from matplotlib.container import StemContainer
-import matplotlib.animation as animation
+from matplotlib import animation
 
 from multipac_testbench.pick_up import PickUp
 
@@ -150,14 +150,15 @@ class MultipactorTest:
             sharex=True,
             **fig_kw
         )
-        axes = {instrument_class: axe
-                for instrument_class, axe in zip(instruments_to_plot, axes)}
+        axes = dict(zip(instruments_to_plot, axes))
 
+        axe = None
         for instrument_class, axe in axes.items():
-            assert isinstance(axe, Axes)
             axe.grid(True)
             axe.set_ylabel(instrument_class.ylabel())
-        axe.set_xlabel("Measurement index")
+        assert isinstance(axe, Axes)
+        if axe is not None:
+            axe.set_xlabel("Measurement index")
         return fig, axes
 
     def animate_pick_ups(self,
@@ -194,11 +195,16 @@ class MultipactorTest:
 
         .. todo::
             Name of pick-ups in x axis.
+
+        .. todo::
             Optimize. Surely I do not need to redraw everything at every
             iteration.
 
+        .. todo::
+            Clarify. This not very clean nor Pythonic
+
         """
-        subplot_kw = {'xlabel': r'Probe position [m]'}
+        # subplot_kw = {'xlabel': r'Probe position [m]'}
         fig, axes = self._create_fig(instruments_to_plot, **fig_kw)
 
         to_ignore = pick_ups_to_exclude + pick_ups_to_ignore_for_limits
@@ -216,12 +222,11 @@ class MultipactorTest:
 
         locs = [pick_up.position
                 for pick_up in self.pick_ups
-                if pick_up.name not in pick_ups_to_exclude
-                ]
+                if pick_up.name not in pick_ups_to_exclude]
 
         def _plot_pick_ups_single_time_step(
                 step_idx: int
-        ) -> Sequence[StemContainer] | None:
+        ) -> Sequence[StemContainer]:
             """Plot as stem the instrument signals.
 
             Parameters
@@ -231,7 +236,7 @@ class MultipactorTest:
 
             """
             if step_idx % keep_one_frame_over != 0:
-                return
+                pass
 
             for axe in axes.values():
                 axe.clear()
