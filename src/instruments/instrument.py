@@ -1,14 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Define object to keep a single instrument measurements.
-
-.. todo::
-    Be more generic than "to smooth". Should be able to apply any number of
-    transformations/transfer functions.
-    PostTreater object???
-
-"""
+"""Define object to keep a single instrument measurements."""
 from typing import Callable
 from abc import ABC
 import pandas as pd

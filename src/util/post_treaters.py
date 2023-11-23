@@ -7,8 +7,7 @@ import numpy as np
 def running_mean(input_data: np.ndarray,
                  n_mean: int,
                  mode: str = 'full',
-                 **kwargs
-                 ) -> np.ndarray:
+                 **kwargs) -> np.ndarray:
     """Compute the runnning mean. Taken from `this link`_.
 
     .. _this link: https://stackoverflow.com/questions/13728392/\
@@ -21,7 +20,6 @@ moving-average-or-running-mean
     n_mean : int
         Number of points on which running mean is ran.
     mode : {'full', 'valid', 'same'}, optional
-        From :func:`np.convolve` documentation.
         'full':
           By default, mode is 'full'.  This returns the convolution
           at each point of overlap, with an output shape of (N+M-1,). At
@@ -38,10 +36,12 @@ moving-average-or-running-mean
           for points where the signals overlap completely.  Values outside
           the signal boundary have no effect.
 
+        (taken from numpy documentation)
+
     Returns
     -------
     np.ndarray
-        Smoothen data.
+        Smoothed data.
 
     """
     return np.convolve(input_data, np.ones(n_mean) / n_mean, mode=mode)
