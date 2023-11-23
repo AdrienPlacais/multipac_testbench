@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Define functions to detect where multipactor happens."""
-from typing import Any
+from typing import Any, Sequence
 import numpy as np
 
 
@@ -112,3 +112,34 @@ def _remove_isolated(multipactor: np.ndarray[np.bool_],
         multipactor[indexer[i]] = False
 
     return multipactor
+
+
+def start_and_end_of_contiguous_true_zones(array: np.ndarray[np.bool_]
+                                           ) -> Sequence[tuple[int, int]]:
+    """Get indexes of the contiguous zones where array is True."""
+    diff = np.where(np.diff(array))[0]
+    n_changes = diff.size
+
+    starts = (diff[::2] + 1).tolist()
+    ends = (diff[1::2] + 1).tolist()
+
+    # Multipacting zones are "closed"
+    if n_changes % 2 == 0:
+        # Multipacting zones are not closed, this is non-multipacting zones
+        # that are
+        if array[0]:
+            starts, ends = ends, starts
+            starts.insert(0, 0)
+            ends.append(None)
+
+    # One multipacting zone is "open"
+    else:
+        ends.append(None)
+
+        if array[0]:
+            starts, ends = ends, starts
+            starts = ends
+            starts.insert(0, 0)
+
+    zones = [(start, end) for start, end in zip(starts, ends)]
+    return zones

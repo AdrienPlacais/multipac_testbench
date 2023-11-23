@@ -59,25 +59,85 @@ class MultipactorTest:
         for pick_up in affected_pick_ups:
             pick_up.set_multipac_detector(*args, **kwargs)
 
-    def plot_pick_ups(self,
-                      pick_up_to_exclude: tuple[str, ...] = (),
-                      instruments_to_plot: tuple[ABCMeta, ...] = (),
-                      png_path: Path | None = None,
-                      raw: bool = False,
-                      **fig_kw,
-                      ) -> None:
-        """Plot the different signals at the different pick-ups."""
+    def plot_pick_ups(
+            self,
+            pick_up_to_exclude: tuple[str, ...] = (),
+            instruments_to_plot: tuple[ABCMeta, ...] = (),
+            png_path: Path | None = None,
+            raw: bool = False,
+            multipactor_plots: dict[ABCMeta, ABCMeta] | None = None,
+            **fig_kw,
+    ) -> None:
+        """Plot the different signals at the different pick-ups.
+
+        Parameters
+        ----------
+        pick_up_to_exclude : tuple[str, ...], optional
+            Name of the pick-ups that should not be plotted. The default is an
+            empty tuple.
+        instruments_to_plot : tuple[ABCMeta, ...]
+            Subclass of the :class:`.Instrument` to plot. The default is an
+            empty tuple, in which case nothing is plotted.
+        png_path : Path | None, optional
+            If provided, the resulting figure is saved at this path. The
+            default is None.
+        raw : bool, optional
+            If the data that should be plotted is the raw data before
+            post-treatment. The default is False.
+        multipactor_plots : dict[ABCMeta, ABCMeta] | None, optional
+            Keys are the Instrument subclass for which you want to see the
+            multipactor zones. Values are the Instrument subclass that detect
+            the multipactor. The default is None, in which case no multipacting
+            zone is drawn.
+        fig_kw :
+            Keyword arguments passed to the ``Figure``.
+
+        """
         fig, axes = self._create_fig(instruments_to_plot, **fig_kw)
+
         for pick_up in self.pick_ups:
             if pick_up.name in pick_up_to_exclude:
                 continue
+
             pick_up.plot_instruments(axes, instruments_to_plot, raw=raw)
+
+            if multipactor_plots is not None:
+                self.add_multipacting_zone(pick_up,
+                                           axes,
+                                           multipactor_plots)
 
         for axe in axes.values():
             axe.legend()
 
         if png_path is not None:
             fig.savefig(png_path)
+
+    def add_multipacting_zone(
+            self,
+            pick_up: PickUp,
+            axes: dict[ABCMeta, Axes],
+            multipactor_plots: dict[ABCMeta, ABCMeta]
+    ) -> None:
+        """Add multipacting zones on pick-up plot.
+
+        Parameters
+        ----------
+        pick_up : PickUp
+            Pick-up which detected multipactor.
+        axes : dict[ABCMeta, Axes]
+            Dictionary holding the plots and the associated instrument
+            subclass.
+        multipactor_plots : dict[ABCMeta, ABCMeta] | None, optional
+            Keys are the Instrument subclass for which you want to see the
+            multipactor zones. Values are the Instrument subclass that detect
+            the multipactor.
+
+        """
+        for plotted_instr, detector_instr in multipactor_plots.items():
+            pick_up.add_multipacting_zone(axes[plotted_instr],
+                                          plotted_instr,
+                                          detector_instr,
+                                          )
 
     def _create_fig(self,
                     instruments_to_plot: tuple[ABCMeta, ...] = (),

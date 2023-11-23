@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Define an object to keep measurements at a pick-up."""
 from abc import ABCMeta
-from typing import Any, Callable
+from typing import Any, Callable, Sequence
 from dataclasses import dataclass
 import pandas as pd
 
@@ -11,8 +11,10 @@ from matplotlib.axes._axes import Axes
 
 from multipac_testbench.instruments.instrument import Instrument
 from multipac_testbench.instruments.factory import InstrumentFactory
-
 from multipac_testbench.instruments.current_probe import CurrentProbe
+
+from multipac_testbench.util.multipactor_detectors import \
+    start_and_end_of_contiguous_true_zones
 
 
 class PickUp:
@@ -73,13 +75,29 @@ class PickUp:
             self,
             multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
             instrument_class: ABCMeta = Instrument,
-            ) -> None:
+    ) -> None:
         """Add multipactor detection function to instruments."""
         affected_instruments = self._get_affected_instruments(
             instrument_class)
 
         for instrument in affected_instruments:
             instrument.multipac_detector = multipac_detector
+
+    def _where_is_multipactor(self,
+                              detector_instrument: Instrument
+                              ) -> Sequence[tuple[int, int]]:
+        """Get the list of multipacting zones (indexes).
+
+        Need to pass in a ``referee_instrument_class`` to tell which type of
+        :class:`.Instrument` we should trust to detect multipactor.
+
+        """
+        assert hasattr(detector_instrument, 'multipac_detector'), "No " \
+            "multipacting detector defined for instrument under study."
+
+        multipactor = detector_instrument.multipactor
+        zones = start_and_end_of_contiguous_true_zones(multipactor)
+        return zones
 
     def _get_affected_instruments(self, instrument_class: ABCMeta
                                   ) -> list[Instrument]:
@@ -108,28 +126,44 @@ class PickUp:
                 if self._color is None:
                     self._color = line1.get_color()
 
-        self._add_mp_zone(axes)
-
-    def add_multipacting_zone(self, axe: Axes, **subplot_kw) -> None:
+    def add_multipacting_zone(self,
+                              axe: Axes,
+                              plotted_instr: ABCMeta,
+                              detector_instr: ABCMeta,
+                              ) -> None:
         """Add multipacting zone on a ``plot_instruments`` plot."""
-        pass
+        instruments = self._get_affected_instruments(detector_instr)
+        if len(instruments) > 1:
+            print("Warning! More than one instrument to detect multipactor. "
+                  "Taking the first one.")
+        detector_instrument = instruments[0]
+        zones = self._where_is_multipactor(detector_instrument)
 
-    def _add_mp_zone(self, axes: dict[ABCMeta, Axes]):
-        instruments = self.instruments
-        if isinstance(instruments[0], CurrentProbe):
-            current_probe = instruments[0]
-            electric_field_probe = instruments[1]
-        else:
-            current_probe = instruments[1]
-            electric_field_probe = instruments[0]
-        multipactor = ~current_probe.multipactor
-        xdata = np.ma.masked_array(electric_field_probe.raw_data.index,
-                                   mask=multipactor)
-        ydata = np.ma.masked_array(electric_field_probe.ydata,
-                                   mask=multipactor)
-        axes[type(electric_field_probe)].plot(xdata, ydata,
-                                              alpha=.3, lw=6,
-                                              color=self._color)
+        plotted_instruments = self._get_affected_instruments(plotted_instr)
+        if len(plotted_instruments) > 1:
+            print("Warning! More than one instrument to be plotted with "
+                  "multipactor. Only taking first one.")
+        plotted_instrument = plotted_instruments[0]
+        y_position_of_multipactor_zone = np.nanmax(plotted_instrument.ydata)
+        y_position_of_multipactor_zone *= 1.05
+
+        arrow_kw = {
+            'color': self._color,
+            'length_includes_head': True,
+            # 'head_width': 0.5,
+        }
+        vline_kw = {
+            'color': self._color,
+            'lw': .2,
+        }
+        for zone in zones:
+            delta_x = zone[1] - zone[0]
+            axe.arrow(zone[0], y_position_of_multipactor_zone,
+                      delta_x, 0., **arrow_kw)
+            axe.arrow(zone[1], y_position_of_multipactor_zone,
+                      -delta_x, 0., **arrow_kw)
+            axe.axvline(zone[0], **vline_kw)
+            axe.axvline(zone[1], **vline_kw)
 
 
 @dataclass
