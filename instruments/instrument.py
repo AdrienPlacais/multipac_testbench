@@ -16,6 +16,7 @@ from abc import ABC
 
 import numpy as np
 from matplotlib.axes._axes import Axes
+from matplotlib.lines import Line2D
 
 
 class Instrument(ABC):
@@ -142,19 +143,33 @@ class Instrument(ABC):
                 f"{post_treater} modified the shape of the array."
         return data
 
-    def _plot_raw(self, axe: Axes, **kwargs) -> None:
+    def _plot_raw(self,
+                  axe: Axes,
+                  color: tuple[float, float, float] | None = None,
+                  **subplot_kw) -> Line2D:
         """Plot the raw data as it is in the ``.csv``."""
-        axe.plot(self.raw_data, label=f"{self.name} (raw)", **kwargs)
+        line1, = axe.plot(self.raw_data,
+                          label=f"{self.name} (raw)",
+                          color=color,
+                          **subplot_kw)
+        return line1
 
-    def plot(self, axe: Axes, raw: bool = False, **kwargs) -> None:
+    def plot(self,
+             axe: Axes,
+             raw: bool = False,
+             color: tuple[float, float, float] | None = None,
+             **subplot_kw
+             ) -> Line2D:
         """Plot what the instrument measured."""
         if raw:
-            return self._plot_raw(axe, **kwargs)
+            return self._plot_raw(axe, color=color, **subplot_kw)
 
-        axe.plot(self.raw_data.index,
-                 self.ydata,
-                 label=f"{self.name} (post-treated)",
-                 **kwargs)
+        line1, = axe.plot(self.raw_data.index,
+                          self.ydata,
+                          label=f"{self.name} (post-treated)",
+                          color=color,
+                          **subplot_kw)
+        return line1
 
 
 @dataclass

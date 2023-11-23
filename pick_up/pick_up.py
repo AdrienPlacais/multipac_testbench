@@ -53,7 +53,7 @@ class PickUp:
             for instr_name, instr_kw in instruments_kw.items()
         ]
 
-        self._color: tuple[float, float, float]
+        self._color: tuple[float, float, float] | None = None
         # doubt
         self.idx_of_mp_zones: list[tuple[int, int]]
 
@@ -104,9 +104,15 @@ class PickUp:
                 continue
 
             axe = axes[type(instrument)]
-            instrument.plot(axe, raw, **subplot_kw)
+            line1 = instrument.plot(axe, raw, color=self._color, **subplot_kw)
+            if self._color is None:
+                self._color = line1.get_color()
 
         self._add_mp_zone(axes)
+
+    def add_multipacting_zone(self, axe: Axes, **subplot_kw) -> None:
+        """Add multipacting zone on a ``plot_instruments`` plot."""
+        pass
 
     def _add_mp_zone(self, axes: dict[Instrument, Axes]):
         instruments = self.instruments
@@ -116,13 +122,14 @@ class PickUp:
         else:
             current_probe = instruments[1]
             electric_field_probe = instruments[0]
-        multipactor = current_probe.multipactor
+        multipactor = ~current_probe.multipactor
         xdata = np.ma.masked_array(electric_field_probe.raw_data.index,
                                    mask=multipactor)
         ydata = np.ma.masked_array(electric_field_probe.ydata,
                                    mask=multipactor)
         axes[type(electric_field_probe)].plot(xdata, ydata,
-                                              alpha=.3, lw=6)
+                                              alpha=.3, lw=6,
+                                              color=self._color)
 
 
 @dataclass
