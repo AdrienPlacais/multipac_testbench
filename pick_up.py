@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 """Define an object to keep measurements at a pick-up."""
 from abc import ABCMeta
-from typing import Any, Callable, Sequence
-from dataclasses import dataclass
+from typing import Callable, Sequence
 import pandas as pd
 
 import numpy as np
@@ -11,7 +10,6 @@ from matplotlib.axes._axes import Axes
 
 from multipac_testbench.instruments.instrument import Instrument
 from multipac_testbench.instruments.factory import InstrumentFactory
-from multipac_testbench.instruments.current_probe import CurrentProbe
 
 from multipac_testbench.util.multipactor_detectors import \
     start_and_end_of_contiguous_true_zones
@@ -55,10 +53,7 @@ class PickUp:
             instrument_factory.run(instr_name, df_data, **instr_kw)
             for instr_name, instr_kw in instruments_kw.items()
         ]
-
         self._color: tuple[float, float, float] | None = None
-        # doubt
-        self.idx_of_mp_zones: list[tuple[int, int]]
 
     def add_post_treater(self,
                          post_treater: Callable[[np.ndarray], np.ndarray],
