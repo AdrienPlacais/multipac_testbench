@@ -61,8 +61,8 @@ class MultipactorTest:
 
     def plot_pick_ups(
             self,
+            instruments_to_plot: tuple[ABCMeta, ...],
             pick_up_to_exclude: tuple[str, ...] = (),
-            instruments_to_plot: tuple[ABCMeta, ...] = (),
             png_path: Path | None = None,
             raw: bool = False,
             multipactor_plots: dict[ABCMeta, ABCMeta] | None = None,
@@ -70,22 +70,17 @@ class MultipactorTest:
     ) -> None:
         """Plot the different signals at the different pick-ups.
 
-        ..  todo::
-            ``instruments_to_plot`` should be mandatory, OR have a default
-            value that works
-
         .. todo::
             bug when there is a pick-up that has no instrument to plot and is
             not in ``pick_up_to_exclude``.
 
         Parameters
         ----------
+        instruments_to_plot : tuple[ABCMeta, ...]
+            Subclass of the :class:`.Instrument` to plot.
         pick_up_to_exclude : tuple[str, ...], optional
             Name of the pick-ups that should not be plotted. The default is an
             empty tuple.
-        instruments_to_plot : tuple[ABCMeta, ...]
-            Subclass of the :class:`.Instrument` to plot. The default is an
-            empty tuple, in which case nothing is plotted.
         png_path : Path | None, optional
             If provided, the resulting figure is saved at this path. The
             default is None.
