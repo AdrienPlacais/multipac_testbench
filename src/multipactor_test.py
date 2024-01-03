@@ -74,6 +74,10 @@ class MultipactorTest:
             ``instruments_to_plot`` should be mandatory, OR have a default
             value that works
 
+        .. todo::
+            bug when there is a pick-up that has no instrument to plot and is
+            not in ``pick_up_to_exclude``.
+
         Parameters
         ----------
         pick_up_to_exclude : tuple[str, ...], optional
@@ -148,12 +152,18 @@ class MultipactorTest:
                     **fig_kw,
                     ) -> tuple[Figure, dict[ABCMeta, Axes]]:
         """Create the figure."""
+        nrows = len(instruments_to_plot)
         fig, axes = plt.subplots(
-            nrows=len(instruments_to_plot),
+            nrows=nrows,
             ncols=1,
             sharex=True,
             **fig_kw
         )
+
+        # ensure that axes is a iterable
+        if nrows == 1:
+            axes = [axes, ]
+
         axes = dict(zip(instruments_to_plot, axes))
 
         axe = None
