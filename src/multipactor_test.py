@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Define an object to store and treat data from pick-ups."""
+"""Define an object to store and treat data from pick-ups.
+
+.. todo::
+    Allow to trim data (remove noisy useless data at end of exp)
+
+"""
 from abc import ABCMeta
 from typing import Sequence
 from pathlib import Path
