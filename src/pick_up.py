@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Define an object to keep measurements at a pick-up."""
 from abc import ABCMeta
-from typing import Callable, Sequence
+from typing import Any, Callable, Sequence
 
 from matplotlib.axes._axes import Axes
 import numpy as np
@@ -95,7 +95,13 @@ class PickUp:
 
     def _get_affected_instruments(self, instrument_class: ABCMeta
                                   ) -> list[Instrument]:
-        """Get instruments which are (sub) classes of ``instrument_class``."""
+        """
+        Get instruments which are (sub) classes of ``instrument_class``.
+
+        An empty list is returned when current pick-up has no instrument of the
+        desired instrument class.
+
+        """
         affected_instruments = [instrument for instrument in self.instruments
                                 if isinstance(instrument, instrument_class)]
         return affected_instruments
@@ -129,23 +135,37 @@ class PickUp:
 
     def add_multipacting_zone(self,
                               axe: Axes,
-                              plotted_instr: ABCMeta,
-                              detector_instr: ABCMeta,
+                              plotted_instrument_class: ABCMeta,
+                              detector_instrument_class: ABCMeta,
                               ) -> None:
-        """Add multipacting zone on a ``plot_instruments`` plot."""
-        instruments = self._get_affected_instruments(detector_instr)
+        """Add multipacting zone on a ``plot_instruments`` plot.
+
+        Parameters
+        ----------
+        axe : Axes
+            Matplotlib object on which multipacting zones should be added.
+        plotted_instrument_class : ABCMeta
+            The nature of the instrument which ``ydata`` is already plotted.
+        detector_instrument_class : ABCMeta
+            The nature of the instrument that determines where there is
+            multipactor. It can be the same than ``plotted_instrument_class``,
+            or it can be different.
+
+        """
+        instruments = self._get_affected_instruments(detector_instrument_class)
         if len(instruments) == 0:
             return
 
         if len(instruments) > 1:
             print(f"Warning! At the pick-up {self.name}, there is more than "
-                  f"one {detector_instr} instrument. So I am not sure which "
-                  "one should be used to determine when multipactor appeared. "
-                  "I will take the first one.")
+                  f"one {detector_instrument_class} instrument. So I am not "
+                  "sure which one should be used to determine when multipactor"
+                  " appeared. I will take the first one.")
         detector_instrument = instruments[0]
         zones = self._where_is_multipactor(detector_instrument)
 
-        plotted_instruments = self._get_affected_instruments(plotted_instr)
+        plotted_instruments = self._get_affected_instruments(
+            plotted_instrument_class)
         if len(plotted_instruments) > 1:
             print("Warning! More than one instrument to be plotted with "
                   "multipactor. Only taking first one.")
@@ -153,15 +173,9 @@ class PickUp:
         y_position_of_multipactor_zone = np.nanmax(plotted_instrument.ydata)
         y_position_of_multipactor_zone *= 1.05
 
-        arrow_kw = {
-            'color': self._color,
-            'length_includes_head': True,
-            # 'head_width': 0.5,
-        }
-        vline_kw = {
-            'color': self._color,
-            'lw': .2,
-        }
+        vline_kw = self._typical_vline_keywords()
+        arrow_kw = self._typical_arrow_keywords(plotted_instrument)
+
         for zone in zones:
             delta_x = zone[1] - zone[0]
             axe.arrow(zone[0], y_position_of_multipactor_zone,
@@ -170,3 +184,25 @@ class PickUp:
                       -delta_x, 0., **arrow_kw)
             axe.axvline(zone[0], **vline_kw)
             axe.axvline(zone[1], **vline_kw)
+
+    def _typical_vline_keywords(self) -> dict[str, Any]:
+        """Set consistent plot properties."""
+        vline_kw = {
+            'color': self._color,
+            'lw': 0.2,
+        }
+        return vline_kw
+
+    def _typical_arrow_keywords(self,
+                                instrument: Instrument) -> dict[str, Any]:
+        """Set consistent plot properties."""
+        typical_width = np.nanmean(instrument.ydata) * 1e-3
+        typical_length = instrument.ydata.shape[0] / 70
+        arrow_kw = {
+            'color': self._color,
+            'length_includes_head': True,
+            'width': typical_width,
+            'head_length': typical_length,
+            'head_width': typical_width * 100.,
+        }
+        return arrow_kw
