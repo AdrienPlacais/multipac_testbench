@@ -8,12 +8,14 @@ import pandas as pd
 from multipac_testbench.src.instruments.current_probe import CurrentProbe
 from multipac_testbench.src.instruments.e_field_probe import ElectricFieldProbe
 from multipac_testbench.src.instruments.instrument import Instrument
+from multipac_testbench.src.instruments.optical_fibre import OpticalFibre
 from multipac_testbench.src.instruments.penning import Penning
 
 
 STRING_TO_INSTRUMENT_CLASS = {
     'CurrentProbe': CurrentProbe,
     'ElectricFieldProbe': ElectricFieldProbe,
+    'OpticalFibre': OpticalFibre,
     'Penning': Penning,
 }  #:
 
