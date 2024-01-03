@@ -23,7 +23,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx_rtd_theme",
     "sphinx.ext.todo",
-    "myst_nb",
+    "nbsphinx",
 ]
 
 add_module_names = False

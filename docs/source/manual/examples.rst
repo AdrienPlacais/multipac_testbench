@@ -4,5 +4,5 @@ Examples
 .. toctree::
    :maxdepth: 2
 
-   ../../../examples/example
+   notebooks/example.ipynb
  
