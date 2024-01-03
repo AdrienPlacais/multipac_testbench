@@ -134,9 +134,14 @@ class PickUp:
                               ) -> None:
         """Add multipacting zone on a ``plot_instruments`` plot."""
         instruments = self._get_affected_instruments(detector_instr)
+        if len(instruments) == 0:
+            return
+
         if len(instruments) > 1:
-            print("Warning! More than one instrument to detect multipactor. "
-                  "Taking the first one.")
+            print(f"Warning! At the pick-up {self.name}, there is more than "
+                  f"one {detector_instr} instrument. So I am not sure which "
+                  "one should be used to determine when multipactor appeared. "
+                  "I will take the first one.")
         detector_instrument = instruments[0]
         zones = self._where_is_multipactor(detector_instrument)
 

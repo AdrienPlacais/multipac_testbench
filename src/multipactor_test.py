@@ -70,10 +70,6 @@ class MultipactorTest:
     ) -> None:
         """Plot the different signals at the different pick-ups.
 
-        .. todo::
-            bug when there is a pick-up that has no instrument to plot and is
-            not in ``pick_up_to_exclude``.
-
         Parameters
         ----------
         instruments_to_plot : tuple[ABCMeta, ...]
