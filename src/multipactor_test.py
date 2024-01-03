@@ -101,9 +101,7 @@ class MultipactorTest:
             pick_up.plot_instruments(axes, instruments_to_plot, raw=raw)
 
             if multipactor_plots is not None:
-                self.add_multipacting_zone(pick_up,
-                                           axes,
-                                           multipactor_plots)
+                self.add_multipacting_zones(pick_up, axes, multipactor_plots)
 
         for axe in axes.values():
             axe.legend()
@@ -111,7 +109,7 @@ class MultipactorTest:
         if png_path is not None:
             fig.savefig(png_path)
 
-    def add_multipacting_zone(
+    def add_multipacting_zones(
             self,
             pick_up: PickUp,
             axes: dict[ABCMeta, Axes],
@@ -127,9 +125,9 @@ class MultipactorTest:
             Dictionary holding the plots and the associated instrument
             subclass.
         multipactor_plots : dict[ABCMeta, ABCMeta] | None, optional
-            Keys are the Instrument subclass for which you want to see the
-            multipactor zones. Values are the Instrument subclass that detect
-            the multipactor.
+            Keys are the :class:`Instrument` subclass for which you want to see
+            the multipactor zones. Values are the :class:`Instrument` subclass
+            that detect the multipactor.
 
         """
         for plotted_instr, detector_instr in multipactor_plots.items():
