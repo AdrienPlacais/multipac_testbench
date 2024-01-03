@@ -72,7 +72,7 @@ class MultipactorTest:
             raw: bool = False,
             multipactor_plots: dict[ABCMeta, ABCMeta] | None = None,
             **fig_kw,
-    ) -> None:
+    ) -> tuple[Figure, Axes]:
         """Plot the different signals at the different pick-ups.
 
         Parameters
@@ -96,6 +96,13 @@ class MultipactorTest:
         fig_kw :
             Keyword arguments passed to the ``Figure``.
 
+        Returns
+        -------
+        fig : Figure
+            The created figure.
+        axes : Axes
+            The created axes.
+
         """
         fig, axes = self._create_fig(instruments_to_plot, **fig_kw)
 
@@ -113,6 +120,8 @@ class MultipactorTest:
 
         if png_path is not None:
             fig.savefig(png_path)
+
+        return fig, axes
 
     def add_multipacting_zones(
             self,
