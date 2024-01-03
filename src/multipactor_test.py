@@ -160,7 +160,7 @@ class MultipactorTest:
             **fig_kw
         )
 
-        # ensure that axes is a iterable
+        # ensure that axes is an iterable
         if nrows == 1:
             axes = [axes, ]
 
