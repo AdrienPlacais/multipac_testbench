@@ -60,3 +60,4 @@ target/
 # Perso
 *.swp
 examples/data/*.csv
+examples/.ipynb_checkpoints/*
