@@ -10,6 +10,7 @@ from multipac_testbench.src.instruments.e_field_probe import ElectricFieldProbe
 from multipac_testbench.src.instruments.instrument import Instrument
 from multipac_testbench.src.instruments.optical_fibre import OpticalFibre
 from multipac_testbench.src.instruments.penning import Penning
+from multipac_testbench.src.instruments.rf_power import RfPower
 
 
 STRING_TO_INSTRUMENT_CLASS = {
@@ -17,6 +18,7 @@ STRING_TO_INSTRUMENT_CLASS = {
     'ElectricFieldProbe': ElectricFieldProbe,
     'OpticalFibre': OpticalFibre,
     'Penning': Penning,
+    'RfPower': RfPower,
 }  #:
 
 
@@ -38,7 +40,7 @@ class InstrumentFactory:
         df_data : pd.DataFrame
             Content of the multipactor tests results ``.csv`` file.
         class_name : {'CurrentProbe', 'ElectricFieldProbe', 'OpticalFibre',\
-'Penning'}
+'Penning', 'RfPower'}
             Name of the instrument class, as given in the ``.toml`` file.
         instruments_kw : dict[str, Any]
             Other keyword arguments in the ``.toml`` file.
