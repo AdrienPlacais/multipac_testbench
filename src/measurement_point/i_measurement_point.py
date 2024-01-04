@@ -46,6 +46,15 @@ class IMeasurementPoint(ABC):
         ]
         self._color: tuple[float, float, float] | None = None
 
+    def add_instrument(self, instrument: Instrument) -> None:
+        """Add a new instrument :attr:`.instruments`.
+
+        A priori, useful only for :class:`.VirtualInstrument`, when they rely
+        on other :class:`.Instrument` objects to be fully initialized.
+
+        """
+        self.instruments.append(instrument)
+
     def add_post_treater(self,
                          post_treater: Callable[[np.ndarray], np.ndarray],
                          instrument_class: ABCMeta = Instrument,
