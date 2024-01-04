@@ -20,6 +20,10 @@ from matplotlib.container import StemContainer
 from matplotlib.figure import Figure
 
 from multipac_testbench.src.instruments.factory import InstrumentFactory
+from multipac_testbench.src.measurement_point.factory import \
+    IMeasurementPointFactory
+from multipac_testbench.src.measurement_point.global_diagnostics import \
+    GlobalDiagnostics
 from multipac_testbench.src.measurement_point.pick_up import PickUp
 
 
@@ -32,11 +36,11 @@ class MultipactorTest:
                  sep: str = ';') -> None:
         """Create all the pick-ups."""
         df_data = pd.read_csv(filepath, sep=sep, index_col="Sample index")
-        instrument_factory = InstrumentFactory()
-        self.pick_ups = [PickUp(key, df_data, instrument_factory, **value)
-                         for key, value in config.items()]
-
         self._n_points = len(df_data)
+
+        imeasurement_point_factory = IMeasurementPointFactory()
+        imeasurement_points = imeasurement_point_factory.run(config, df_data)
+        self.global_diagnostics, self.pick_ups = imeasurement_points
 
     def add_post_treater(self,
                          *args,

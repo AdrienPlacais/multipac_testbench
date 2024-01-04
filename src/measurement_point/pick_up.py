@@ -40,3 +40,11 @@ class PickUp(IMeasurementPoint):
         super().__init__(df_data, instrument_factory, instruments_kw)
         self.name = name
         self.position = position
+
+    def __str__(self) -> str:
+        """Give concise info on pick-up."""
+        out = f"""
+        Pick-Up {self.name} at z = {self.position:1.3f}m,
+        with instruments: {[str(x) for x in self.instruments]}
+        """
+        return " ".join(out.split())

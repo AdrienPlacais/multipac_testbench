@@ -198,4 +198,3 @@ class IMeasurementPoint(ABC):
             'head_width': typical_width * 100.,
         }
         return arrow_kw
-

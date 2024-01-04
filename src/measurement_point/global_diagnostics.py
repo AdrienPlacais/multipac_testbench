@@ -31,3 +31,10 @@ class GlobalDiagnostics(IMeasurementPoint):
 
         """
         super().__init__(df_data, instrument_factory, instruments_kw)
+
+    def __str__(self) -> str:
+        """Give concise info on global diagnostics."""
+        out = f"""
+        GlobalDiagnostic with instruments: {[str(x) for x in self.instruments]}
+        """
+        return " ".join(out.split())

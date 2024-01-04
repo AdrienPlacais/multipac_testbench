@@ -41,6 +41,11 @@ class Instrument(ABC):
         self._multipac_detector: Callable[[np.ndarray], np.ndarray]
         self._multipactor: np.ndarray | None = None
 
+    def __str__(self) -> str:
+        """Give concise information on instrument."""
+        out = f"{self.class_name} ({self.name})"
+        return out
+
     @classmethod
     def ylabel(cls) -> str:
         """Label used for plots."""
