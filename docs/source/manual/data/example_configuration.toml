@@ -3,10 +3,10 @@ position = 0e0
 
 [E1.instruments_kw]
 [E1.instruments_kw.NI9205_MP1l]
-instrument_class_name = "CurrentProbe"
+class_name = "CurrentProbe"
 
 [E1.instruments_kw.NI9205_E1]
-instrument_class_name = "ElectricFieldProbe"
+class_name = "ElectricFieldProbe"
 
 # ==================================
 [E2]
@@ -14,10 +14,10 @@ position = 0.26
 
 [E2.instruments_kw]
 [E2.instruments_kw.NI9205_MP2l]
-instrument_class_name = "CurrentProbe"
+class_name = "CurrentProbe"
 
 [E2.instruments_kw.NI9205_E2]
-instrument_class_name = "ElectricFieldProbe"
+class_name = "ElectricFieldProbe"
 
 # ==================================
 [E3]
@@ -25,10 +25,10 @@ position = 0.39
 
 [E3.instruments_kw]
 [E3.instruments_kw.NI9205_MP3l]
-instrument_class_name = "CurrentProbe"
+class_name = "CurrentProbe"
 
 [E3.instruments_kw.NI9205_E3]
-instrument_class_name = "ElectricFieldProbe"
+class_name = "ElectricFieldProbe"
 
 # ==================================
 [E4]
@@ -36,10 +36,10 @@ position = 0.611
 
 [E4.instruments_kw]
 [E4.instruments_kw.NI9205_MP4l]
-instrument_class_name = "CurrentProbe"
+class_name = "CurrentProbe"
 
 [E4.instruments_kw.NI9205_E4]
-instrument_class_name = "ElectricFieldProbe"
+class_name = "ElectricFieldProbe"
 
 # ==================================
 [E5]
@@ -47,10 +47,10 @@ position = 0.832
 
 [E5.instruments_kw]
 [E5.instruments_kw.NI9205_MP5l]
-instrument_class_name = "CurrentProbe"
+class_name = "CurrentProbe"
 
 [E5.instruments_kw.NI9205_E5]
-instrument_class_name = "ElectricFieldProbe"
+class_name = "ElectricFieldProbe"
 
 # ==================================
 [E6]
@@ -58,10 +58,10 @@ position = 0.962
 
 [E6.instruments_kw]
 [E6.instruments_kw.NI9205_MP6l]
-instrument_class_name = "CurrentProbe"
+class_name = "CurrentProbe"
 
 [E6.instruments_kw.NI9205_E6]
-instrument_class_name = "ElectricFieldProbe"
+class_name = "ElectricFieldProbe"
 
 # ==================================
 [E7]
@@ -69,8 +69,8 @@ position = 1.222
 
 [E7.instruments_kw]
 [E7.instruments_kw.NI9205_MP7l]
-instrument_class_name = "CurrentProbe"
+class_name = "CurrentProbe"
 
 [E7.instruments_kw.NI9205_E7]
-instrument_class_name = "ElectricFieldProbe"
+class_name = "ElectricFieldProbe"
 

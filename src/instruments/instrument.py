@@ -18,7 +18,20 @@ class Instrument(ABC):
                  raw_data: pd.Series,
                  **kwargs,
                  ) -> None:
-        """Instantiate the class."""
+        """Instantiate the class.
+
+        Parameters
+        ----------
+        name : str
+            Name of the instrument. It must correspond to the name of a column
+            in the ``.csv`` file.
+        raw_data : pd.Series
+            ``x`` and ``y`` data as saved in the ``.csv`` produced by LabVIEW.
+        kwargs :
+            Additional keyword arguments coming from the ``.toml``
+            configuration file.
+
+        """
         self.name = name
         self.raw_data = raw_data
 
@@ -34,8 +47,8 @@ class Instrument(ABC):
         return "default ylabel"
 
     @property
-    def instrument_class_name(self) -> str:
-        """Name of the instrument class."""
+    def class_name(self) -> str:
+        """Shortcut to the name of the instrument class."""
         return self.__class__.__name__
 
     @property
@@ -92,7 +105,8 @@ class Instrument(ABC):
         Parameters
         ----------
         post_treater : Callable[[np.ndarray], np.ndarray]
-            Post-treating function to add.
+            Post-treating function to add. It must take an array as input, and
+            return an array with the same size as output.
 
         """
         self._post_treaters.append(post_treater)
