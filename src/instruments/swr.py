@@ -23,6 +23,7 @@ class SWR(VirtualInstrument):
                              power_forward: RfPower,
                              power_reflected: RfPower,
                              name: str = 'SWR (calculated from power probes)',
+                             tol: float = 5e-2,
                              **kwargs
                              ) -> Self:
         r"""Instantiate the object by manual calculation.
@@ -45,8 +46,10 @@ class SWR(VirtualInstrument):
             Holds injected rf power :math:`P_f`.
         power_reflected : RfPower
             Holds reflected power :math:`P_r`.
-        name : str
+        name : str, optional
             Name of the virtual instrument.
+        tol : float, optional
+            To remove :math:`\Gamma` values that are too close to unity.
         kwargs :
             Other keyword arguments.
 
@@ -57,5 +60,24 @@ class SWR(VirtualInstrument):
 
         """
         gamma = np.sqrt(power_reflected.ydata / power_forward.ydata)
+        gamma = np.abs(gamma)
+
+        invalid_indexes = np.where(gamma > 1.)[0]
+        n_invalid = len(invalid_indexes)
+        if n_invalid > 0:
+            gamma[invalid_indexes] = np.NaN
+            print(f"Warning! {n_invalid} points where removed in SWR "
+                  "calculation, where reflected power was higher than to "
+                  f"forward power. See instruments.SWR for more info.")
+
+        invalid_indexes = np.where(np.abs(gamma - 1.) < tol)[0]
+        n_invalid = len(invalid_indexes)
+        if n_invalid > 0:
+            gamma[invalid_indexes] = np.NaN
+            print(f"Warning! {n_invalid} points where removed in SWR "
+                  "calculation, where reflected power was too close to "
+                  f"forward power. Tolerance over Gamma was: {tol = }. See "
+                  "instruments.SWR for more info.")
+
         ydata = (1. + gamma) / (1. - gamma)
         return cls.from_array(name, ydata, **kwargs)
