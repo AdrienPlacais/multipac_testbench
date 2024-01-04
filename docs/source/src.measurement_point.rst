@@ -12,6 +12,7 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
+   src.measurement_point.factory
    src.measurement_point.global_diagnostics
    src.measurement_point.i_measurement_point
    src.measurement_point.pick_up
