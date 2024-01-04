@@ -36,6 +36,8 @@ exclude_patterns = ['_build',
                     '.DS_Store',
                     'experimental',
                     ]
+autodoc_member_order = 'bysource'
+
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
