@@ -16,3 +16,6 @@ Submodules
    src.instruments.e_field_probe
    src.instruments.factory
    src.instruments.instrument
+   src.instruments.optical_fibre
+   src.instruments.penning
+   src.instruments.rf_power
