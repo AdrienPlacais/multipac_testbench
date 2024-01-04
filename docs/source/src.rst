@@ -13,6 +13,7 @@ Subpackages
    :maxdepth: 4
 
    src.instruments
+   src.measurement_point
    src.util
 
 Submodules
@@ -22,4 +23,3 @@ Submodules
    :maxdepth: 4
 
    src.multipactor_test
-   src.pick_up
