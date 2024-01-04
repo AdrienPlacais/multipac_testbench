@@ -94,8 +94,19 @@
 <p>Hold information on a single pick-up.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.pick_up.PickUp.add_multipacting_zone">
-<span class="sig-name descname"><span class="pre">add_multipacting_zone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axe</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Axes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotted_instr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ABCMeta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detector_instr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ABCMeta</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#src.pick_up.PickUp.add_multipacting_zone" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_multipacting_zone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axe</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Axes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotted_instrument_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ABCMeta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detector_instrument_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ABCMeta</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#src.pick_up.PickUp.add_multipacting_zone" title="Permalink to this definition"></a></dt>
 <dd><p>Add multipacting zone on a <code class="docutils literal notranslate"><span class="pre">plot_instruments</span></code> plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axe</strong> (<em>Axes</em>) – Matplotlib object on which multipacting zones should be added.</p></li>
+<li><p><strong>plotted_instrument_class</strong> (<em>ABCMeta</em>) – The nature of the instrument which <code class="docutils literal notranslate"><span class="pre">ydata</span></code> is already plotted.</p></li>
+<li><p><strong>detector_instrument_class</strong> (<em>ABCMeta</em>) – The nature of the instrument that determines where there is
+multipactor. It can be the same than <code class="docutils literal notranslate"><span class="pre">plotted_instrument_class</span></code>,
+or it can be different.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
