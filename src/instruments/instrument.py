@@ -38,8 +38,8 @@ class Instrument(ABC):
         self._ydata: np.ndarray | None = None
         self._post_treaters: list[Callable[[np.ndarray], np.ndarray]] = []
 
-        self._multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]]
-        self._multipactor: np.ndarray[np.bool_] | None = None
+        self._multipac_detector: Callable[[np.ndarray], np.ndarray]
+        self._multipactor: np.ndarray | None = None
 
     @classmethod
     def ylabel(cls) -> str:
@@ -117,15 +117,25 @@ class Instrument(ABC):
 
     @property
     def multipac_detector(self
-                          ) -> Callable[[np.ndarray], np.ndarray[np.bool_]]:
+                          ) -> Callable[[np.ndarray], np.ndarray]:
         """Get access to the function that determines where is multipactor."""
         return self._multipac_detector
 
     @multipac_detector.setter
     def multipac_detector(self,
-                          value: Callable[[np.ndarray], np.ndarray[np.bool_]]
+                          value: Callable[[np.ndarray], np.ndarray]
                           ) -> None:
-        """Set the function that determines where there is multipactor."""
+        """Set the function determining where/when there is multipactor.
+
+        Parameters
+        ----------
+        value : Callable[[np.ndarray], np.ndarray]
+            Function taking in the array of :attr:`~ydata`, and returning an
+            array of boolean with the same shape. It contains ``True`` where
+            there is multipactor, and ``False`` where multipactor does not
+            happen.
+
+        """
         if self._multipactor is not None:
             print("Warning! Modifying the multipactor detector makes "
                   "previously calculated multipactor zones obsolete.")
@@ -133,8 +143,16 @@ class Instrument(ABC):
         self._multipac_detector = value
 
     @property
-    def multipactor(self) -> np.ndarray[np.bool_]:
-        """Use ``multipac_detector`` to determine where multipac happens."""
+    def multipactor(self) -> np.ndarray:
+        """Use ``multipac_detector`` to determine where multipac happens.
+
+        Returns
+        -------
+        _multipactor : np.ndarray
+            Array with the same shape as :attr:`~ydata`. It is ``True`` where
+            there is multipactor and ``False`` elsewhere.
+
+        """
         if self._multipactor is None:
             self._multipactor = self.multipac_detector(self.ydata)
         return self._multipactor
