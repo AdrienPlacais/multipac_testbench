@@ -20,7 +20,7 @@ from matplotlib.container import StemContainer
 from matplotlib.figure import Figure
 
 from multipac_testbench.src.instruments.factory import InstrumentFactory
-from multipac_testbench.src.pick_up import PickUp
+from multipac_testbench.src.measurement_point.pick_up import PickUp
 
 
 class MultipactorTest:

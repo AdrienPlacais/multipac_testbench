@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Define an object to keep measurements at a pick-up."""
-from abc import ABCMeta
+"""Define an object to keep several related measurements."""
+from abc import ABC, ABCMeta
 from typing import Any, Callable, Sequence
 
 from matplotlib.axes._axes import Axes
@@ -14,40 +14,32 @@ from multipac_testbench.src.util.multipactor_detectors import \
     start_and_end_of_contiguous_true_zones
 
 
-class PickUp:
-    """Hold information on a single pick-up."""
+class IMeasurementPoint(ABC):
+    """Hold several related measurements.
+
+    In particular, gather :class:`Instrument` which have the same position.
+
+    """
 
     def __init__(self,
-                 name: str,
                  df_data: pd.DataFrame,
                  instrument_factory: InstrumentFactory,
-                 position: float,
                  instruments_kw: dict,
                  ) -> None:
-        """Create the pick-up with all its instruments.
+        """Create the all the global instruments.
 
         Parameters
         ----------
-        name : str
-            Name of the pick-up.
         df_data : pd.DataFrame
             df_data
         instrument_factory : InstrumentFactory
             An object that creates :class:`.Instrument`.
-        position : float
-            position
         instruments_kw : dict[str, dict]
             Dictionary which keys are name of the column where the data from
             the instrument is. Values are dictionaries with keyword arguments
             passed to the proper :class:`.Instrument`.
 
-        Returns
-        -------
-        None
-
         """
-        self.name = name
-        self.position = position
         self.instruments = [
             instrument_factory.run(instr_name, df_data, **instr_kw)
             for instr_name, instr_kw in instruments_kw.items()
@@ -157,10 +149,10 @@ class PickUp:
             return
 
         if len(instruments) > 1:
-            print(f"Warning! At the pick-up {self.name}, there is more than "
-                  f"one {detector_instrument_class} instrument. So I am not "
-                  "sure which one should be used to determine when multipactor"
-                  " appeared. I will take the first one.")
+            print(f"Warning! More than one {detector_instrument_class} "
+                  "instrument at current GlobalDiagnostics/PickUp. So I am not"
+                  " sure which one should be used to determine when "
+                  "multipactor appeared. I will take the first one.")
         detector_instrument = instruments[0]
         zones = self._where_is_multipactor(detector_instrument)
 
@@ -206,3 +198,4 @@ class PickUp:
             'head_width': typical_width * 100.,
         }
         return arrow_kw
+
