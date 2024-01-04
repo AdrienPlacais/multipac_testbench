@@ -118,7 +118,14 @@ class Instrument(ABC):
     @property
     def multipac_detector(self
                           ) -> Callable[[np.ndarray], np.ndarray]:
-        """Get access to the function that determines where is multipactor."""
+        """Get access to the function that determines where is multipactor.
+
+        .. note::
+            It is not mandatory to define a multipactor detector for every
+            :class:`Instrument`, as it may be unrelatable with some types of
+            instrument.
+
+        """
         return self._multipac_detector
 
     @multipac_detector.setter
