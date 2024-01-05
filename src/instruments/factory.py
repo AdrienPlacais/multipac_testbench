@@ -29,7 +29,7 @@ class InstrumentFactory:
             name: str,
             df_data: pd.DataFrame,
             class_name: str,
-            **instruments_kw: dict[str, Any],
+            **instruments_kw: Any,
             ) -> Instrument:
         """Take the proper subclass, instantiate it and return it.
 
@@ -42,7 +42,7 @@ class InstrumentFactory:
         class_name : {'CurrentProbe', 'ElectricFieldProbe', 'OpticalFibre',\
 'Penning', 'RfPower'}
             Name of the instrument class, as given in the ``.toml`` file.
-        instruments_kw : dict[str, Any]
+        instruments_kw : Any
             Other keyword arguments in the ``.toml`` file.
 
         Returns
