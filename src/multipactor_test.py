@@ -71,7 +71,7 @@ class MultipactorTest:
     def plot_instruments_vs_time(
             self,
             instruments_to_plot: tuple[ABCMeta, ...],
-            measurement_point_to_exclude: tuple[str, ...] = (),
+            measurement_points_to_exclude: tuple[str, ...] = (),
             png_path: Path | None = None,
             raw: bool = False,
             multipactor_plots: dict[ABCMeta, ABCMeta] | None = None,
@@ -115,7 +115,7 @@ class MultipactorTest:
             measurement_points.append(self.global_diagnostics)
 
         for measurement_point in measurement_points:
-            if measurement_point.name in measurement_point_to_exclude:
+            if measurement_point.name in measurement_points_to_exclude:
                 continue
 
             measurement_point.plot_instruments(axes,
@@ -139,6 +139,10 @@ class MultipactorTest:
         """Plot pick-ups signals."""
         print("Warning, `plot_pick_ups` will be deprecated. Prefer calling "
               "plot_instruments_vs_time")
+        if 'pick_up_to_exclude' in kwargs:
+            kwargs['measurement_points_to_exclude'] = \
+                kwargs['pick_up_to_exclude']
+            del kwargs['pick_up_to_exclude']
         return self.plot_instruments_vs_time(*args, **kwargs)
 
     def add_multipacting_zones(
