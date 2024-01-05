@@ -16,7 +16,7 @@ class Instrument(ABC):
     def __init__(self,
                  name: str,
                  raw_data: pd.Series,
-                 x_pos: np.ndarray | float | None = None,
+                 position: np.ndarray | float | None = None,
                  **kwargs,
                  ) -> None:
         """Instantiate the class.
@@ -28,9 +28,9 @@ class Instrument(ABC):
             in the ``.csv`` file.
         raw_data : pd.Series
             ``x`` and ``y`` data as saved in the ``.csv`` produced by LabVIEW.
-        x_pos : np.ndarray | float | None, optional
+        position : np.ndarray | float | None, optional
             The position of the instrument. The default is None, in which case
-            :attr:`._x_pos` is not set.
+            :attr:`._position` is not set (case of :class:`.GlobalDiagnostic`).
         kwargs :
             Additional keyword arguments coming from the ``.toml``
             configuration file.
@@ -39,9 +39,9 @@ class Instrument(ABC):
         self.name = name
         self.raw_data = raw_data
 
-        self._x_pos: np.ndarray | float
-        if x_pos is not None:
-            self._x_pos = x_pos
+        self._position: np.ndarray | float
+        if position is not None:
+            self._position = position
 
         self._ydata: np.ndarray | None = None
         self._post_treaters: list[Callable[[np.ndarray], np.ndarray]] = []
