@@ -199,6 +199,9 @@ class Instrument(ABC):
         if raw:
             return self._plot_raw(axe, color=color, **subplot_kw)
 
+        if len(self.post_treaters) == 0:
+            return self._plot_raw(axe, color=color, **subplot_kw)
+
         line1, = axe.plot(self.raw_data.index,
                           self.ydata,
                           label=f"{self.name} (post-treated)",
