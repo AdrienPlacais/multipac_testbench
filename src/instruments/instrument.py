@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Define object to keep a single instrument measurements."""
-from typing import Callable
 from abc import ABC
-import pandas as pd
+from typing import Callable
+from matplotlib.artist import Artist
 
 import numpy as np
+import pandas as pd
 from matplotlib.axes._axes import Axes
+from matplotlib.container import StemContainer
 from matplotlib.lines import Line2D
 
 
@@ -48,6 +50,8 @@ class Instrument(ABC):
 
         self._multipac_detector: Callable[[np.ndarray], np.ndarray]
         self._multipactor: np.ndarray | None = None
+
+        self.plot_vs_position = self._stem_vs_position
 
     def __str__(self) -> str:
         """Give concise information on instrument."""
@@ -186,12 +190,12 @@ class Instrument(ABC):
                 f"{post_treater} modified the shape of the array."
         return data
 
-    def plot(self,
-             axe: Axes,
-             raw: bool = False,
-             color: tuple[float, float, float] | None = None,
-             **subplot_kw
-             ) -> Line2D:
+    def plot_vs_time(self,
+                     axe: Axes,
+                     raw: bool = False,
+                     color: tuple[float, float, float] | None = None,
+                     **subplot_kw
+                     ) -> Line2D:
         """Plot what the instrument measured."""
         ydata = self.ydata
         label = f"{self.name} (post-treated)"
@@ -206,3 +210,104 @@ class Instrument(ABC):
                           label=label,
                           **subplot_kw)
         return line1
+
+    def _stem_vs_position(self,
+                          sample_index: int,
+                          raw: bool = False,
+                          color: tuple[float, float, float] | None = None,
+                          artist: StemContainer | None = None,
+                          axe: Axes | None = None,
+                          ) -> StemContainer:
+        """
+        Plot what instrument measured at its position, at a given time step.
+
+        Adapted to Pick-Up instruments.
+
+        Parameters
+        ----------
+        sample_index : int
+            Index of the measurements.
+        raw : bool
+            If the raw data should be plotted. The default is False.
+        color : tuple[float, float, float] | None, optional
+            Color of the plot. The default is None (default color).
+        artist : StemContainer | None, optional
+            If provided, the stem Artist object is updated rather than
+            overwritten. It is mandatory for matplotlib animation to work. The
+            default is None.
+        axe : Axes | None, optional
+            Axe where the artist should be created. It must be provided if
+            ``artist`` is not given. The default is None.
+
+        Returns
+        -------
+        artist : StemContainer
+            The plotted stem.
+
+        """
+        position = getattr(self, '_position', -1.)
+        assert isinstance(position, float)
+
+        ydata = self.ydata[sample_index]
+        if raw or len(self.post_treaters) == 0:
+            ydata = self.raw_data[sample_index]
+
+        if artist is not None:
+            artist[0].set_ydata(ydata)
+            new_path = np.array([[position, 0.],
+                                 [position, ydata]])
+            artist[1].set_paths([new_path])
+            return artist
+
+        assert axe is not None
+        artist = axe.stem(position, ydata)
+        return artist
+
+    def _plot_vs_position(self,
+                          sample_index: int,
+                          raw: bool = False,
+                          color: tuple[float, float, float] | None = None,
+                          axe: Axes | None = None,
+                          artist: Line2D | None = None,
+                          ) -> Line2D:
+        """
+        Plot what instrument measured at all positions, at a given time step.
+
+        Adapted to instruments with several positions, such as
+        VirtualInstrument reproducing electric field envelope at all positions.
+
+        Parameters
+        ----------
+        sample_index : int
+            Index of the measurements.
+        raw : bool
+            If the raw data should be plotted. The default is False.
+        color : tuple[float, float, float] | None, optional
+            Color of the plot. The default is None (default color).
+        artist : Line2D | None, optional
+            If provided, the Line2D Artist object is updated rather than
+            overwritten. It is mandatory for matplotlib animation to work. The
+            default is None.
+        axe : Axes | None, optional
+            Axe where the artist should be created. It must be provided if
+            ``artist`` is not given. The default is None.
+
+        Returns
+        -------
+        artist : Line2D
+            The plotted line.
+
+        """
+        assert hasattr(self, '_position')
+        assert isinstance(self._position, np.ndarray)
+
+        ydata = self.ydata[sample_index, :]
+        assert isinstance(ydata, np.ndarray)
+        assert ydata.shape == self._position.shape
+
+        if artist is not None:
+            raise NotImplementedError
+
+        assert axe is not None
+        artist, = axe.plot(self._position, ydata, color=color)
+        return artist
