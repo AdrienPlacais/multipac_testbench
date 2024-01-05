@@ -68,10 +68,10 @@ class MultipactorTest:
         for pick_up in affected_pick_ups:
             pick_up.set_multipac_detector(*args, **kwargs)
 
-    def plot_pick_ups(
+    def plot_instruments_vs_time(
             self,
             instruments_to_plot: tuple[ABCMeta, ...],
-            pick_up_to_exclude: tuple[str, ...] = (),
+            measurement_point_to_exclude: tuple[str, ...] = (),
             png_path: Path | None = None,
             raw: bool = False,
             multipactor_plots: dict[ABCMeta, ABCMeta] | None = None,
@@ -110,14 +110,22 @@ class MultipactorTest:
         """
         fig, axes = self._create_fig(instruments_to_plot, **fig_kw)
 
-        for pick_up in self.pick_ups:
-            if pick_up.name in pick_up_to_exclude:
+        measurement_points = self.pick_ups
+        if self.global_diagnostics is not None:
+            measurement_points.append(self.global_diagnostics)
+
+        for measurement_point in measurement_points:
+            if measurement_point.name in measurement_point_to_exclude:
                 continue
 
-            pick_up.plot_instruments(axes, instruments_to_plot, raw=raw)
+            measurement_point.plot_instruments(axes,
+                                               instruments_to_plot,
+                                               raw=raw)
 
             if multipactor_plots is not None:
-                self.add_multipacting_zones(pick_up, axes, multipactor_plots)
+                self.add_multipacting_zones(measurement_point,
+                                            axes,
+                                            multipactor_plots)
 
         for axe in axes.values():
             axe.legend()
@@ -126,6 +134,12 @@ class MultipactorTest:
             fig.savefig(png_path)
 
         return fig, axes
+
+    def plot_pick_ups(self, *args, **kwargs) -> tuple[Figure, Axes]:
+        """Plot pick-ups signals."""
+        print("Warning, `plot_pick_ups` will be deprecated. Prefer calling "
+              "plot_instruments_vs_time")
+        return self.plot_instruments_vs_time(*args, **kwargs)
 
     def add_multipacting_zones(
             self,
