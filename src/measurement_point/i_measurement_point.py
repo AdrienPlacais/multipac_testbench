@@ -25,7 +25,7 @@ class IMeasurementPoint(ABC):
                  name: str,
                  df_data: pd.DataFrame,
                  instrument_factory: InstrumentFactory,
-                 instruments_kw: dict,
+                 instruments_kw: dict[str, dict[str, Any]],
                  ) -> None:
         """Create the all the global instruments.
 
@@ -35,7 +35,7 @@ class IMeasurementPoint(ABC):
             df_data
         instrument_factory : InstrumentFactory
             An object that creates :class:`.Instrument`.
-        instruments_kw : dict[str, dict]
+        instruments_kw : dict[str, dict[str, Any]]
             Dictionary which keys are name of the column where the data from
             the instrument is. Values are dictionaries with keyword arguments
             passed to the proper :class:`.Instrument`.
