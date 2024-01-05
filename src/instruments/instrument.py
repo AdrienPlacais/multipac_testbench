@@ -186,17 +186,6 @@ class Instrument(ABC):
                 f"{post_treater} modified the shape of the array."
         return data
 
-    def _plot_raw(self,
-                  axe: Axes,
-                  color: tuple[float, float, float] | None = None,
-                  **subplot_kw) -> Line2D:
-        """Plot the raw data as it is in the ``.csv``."""
-        line1, = axe.plot(self.raw_data,
-                          label=f"{self.name} (raw)",
-                          color=color,
-                          **subplot_kw)
-        return line1
-
     def plot(self,
              axe: Axes,
              raw: bool = False,
@@ -204,15 +193,16 @@ class Instrument(ABC):
              **subplot_kw
              ) -> Line2D:
         """Plot what the instrument measured."""
-        if raw:
-            return self._plot_raw(axe, color=color, **subplot_kw)
+        ydata = self.ydata
+        label = f"{self.name} (post-treated)"
 
-        if len(self.post_treaters) == 0:
-            return self._plot_raw(axe, color=color, **subplot_kw)
+        if raw or len(self.post_treaters) == 0:
+            ydata = self.raw_data
+            label = f"{self.name} (raw)"
 
         line1, = axe.plot(self.raw_data.index,
-                          self.ydata,
-                          label=f"{self.name} (post-treated)",
+                          ydata,
                           color=color,
+                          label=label,
                           **subplot_kw)
         return line1
