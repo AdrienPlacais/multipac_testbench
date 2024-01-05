@@ -19,11 +19,10 @@ from matplotlib.axes._axes import Axes
 from matplotlib.container import StemContainer
 from matplotlib.figure import Figure
 
-from multipac_testbench.src.instruments.factory import InstrumentFactory
 from multipac_testbench.src.measurement_point.factory import \
     IMeasurementPointFactory
-from multipac_testbench.src.measurement_point.global_diagnostics import \
-    GlobalDiagnostics
+from multipac_testbench.src.measurement_point.i_measurement_point import \
+    IMeasurementPoint
 from multipac_testbench.src.measurement_point.pick_up import PickUp
 
 
@@ -77,7 +76,7 @@ class MultipactorTest:
             multipactor_plots: dict[ABCMeta, ABCMeta] | None = None,
             **fig_kw,
     ) -> tuple[Figure, Axes]:
-        """Plot the different signals at the different pick-ups.
+        """Plot signals measured by ``instruments_to_plot``.
 
         Parameters
         ----------
@@ -112,14 +111,10 @@ class MultipactorTest:
         """
         fig, axes = self._create_fig(instruments_to_plot, **fig_kw)
 
-        measurement_points = self.pick_ups
-        if self.global_diagnostics is not None:
-            measurement_points.append(self.global_diagnostics)
+        measurement_points = self._filter_measurement_points(
+            to_exclude=measurement_points_to_exclude)
 
         for measurement_point in measurement_points:
-            if measurement_point.name in measurement_points_to_exclude:
-                continue
-
             measurement_point.plot_instruments(axes,
                                                instruments_to_plot,
                                                raw=raw)
@@ -148,6 +143,7 @@ class MultipactorTest:
             del kwargs['pick_up_to_exclude']
         return self.plot_instruments_vs_time(*args, **kwargs)
 
+# to reformulate
     def add_multipacting_zones(
             self,
             pick_up: PickUp,
@@ -175,33 +171,76 @@ class MultipactorTest:
                                           detector_instr,
                                           )
 
-    def _create_fig(self,
-                    instruments_to_plot: tuple[ABCMeta, ...] = (),
-                    **fig_kw,
-                    ) -> tuple[Figure, dict[ABCMeta, Axes]]:
-        """Create the figure."""
-        nrows = len(instruments_to_plot)
-        fig, axes = plt.subplots(
-            nrows=nrows,
-            ncols=1,
-            sharex=True,
-            **fig_kw
-        )
+    # def animate_instruments_vs_position(
+    #         self,
+    #         instruments_to_plot: tuple[ABCMeta, ...],
+    #         sample_index: int,
+    #         measurement_points_to_exclude: tuple[str, ...] = (),
+    #         instruments_to_ignore_for_limits: tuple[str, ...] = (),
+    #         png_path: Path | None = None,
+    #         raw: bool = False,
+    #         multipactor_plots: dict[ABCMeta, ABCMeta] | None = None,
+    #         **fig_kw,
+    # ) -> tuple[Figure, Axes]:
+    #     """
+    #     Represent measured signals with probe position.
 
-        # ensure that axes is an iterable
-        if nrows == 1:
-            axes = [axes, ]
+    #     """
+    #     fig, axes = self._create_fig(instruments_to_plot, **fig_kw)
 
-        axes = dict(zip(instruments_to_plot, axes))
+    #     measurement_points = self._filter_measurement_points(
+    #         to_exclude=measurement_points_to_exclude)
 
-        axe = None
-        for instrument_class, axe in axes.items():
-            axe.grid(True)
-            axe.set_ylabel(instrument_class.ylabel())
-        assert isinstance(axe, Axes)
-        if axe is not None:
-            axe.set_xlabel("Measurement index")
-        return fig, axes
+    #     y_limits = {
+    #         instrument_class: self._get_limits(
+    #             instrument_class,
+    #             measurement_points,
+    #             instruments_to_ignore=instruments_to_ignore_for_limits,
+    #         )
+    #         for instrument_class in instruments_to_plot
+    #     }
+
+    # def _plot_instruments_vs_position_single_time_step(
+    #         self,
+    #         axes: Axes,
+    #         measurement_points: Sequence[IMeasurementPoint],
+    #         locs: Sequence,
+    #         step_idx: int,
+    #         keep_one_frame_over: int,
+    #         ) -> Sequence[StemContainer]:
+    #     """Plot as stem the instrument signals.
+
+    #     Parameters
+    #     ----------
+    #     axes : Axes
+    #         Where the stem line should be plotted.
+    #     measurement_points : Sequence[IMeasurementPoint]
+    #         The :class:`.PickUp` and :class:`.GlobalDiagnostic` to plot.
+    #     locs : Sequence
+    #         The x-position of the stems.
+    #     step_idx : int
+    #         Current measurement point.
+    #     keep_one_frame_over : int
+    #         To avoid plotting some points.
+
+
+    #     """
+    #     if step_idx % keep_one_frame_over != 0:
+    #         pass
+
+    #     for axe in axes.values():
+    #         axe.clear()
+    #     _redraw()
+
+    #     lines = []
+    #     for instrument_class, axe in axes.items():
+    #         heads = [
+    #             x.get_instrument_data(instrument_class)[step_idx]
+    #             for x in measurement_points
+    #         ]
+    #         line = axe.stem(locs, heads)
+    #         lines.append(line)
+    #     return lines
 
     def animate_pick_ups(self,
                          instruments_to_plot: tuple[ABCMeta, ...],
@@ -253,8 +292,8 @@ class MultipactorTest:
         fig, axes = self._create_fig(instruments_to_plot, **fig_kw)
 
         to_ignore = pick_ups_to_exclude + pick_ups_to_ignore_for_limits
-        y_limits = {instrument: self._get_limits(instrument,
-                                                 to_ignore=to_ignore)
+        y_limits = {instrument: self._get_limits_old(instrument,
+                                                     to_ignore=to_ignore)
                     for instrument in instruments_to_plot}
 
         def _redraw() -> None:
@@ -293,7 +332,7 @@ class MultipactorTest:
                     pick_up.get_instrument_data(instrument_class)[step_idx]
                     for pick_up in self.pick_ups
                     if pick_up.name not in pick_ups_to_exclude
-                    ]
+                ]
                 line = axe.stem(locs, heads)
                 lines.append(line)
             return lines
@@ -311,10 +350,74 @@ class MultipactorTest:
             writergif = animation.PillowWriter(fps=fps)
             ani.save(gif_path, writer=writergif)
 
-    def _get_limits(self,
-                    instrument_class: ABCMeta,
-                    to_ignore: tuple[str, ...] = (),
-                    ) -> tuple[float, float]:
+    def _create_fig(self,
+                    instruments_to_plot: tuple[ABCMeta, ...] = (),
+                    **fig_kw,
+                    ) -> tuple[Figure, dict[ABCMeta, Axes]]:
+        """Create the figure."""
+        nrows = len(instruments_to_plot)
+        fig, axes = plt.subplots(
+            nrows=nrows,
+            ncols=1,
+            sharex=True,
+            **fig_kw
+        )
+
+        # ensure that axes is an iterable
+        if nrows == 1:
+            axes = [axes, ]
+
+        axes = dict(zip(instruments_to_plot, axes))
+
+        axe = None
+        for instrument_class, axe in axes.items():
+            axe.grid(True)
+            axe.set_ylabel(instrument_class.ylabel())
+        assert isinstance(axe, Axes)
+        if axe is not None:
+            axe.set_xlabel("Measurement index")
+        return fig, axes
+
+    def _filter_measurement_points(
+            self,
+            to_exclude: tuple[str | IMeasurementPoint, ...] = (),
+    ) -> list[IMeasurementPoint]:
+        """Get measurement points (Pick-Ups and GlobalDiagnostic)."""
+        names_to_exclude = [x if isinstance(x, str) else x.name
+                            for x in to_exclude]
+
+        measurement_points = [x for x in self.pick_ups
+                              if x.name not in names_to_exclude]
+        if self.global_diagnostics is None:
+            return measurement_points
+        if self.global_diagnostics.name in names_to_exclude:
+            return measurement_points
+        measurement_points.append(self.global_diagnostics)
+        return measurement_points
+
+    def _get_limits(
+            self,
+            instrument_class: ABCMeta,
+            measurement_points_to_consider: Sequence[IMeasurementPoint],
+            instruments_to_ignore: tuple[str, ...] = (),
+    ) -> tuple[float, float]:
+        """Set limits for the plots."""
+        all_ydata = [mpoint.get_instrument_data(instrument_class)
+                     for mpoint in measurement_points_to_consider
+                     if mpoint.name not in instruments_to_ignore]
+
+        lowers = [np.nanmin(ydata) for ydata in all_ydata]
+        lower = min(lowers)
+
+        uppers = [np.nanmax(ydata) for ydata in all_ydata]
+        upper = max(uppers)
+        amplitude = abs(upper - lower)
+        return lower - .1 * amplitude, upper + .1 * amplitude
+
+    def _get_limits_old(self,
+                        instrument_class: ABCMeta,
+                        to_ignore: tuple[str, ...] = (),
+                        ) -> tuple[float, float]:
         """Set limits for the plots.
 
         Parameters
