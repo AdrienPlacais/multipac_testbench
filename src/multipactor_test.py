@@ -83,15 +83,17 @@ class MultipactorTest:
         ----------
         instruments_to_plot : tuple[ABCMeta, ...]
             Subclass of the :class:`.Instrument` to plot.
-        pick_up_to_exclude : tuple[str, ...], optional
-            Name of the pick-ups that should not be plotted. The default is an
-            empty tuple.
+        measurement_points_to_exclude : tuple[str, ...], optional
+            Name of the measurement points that should not be plotted. The
+            default is an empty tuple.
         png_path : Path | None, optional
             If provided, the resulting figure is saved at this path. The
             default is None.
         raw : bool, optional
             If the data that should be plotted is the raw data before
-            post-treatment. The default is False.
+            post-treatment. The default is False. Note that when the
+            :attr:`.Instrument.post_treaters` list is empty, raw data is
+            plotted even if ``raw==True``.
         multipactor_plots : dict[ABCMeta, ABCMeta] | None, optional
             Keys are the Instrument subclass for which you want to see the
             multipactor zones. Values are the Instrument subclass that detect
@@ -135,6 +137,7 @@ class MultipactorTest:
 
         return fig, axes
 
+# legacy
     def plot_pick_ups(self, *args, **kwargs) -> tuple[Figure, Axes]:
         """Plot pick-ups signals."""
         print("Warning, `plot_pick_ups` will be deprecated. Prefer calling "
