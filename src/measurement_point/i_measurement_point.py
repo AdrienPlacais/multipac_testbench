@@ -22,6 +22,7 @@ class IMeasurementPoint(ABC):
     """
 
     def __init__(self,
+                 name: str,
                  df_data: pd.DataFrame,
                  instrument_factory: InstrumentFactory,
                  instruments_kw: dict,
@@ -40,6 +41,7 @@ class IMeasurementPoint(ABC):
             passed to the proper :class:`.Instrument`.
 
         """
+        self.name = name
         self.instruments = [
             instrument_factory.run(instr_name, df_data, **instr_kw)
             for instr_name, instr_kw in instruments_kw.items()

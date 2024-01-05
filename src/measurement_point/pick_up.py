@@ -37,8 +37,7 @@ class PickUp(IMeasurementPoint):
             passed to the proper :class:`.Instrument`.
 
         """
-        super().__init__(df_data, instrument_factory, instruments_kw)
-        self.name = name
+        super().__init__(name, df_data, instrument_factory, instruments_kw)
         self.position = position
 
     def __str__(self) -> str:

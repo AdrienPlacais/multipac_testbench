@@ -12,6 +12,7 @@ class GlobalDiagnostics(IMeasurementPoint):
     """Hold measurements unrelated to pick-ups."""
 
     def __init__(self,
+                 name: str,
                  df_data: pd.DataFrame,
                  instrument_factory: InstrumentFactory,
                  instruments_kw: dict,
@@ -30,11 +31,12 @@ class GlobalDiagnostics(IMeasurementPoint):
             passed to the proper :class:`.Instrument`.
 
         """
-        super().__init__(df_data, instrument_factory, instruments_kw)
+        super().__init__(name, df_data, instrument_factory, instruments_kw)
 
     def __str__(self) -> str:
         """Give concise info on global diagnostics."""
         out = f"""
-        GlobalDiagnostic with instruments: {[str(x) for x in self.instruments]}
+        GlobalDiagnostic {self.name},
+        with instruments: {[str(x) for x in self.instruments]}
         """
         return " ".join(out.split())

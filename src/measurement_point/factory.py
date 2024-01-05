@@ -50,9 +50,11 @@ class IMeasurementPointFactory:
 
         """
         if "global" in config_key:
-            return GlobalDiagnostics(df_data,
-                                     self.instrument_factory,
-                                     **config_value)
+            return GlobalDiagnostics(
+                name=config_key,
+                df_data=df_data,
+                instrument_factory=self.instrument_factory,
+                **config_value)
         return PickUp(name=config_key,
                       df_data=df_data,
                       instrument_factory=self.instrument_factory,
