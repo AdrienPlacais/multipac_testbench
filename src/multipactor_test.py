@@ -5,20 +5,25 @@
 .. todo::
     Allow to trim data (remove noisy useless data at end of exp)
 
+.. todo::
+    name of pick ups in animation
+
 """
 from abc import ABCMeta
-from typing import Sequence
+from functools import partial
 from pathlib import Path
-
-import numpy as np
-import pandas as pd
+from typing import Sequence
 
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 from matplotlib import animation
+from matplotlib.artist import Artist
 from matplotlib.axes._axes import Axes
 from matplotlib.container import StemContainer
 from matplotlib.figure import Figure
 
+from multipac_testbench.src.instruments.instrument import Instrument
 from multipac_testbench.src.measurement_point.factory import \
     IMeasurementPointFactory
 from multipac_testbench.src.measurement_point.i_measurement_point import \
@@ -109,39 +114,29 @@ class MultipactorTest:
             The created axes.
 
         """
-        fig, axes = self._create_fig(instruments_to_plot, **fig_kw)
+        fig, instrument_class_axes = self._create_fig(instruments_to_plot,
+                                                      **fig_kw)
 
         measurement_points = self._filter_measurement_points(
             to_exclude=measurement_points_to_exclude)
 
         for measurement_point in measurement_points:
-            measurement_point.plot_instruments(axes,
+            measurement_point.plot_instruments(instrument_class_axes,
                                                instruments_to_plot,
                                                raw=raw)
 
             if multipactor_plots is not None:
                 self.add_multipacting_zones(measurement_point,
-                                            axes,
+                                            instrument_class_axes,
                                             multipactor_plots)
 
-        for axe in axes.values():
+        for axe in instrument_class_axes.values():
             axe.legend()
 
         if png_path is not None:
             fig.savefig(png_path)
 
-        return fig, axes
-
-# legacy
-    def plot_pick_ups(self, *args, **kwargs) -> tuple[Figure, Axes]:
-        """Plot pick-ups signals."""
-        print("Warning, `plot_pick_ups` will be deprecated. Prefer calling "
-              "plot_instruments_vs_time")
-        if 'pick_up_to_exclude' in kwargs:
-            kwargs['measurement_points_to_exclude'] = \
-                kwargs['pick_up_to_exclude']
-            del kwargs['pick_up_to_exclude']
-        return self.plot_instruments_vs_time(*args, **kwargs)
+        return fig, instrument_class_axes
 
 # to reformulate
     def add_multipacting_zones(
@@ -171,192 +166,109 @@ class MultipactorTest:
                                           detector_instr,
                                           )
 
-    # def animate_instruments_vs_position(
-    #         self,
-    #         instruments_to_plot: tuple[ABCMeta, ...],
-    #         sample_index: int,
-    #         measurement_points_to_exclude: tuple[str, ...] = (),
-    #         instruments_to_ignore_for_limits: tuple[str, ...] = (),
-    #         png_path: Path | None = None,
-    #         raw: bool = False,
-    #         multipactor_plots: dict[ABCMeta, ABCMeta] | None = None,
-    #         **fig_kw,
-    # ) -> tuple[Figure, Axes]:
-    #     """
-    #     Represent measured signals with probe position.
+    def animate_instruments_vs_position(
+            self,
+            instruments_to_plot: tuple[ABCMeta, ...],
+            gif_path: Path | None = None,
+            fps: int = 50,
+            keep_one_frame_over: int = 1,
+            **fig_kw,
+            ) -> Figure:
+        """Represent measured signals with probe position."""
+        fig, axes_instruments = self._prepare_animation_fig(
+            instruments_to_plot,
+            **fig_kw
+        )
 
-    #     """
-    #     fig, axes = self._create_fig(instruments_to_plot, **fig_kw)
+        frames = self._n_points - 1
+        artists = self._plot_instruments_single_time_step(
+            0,
+            keep_one_frame_over=keep_one_frame_over,
+            axes_instruments=axes_instruments,
+            artists=None,
+        )
 
-    #     measurement_points = self._filter_measurement_points(
-    #         to_exclude=measurement_points_to_exclude)
-
-    #     y_limits = {
-    #         instrument_class: self._get_limits(
-    #             instrument_class,
-    #             measurement_points,
-    #             instruments_to_ignore=instruments_to_ignore_for_limits,
-    #         )
-    #         for instrument_class in instruments_to_plot
-    #     }
-
-    # def _plot_instruments_vs_position_single_time_step(
-    #         self,
-    #         axes: Axes,
-    #         measurement_points: Sequence[IMeasurementPoint],
-    #         locs: Sequence,
-    #         step_idx: int,
-    #         keep_one_frame_over: int,
-    #         ) -> Sequence[StemContainer]:
-    #     """Plot as stem the instrument signals.
-
-    #     Parameters
-    #     ----------
-    #     axes : Axes
-    #         Where the stem line should be plotted.
-    #     measurement_points : Sequence[IMeasurementPoint]
-    #         The :class:`.PickUp` and :class:`.GlobalDiagnostic` to plot.
-    #     locs : Sequence
-    #         The x-position of the stems.
-    #     step_idx : int
-    #         Current measurement point.
-    #     keep_one_frame_over : int
-    #         To avoid plotting some points.
-
-
-    #     """
-    #     if step_idx % keep_one_frame_over != 0:
-    #         pass
-
-    #     for axe in axes.values():
-    #         axe.clear()
-    #     _redraw()
-
-    #     lines = []
-    #     for instrument_class, axe in axes.items():
-    #         heads = [
-    #             x.get_instrument_data(instrument_class)[step_idx]
-    #             for x in measurement_points
-    #         ]
-    #         line = axe.stem(locs, heads)
-    #         lines.append(line)
-    #     return lines
-
-    def animate_pick_ups(self,
-                         instruments_to_plot: tuple[ABCMeta, ...],
-                         pick_ups_to_exclude: tuple[str, ...] = (),
-                         pick_ups_to_ignore_for_limits: tuple[str, ...] = (),
-                         gif_path: Path | None = None,
-                         fps: int = 50,
-                         keep_one_frame_over: int = 1,
-                         **fig_kw,
-                         ) -> None:
-        """Animate the pick-up measurements.
-
-        .. todo::
-            not sure if ``keep_one_frame_over`` work as expected
-
-        Parameters
-        ----------
-        pick_up_to_exclude : tuple[str, ...], optional
-            The pick-ups that should not be plotted. The default is an empty
-            tuple, in which case all the pick-ups are represented.
-        pick_ups_to_ignore_for_limits : tuple[str, ...], optional
-            The pick-ups that should be plotted, but are not considered for the
-            limits of the plots.
-        gif_path : Path | None, optional
-            The path where the resulting ``.gif`` will be saved. The optional
-            is None, in which case the animation is not saved.
-        fps : int, optional
-            Number of frame per seconds in the save ``.gif``. The default is
-            50.
-        keep_one_frame_over : int, optional
-           To reduce memory consumption of the animation, plot only one frame
-           over ``keep_one_frame_over``. The default is 1, in which case all
-           frames are plotted.
-        fig_kw :
-            Keyword arguments given to the matplotlib ``Figure``.
-
-        .. todo::
-            Name of pick-ups in x axis.
-
-        .. todo::
-            Optimize. Surely I do not need to redraw everything at every
-            iteration.
-
-        .. todo::
-            Clarify. This not very clean nor Pythonic
-
-        """
-        # subplot_kw = {'xlabel': r'Probe position [m]'}
-        fig, axes = self._create_fig(instruments_to_plot, **fig_kw)
-
-        to_ignore = pick_ups_to_exclude + pick_ups_to_ignore_for_limits
-        y_limits = {instrument: self._get_limits_old(instrument,
-                                                     to_ignore=to_ignore)
-                    for instrument in instruments_to_plot}
-
-        def _redraw() -> None:
-            """Redraw what does not change between two frames."""
-            for instrument_class in instruments_to_plot:
-                axe = axes[instrument_class]
-                axe.set_ylabel(instrument_class.ylabel())
-                axe.set_ylim(y_limits[instrument_class])
-                axe.grid(True)
-
-        locs = [pick_up.position
-                for pick_up in self.pick_ups
-                if pick_up.name not in pick_ups_to_exclude]
-
-        def _plot_pick_ups_single_time_step(
-                step_idx: int
-        ) -> Sequence[StemContainer]:
-            """Plot as stem the instrument signals.
+        def update(step_idx: int) -> Sequence[Artist]:
+            """Update the ``artists`` defined in outer scope.
 
             Parameters
             ----------
             step_idx : int
-                Current measurement point.
+                Step that shall be plotted.
+
+            Returns
+            -------
+            artists : Sequence[Artist]
+                Updated artists.
 
             """
-            if step_idx % keep_one_frame_over != 0:
-                pass
+            self._plot_instruments_single_time_step(
+                step_idx,
+                keep_one_frame_over=keep_one_frame_over,
+                axes_instruments=axes_instruments,
+                artists=artists,
+            )
+            assert artists is not None
+            return artists
 
-            for axe in axes.values():
-                axe.clear()
-            _redraw()
-
-            lines = []
-            for instrument_class, axe in axes.items():
-                heads = [
-                    pick_up.get_instrument_data(instrument_class)[step_idx]
-                    for pick_up in self.pick_ups
-                    if pick_up.name not in pick_ups_to_exclude
-                ]
-                line = axe.stem(locs, heads)
-                lines.append(line)
-            return lines
-
-        frames = self._n_points
-        ani = animation.FuncAnimation(
-            fig,
-            _plot_pick_ups_single_time_step,
-            frames=frames,
-            repeat=True,
-        )
+        ani = animation.FuncAnimation(fig, update, frames=frames, repeat=True)
         plt.show()
 
         if gif_path is not None:
             writergif = animation.PillowWriter(fps=fps)
             ani.save(gif_path, writer=writergif)
+        return fig
+
+    def _plot_instruments_single_time_step(
+            self,
+            step_idx: int,
+            keep_one_frame_over: int,
+            axes_instruments: dict[Axes, list[Instrument]],
+            artists: Sequence[Artist] | None = None,
+    ) -> Sequence[Artist] | None:
+        """Plot all instruments signal at proper axe and time step."""
+        if step_idx % keep_one_frame_over != 0:
+            return
+
+        sample_index = step_idx + 1
+
+        if artists is None:
+            artists = [instrument.plot_vs_position(sample_index, axe=axe)
+                       for axe, instruments in axes_instruments.items()
+                       for instrument in instruments]
+            return artists
+
+        i = 0
+        for instruments in axes_instruments.values():
+            for instrument in instruments:
+                instrument.plot_vs_position(sample_index, artist=artists[i])
+                i += 1
+        return artists
 
     def _create_fig(self,
                     instruments_to_plot: tuple[ABCMeta, ...] = (),
                     **fig_kw,
                     ) -> tuple[Figure, dict[ABCMeta, Axes]]:
-        """Create the figure."""
+        """Create the figure and axes.
+
+        Parameters
+        ----------
+        instruments_to_plot : tuple[ABCMeta, ...]
+            Class of the instruments to be plotted.
+        fig_kw :
+            Keyword arguments passsed to the Figure constructor.
+
+        Returns
+        -------
+        fig : Figure
+            Figure holding the axes.
+        instrument_class_axes : dict[ABCMeta, Axes]
+            Dictionary linking the class of the instruments to plot with the
+            associated axes.
+
+        """
         nrows = len(instruments_to_plot)
-        fig, axes = plt.subplots(
+        fig, instrument_class_axes = plt.subplots(
             nrows=nrows,
             ncols=1,
             sharex=True,
@@ -365,18 +277,19 @@ class MultipactorTest:
 
         # ensure that axes is an iterable
         if nrows == 1:
-            axes = [axes, ]
+            instrument_class_axes = [instrument_class_axes, ]
 
-        axes = dict(zip(instruments_to_plot, axes))
+        instrument_class_axes = dict(zip(instruments_to_plot,
+                                         instrument_class_axes))
 
         axe = None
-        for instrument_class, axe in axes.items():
+        for instrument_class, axe in instrument_class_axes.items():
             axe.grid(True)
             axe.set_ylabel(instrument_class.ylabel())
         assert isinstance(axe, Axes)
         if axe is not None:
             axe.set_xlabel("Measurement index")
-        return fig, axes
+        return fig, instrument_class_axes
 
     def _filter_measurement_points(
             self,
@@ -395,52 +308,121 @@ class MultipactorTest:
         measurement_points.append(self.global_diagnostics)
         return measurement_points
 
-    def _get_limits(
-            self,
-            instrument_class: ABCMeta,
-            measurement_points_to_consider: Sequence[IMeasurementPoint],
-            instruments_to_ignore: tuple[str, ...] = (),
-    ) -> tuple[float, float]:
-        """Set limits for the plots."""
-        all_ydata = [mpoint.get_instrument_data(instrument_class)
-                     for mpoint in measurement_points_to_consider
-                     if mpoint.name not in instruments_to_ignore]
+    def _filter_instruments(self,
+                            instrument_class: ABCMeta,
+                            measurement_points: Sequence[IMeasurementPoint],
+                            instruments_to_ignore: Sequence[Instrument | str],
+                            ) -> list[Instrument]:
+        """Get all instruments of desired class from ``measurement_points``.
 
-        lowers = [np.nanmin(ydata) for ydata in all_ydata]
-        lower = min(lowers)
-
-        uppers = [np.nanmax(ydata) for ydata in all_ydata]
-        upper = max(uppers)
-        amplitude = abs(upper - lower)
-        return lower - .1 * amplitude, upper + .1 * amplitude
-
-    def _get_limits_old(self,
-                        instrument_class: ABCMeta,
-                        to_ignore: tuple[str, ...] = (),
-                        ) -> tuple[float, float]:
-        """Set limits for the plots.
+        But remove the instruments to ignore.
 
         Parameters
         ----------
         instrument_class : ABCMeta
-            Instrument subclass.
-        to_ignore : tuple[str, ...]
-            Name of the pick-ups that should not be considered for the limits.
+            Class of the desired instruments.
+        measurement_points : Sequence[IMeasurementPoint]
+            The measurement points from which you want the instruments.
+        instruments_to_ignore : Sequence[Instrument | str]
+            The :class:`.Instrument` or instrument names you do not want.
 
         Returns
         -------
-        tuple[float, float]
-            Lower and upper limits that should allow to visualize all data but
-            the one in pick-ups to ignore.
+        instruments : list[Instrument]
+            All the instruments matching the required conditions.
 
         """
-        all_ydata = [pick_up.get_instrument_data(instrument_class)
-                     for pick_up in self.pick_ups
-                     if pick_up.name not in to_ignore]
-        lowers = [np.nanmin(ydata) for ydata in all_ydata]
-        lower = min(lowers)
+        instruments_2d = [
+            measurement_point.get_affected_instruments(
+                instrument_class,
+                instruments_to_ignore=instruments_to_ignore,
+            )
+            for measurement_point in measurement_points
+        ]
+        instruments = [instrument
+                       for instrument_1d in instruments_2d
+                       for instrument in instrument_1d]
+        return instruments
 
-        uppers = [np.nanmax(ydata) for ydata in all_ydata]
-        upper = max(uppers)
-        amplitude = abs(upper - lower)
-        return lower - .1 * amplitude, upper + .1 * amplitude
+    def _get_limits(
+            self,
+            axes_instruments: dict[Axes, Sequence[Instrument]],
+            instruments_to_ignore_for_limits: Sequence[Instrument | str] = (),
+    ) -> dict[Axes, tuple[float, float]]:
+        """Set limits for the plots."""
+        names_to_ignore = [x if isinstance(x, str) else x.name
+                           for x in instruments_to_ignore_for_limits]
+        limits = {}
+        for axe, instruments in axes_instruments.items():
+            all_ydata = [instrument.ydata for instrument in instruments
+                         if instrument.name not in names_to_ignore]
+
+            lowers = [np.nanmin(ydata) for ydata in all_ydata]
+            lower = min(lowers)
+
+            uppers = [np.nanmax(ydata) for ydata in all_ydata]
+            upper = max(uppers)
+            amplitude = abs(upper - lower)
+
+            limits[axe] = (lower - .1 * amplitude, upper + .1 * amplitude)
+        return limits
+
+    def _prepare_animation_fig(
+        self,
+        instruments_to_plot: tuple[ABCMeta, ...],
+        measurement_points_to_exclude: tuple[str, ...] = (),
+        instruments_to_ignore_for_limits: tuple[str, ...] = (),
+        instruments_to_ignore: Sequence[Instrument | str] = (),
+        **fig_kw,
+    ) -> tuple[Figure, dict[Axes, list[Instrument]]]:
+        """Prepare the figure and axes for the animation.
+
+        Parameters
+        ----------
+        instruments_to_plot : tuple[ABCMeta, ...]
+            Classes of instruments you want to see.
+        measurement_points_to_exclude : tuple[str, ...]
+            Measurement points that should not appear.
+        instruments_to_ignore_for_limits : tuple[str, ...]
+            Instruments to plot, but that can go off limits.
+        instruments_to_ignore : Sequence[Instrument | str]
+            Instruments that will not even be plotted.
+        fig_kw :
+            Other keyword arguments for Figure.
+
+        Returns
+        -------
+        fig : Figure
+         Figure holding the axes.
+        axes_instruments : dict[Axes, list[Instrument]]
+            Links the instruments to plot with the Axes they should be plotted
+            on.
+
+        """
+        fig, instrument_class_axes = self._create_fig(instruments_to_plot,
+                                                      **fig_kw)
+        for instrument_class, axe in instrument_class_axes.items():
+            axe.set_ylabel(instrument_class.ylabel())
+
+        measurement_points = self._filter_measurement_points(
+            to_exclude=measurement_points_to_exclude)
+        axes_instruments = {
+            axe: self._filter_instruments(
+                instrument_class,
+                measurement_points,
+                instruments_to_ignore=instruments_to_ignore)
+            for instrument_class, axe in instrument_class_axes.items()
+        }
+
+        y_limits = self._get_limits(
+            axes_instruments,
+            instruments_to_ignore_for_limits=instruments_to_ignore_for_limits)
+
+        axe = None
+        for axe, y_lim in y_limits.items():
+            axe.set_ylim(y_lim)
+            axe.grid(True)
+        if axe is not None:
+            axe.set_xlabel('Position [m]')
+
+        return fig, axes_instruments
