@@ -56,8 +56,8 @@ class MultipactorTest:
 
         if swr is None:
             print("MultipactorTest.__init__ warning! Providing SWR will soon "
-                  "be mandatory! Setting default to 1...")
-            swr = 1.
+                  "be mandatory! Setting default to np.NaN...")
+            swr = np.NaN
         self.swr = swr
 
     def add_post_treater(self,
