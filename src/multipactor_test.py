@@ -37,6 +37,8 @@ class MultipactorTest:
     def __init__(self,
                  filepath: Path,
                  config: dict,
+                 freq_mhz: float | None = None,
+                 swr: float | None = None,
                  sep: str = ';') -> None:
         """Create all the pick-ups."""
         df_data = pd.read_csv(filepath, sep=sep, index_col="Sample index")
@@ -45,6 +47,18 @@ class MultipactorTest:
         imeasurement_point_factory = IMeasurementPointFactory()
         imeasurement_points = imeasurement_point_factory.run(config, df_data)
         self.global_diagnostics, self.pick_ups = imeasurement_points
+
+        if freq_mhz is None:
+            print("MultipactorTest.__init__ warning! Providing frequency will "
+                  "soon be mandatory! Setting default 120MHz...")
+            freq_mhz = 120.
+        self.freq_mhz = freq_mhz
+
+        if swr is None:
+            print("MultipactorTest.__init__ warning! Providing SWR will soon "
+                  "be mandatory! Setting default to 1...")
+            swr = 1.
+        self.swr = swr
 
     def add_post_treater(self,
                          *args,
