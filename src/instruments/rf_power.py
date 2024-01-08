@@ -27,6 +27,7 @@ class RfPower(Instrument):
                                   swr: float | np.ndarray,
                                   impedance: float = 50.,
                                   name: str | None = None,
+                                  from_raw_ydata: bool = False,
                                   **kwargs,
                                   ) -> Self:
         r"""Instantiate the power probe from an electric field probe.
@@ -53,6 +54,9 @@ class RfPower(Instrument):
         name : str | None, optional
             Name of the probe, optional. The default is inferred from the name
             of ``e_field_probe``.
+        from_raw_ydata : bool, optional
+            To compute the RF power from the raw ``e_field_probe`` signal
+            instead of the post-treated.
         kwargs :
             Other keyword arguments passed to initializer.
 
@@ -65,6 +69,10 @@ class RfPower(Instrument):
         if name is None:
             name = f"Power from {e_field_probe.name}"
 
-        ydata = e_field_probe.ydata**2 / (2. * impedance * swr)
+        original_ydata = e_field_probe.ydata
+        if from_raw_ydata:
+            raise NotImplementedError
+
+        ydata = original_ydata**2 / (2. * impedance * swr)
 
         return cls.from_array(name, ydata, **kwargs)
