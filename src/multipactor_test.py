@@ -310,6 +310,9 @@ class MultipactorTest:
         assert isinstance(axe, Axes)
         if axe is not None:
             axe.set_xlabel("Measurement index")
+
+        fig.suptitle(f"f = {self.freq_mhz}MHz; SWR = {self.swr}")
+
         return fig, instrument_class_axes
 
     def _filter_measurement_points(
