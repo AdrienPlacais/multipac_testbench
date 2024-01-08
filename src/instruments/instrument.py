@@ -323,7 +323,8 @@ class Instrument(ABC):
         assert ydata.shape == self._position.shape
 
         if artist is not None:
-            raise NotImplementedError
+            artist.set_data(self._position, ydata)
+            return artist
 
         assert axe is not None
         artist, = axe.plot(self._position, ydata, color=color)
