@@ -50,9 +50,9 @@
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">src package</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.html">src.instruments package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.measurement_point.html">src.measurement_point package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.util.html">src.util package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html">src.multipactor_test module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="src.pick_up.html">src.pick_up module</a></li>
 </ul>
 </li>
 </ul>
@@ -102,12 +102,54 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.factory.html">src.instruments.factory module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="src.instruments.factory.html#src.instruments.factory.InstrumentFactory"><code class="docutils literal notranslate"><span class="pre">InstrumentFactory</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.factory.html#src.instruments.factory.STRING_TO_INSTRUMENT_CLASS"><code class="docutils literal notranslate"><span class="pre">STRING_TO_INSTRUMENT_CLASS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.instruments.factory.html#src.instruments.factory.InstrumentFactory"><code class="docutils literal notranslate"><span class="pre">InstrumentFactory</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html">src.instruments.instrument module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument"><code class="docutils literal notranslate"><span class="pre">Instrument</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="src.instruments.optical_fibre.html">src.instruments.optical_fibre module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.instruments.optical_fibre.html#src.instruments.optical_fibre.OpticalFibre"><code class="docutils literal notranslate"><span class="pre">OpticalFibre</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="src.instruments.penning.html">src.instruments.penning module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.instruments.penning.html#src.instruments.penning.Penning"><code class="docutils literal notranslate"><span class="pre">Penning</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="src.instruments.rf_power.html">src.instruments.rf_power module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.instruments.rf_power.html#src.instruments.rf_power.RfPower"><code class="docutils literal notranslate"><span class="pre">RfPower</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="src.instruments.swr.html">src.instruments.swr module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.instruments.swr.html#src.instruments.swr.SWR"><code class="docutils literal notranslate"><span class="pre">SWR</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="src.instruments.virtual_instrument.html">src.instruments.virtual_instrument module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.instruments.virtual_instrument.html#src.instruments.virtual_instrument.VirtualInstrument"><code class="docutils literal notranslate"><span class="pre">VirtualInstrument</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src.measurement_point.html">src.measurement_point package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src.measurement_point.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.measurement_point.factory.html">src.measurement_point.factory module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.measurement_point.factory.html#src.measurement_point.factory.IMeasurementPointFactory"><code class="docutils literal notranslate"><span class="pre">IMeasurementPointFactory</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="src.measurement_point.global_diagnostics.html">src.measurement_point.global_diagnostics module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.measurement_point.global_diagnostics.html#src.measurement_point.global_diagnostics.GlobalDiagnostics"><code class="docutils literal notranslate"><span class="pre">GlobalDiagnostics</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="src.measurement_point.i_measurement_point.html">src.measurement_point.i_measurement_point module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.measurement_point.i_measurement_point.html#src.measurement_point.i_measurement_point.IMeasurementPoint"><code class="docutils literal notranslate"><span class="pre">IMeasurementPoint</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="src.measurement_point.pick_up.html">src.measurement_point.pick_up module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.measurement_point.pick_up.html#src.measurement_point.pick_up.PickUp"><code class="docutils literal notranslate"><span class="pre">PickUp</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -138,22 +180,11 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="src.multipactor_test.html">src.multipactor_test module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest"><code class="docutils literal notranslate"><span class="pre">MultipactorTest</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.add_multipacting_zones"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.add_multipacting_zones()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.add_post_treater"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.add_post_treater()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.animate_pick_ups"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.animate_pick_ups()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.plot_pick_ups"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.plot_pick_ups()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.set_multipac_detector"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.set_multipac_detector()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="src.pick_up.html">src.pick_up module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="src.pick_up.html#src.pick_up.PickUp"><code class="docutils literal notranslate"><span class="pre">PickUp</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="src.pick_up.html#src.pick_up.PickUp.add_multipacting_zone"><code class="docutils literal notranslate"><span class="pre">PickUp.add_multipacting_zone()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="src.pick_up.html#src.pick_up.PickUp.add_post_treater"><code class="docutils literal notranslate"><span class="pre">PickUp.add_post_treater()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="src.pick_up.html#src.pick_up.PickUp.get_instrument_data"><code class="docutils literal notranslate"><span class="pre">PickUp.get_instrument_data()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="src.pick_up.html#src.pick_up.PickUp.plot_instruments"><code class="docutils literal notranslate"><span class="pre">PickUp.plot_instruments()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="src.pick_up.html#src.pick_up.PickUp.set_multipac_detector"><code class="docutils literal notranslate"><span class="pre">PickUp.set_multipac_detector()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.plot_instruments_vs_time"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.plot_instruments_vs_time()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.add_multipacting_zones"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.add_multipacting_zones()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.animate_instruments_vs_position"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.animate_instruments_vs_position()</span></code></a></li>
 </ul>
 </li>
 </ul>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.instruments.swr module &mdash; MULTIPAC test bench 1.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="src.instruments.virtual_instrument module" href="src.instruments.virtual_instrument.html" />
+    <link rel="prev" title="src.instruments.rf_power module" href="src.instruments.rf_power.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            MULTIPAC test bench
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="manual/examples.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="src.html">src package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="src.instruments.html">src.instruments package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="src.instruments.current_probe.html">src.instruments.current_probe module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.instruments.e_field_probe.html">src.instruments.e_field_probe module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.instruments.factory.html">src.instruments.factory module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.instruments.instrument.html">src.instruments.instrument module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.instruments.optical_fibre.html">src.instruments.optical_fibre module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.instruments.penning.html">src.instruments.penning module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.instruments.rf_power.html">src.instruments.rf_power module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">src.instruments.swr module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.instruments.virtual_instrument.html">src.instruments.virtual_instrument module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="src.measurement_point.html">src.measurement_point package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.util.html">src.util package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html">src.multipactor_test module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">MULTIPAC test bench</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">src</a></li>
+          <li class="breadcrumb-item"><a href="src.html">src package</a></li>
+          <li class="breadcrumb-item"><a href="src.instruments.html">src.instruments package</a></li>
+      <li class="breadcrumb-item active">src.instruments.swr module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/src.instruments.swr.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-src.instruments.swr">
+<span id="src-instruments-swr-module"></span><h1>src.instruments.swr module<a class="headerlink" href="#module-src.instruments.swr" title="Permalink to this heading"></a></h1>
+<p>Define a Signal Wave Ratio probe.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.instruments.swr.SWR">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SWR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Series</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.instruments.swr.SWR" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">VirtualInstrument</span></code></p>
+<p>An object to study the SWR.</p>
+<p>Here, SWR stands for Standing Wave Ratio and is the Voltage Standing Wave
+Ratio.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.swr.SWR.from_rf_power_probes">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_rf_power_probes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">power_forward</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">RfPower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power_reflected</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">RfPower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'SWR</span> <span class="pre">(calculated</span> <span class="pre">from</span> <span class="pre">power</span> <span class="pre">probes)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#src.instruments.swr.SWR.from_rf_power_probes" title="Permalink to this definition"></a></dt>
+<dd><p>Instantiate the object by manual calculation.</p>
+<p>First, we compute the reflection coefficient, defined as:</p>
+<div class="math notranslate nohighlight">
+\[\Gamma = \frac{V_r}{V_f} = \sqrt{\frac{P_r}{P_f}}\]</div>
+<p>the SWR is then defined as:</p>
+<div class="math notranslate nohighlight">
+\[SWR = \frac{1 + |\Gamma|}{1 - |\Gamma|}\]</div>
+<p>In our case, <span class="math notranslate nohighlight">\(P_r\)</span> and <span class="math notranslate nohighlight">\(P_f\)</span> are real and positive.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>power_forward</strong> (<a class="reference internal" href="src.instruments.rf_power.html#src.instruments.rf_power.RfPower" title="src.instruments.rf_power.RfPower"><em>RfPower</em></a>) – Holds injected rf power <span class="math notranslate nohighlight">\(P_f\)</span>.</p></li>
+<li><p><strong>power_reflected</strong> (<a class="reference internal" href="src.instruments.rf_power.html#src.instruments.rf_power.RfPower" title="src.instruments.rf_power.RfPower"><em>RfPower</em></a>) – Holds reflected power <span class="math notranslate nohighlight">\(P_r\)</span>.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the virtual instrument.</p></li>
+<li><p><strong>tol</strong> (<em>float</em><em>, </em><em>optional</em>) – To remove <span class="math notranslate nohighlight">\(\Gamma\)</span> values that are too close to unity.</p></li>
+<li><p><strong>kwargs</strong> – Other keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A <a class="reference internal" href="#src.instruments.swr.SWR" title="src.instruments.swr.SWR"><code class="xref py py-class docutils literal notranslate"><span class="pre">SWR</span></code></a> <a class="reference internal" href="src.instruments.virtual_instrument.html#src.instruments.virtual_instrument.VirtualInstrument" title="src.instruments.virtual_instrument.VirtualInstrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">VirtualInstrument</span></code></a>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#src.instruments.swr.SWR" title="src.instruments.swr.SWR">SWR</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="src.instruments.rf_power.html" class="btn btn-neutral float-left" title="src.instruments.rf_power module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="src.instruments.virtual_instrument.html" class="btn btn-neutral float-right" title="src.instruments.virtual_instrument module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, A. Plaçais.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
