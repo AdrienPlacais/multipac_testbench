@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Define an object to keep measurements at a pick-up."""
-
 from typing import Any
+
+import numpy as np
 import pandas as pd
 
+from multipac_testbench.src.instruments.e_field_probe import ElectricFieldProbe
 from multipac_testbench.src.instruments.factory import InstrumentFactory
+from multipac_testbench.src.instruments.rf_power import RfPower
 from multipac_testbench.src.measurement_point.i_measurement_point import \
     IMeasurementPoint
 
@@ -67,3 +70,34 @@ class PickUp(IMeasurementPoint):
         with instruments: {[str(x) for x in self.instruments]}
         """
         return " ".join(out.split())
+
+    def create_rf_power_from_e_field_probe(self,
+                                           swr: float | np.ndarray,
+                                           impedance: float = 50.,
+                                           name: str | None = None,
+                                           **kwargs
+                                           ) -> None:
+        r"""Compute the power measured at this pick up from the e field probe.
+
+        Parameters
+        ----------
+        swr : float | np.ndarray
+            Voltage Signal Wave Ratio.
+        impedance : float
+            Impedance of the coaxial waveguide in :math:`\Ohm`.
+        name : str | None
+            Name given to the rf power probe.
+        kwargs :
+            Other keyword arguments.
+
+        """
+        e_field_probes = self.get_affected_instruments(ElectricFieldProbe)
+        for e_field_probe in e_field_probes:
+            rf_power_probe = RfPower.from_electric_field_probe(
+                e_field_probe,
+                swr,
+                impedance=impedance,
+                name=name,
+                **kwargs,
+                )
+            self.instruments.append(rf_power_probe)

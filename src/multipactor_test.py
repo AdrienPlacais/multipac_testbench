@@ -433,3 +433,25 @@ class MultipactorTest:
             axe.set_xlabel('Position [m]')
 
         return fig, axes_instruments
+
+    def create_rf_probes_from_e_field_probes(self,
+                                             swr: float | np.ndarray,
+                                             impedance: float = 50.,
+                                             **kwargs
+                                             ) -> None:
+        r"""Compute power from every e field probe of every pick-up.
+
+        Parameters
+        ----------
+        swr : float | np.ndarray
+            Voltage Signal Wave Ratio.
+        impedance : float
+            Impedance of the coaxial waveguide in :math:`\Ohm`.
+        kwargs :
+            Other keyword arguments.
+
+        """
+        for pick_up in self.pick_ups:
+            pick_up.create_rf_power_from_e_field_probe(swr,
+                                                       impedance=impedance,
+                                                       **kwargs)

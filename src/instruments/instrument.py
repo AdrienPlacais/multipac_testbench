@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 """Define object to keep a single instrument measurements."""
 from abc import ABC
-from typing import Callable
-from matplotlib.artist import Artist
+from collections.abc import Iterable
+from typing import Callable, Self
+
 
 import numpy as np
 import pandas as pd
@@ -63,6 +64,22 @@ class Instrument(ABC):
         """Label used for plots."""
         return "default ylabel"
 
+    @classmethod
+    def from_array(cls,
+                   name: str,
+                   ydata: np.ndarray,
+                   xdata: Iterable | None = None,
+                   **kwargs) -> Self:
+        """Instantiate from numpy array."""
+        if xdata is None:
+            n_points = len(ydata)
+            xdata = range(1, n_points + 1)
+
+        raw_data = pd.Series(data=ydata,
+                             index=xdata,
+                             name=name)
+
+        return cls(name, raw_data, **kwargs)
     @property
     def class_name(self) -> str:
         """Shortcut to the name of the instrument class."""
