@@ -172,8 +172,9 @@ class MultipactorTest:
             gif_path: Path | None = None,
             fps: int = 50,
             keep_one_frame_over: int = 1,
+            interval: int | None = None,
             **fig_kw,
-            ) -> Figure:
+            ) -> animation.FuncAnimation:
         """Represent measured signals with probe position."""
         fig, axes_instruments = self._prepare_animation_fig(
             instruments_to_plot,
@@ -211,13 +212,19 @@ class MultipactorTest:
             assert artists is not None
             return artists
 
-        ani = animation.FuncAnimation(fig, update, frames=frames, repeat=True)
-        plt.show()
+        if interval is None:
+            interval = int(200 / keep_one_frame_over)
+
+        ani = animation.FuncAnimation(fig,
+                                      update,
+                                      frames=frames,
+                                      interval=interval,
+                                      repeat=True)
 
         if gif_path is not None:
             writergif = animation.PillowWriter(fps=fps)
             ani.save(gif_path, writer=writergif)
-        return fig
+        return ani
 
     def _plot_instruments_single_time_step(
             self,
