@@ -24,6 +24,9 @@ from matplotlib.container import StemContainer
 from matplotlib.figure import Figure
 
 from multipac_testbench.src.instruments.instrument import Instrument
+from multipac_testbench.src.instruments.e_field_probe import ElectricFieldProbe
+from multipac_testbench.src.instruments.reconstructed_voltage import \
+    ReconstructedVoltage
 from multipac_testbench.src.measurement_point.factory import \
     IMeasurementPointFactory
 from multipac_testbench.src.measurement_point.i_measurement_point import \
@@ -430,6 +433,7 @@ class MultipactorTest:
 
         measurement_points = self._filter_measurement_points(
             to_exclude=measurement_points_to_exclude)
+
         axes_instruments = {
             axe: self._filter_instruments(
                 instrument_class,
@@ -449,4 +453,37 @@ class MultipactorTest:
         if axe is not None:
             axe.set_xlabel('Position [m]')
 
+        print("Warning!! Dirty add an reconstructed voltage to animation")
+        for instruments in axes_instruments.values():
+            reconstructed_voltage = self.global_diagnostics.instruments[-1]
+            reconstructed_voltage.plot_vs_position = partial(
+                reconstructed_voltage.plot_vs_position,
+                label=reconstructed_voltage.fit_info)
+            assert isinstance(reconstructed_voltage, ReconstructedVoltage)
+            if isinstance(instruments[0], ElectricFieldProbe):
+                instruments.append(reconstructed_voltage)
+
         return fig, axes_instruments
+
+    def reconstruct_voltage_along_line(
+            self,
+            name: str,
+            probes_to_ignore: Sequence[str | ElectricFieldProbe],
+            ) -> ReconstructedVoltage:
+        """Reconstruct the voltage profile from the e field probes."""
+        e_field_probes = self._filter_instruments(ElectricFieldProbe,
+                                                  self.pick_ups,
+                                                  probes_to_ignore)
+        reconstructed_voltage = ReconstructedVoltage(
+            name=name,
+            raw_data=None,
+            e_field_probes=e_field_probes,
+            forward_power=self.global_diagnostics.instruments[0],
+        )
+        reconstructed_voltage.fit_voltage()
+
+        if self.global_diagnostics is None:
+            self.global_diagnostics = []
+        self.global_diagnostics.instruments.append(reconstructed_voltage)
+
+        return reconstructed_voltage
