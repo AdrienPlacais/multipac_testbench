@@ -234,6 +234,7 @@ class Instrument(ABC):
                           color: tuple[float, float, float] | None = None,
                           artist: StemContainer | None = None,
                           axe: Axes | None = None,
+                          **kwargs
                           ) -> StemContainer:
         """
         Plot what instrument measured at its position, at a given time step.
@@ -277,7 +278,7 @@ class Instrument(ABC):
             return artist
 
         assert axe is not None
-        artist = axe.stem(position, ydata)
+        artist = axe.stem(position, ydata, **kwargs)
         return artist
 
     def _plot_vs_position(self,
@@ -286,6 +287,7 @@ class Instrument(ABC):
                           color: tuple[float, float, float] | None = None,
                           axe: Axes | None = None,
                           artist: Line2D | None = None,
+                          **kwargs,
                           ) -> Line2D:
         """
         Plot what instrument measured at all positions, at a given time step.
@@ -327,5 +329,6 @@ class Instrument(ABC):
             return artist
 
         assert axe is not None
-        artist, = axe.plot(self._position, ydata, color=color)
+        artist, = axe.plot(self._position, ydata, color=color, **kwargs)
+        axe.legend()
         return artist
