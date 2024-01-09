@@ -108,7 +108,7 @@ class Instrument(ABC):
 
     @classmethod
     def from_pd_dataframe(cls,
-                          name: Sequence[str],
+                          name: str,
                           raw_data: pd.DataFrame,
                           **kwargs,
                           ) -> Self:
@@ -116,7 +116,7 @@ class Instrument(ABC):
 
         Parameters
         ----------
-        name : Sequence[str]
+        name : str
             Name of the instrument.
         raw_data : pd.DataFrame
             Object holding several columns of the ``.csv``.
@@ -130,7 +130,6 @@ class Instrument(ABC):
             array.
 
         """
-        name = ' & '.join(name)
         is_2d = True
         return cls(name, raw_data, is_2d=is_2d, **kwargs)
 
