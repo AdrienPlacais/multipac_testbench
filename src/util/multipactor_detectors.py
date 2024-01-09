@@ -9,7 +9,7 @@ def quantity_is_above_threshold(quantity: np.ndarray,
                                 threshold: float,
                                 consecutive_criterion: int = 0,
                                 minimum_number_of_points: int = 1,
-                                **kwargs: Any) -> np.ndarray[np.bool_]:
+                                **kwargs: Any) -> np.ndarray:
     """Detect where ``quantity`` is above a given threshold.
 
     Parameters
@@ -29,7 +29,7 @@ def quantity_is_above_threshold(quantity: np.ndarray,
 
     Returns
     -------
-    np.ndarray[np.bool_]
+    np.ndarray
         True where multipactor was detected.
 
     """
@@ -44,8 +44,8 @@ def quantity_is_above_threshold(quantity: np.ndarray,
     return multipactor
 
 
-def _merge_consecutive(multipactor: np.ndarray[np.bool_],
-                       consecutive_criterion: int) -> np.ndarray[np.bool_]:
+def _merge_consecutive(multipactor: np.ndarray,
+                       consecutive_criterion: int) -> np.ndarray:
     """
     Merge multipac zones separated by ``consecutive_criterion`` points.
 
@@ -82,8 +82,8 @@ def _merge_consecutive(multipactor: np.ndarray[np.bool_],
     return multipactor
 
 
-def _remove_isolated(multipactor: np.ndarray[np.bool_],
-                     minimum_number_of_points: int) -> np.ndarray[np.bool_]:
+def _remove_isolated(multipactor: np.ndarray,
+                     minimum_number_of_points: int) -> np.ndarray:
     """
     Remove mp zones observed on less than ``minimum_number_of_points`` points.
 
@@ -114,7 +114,7 @@ def _remove_isolated(multipactor: np.ndarray[np.bool_],
     return multipactor
 
 
-def start_and_end_of_contiguous_true_zones(array: np.ndarray[np.bool_]
+def start_and_end_of_contiguous_true_zones(array: np.ndarray
                                            ) -> Sequence[tuple[int, int]]:
     """Get indexes of the contiguous zones where array is True."""
     diff = np.where(np.diff(array))[0]

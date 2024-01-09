@@ -1,3 +1,11 @@
+# ==================================
+[global]
+[global.instruments_kw]
+[global.instruments_kw.NI9205_both_powers]
+class_name = "Powers"
+column_header = ["NI9205_Power1", "NI9205_Power2"]
+
+# ==================================
 [E1]
 position = 0e0
 
@@ -7,6 +15,14 @@ class_name = "CurrentProbe"
 
 [E1.instruments_kw.NI9205_E1]
 class_name = "ElectricFieldProbe"
+
+# ==================================
+[V1]
+position = 0.130
+
+[V1.instruments_kw]
+[V1.instruments_kw.NI9205_Penning1]
+class_name = "Penning"
 
 # ==================================
 [E2]
@@ -31,6 +47,14 @@ class_name = "CurrentProbe"
 class_name = "ElectricFieldProbe"
 
 # ==================================
+[V2]
+position = 0.611
+
+[V2.instruments_kw]
+[V2.instruments_kw.NI9205_Penning]
+class_name = "Penning"
+
+# ==================================
 [E4]
 position = 0.611
 
@@ -40,6 +64,21 @@ class_name = "CurrentProbe"
 
 [E4.instruments_kw.NI9205_E4]
 class_name = "ElectricFieldProbe"
+
+# [E8]
+# position = 0.611
+# 
+# [E8.instruments_kw]
+# [E8.instruments_kw.NI9205_MP8l]
+# class_name = "CurrentProbe"
+
+# ==================================
+# [OF]
+# position = 0.656
+# 
+# [OF.instruments_kw]
+# [OF.instruments_kw.NI9205_Arc1]
+# class_name = "OpticalFibre"
 
 # ==================================
 [E5]
@@ -62,6 +101,14 @@ class_name = "CurrentProbe"
 
 [E6.instruments_kw.NI9205_E6]
 class_name = "ElectricFieldProbe"
+
+# ==================================
+[V3]
+position = 1.092
+
+[V3.instruments_kw]
+[V3.instruments_kw.NI9205_Penning2]
+class_name = "Penning"
 
 # ==================================
 [E7]

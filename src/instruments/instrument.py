@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Define object to keep a single instrument measurements."""
 from abc import ABC
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 from typing import Callable, Self
 
 
@@ -18,8 +18,9 @@ class Instrument(ABC):
 
     def __init__(self,
                  name: str,
-                 raw_data: pd.Series,
+                 raw_data: pd.Series | pd.DataFrame,
                  position: np.ndarray | float | None = None,
+                 is_2d: bool = False,
                  **kwargs,
                  ) -> None:
         """Instantiate the class.
@@ -27,13 +28,16 @@ class Instrument(ABC):
         Parameters
         ----------
         name : str
-            Name of the instrument. It must correspond to the name of a column
-            in the ``.csv`` file.
+            Name of the instrument.
         raw_data : pd.Series
             ``x`` and ``y`` data as saved in the ``.csv`` produced by LabVIEW.
         position : np.ndarray | float | None, optional
             The position of the instrument. The default is None, in which case
             :attr:`._position` is not set (case of :class:`.GlobalDiagnostic`).
+        is_2d : bool, optional
+            To make the difference between instruments holding a single array
+            of data (e.g. current vs time) and those holding several columns
+            (eg forward and reflected power).
         kwargs :
             Additional keyword arguments coming from the ``.toml``
             configuration file.
@@ -46,13 +50,15 @@ class Instrument(ABC):
         if position is not None:
             self._position = position
 
+        self.is_2d = is_2d
+        self.plot_vs_time, self.plot_vs_position = self._get_plot_methods(
+            is_2d)
+
         self._ydata: np.ndarray | None = None
         self._post_treaters: list[Callable[[np.ndarray], np.ndarray]] = []
 
         self._multipac_detector: Callable[[np.ndarray], np.ndarray]
         self._multipactor: np.ndarray | None = None
-
-        self.plot_vs_position = self._stem_vs_position
 
     def __str__(self) -> str:
         """Give concise information on instrument."""
@@ -64,13 +70,38 @@ class Instrument(ABC):
         """Label used for plots."""
         return "default ylabel"
 
+    @property
+    def label(self) -> str | None:
+        """Label used for legends in plots vs position."""
+        return
+
     @classmethod
     def from_array(cls,
                    name: str,
                    ydata: np.ndarray,
                    xdata: Iterable | None = None,
                    **kwargs) -> Self:
-        """Instantiate from numpy array."""
+        """Instantiate :class:`Instrument` from a numpy array.
+
+        Parameters
+        ----------
+        name : str
+            Name of the instrument.
+        ydata : np.ndarray
+            The data measured by the instrument.
+        xdata : Iterable | None, optional
+            The data representing the measuring points. The default is None, in
+            which case it is a list of integers starting from 1, which is the
+            same as all data from the ``.csv``.
+        kwargs :
+            Other keyword arguments passed to the :class:`.Instrument`.
+
+        Returns
+        -------
+        instrument : Instrument
+            A regular instrument.
+
+        """
         if xdata is None:
             n_points = len(ydata)
             xdata = range(1, n_points + 1)
@@ -78,8 +109,35 @@ class Instrument(ABC):
         raw_data = pd.Series(data=ydata,
                              index=xdata,
                              name=name)
-
         return cls(name, raw_data, **kwargs)
+
+    @classmethod
+    def from_pd_dataframe(cls,
+                          name: str,
+                          raw_data: pd.DataFrame,
+                          **kwargs,
+                          ) -> Self:
+        """Instantiate the object from several ``.csv`` file columns.
+
+        Parameters
+        ----------
+        name : str
+            Name of the instrument.
+        raw_data : pd.DataFrame
+            Object holding several columns of the ``.csv``.
+        kwargs :
+            Other keyword arguments passed to the :class:`.Instrument`.
+
+        Returns
+        -------
+        instrument : Instrument
+            An instrument. Note that its ``ydata`` attribute will be a 2D
+            array.
+
+        """
+        is_2d = True
+        return cls(name, raw_data, is_2d=is_2d, **kwargs)
+
     @property
     def class_name(self) -> str:
         """Shortcut to the name of the instrument class."""
@@ -107,6 +165,12 @@ class Instrument(ABC):
                   "previously calculated multipactor zones obsolete.")
             self._multipactor = None
         self._ydata = value
+
+    def _get_plot_methods(self, is_2d: bool) -> tuple[Callable, Callable]:
+        """Give the proper plotting functions according to ``is_2d``."""
+        if is_2d:
+            return self._plot_vs_time_for_2d, self._plot_vs_position_for_2d
+        return self._plot_vs_time_for_1d, self._plot_vs_position_for_1d
 
     @property
     def post_treaters(self) -> list[Callable[[np.ndarray], np.ndarray]]:
@@ -207,12 +271,12 @@ class Instrument(ABC):
                 f"{post_treater} modified the shape of the array."
         return data
 
-    def plot_vs_time(self,
-                     axe: Axes,
-                     raw: bool = False,
-                     color: tuple[float, float, float] | None = None,
-                     **subplot_kw
-                     ) -> Line2D:
+    def _plot_vs_time_for_1d(self,
+                             axe: Axes,
+                             raw: bool = False,
+                             color: tuple[float, float, float] | None = None,
+                             **subplot_kw
+                             ) -> Line2D:
         """Plot what the instrument measured."""
         ydata = self.ydata
         label = f"{self.name} (post-treated)"
@@ -228,13 +292,40 @@ class Instrument(ABC):
                           **subplot_kw)
         return line1
 
-    def _stem_vs_position(self,
-                          sample_index: int,
-                          raw: bool = False,
-                          color: tuple[float, float, float] | None = None,
-                          artist: StemContainer | None = None,
-                          axe: Axes | None = None,
-                          ) -> StemContainer:
+    def _plot_vs_time_for_2d(self,
+                             axe: Axes,
+                             raw: bool = False,
+                             color: tuple[float, float, float] | None = None,
+                             **subplot_kw
+                             ) -> Line2D:
+        """Plot what the instrument measured."""
+        ydata = self.ydata
+        label = f"{self.name} (post-treated)"
+
+        if raw or len(self.post_treaters) == 0:
+            ydata = self.raw_data.to_numpy()
+            label = f"{self.name} (raw)"
+
+        n_cols = ydata.shape[1]
+        line1 = None
+        for i in range(n_cols):
+            line1, = axe.plot(self.raw_data.index,
+                              ydata[:, i],
+                              color=color,
+                              label=label + f" (column {i})",
+                              **subplot_kw)
+        assert line1 is not None
+        return line1
+
+    def _plot_vs_position_for_1d(self,
+                                 sample_index: int,
+                                 raw: bool = False,
+                                 color: tuple[float, float,
+                                              float] | None = None,
+                                 artist: StemContainer | None = None,
+                                 axe: Axes | None = None,
+                                 **kwargs
+                                 ) -> StemContainer:
         """
         Plot what instrument measured at its position, at a given time step.
 
@@ -277,16 +368,21 @@ class Instrument(ABC):
             return artist
 
         assert axe is not None
-        artist = axe.stem(position, ydata)
+        artist = axe.stem(position,
+                          ydata,
+                          label=self.label,
+                          **kwargs)
         return artist
 
-    def _plot_vs_position(self,
-                          sample_index: int,
-                          raw: bool = False,
-                          color: tuple[float, float, float] | None = None,
-                          axe: Axes | None = None,
-                          artist: Line2D | None = None,
-                          ) -> Line2D:
+    def _plot_vs_position_for_2d(self,
+                                 sample_index: int,
+                                 raw: bool = False,
+                                 color: tuple[float, float,
+                                              float] | None = None,
+                                 axe: Axes | None = None,
+                                 artist: Line2D | None = None,
+                                 **kwargs,
+                                 ) -> Line2D:
         """
         Plot what instrument measured at all positions, at a given time step.
 
@@ -323,8 +419,14 @@ class Instrument(ABC):
         assert ydata.shape == self._position.shape
 
         if artist is not None:
-            raise NotImplementedError
+            artist.set_data(self._position, ydata)
+            return artist
 
         assert axe is not None
-        artist, = axe.plot(self._position, ydata, color=color)
+        artist, = axe.plot(self._position,
+                           ydata,
+                           color=color,
+                           label=self.label,
+                           **kwargs)
+        axe.legend()
         return artist

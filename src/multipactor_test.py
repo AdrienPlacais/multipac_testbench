@@ -20,10 +20,14 @@ import pandas as pd
 from matplotlib import animation
 from matplotlib.artist import Artist
 from matplotlib.axes._axes import Axes
-from matplotlib.container import StemContainer
 from matplotlib.figure import Figure
 
+from multipac_testbench.src.instruments.electric_field.field_probe import \
+    FieldProbe
+from multipac_testbench.src.instruments.electric_field.reconstructed import \
+    Reconstructed
 from multipac_testbench.src.instruments.instrument import Instrument
+from multipac_testbench.src.instruments.powers import Powers
 from multipac_testbench.src.measurement_point.factory import \
     IMeasurementPointFactory
 from multipac_testbench.src.measurement_point.i_measurement_point import \
@@ -56,8 +60,8 @@ class MultipactorTest:
 
         if swr is None:
             print("MultipactorTest.__init__ warning! Providing SWR will soon "
-                  "be mandatory! Setting default to 1...")
-            swr = 1.
+                  "be mandatory! Setting default to np.NaN...")
+            swr = np.NaN
         self.swr = swr
 
     def add_post_treater(self,
@@ -310,6 +314,9 @@ class MultipactorTest:
         assert isinstance(axe, Axes)
         if axe is not None:
             axe.set_xlabel("Measurement index")
+
+        fig.suptitle(f"f = {self.freq_mhz}MHz; SWR = {self.swr}")
+
         return fig, instrument_class_axes
 
     def _filter_measurement_points(
@@ -427,6 +434,7 @@ class MultipactorTest:
 
         measurement_points = self._filter_measurement_points(
             to_exclude=measurement_points_to_exclude)
+
         axes_instruments = {
             axe: self._filter_instruments(
                 instrument_class,
@@ -446,4 +454,43 @@ class MultipactorTest:
         if axe is not None:
             axe.set_xlabel('Position [m]')
 
+        # print("Warning!! Dirty add an reconstructed voltage to animation")
+        # for instruments in axes_instruments.values():
+        #     reconstructed = self.global_diagnostics.instruments[-1]
+        #     reconstructed.plot_vs_position = partial(
+        #         reconstructed.plot_vs_position,
+        #         label=reconstructed.fit_info)
+        #     assert isinstance(reconstructed, Reconstructed)
+        #     if isinstance(instruments[0], FieldProbe):
+        #         instruments.append(reconstructed)
+
         return fig, axes_instruments
+
+    def reconstruct_voltage_along_line(
+            self,
+            name: str,
+            probes_to_ignore: Sequence[str | FieldProbe],
+            ) -> Reconstructed:
+        """Reconstruct the voltage profile from the e field probes."""
+        e_field_probes = self._filter_instruments(FieldProbe,
+                                                  self.pick_ups,
+                                                  probes_to_ignore)
+        assert self.global_diagnostics is not None
+        powers = self._filter_instruments(Powers,
+                                          [self.global_diagnostics],
+                                          probes_to_ignore)
+        assert len(powers) == 1
+        powers = powers[0]
+
+        reconstructed = Reconstructed(
+            name=name,
+            raw_data=None,
+            e_field_probes=e_field_probes,
+            powers=powers,
+            freq_mhz=self.freq_mhz,
+        )
+        reconstructed.fit_voltage()
+
+        self.global_diagnostics.add_instrument(reconstructed)
+
+        return reconstructed
