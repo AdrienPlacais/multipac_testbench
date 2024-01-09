@@ -51,14 +51,14 @@ class Instrument(ABC):
             self._position = position
 
         self.is_2d = is_2d
+        self.plot_vs_time, self.plot_vs_position = self._get_plot_methods(
+            is_2d)
 
         self._ydata: np.ndarray | None = None
         self._post_treaters: list[Callable[[np.ndarray], np.ndarray]] = []
 
         self._multipac_detector: Callable[[np.ndarray], np.ndarray]
         self._multipactor: np.ndarray | None = None
-
-        self.plot_vs_position = self._stem_vs_position
 
     def __str__(self) -> str:
         """Give concise information on instrument."""
@@ -161,6 +161,12 @@ class Instrument(ABC):
             self._multipactor = None
         self._ydata = value
 
+    def _get_plot_methods(self, is_2d: bool) -> tuple[Callable, Callable]:
+        """Give the proper plotting functions according to ``is_2d``."""
+        if is_2d:
+            return self._plot_vs_time_for_2d, self._plot_vs_position_for_2d
+        return self._plot_vs_time_for_1d, self._plot_vs_position_for_1d
+
     @property
     def post_treaters(self) -> list[Callable[[np.ndarray], np.ndarray]]:
         """Get the list of the post-treating functions."""
@@ -260,12 +266,12 @@ class Instrument(ABC):
                 f"{post_treater} modified the shape of the array."
         return data
 
-    def plot_vs_time(self,
-                     axe: Axes,
-                     raw: bool = False,
-                     color: tuple[float, float, float] | None = None,
-                     **subplot_kw
-                     ) -> Line2D:
+    def _plot_vs_time_for_1d(self,
+                             axe: Axes,
+                             raw: bool = False,
+                             color: tuple[float, float, float] | None = None,
+                             **subplot_kw
+                             ) -> Line2D:
         """Plot what the instrument measured."""
         ydata = self.ydata
         label = f"{self.name} (post-treated)"
@@ -281,14 +287,38 @@ class Instrument(ABC):
                           **subplot_kw)
         return line1
 
-    def _stem_vs_position(self,
-                          sample_index: int,
-                          raw: bool = False,
-                          color: tuple[float, float, float] | None = None,
-                          artist: StemContainer | None = None,
-                          axe: Axes | None = None,
-                          **kwargs
-                          ) -> StemContainer:
+    def _plot_vs_time_for_2d(self,
+                             axe: Axes,
+                             raw: bool = False,
+                             color: tuple[float, float, float] | None = None,
+                             **subplot_kw
+                             ) -> Line2D:
+        """Plot what the instrument measured."""
+        ydata = self.ydata
+        label = f"{self.name} (post-treated)"
+
+        if raw or len(self.post_treaters) == 0:
+            ydata = self.raw_data.to_numpy()
+            label = f"{self.name} (raw)"
+
+        n_cols = ydata.shape[1]
+        for i in range(n_cols):
+            line1, = axe.plot(self.raw_data.index,
+                              ydata[:, i],
+                              color=color,
+                              label=label + f" (column {i})",
+                              **subplot_kw)
+        return line1
+
+    def _plot_vs_position_for_1d(self,
+                                 sample_index: int,
+                                 raw: bool = False,
+                                 color: tuple[float, float,
+                                              float] | None = None,
+                                 artist: StemContainer | None = None,
+                                 axe: Axes | None = None,
+                                 **kwargs
+                                 ) -> StemContainer:
         """
         Plot what instrument measured at its position, at a given time step.
 
@@ -334,14 +364,15 @@ class Instrument(ABC):
         artist = axe.stem(position, ydata, **kwargs)
         return artist
 
-    def _plot_vs_position(self,
-                          sample_index: int,
-                          raw: bool = False,
-                          color: tuple[float, float, float] | None = None,
-                          axe: Axes | None = None,
-                          artist: Line2D | None = None,
-                          **kwargs,
-                          ) -> Line2D:
+    def _plot_vs_position_for_2d(self,
+                                 sample_index: int,
+                                 raw: bool = False,
+                                 color: tuple[float, float,
+                                              float] | None = None,
+                                 axe: Axes | None = None,
+                                 artist: Line2D | None = None,
+                                 **kwargs,
+                                 ) -> Line2D:
         """
         Plot what instrument measured at all positions, at a given time step.
 
