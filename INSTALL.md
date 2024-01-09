@@ -10,6 +10,7 @@ Some non-standard libraries are required, namely:
  - `numpy`
  - `pandas`
  - `scipy`
+
 If you version of Python is 3.9 or 3.10, the `toml` parser `tomllib` will not be available.
 You can use any `toml` parser, such as `tomli`.
 In this case, replace every occurrence of `tomllib` by `tomli`.
