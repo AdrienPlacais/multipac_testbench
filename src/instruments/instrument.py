@@ -302,12 +302,14 @@ class Instrument(ABC):
             label = f"{self.name} (raw)"
 
         n_cols = ydata.shape[1]
+        line1 = None
         for i in range(n_cols):
             line1, = axe.plot(self.raw_data.index,
                               ydata[:, i],
                               color=color,
                               label=label + f" (column {i})",
                               **subplot_kw)
+        assert line1 is not None
         return line1
 
     def _plot_vs_position_for_1d(self,
