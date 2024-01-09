@@ -102,9 +102,9 @@ class ReconstructedVoltage(VirtualInstrument):
             \cos{(2\beta z + \psi_0)}}
 
         """
-        x_0 = np.array([0.003, 2., 2., np.pi])
+        x_0 = np.array([0.003, 0.5, 2., np.pi])
         bounds = ([0., 0., -np.inf, -2. * np.pi],
-                  [np.inf, np.inf, np.inf, 2. * np.pi])
+                  [np.inf, 1., np.inf, 2. * np.pi])
         xdata = []
         ydata = []
         for e_probe in self._e_field_probes:
