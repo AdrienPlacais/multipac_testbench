@@ -482,6 +482,7 @@ class MultipactorTest:
             raw_data=None,
             e_field_probes=e_field_probes,
             powers=powers,
+            freq_mhz=self.freq_mhz,
         )
         reconstructed_voltage.fit_voltage()
 

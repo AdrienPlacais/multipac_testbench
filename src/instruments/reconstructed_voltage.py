@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Define voltage along line."""
+from functools import partial
 import math
 from typing import overload
 
 import numpy as np
 import pandas as pd
+from scipy.constants import c
 from scipy import optimize
 
 from multipac_testbench.src.instruments.e_field_probe import ElectricFieldProbe
@@ -22,6 +24,7 @@ class ReconstructedVoltage(VirtualInstrument):
                  raw_data: pd.Series | None,
                  e_field_probes: list[ElectricFieldProbe],
                  powers: Powers,
+                 freq_mhz: float,
                  position: np.ndarray = np.linspace(0., 1.3, 201),
                  **kwargs,
                  ) -> None:
@@ -36,9 +39,9 @@ class ReconstructedVoltage(VirtualInstrument):
         self._powers = powers
         self._sample_indexes = self._e_field_probes[0].raw_data.index
         self._pos_for_fit = [probe._position for probe in self._e_field_probes]
+        self._beta = c / freq_mhz * 1e-6
 
         self._sqrt_power_scaler: float
-        self._beta: float
         self._psi_0: float
         self._ydata: np.ndarray | None = None
 
@@ -60,18 +63,18 @@ class ReconstructedVoltage(VirtualInstrument):
         if self._ydata is not None:
             return self._ydata
 
-        mandatory_args = ('_sqrt_power_scaler', '_beta', '_psi_0')
+        mandatory_args = ('_sqrt_power_scaler', '_psi_0')
         for arg in mandatory_args:
             assert hasattr(self, arg)
 
         ydata = []
-        args = (self._beta, self._psi_0)
         for power, gamma in zip(self._powers.ydata[:, 0], self._powers.gamma):
             v_f = math.sqrt(power) * self._sqrt_power_scaler
             ydata.append(voltage_vs_position(self._position,
                                              v_f,
                                              gamma,
-                                             *args))
+                                             self._beta,
+                                             self._psi_0))
         self._ydata = np.array(ydata)
         return self._ydata
 
@@ -79,7 +82,6 @@ class ReconstructedVoltage(VirtualInstrument):
     def fit_info(self) -> str:
         """Print compact info on fit."""
         out = [f"$k = ${self._sqrt_power_scaler:2.3f}",
-               rf"$\beta = ${self._beta:2.3f}",
                rf"$\psi_0 = ${self._psi_0:2.3f}",
                ]
         return '\n'.join(out)
@@ -88,18 +90,18 @@ class ReconstructedVoltage(VirtualInstrument):
         r"""Find out the proper voltage parameters.
 
         Idea is the following: for every sample index we know the forward
-        (injected) power :math:`P_f` and :math:`V_\mathrm{coax}` at several
-        pick-ups. We try to find :math:`k`, :math:`\Gamma`, :math:`\beta` and
-        :math:`\psi_0` to verify:
+        (injected) power :math:`P_f`, :math:`\Gamma`, and
+        :math:`V_\mathrm{coax}` at several pick-ups. We try to find :math:`k`
+        and :math:`\psi_0` to verify:
 
         .. math::
             |V_\mathrm{coax}(z)| = k\sqrt{P_f} \sqrt{1 + |\Gamma|^2 + 2|\Gamma|
             \cos{(2\beta z + \psi_0)}}
 
         """
-        x_0 = np.array([0.003, 2., np.pi])
-        bounds = ([0., -np.inf, -2. * np.pi],
-                  [np.inf, np.inf, 2. * np.pi])
+        x_0 = np.array([0.003, np.pi])
+        bounds = ([0., -2. * np.pi],
+                  [np.inf, 2. * np.pi])
         xdata = []
         ydata = []
         for e_probe in self._e_field_probes:
@@ -109,15 +111,15 @@ class ReconstructedVoltage(VirtualInstrument):
                 xdata.append([p_f, gamma, e_probe._position])
                 ydata.append(e_field)
 
-        result = optimize.curve_fit(_model,
+        to_fit = partial(_model, beta=self._beta)
+        result = optimize.curve_fit(to_fit,
                                     xdata=xdata,  # [power, pos] combinations
                                     ydata=ydata,  # resulting voltages
                                     p0=x_0,
                                     bounds=bounds,
                                     )
-        sqrt_power_scaler, beta, psi_0 = result[0]
+        sqrt_power_scaler, psi_0 = result[0]
         self._sqrt_power_scaler = sqrt_power_scaler
-        self._beta = beta
         self._psi_0 = psi_0
 
     def _compute_voltages(self,
@@ -146,7 +148,9 @@ class ReconstructedVoltage(VirtualInstrument):
 
 
 def _model(var: np.ndarray,
-           *param: np.ndarray,
+           sqrt_power_scaler: float,
+           psi_0: float,
+           beta: float
            ) -> float:
     r"""Give voltage for given set of parameters, at proper power and position.
 
@@ -162,7 +166,6 @@ def _model(var: np.ndarray,
 
     """
     power, gamma, pos = var[:, 0], var[:, 1], var[:, 2]
-    sqrt_power_scaler, beta, psi_0 = param
     v_f = sqrt_power_scaler * np.sqrt(power)
     return voltage_vs_position(pos, v_f, gamma, beta, psi_0)
 
