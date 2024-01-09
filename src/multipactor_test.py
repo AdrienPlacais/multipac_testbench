@@ -25,6 +25,7 @@ from matplotlib.figure import Figure
 
 from multipac_testbench.src.instruments.instrument import Instrument
 from multipac_testbench.src.instruments.e_field_probe import ElectricFieldProbe
+from multipac_testbench.src.instruments.powers import Powers
 from multipac_testbench.src.instruments.reconstructed_voltage import \
     ReconstructedVoltage
 from multipac_testbench.src.measurement_point.factory import \
@@ -474,11 +475,13 @@ class MultipactorTest:
         e_field_probes = self._filter_instruments(ElectricFieldProbe,
                                                   self.pick_ups,
                                                   probes_to_ignore)
+        powers = self.global_diagnostics.instruments[0]
+        assert isinstance(powers, Powers)
         reconstructed_voltage = ReconstructedVoltage(
             name=name,
             raw_data=None,
             e_field_probes=e_field_probes,
-            forward_power=self.global_diagnostics.instruments[0],
+            powers=powers,
         )
         reconstructed_voltage.fit_voltage()
 
