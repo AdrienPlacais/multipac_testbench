@@ -39,15 +39,14 @@ class Powers(Instrument):
 
         """
         if self._gamma is None:
-            self._compute_gamma()
-        assert self._gamma is not None
+            self._gamma = self._compute_gamma()
         return self._gamma
 
     def _compute_gamma(self,
                        warn_reflected_higher_than_forward: bool = True,
                        warn_gamma_too_close_to_unity: bool = True,
                        tol: float = 5e-2,
-                       ) -> None:
+                       ) -> np.ndarray:
         r"""Compute the reflection coefficient :math:`\Gamma`."""
         assert self.is_2d, "Forward and Reflected power must be provided to "\
             "compute reflection coefficient."
@@ -72,6 +71,7 @@ class Powers(Instrument):
                       "calculation, where reflected power was too close to "
                       f"forward power. Tolerance over Gamma was: {tol = }. See"
                       " instruments.powers for more info.")
+        return gamma
 
     @property
     def swr(self) -> np.ndarray:
