@@ -7,13 +7,20 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 import os
 import sys
+import re
+
 sys.path.insert(0, os.path.abspath(
     "/home/placais/Documents/Simulation/python/multipac_testbench/"))
 
 project = 'MULTIPAC test bench'
 copyright = '2023, A. Plaçais'
 author = 'A. Plaçais'
-release = '1.0.0'
+
+# See https://protips.readthedocs.io/git-tag-version.html
+# The full version, including alpha/beta/rc tags.
+release = re.sub('^v', '', os.popen('git describe').read().strip())
+# The short X.Y version.
+version = release
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
