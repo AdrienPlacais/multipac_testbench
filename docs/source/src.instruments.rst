@@ -6,6 +6,14 @@ src.instruments package
    :undoc-members:
    :show-inheritance:
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   src.instruments.electric_field
+
 Submodules
 ----------
 
@@ -13,12 +21,11 @@ Submodules
    :maxdepth: 4
 
    src.instruments.current_probe
-   src.instruments.e_field_probe
    src.instruments.factory
    src.instruments.instrument
    src.instruments.optical_fibre
    src.instruments.penning
-   src.instruments.reconstructed_voltage
+   src.instruments.powers
    src.instruments.rf_power
    src.instruments.swr
    src.instruments.virtual_instrument
