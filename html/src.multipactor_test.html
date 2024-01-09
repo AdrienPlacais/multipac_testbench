@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>src.multipactor_test module &mdash; MULTIPAC test bench 1.0.0 documentation</title>
+  <title>src.multipactor_test module &mdash; MULTIPAC test bench 1.1.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -35,6 +35,9 @@
           <a href="index.html" class="icon icon-home">
             MULTIPAC test bench
           </a>
+              <div class="version">
+                1.1.0
+              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -167,6 +170,12 @@ that detect the multipactor.</p></li>
 <dt class="sig sig-object py" id="src.multipactor_test.MultipactorTest.animate_instruments_vs_position">
 <span class="sig-name descname"><span class="pre">animate_instruments_vs_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instruments_to_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">abc.ABCMeta</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gif_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_one_frame_over</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">fig_kw</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FuncAnimation</span></span></span><a class="headerlink" href="#src.multipactor_test.MultipactorTest.animate_instruments_vs_position" title="Permalink to this definition"></a></dt>
 <dd><p>Represent measured signals with probe position.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.multipactor_test.MultipactorTest.reconstruct_voltage_along_line">
+<span class="sig-name descname"><span class="pre">reconstruct_voltage_along_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">probes_to_ignore</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">multipac_testbench.src.instruments.electric_field.field_probe.FieldProbe</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Reconstructed</span></span></span><a class="headerlink" href="#src.multipactor_test.MultipactorTest.reconstruct_voltage_along_line" title="Permalink to this definition"></a></dt>
+<dd><p>Reconstruct the voltage profile from the e field probes.</p>
 </dd></dl>
 
 </dd></dl>

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>src.instruments.rf_power module &mdash; MULTIPAC test bench 1.0.0 documentation</title>
+  <title>src.instruments.rf_power module &mdash; MULTIPAC test bench 1.1.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -22,7 +22,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="src.instruments.swr module" href="src.instruments.swr.html" />
-    <link rel="prev" title="src.instruments.penning module" href="src.instruments.penning.html" /> 
+    <link rel="prev" title="src.instruments.powers module" href="src.instruments.powers.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -36,6 +36,9 @@
           <a href="index.html" class="icon icon-home">
             MULTIPAC test bench
           </a>
+              <div class="version">
+                1.1.0
+              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -50,12 +53,13 @@
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="src.html">src package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="src.instruments.html">src.instruments package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="src.instruments.electric_field.html">src.instruments.electric_field package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.current_probe.html">src.instruments.current_probe module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.instruments.e_field_probe.html">src.instruments.e_field_probe module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.factory.html">src.instruments.factory module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.instrument.html">src.instruments.instrument module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.optical_fibre.html">src.instruments.optical_fibre module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.penning.html">src.instruments.penning module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.instruments.powers.html">src.instruments.powers module</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">src.instruments.rf_power module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.swr.html">src.instruments.swr module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.virtual_instrument.html">src.instruments.virtual_instrument module</a></li>
@@ -105,6 +109,9 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RfPower</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.instruments.rf_power.RfPower" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code></p>
 <p>An instrument to measure injected, reflected or probe rf power.</p>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version v1.1.0.</span></p>
+</div>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.instruments.rf_power.RfPower.ylabel">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ylabel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#src.instruments.rf_power.RfPower.ylabel" title="Permalink to this definition"></a></dt>
@@ -119,7 +126,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="src.instruments.penning.html" class="btn btn-neutral float-left" title="src.instruments.penning module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="src.instruments.powers.html" class="btn btn-neutral float-left" title="src.instruments.powers module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="src.instruments.swr.html" class="btn btn-neutral float-right" title="src.instruments.swr module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

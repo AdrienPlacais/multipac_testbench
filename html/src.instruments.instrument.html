@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>src.instruments.instrument module &mdash; MULTIPAC test bench 1.0.0 documentation</title>
+  <title>src.instruments.instrument module &mdash; MULTIPAC test bench 1.1.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -36,6 +36,9 @@
           <a href="index.html" class="icon icon-home">
             MULTIPAC test bench
           </a>
+              <div class="version">
+                1.1.0
+              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -50,12 +53,13 @@
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="src.html">src package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="src.instruments.html">src.instruments package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="src.instruments.electric_field.html">src.instruments.electric_field package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.current_probe.html">src.instruments.current_probe module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.instruments.e_field_probe.html">src.instruments.e_field_probe module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.factory.html">src.instruments.factory module</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">src.instruments.instrument module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.optical_fibre.html">src.instruments.optical_fibre module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.penning.html">src.instruments.penning module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.instruments.powers.html">src.instruments.powers module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.rf_power.html">src.instruments.rf_power module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.swr.html">src.instruments.swr module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.virtual_instrument.html">src.instruments.virtual_instrument module</a></li>
@@ -102,7 +106,7 @@
 <p>Define object to keep a single instrument measurements.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="src.instruments.instrument.Instrument">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Instrument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.instruments.instrument.Instrument" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Instrument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.series.Series</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_2d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.instruments.instrument.Instrument" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>Hold measurements of a single instrument.</p>
 <dl class="py method">
@@ -111,10 +115,56 @@
 <dd><p>Label used for plots.</p>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="src.instruments.instrument.Instrument.label">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">label</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#src.instruments.instrument.Instrument.label" title="Permalink to this definition"></a></dt>
+<dd><p>Label used for legends in plots vs position.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="src.instruments.instrument.Instrument.from_array">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ydata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xdata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Iterable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#src.instruments.instrument.Instrument.from_array" title="Permalink to this definition"></a></dt>
-<dd><p>Instantiate from numpy array.</p>
+<dd><p>Instantiate <a class="reference internal" href="#src.instruments.instrument.Instrument" title="src.instruments.instrument.Instrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code></a> from a numpy array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Name of the instrument.</p></li>
+<li><p><strong>ydata</strong> (<em>np.ndarray</em>) – The data measured by the instrument.</p></li>
+<li><p><strong>xdata</strong> (<em>Iterable</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – The data representing the measuring points. The default is None, in
+which case it is a list of integers starting from 1, which is the
+same as all data from the <code class="docutils literal notranslate"><span class="pre">.csv</span></code>.</p></li>
+<li><p><strong>kwargs</strong> – Other keyword arguments passed to the <a class="reference internal" href="#src.instruments.instrument.Instrument" title="src.instruments.instrument.Instrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>instrument</strong> – A regular instrument.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#src.instruments.instrument.Instrument" title="src.instruments.instrument.Instrument">Instrument</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.instrument.Instrument.from_pd_dataframe">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_pd_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#src.instruments.instrument.Instrument.from_pd_dataframe" title="Permalink to this definition"></a></dt>
+<dd><p>Instantiate the object from several <code class="docutils literal notranslate"><span class="pre">.csv</span></code> file columns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Name of the instrument.</p></li>
+<li><p><strong>raw_data</strong> (<em>pd.DataFrame</em>) – Object holding several columns of the <code class="docutils literal notranslate"><span class="pre">.csv</span></code>.</p></li>
+<li><p><strong>kwargs</strong> – Other keyword arguments passed to the <a class="reference internal" href="#src.instruments.instrument.Instrument" title="src.instruments.instrument.Instrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>instrument</strong> – An instrument. Note that its <code class="docutils literal notranslate"><span class="pre">ydata</span></code> attribute will be a 2D
+array.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#src.instruments.instrument.Instrument" title="src.instruments.instrument.Instrument">Instrument</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
@@ -176,12 +226,6 @@ there is multipactor and <code class="docutils literal notranslate"><span class=
 <dd class="field-even"><p>np.ndarray</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="src.instruments.instrument.Instrument.plot_vs_time">
-<span class="sig-name descname"><span class="pre">plot_vs_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axe</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Axes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">subplot_kw</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Line2D</span></span></span><a class="headerlink" href="#src.instruments.instrument.Instrument.plot_vs_time" title="Permalink to this definition"></a></dt>
-<dd><p>Plot what the instrument measured.</p>
 </dd></dl>
 
 </dd></dl>

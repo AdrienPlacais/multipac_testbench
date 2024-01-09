@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; MULTIPAC test bench 1.0.0 documentation</title>
+  <title>Index &mdash; MULTIPAC test bench 1.1.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -33,6 +33,9 @@
           <a href="index.html" class="icon icon-home">
             MULTIPAC test bench
           </a>
+              <div class="version">
+                1.1.0
+              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -76,10 +79,10 @@
 <div class="genindex-jumpbox">
  <a href="#A"><strong>A</strong></a>
  | <a href="#C"><strong>C</strong></a>
- | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#I"><strong>I</strong></a>
+ | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
@@ -126,21 +129,21 @@
   </ul></td>
 </tr></table>
 
-<h2 id="E">E</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="src.instruments.e_field_probe.html#src.instruments.e_field_probe.ElectricFieldProbe">ElectricFieldProbe (class in src.instruments.e_field_probe)</a>
-</li>
-  </ul></td>
-</tr></table>
-
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="src.instruments.instrument.html#src.instruments.instrument.Instrument.from_array">from_array() (Instrument class method)</a>
+      <li><a href="src.instruments.electric_field.field_probe.html#src.instruments.electric_field.field_probe.FieldProbe">FieldProbe (class in src.instruments.electric_field.field_probe)</a>
+</li>
+      <li><a href="src.instruments.electric_field.reconstructed.html#src.instruments.electric_field.reconstructed.Reconstructed.fit_info">fit_info (Reconstructed property)</a>
+</li>
+      <li><a href="src.instruments.electric_field.reconstructed.html#src.instruments.electric_field.reconstructed.Reconstructed.fit_voltage">fit_voltage() (Reconstructed method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="src.instruments.instrument.html#src.instruments.instrument.Instrument.from_array">from_array() (Instrument class method)</a>
+</li>
+      <li><a href="src.instruments.instrument.html#src.instruments.instrument.Instrument.from_pd_dataframe">from_pd_dataframe() (Instrument class method)</a>
+</li>
       <li><a href="src.instruments.swr.html#src.instruments.swr.SWR.from_rf_power_probes">from_rf_power_probes() (SWR class method)</a>
 </li>
   </ul></td>
@@ -149,6 +152,8 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="src.instruments.powers.html#src.instruments.powers.Powers.gamma">gamma (Powers property)</a>
+</li>
       <li><a href="src.measurement_point.i_measurement_point.html#src.measurement_point.i_measurement_point.IMeasurementPoint.get_affected_instruments">get_affected_instruments() (IMeasurementPoint method)</a>
 </li>
   </ul></td>
@@ -163,16 +168,30 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="src.measurement_point.i_measurement_point.html#src.measurement_point.i_measurement_point.IMeasurementPoint">IMeasurementPoint (class in src.measurement_point.i_measurement_point)</a>
+      <li><a href="src.instruments.electric_field.i_electric_field.html#src.instruments.electric_field.i_electric_field.IElectricField">IElectricField (class in src.instruments.electric_field.i_electric_field)</a>
 </li>
-      <li><a href="src.measurement_point.factory.html#src.measurement_point.factory.IMeasurementPointFactory">IMeasurementPointFactory (class in src.measurement_point.factory)</a>
+      <li><a href="src.measurement_point.i_measurement_point.html#src.measurement_point.i_measurement_point.IMeasurementPoint">IMeasurementPoint (class in src.measurement_point.i_measurement_point)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="src.measurement_point.factory.html#src.measurement_point.factory.IMeasurementPointFactory">IMeasurementPointFactory (class in src.measurement_point.factory)</a>
+</li>
       <li><a href="src.instruments.instrument.html#src.instruments.instrument.Instrument">Instrument (class in src.instruments.instrument)</a>
 </li>
       <li><a href="src.instruments.factory.html#src.instruments.factory.InstrumentFactory">InstrumentFactory (class in src.instruments.factory)</a>
 </li>
+  </ul></td>
+</tr></table>
+
+<h2 id="L">L</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="src.instruments.instrument.html#src.instruments.instrument.Instrument.label">label (Instrument property)</a>
+
+      <ul>
+        <li><a href="src.instruments.electric_field.reconstructed.html#src.instruments.electric_field.reconstructed.Reconstructed.label">(Reconstructed property)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -189,7 +208,13 @@
 </li>
         <li><a href="src.instruments.current_probe.html#module-src.instruments.current_probe">src.instruments.current_probe</a>
 </li>
-        <li><a href="src.instruments.e_field_probe.html#module-src.instruments.e_field_probe">src.instruments.e_field_probe</a>
+        <li><a href="src.instruments.electric_field.html#module-src.instruments.electric_field">src.instruments.electric_field</a>
+</li>
+        <li><a href="src.instruments.electric_field.field_probe.html#module-src.instruments.electric_field.field_probe">src.instruments.electric_field.field_probe</a>
+</li>
+        <li><a href="src.instruments.electric_field.i_electric_field.html#module-src.instruments.electric_field.i_electric_field">src.instruments.electric_field.i_electric_field</a>
+</li>
+        <li><a href="src.instruments.electric_field.reconstructed.html#module-src.instruments.electric_field.reconstructed">src.instruments.electric_field.reconstructed</a>
 </li>
         <li><a href="src.instruments.factory.html#module-src.instruments.factory">src.instruments.factory</a>
 </li>
@@ -198,6 +223,8 @@
         <li><a href="src.instruments.optical_fibre.html#module-src.instruments.optical_fibre">src.instruments.optical_fibre</a>
 </li>
         <li><a href="src.instruments.penning.html#module-src.instruments.penning">src.instruments.penning</a>
+</li>
+        <li><a href="src.instruments.powers.html#module-src.instruments.powers">src.instruments.powers</a>
 </li>
         <li><a href="src.instruments.rf_power.html#module-src.instruments.rf_power">src.instruments.rf_power</a>
 </li>
@@ -256,9 +283,9 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.plot_instruments_vs_time">plot_instruments_vs_time() (MultipactorTest method)</a>
 </li>
-      <li><a href="src.instruments.instrument.html#src.instruments.instrument.Instrument.plot_vs_time">plot_vs_time() (Instrument method)</a>
-</li>
       <li><a href="src.instruments.instrument.html#src.instruments.instrument.Instrument.post_treaters">post_treaters (Instrument property)</a>
+</li>
+      <li><a href="src.instruments.powers.html#src.instruments.powers.Powers">Powers (class in src.instruments.powers)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -274,16 +301,20 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.reconstruct_voltage_along_line">reconstruct_voltage_along_line() (MultipactorTest method)</a>
+</li>
+      <li><a href="src.instruments.electric_field.reconstructed.html#src.instruments.electric_field.reconstructed.Reconstructed">Reconstructed (class in src.instruments.electric_field.reconstructed)</a>
+</li>
       <li><a href="src.instruments.rf_power.html#src.instruments.rf_power.RfPower">RfPower (class in src.instruments.rf_power)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="src.measurement_point.factory.html#src.measurement_point.factory.IMeasurementPointFactory.run">run() (IMeasurementPointFactory method)</a>
 
       <ul>
         <li><a href="src.instruments.factory.html#src.instruments.factory.InstrumentFactory.run">(InstrumentFactory method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="src.measurement_point.factory.html#src.measurement_point.factory.IMeasurementPointFactory.run_single">run_single() (IMeasurementPointFactory method)</a>
 </li>
       <li><a href="src.util.post_treaters.html#src.util.post_treaters.running_mean">running_mean() (in module src.util.post_treaters)</a>
@@ -322,10 +353,31 @@
 </li>
       </ul></li>
       <li>
-    src.instruments.e_field_probe
+    src.instruments.electric_field
 
       <ul>
-        <li><a href="src.instruments.e_field_probe.html#module-src.instruments.e_field_probe">module</a>
+        <li><a href="src.instruments.electric_field.html#module-src.instruments.electric_field">module</a>
+</li>
+      </ul></li>
+      <li>
+    src.instruments.electric_field.field_probe
+
+      <ul>
+        <li><a href="src.instruments.electric_field.field_probe.html#module-src.instruments.electric_field.field_probe">module</a>
+</li>
+      </ul></li>
+      <li>
+    src.instruments.electric_field.i_electric_field
+
+      <ul>
+        <li><a href="src.instruments.electric_field.i_electric_field.html#module-src.instruments.electric_field.i_electric_field">module</a>
+</li>
+      </ul></li>
+      <li>
+    src.instruments.electric_field.reconstructed
+
+      <ul>
+        <li><a href="src.instruments.electric_field.reconstructed.html#module-src.instruments.electric_field.reconstructed">module</a>
 </li>
       </ul></li>
       <li>
@@ -357,12 +409,21 @@
 </li>
       </ul></li>
       <li>
+    src.instruments.powers
+
+      <ul>
+        <li><a href="src.instruments.powers.html#module-src.instruments.powers">module</a>
+</li>
+      </ul></li>
+      <li>
     src.instruments.rf_power
 
       <ul>
         <li><a href="src.instruments.rf_power.html#module-src.instruments.rf_power">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     src.instruments.swr
 
@@ -370,8 +431,6 @@
         <li><a href="src.instruments.swr.html#module-src.instruments.swr">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     src.instruments.virtual_instrument
 
@@ -448,6 +507,8 @@
 </li>
       <li><a href="src.instruments.swr.html#src.instruments.swr.SWR">SWR (class in src.instruments.swr)</a>
 </li>
+      <li><a href="src.instruments.powers.html#src.instruments.powers.Powers.swr">swr (Powers property)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -457,23 +518,35 @@
       <li><a href="src.instruments.virtual_instrument.html#src.instruments.virtual_instrument.VirtualInstrument">VirtualInstrument (class in src.instruments.virtual_instrument)</a>
 </li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="src.instruments.electric_field.reconstructed.html#src.instruments.electric_field.reconstructed.voltage_vs_position">voltage_vs_position() (in module src.instruments.electric_field.reconstructed)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="Y">Y</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="src.instruments.instrument.html#src.instruments.instrument.Instrument.ydata">ydata (Instrument property)</a>
+
+      <ul>
+        <li><a href="src.instruments.electric_field.reconstructed.html#src.instruments.electric_field.reconstructed.Reconstructed.ydata">(Reconstructed property)</a>
 </li>
+      </ul></li>
       <li><a href="src.instruments.current_probe.html#src.instruments.current_probe.CurrentProbe.ylabel">ylabel() (CurrentProbe class method)</a>
 
       <ul>
-        <li><a href="src.instruments.e_field_probe.html#src.instruments.e_field_probe.ElectricFieldProbe.ylabel">(ElectricFieldProbe class method)</a>
+        <li><a href="src.instruments.electric_field.i_electric_field.html#src.instruments.electric_field.i_electric_field.IElectricField.ylabel">(IElectricField class method)</a>
 </li>
         <li><a href="src.instruments.instrument.html#src.instruments.instrument.Instrument.ylabel">(Instrument class method)</a>
 </li>
         <li><a href="src.instruments.optical_fibre.html#src.instruments.optical_fibre.OpticalFibre.ylabel">(OpticalFibre class method)</a>
 </li>
         <li><a href="src.instruments.penning.html#src.instruments.penning.Penning.ylabel">(Penning class method)</a>
+</li>
+        <li><a href="src.instruments.powers.html#src.instruments.powers.Powers.ylabel">(Powers class method)</a>
+</li>
+        <li><a href="src.instruments.electric_field.reconstructed.html#src.instruments.electric_field.reconstructed.Reconstructed.ylabel">(Reconstructed class method)</a>
 </li>
         <li><a href="src.instruments.rf_power.html#src.instruments.rf_power.RfPower.ylabel">(RfPower class method)</a>
 </li>

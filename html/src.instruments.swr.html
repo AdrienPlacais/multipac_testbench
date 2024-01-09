@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>src.instruments.swr module &mdash; MULTIPAC test bench 1.0.0 documentation</title>
+  <title>src.instruments.swr module &mdash; MULTIPAC test bench 1.1.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -38,6 +38,9 @@
           <a href="index.html" class="icon icon-home">
             MULTIPAC test bench
           </a>
+              <div class="version">
+                1.1.0
+              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -52,12 +55,13 @@
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="src.html">src package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="src.instruments.html">src.instruments package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="src.instruments.electric_field.html">src.instruments.electric_field package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.current_probe.html">src.instruments.current_probe module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.instruments.e_field_probe.html">src.instruments.e_field_probe module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.factory.html">src.instruments.factory module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.instrument.html">src.instruments.instrument module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.optical_fibre.html">src.instruments.optical_fibre module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.penning.html">src.instruments.penning module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.instruments.powers.html">src.instruments.powers module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.rf_power.html">src.instruments.rf_power module</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">src.instruments.swr module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.virtual_instrument.html">src.instruments.virtual_instrument module</a></li>
@@ -104,11 +108,14 @@
 <p>Define a Signal Wave Ratio probe.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="src.instruments.swr.SWR">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SWR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Series</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.instruments.swr.SWR" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SWR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.instruments.swr.SWR" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">VirtualInstrument</span></code></p>
 <p>An object to study the SWR.</p>
 <p>Here, SWR stands for Standing Wave Ratio and is the Voltage Standing Wave
 Ratio.</p>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version v1.1.0.</span></p>
+</div>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.instruments.swr.SWR.from_rf_power_probes">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_rf_power_probes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">power_forward</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">RfPower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power_reflected</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">RfPower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'SWR</span> <span class="pre">(calculated</span> <span class="pre">from</span> <span class="pre">power</span> <span class="pre">probes)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#src.instruments.swr.SWR.from_rf_power_probes" title="Permalink to this definition"></a></dt>
