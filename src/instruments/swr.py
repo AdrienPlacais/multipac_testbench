@@ -16,7 +16,15 @@ class SWR(VirtualInstrument):
     Here, SWR stands for Standing Wave Ratio and is the Voltage Standing Wave
     Ratio.
 
+    .. deprecated:: v1.1.0
+
     """
+
+    def __init__(self, *args, **kwargs) -> None:
+        """Just instantiate."""
+        print("SWR.__init__ warning! Do not use this class anymore, will "
+              "be deprecated in the future. Use Powers instead.")
+        super().__init__(*args, **kwargs)
 
     @classmethod
     def from_rf_power_probes(cls,
