@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Define object to keep a single instrument measurements."""
 from abc import ABC
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 from typing import Callable, Self
 
 
@@ -18,8 +18,9 @@ class Instrument(ABC):
 
     def __init__(self,
                  name: str,
-                 raw_data: pd.Series,
+                 raw_data: pd.Series | pd.DataFrame,
                  position: np.ndarray | float | None = None,
+                 is_2d: bool = False,
                  **kwargs,
                  ) -> None:
         """Instantiate the class.
@@ -27,13 +28,16 @@ class Instrument(ABC):
         Parameters
         ----------
         name : str
-            Name of the instrument. It must correspond to the name of a column
-            in the ``.csv`` file.
+            Name of the instrument.
         raw_data : pd.Series
             ``x`` and ``y`` data as saved in the ``.csv`` produced by LabVIEW.
         position : np.ndarray | float | None, optional
             The position of the instrument. The default is None, in which case
             :attr:`._position` is not set (case of :class:`.GlobalDiagnostic`).
+        is_2d : bool, optional
+            To make the difference between instruments holding a single array
+            of data (e.g. current vs time) and those holding several columns
+            (eg forward and reflected power).
         kwargs :
             Additional keyword arguments coming from the ``.toml``
             configuration file.
@@ -45,6 +49,8 @@ class Instrument(ABC):
         self._position: np.ndarray | float
         if position is not None:
             self._position = position
+
+        self.is_2d = is_2d
 
         self._ydata: np.ndarray | None = None
         self._post_treaters: list[Callable[[np.ndarray], np.ndarray]] = []
@@ -70,7 +76,27 @@ class Instrument(ABC):
                    ydata: np.ndarray,
                    xdata: Iterable | None = None,
                    **kwargs) -> Self:
-        """Instantiate from numpy array."""
+        """Instantiate :class:`Instrument` from a numpy array.
+
+        Parameters
+        ----------
+        name : str
+            Name of the instrument.
+        ydata : np.ndarray
+            The data measured by the instrument.
+        xdata : Iterable | None, optional
+            The data representing the measuring points. The default is None, in
+            which case it is a list of integers starting from 1, which is the
+            same as all data from the ``.csv``.
+        kwargs :
+            Other keyword arguments passed to the :class:`.Instrument`.
+
+        Returns
+        -------
+        instrument : Instrument
+            A regular instrument.
+
+        """
         if xdata is None:
             n_points = len(ydata)
             xdata = range(1, n_points + 1)
@@ -78,8 +104,36 @@ class Instrument(ABC):
         raw_data = pd.Series(data=ydata,
                              index=xdata,
                              name=name)
-
         return cls(name, raw_data, **kwargs)
+
+    @classmethod
+    def from_pd_dataframe(cls,
+                          name: Sequence[str],
+                          raw_data: pd.DataFrame,
+                          **kwargs,
+                          ) -> Self:
+        """Instantiate the object from several ``.csv`` file columns.
+
+        Parameters
+        ----------
+        name : Sequence[str]
+            Name of the instrument.
+        raw_data : pd.DataFrame
+            Object holding several columns of the ``.csv``.
+        kwargs :
+            Other keyword arguments passed to the :class:`.Instrument`.
+
+        Returns
+        -------
+        instrument : Instrument
+            An instrument. Note that its ``ydata`` attribute will be a 2D
+            array.
+
+        """
+        name = ' & '.join(name)
+        is_2d = True
+        return cls(name, raw_data, is_2d=is_2d, **kwargs)
+
     @property
     def class_name(self) -> str:
         """Shortcut to the name of the instrument class."""
