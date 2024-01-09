@@ -6,7 +6,8 @@ from typing import Any
 import pandas as pd
 
 from multipac_testbench.src.instruments.current_probe import CurrentProbe
-from multipac_testbench.src.instruments.e_field_probe import ElectricFieldProbe
+from multipac_testbench.src.instruments.electric_field.field_probe import \
+    FieldProbe
 from multipac_testbench.src.instruments.instrument import Instrument
 from multipac_testbench.src.instruments.optical_fibre import OpticalFibre
 from multipac_testbench.src.instruments.penning import Penning
@@ -16,7 +17,8 @@ from multipac_testbench.src.instruments.rf_power import RfPower
 
 STRING_TO_INSTRUMENT_CLASS = {
     'CurrentProbe': CurrentProbe,
-    'ElectricFieldProbe': ElectricFieldProbe,
+    'ElectricFieldProbe': FieldProbe,
+    'FieldProbe': FieldProbe,
     'OpticalFibre': OpticalFibre,
     'Penning': Penning,
     'Powers': Powers,

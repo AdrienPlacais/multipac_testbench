@@ -20,14 +20,14 @@ import pandas as pd
 from matplotlib import animation
 from matplotlib.artist import Artist
 from matplotlib.axes._axes import Axes
-from matplotlib.container import StemContainer
 from matplotlib.figure import Figure
 
+from multipac_testbench.src.instruments.electric_field.field_probe import \
+    FieldProbe
+from multipac_testbench.src.instruments.electric_field.reconstructed import \
+    Reconstructed
 from multipac_testbench.src.instruments.instrument import Instrument
-from multipac_testbench.src.instruments.e_field_probe import ElectricFieldProbe
 from multipac_testbench.src.instruments.powers import Powers
-from multipac_testbench.src.instruments.reconstructed_voltage import \
-    ReconstructedVoltage
 from multipac_testbench.src.measurement_point.factory import \
     IMeasurementPointFactory
 from multipac_testbench.src.measurement_point.i_measurement_point import \
@@ -454,40 +454,43 @@ class MultipactorTest:
         if axe is not None:
             axe.set_xlabel('Position [m]')
 
-        print("Warning!! Dirty add an reconstructed voltage to animation")
-        for instruments in axes_instruments.values():
-            reconstructed_voltage = self.global_diagnostics.instruments[-1]
-            reconstructed_voltage.plot_vs_position = partial(
-                reconstructed_voltage.plot_vs_position,
-                label=reconstructed_voltage.fit_info)
-            assert isinstance(reconstructed_voltage, ReconstructedVoltage)
-            if isinstance(instruments[0], ElectricFieldProbe):
-                instruments.append(reconstructed_voltage)
+        # print("Warning!! Dirty add an reconstructed voltage to animation")
+        # for instruments in axes_instruments.values():
+        #     reconstructed = self.global_diagnostics.instruments[-1]
+        #     reconstructed.plot_vs_position = partial(
+        #         reconstructed.plot_vs_position,
+        #         label=reconstructed.fit_info)
+        #     assert isinstance(reconstructed, Reconstructed)
+        #     if isinstance(instruments[0], FieldProbe):
+        #         instruments.append(reconstructed)
 
         return fig, axes_instruments
 
     def reconstruct_voltage_along_line(
             self,
             name: str,
-            probes_to_ignore: Sequence[str | ElectricFieldProbe],
-            ) -> ReconstructedVoltage:
+            probes_to_ignore: Sequence[str | FieldProbe],
+            ) -> Reconstructed:
         """Reconstruct the voltage profile from the e field probes."""
-        e_field_probes = self._filter_instruments(ElectricFieldProbe,
+        e_field_probes = self._filter_instruments(FieldProbe,
                                                   self.pick_ups,
                                                   probes_to_ignore)
-        powers = self.global_diagnostics.instruments[0]
-        assert isinstance(powers, Powers)
-        reconstructed_voltage = ReconstructedVoltage(
+        assert self.global_diagnostics is not None
+        powers = self._filter_instruments(Powers,
+                                          [self.global_diagnostics],
+                                          probes_to_ignore)
+        assert len(powers) == 1
+        powers = powers[0]
+
+        reconstructed = Reconstructed(
             name=name,
             raw_data=None,
             e_field_probes=e_field_probes,
             powers=powers,
             freq_mhz=self.freq_mhz,
         )
-        reconstructed_voltage.fit_voltage()
+        reconstructed.fit_voltage()
 
-        if self.global_diagnostics is None:
-            self.global_diagnostics = []
-        self.global_diagnostics.instruments.append(reconstructed_voltage)
+        self.global_diagnostics.add_instrument(reconstructed)
 
-        return reconstructed_voltage
+        return reconstructed

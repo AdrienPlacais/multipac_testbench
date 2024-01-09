@@ -70,6 +70,11 @@ class Instrument(ABC):
         """Label used for plots."""
         return "default ylabel"
 
+    @property
+    def label(self) -> str | None:
+        """Label used for legends in plots vs position."""
+        return
+
     @classmethod
     def from_array(cls,
                    name: str,
@@ -363,7 +368,10 @@ class Instrument(ABC):
             return artist
 
         assert axe is not None
-        artist = axe.stem(position, ydata, **kwargs)
+        artist = axe.stem(position,
+                          ydata,
+                          label=self.label,
+                          **kwargs)
         return artist
 
     def _plot_vs_position_for_2d(self,
@@ -415,6 +423,10 @@ class Instrument(ABC):
             return artist
 
         assert axe is not None
-        artist, = axe.plot(self._position, ydata, color=color, **kwargs)
+        artist, = axe.plot(self._position,
+                           ydata,
+                           color=color,
+                           label=self.label,
+                           **kwargs)
         axe.legend()
         return artist
