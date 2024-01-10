@@ -101,6 +101,10 @@ class MultipactorTest:
     ) -> tuple[Figure, Axes]:
         """Plot signals measured by ``instruments_to_plot``.
 
+        .. todo::
+            Add a ``instruments_to_exclude`` argument. Could replace
+            ``measurement_points_to_exclude``.
+
         Parameters
         ----------
         instruments_to_plot : tuple[ABCMeta, ...]
