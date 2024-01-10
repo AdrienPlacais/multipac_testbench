@@ -271,12 +271,15 @@ class MultipactorTest:
                 i += 1
         return artists
 
-    def scatter_instruments_data(self,
-                                 instruments_to_plot: Sequence[ABCMeta],
-                                 mp_detector_instrument: ABCMeta,
-                                 png_path: Path | None = None,
-                                 **fig_kw,
-                                 ) -> tuple[Figure, Axes]:
+    def scatter_instruments_data(
+        self,
+            instruments_to_plot: Sequence[ABCMeta],
+            mp_detector_instrument: ABCMeta,
+            measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (
+            ),
+            png_path: Path | None = None,
+            **fig_kw,
+    ) -> tuple[Figure, Axes]:
         """Plot the data measured by instruments.
 
         This plot results in important amount of points. It becomes interesting
@@ -293,18 +296,19 @@ class MultipactorTest:
         """
         fig, instrument_class_axes = self._create_fig(instruments_to_plot,
                                                       **fig_kw)
-        for i, pick_up in enumerate(self.pick_ups):
-            if i == 0:
-                continue
-            pick_up.scatter_instruments_data(instrument_class_axes,
-                                             mp_detector_instrument,
-                                             xdata=float(i),
-                                             )
+        measurement_points = self._filter_measurement_points(
+            measurement_points_to_exclude)
+        for i, measurement_point in enumerate(measurement_points):
+            measurement_point.scatter_instruments_data(instrument_class_axes,
+                                                       mp_detector_instrument,
+                                                       xdata=float(i),
+                                                       )
+        axes = [axes for axes in instrument_class_axes.values()]
+        for axe in axes:
+            axe.legend()
+
         if png_path is not None:
             fig.savefig(png_path)
-        axes = [axes for axes in instrument_class_axes.values()]
-        axes[0].legend()
-
         return fig, axes
 
     def _create_fig(self,
@@ -358,7 +362,7 @@ class MultipactorTest:
 
     def _filter_measurement_points(
             self,
-            to_exclude: tuple[str | IMeasurementPoint, ...] = (),
+            to_exclude: Sequence[str | IMeasurementPoint] = (),
     ) -> list[IMeasurementPoint]:
         """Get measurement points (Pick-Ups and GlobalDiagnostic)."""
         names_to_exclude = [x if isinstance(x, str) else x.name
