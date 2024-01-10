@@ -62,10 +62,8 @@ class IMeasurementPoint(ABC):
                          instrument_class: ABCMeta = Instrument,
                          ) -> None:
         """Add post-treatment functions to instruments."""
-        affected_instruments = self.get_affected_instruments(
-            instrument_class)
-
-        for instrument in affected_instruments:
+        instruments = self.get_instruments(instrument_class)
+        for instrument in instruments:
             instrument.add_post_treater(post_treater)
 
     def set_multipac_detector(
@@ -74,10 +72,8 @@ class IMeasurementPoint(ABC):
             instrument_class: ABCMeta = Instrument,
     ) -> None:
         """Add multipactor detection function to instruments."""
-        affected_instruments = self.get_affected_instruments(
-            instrument_class)
-
-        for instrument in affected_instruments:
+        instruments = self.get_instruments(instrument_class)
+        for instrument in instruments:
             instrument.multipac_detector = multipac_detector
 
     def _where_is_multipactor(self,
@@ -96,11 +92,10 @@ class IMeasurementPoint(ABC):
         zones = start_and_end_of_contiguous_true_zones(multipactor)
         return zones
 
-    def get_affected_instruments(
-            self,
-            instrument_class: ABCMeta,
-            instruments_to_ignore: Sequence[Instrument | str] = ()
-    ) -> list[Instrument]:
+    def get_instruments(self,
+                        instrument_class: ABCMeta,
+                        instruments_to_ignore: Sequence[Instrument | str] = (),
+                        ) -> list[Instrument]:
         """
         Get instruments which are (sub) classes of ``instrument_class``.
 
@@ -108,21 +103,33 @@ class IMeasurementPoint(ABC):
         desired instrument class.
 
         """
-        instrument_names_to_ignore = [
-            x if isinstance(x, str)
-            else x.name
-            for x in instruments_to_ignore]
+        instrument_names_to_ignore = [x if isinstance(x, str)
+                                      else x.name
+                                      for x in instruments_to_ignore]
         affected_instruments = [
             instrument for instrument in self.instruments
             if isinstance(instrument, instrument_class)
             and instrument.name not in instrument_names_to_ignore]
         return affected_instruments
 
-    def get_instrument_data(self, instrument_class: ABCMeta) -> np.ndarray:
+    def get_instrument(self, *args, **kwargs) -> Instrument | None:
+        """Get instrument which is (sub) class of ``instrument_class``.
+
+        Raise an error if several instruments match the condition.
+
+        """
+        instruments = self.get_instruments(*args, **kwargs)
+        if len(instruments) == 0:
+            return
+        if len(instruments) == 1:
+            return instruments[0]
+        raise IOError(f"More than one instrument found with {args = } and "
+                      f"{kwargs = }.")
+
+    def get_data(self, instrument_class: ABCMeta) -> np.ndarray:
         """Get the ``ydata`` from first ``instrument_class`` instrument."""
-        instruments = self.get_affected_instruments(instrument_class)
-        assert len(instruments) < 2
-        instrument = instruments[0]
+        instrument = self.get_instrument(instrument_class)
+        assert instrument is not None
         return instrument.ydata
 
     def plot_instrument_vs_time(self,
@@ -147,11 +154,10 @@ class IMeasurementPoint(ABC):
 
         """
         for instrument_class in instruments_to_plot:
-            affected_instruments = self.get_affected_instruments(
-                instrument_class)
+            instruments = self.get_instruments(instrument_class)
             axe = instrument_class_axes[instrument_class]
 
-            for instrument in affected_instruments:
+            for instrument in instruments:
                 line1 = instrument.plot_vs_time(axe,
                                                 raw,
                                                 color=self._color,
@@ -178,7 +184,7 @@ class IMeasurementPoint(ABC):
             or it can be different.
 
         """
-        instruments = self.get_affected_instruments(detector_instrument_class)
+        instruments = self.get_instruments(detector_instrument_class)
         if len(instruments) == 0:
             return
 
@@ -190,7 +196,7 @@ class IMeasurementPoint(ABC):
         detector_instrument = instruments[0]
         zones = self._where_is_multipactor(detector_instrument)
 
-        plotted_instruments = self.get_affected_instruments(
+        plotted_instruments = self.get_instruments(
             plotted_instrument_class)
         if len(plotted_instruments) > 1:
             print("Warning! More than one instrument to be plotted with "

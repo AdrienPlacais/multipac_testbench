@@ -69,12 +69,12 @@ class MultipactorTest:
                          only_pick_up_which_name_is: tuple[str, ...] = (),
                          **kwargs) -> None:
         """Add post-treatment functions to instruments."""
-        affected_pick_ups = self.pick_ups
+        pick_ups = self.pick_ups
         if len(only_pick_up_which_name_is) > 0:
-            affected_pick_ups = [pick_up for pick_up in self.pick_ups
-                                 if pick_up.name in only_pick_up_which_name_is]
+            pick_ups = [pick_up for pick_up in self.pick_ups
+                        if pick_up.name in only_pick_up_which_name_is]
 
-        for pick_up in affected_pick_ups:
+        for pick_up in pick_ups:
             pick_up.add_post_treater(*args, **kwargs)
 
     def set_multipac_detector(self,
@@ -82,12 +82,12 @@ class MultipactorTest:
                               only_pick_up_which_name_is: tuple[str, ...] = (),
                               **kwargs) -> None:
         """Set multipactor detection functions to instruments."""
-        affected_pick_ups = self.pick_ups
+        pick_ups = self.pick_ups
         if len(only_pick_up_which_name_is) > 0:
-            affected_pick_ups = [pick_up for pick_up in self.pick_ups
+            pick_ups = [pick_up for pick_up in self.pick_ups
                                  if pick_up.name in only_pick_up_which_name_is]
 
-        for pick_up in affected_pick_ups:
+        for pick_up in pick_ups:
             pick_up.set_multipac_detector(*args, **kwargs)
 
     def plot_instruments_vs_time(
@@ -362,7 +362,7 @@ class MultipactorTest:
 
         """
         instruments_2d = [
-            measurement_point.get_affected_instruments(
+            measurement_point.get_instruments(
                 instrument_class,
                 instruments_to_ignore=instruments_to_ignore,
             )
