@@ -85,7 +85,7 @@ class MultipactorTest:
         pick_ups = self.pick_ups
         if len(only_pick_up_which_name_is) > 0:
             pick_ups = [pick_up for pick_up in self.pick_ups
-                                 if pick_up.name in only_pick_up_which_name_is]
+                        if pick_up.name in only_pick_up_which_name_is]
 
         for pick_up in pick_ups:
             pick_up.set_multipac_detector(*args, **kwargs)
@@ -454,16 +454,6 @@ class MultipactorTest:
             axe.grid(True)
         if axe is not None:
             axe.set_xlabel('Position [m]')
-
-        # print("Warning!! Dirty add an reconstructed voltage to animation")
-        # for instruments in axes_instruments.values():
-        #     reconstructed = self.global_diagnostics.instruments[-1]
-        #     reconstructed.plot_vs_position = partial(
-        #         reconstructed.plot_vs_position,
-        #         label=reconstructed.fit_info)
-        #     assert isinstance(reconstructed, Reconstructed)
-        #     if isinstance(instruments[0], FieldProbe):
-        #         instruments.append(reconstructed)
 
         return fig, axes_instruments
 
