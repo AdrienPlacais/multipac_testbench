@@ -143,14 +143,14 @@ class MultipactorTest:
             to_exclude=measurement_points_to_exclude)
 
         for measurement_point in measurement_points:
-            measurement_point.plot_instruments(instrument_class_axes,
-                                               instruments_to_plot,
-                                               raw=raw)
+            measurement_point.plot_instrument_vs_time(instrument_class_axes,
+                                                      instruments_to_plot,
+                                                      raw=raw)
 
             if multipactor_plots is not None:
-                self.add_multipacting_zones(measurement_point,
-                                            instrument_class_axes,
-                                            multipactor_plots)
+                self._add_multipactor_vs_time(measurement_point,
+                                              instrument_class_axes,
+                                              multipactor_plots)
 
         for axe in instrument_class_axes.values():
             axe.legend()
@@ -160,33 +160,30 @@ class MultipactorTest:
 
         return fig, instrument_class_axes
 
-# to reformulate
-    def add_multipacting_zones(
-            self,
-            pick_up: PickUp,
-            axes: dict[ABCMeta, Axes],
-            multipactor_plots: dict[ABCMeta, ABCMeta]
-    ) -> None:
-        """Add multipacting zones on pick-up plot.
+    def _add_multipactor_vs_time(self,
+                                 measurement_point: IMeasurementPoint,
+                                 instrument_class_axes: dict[ABCMeta, Axes],
+                                 multipactor_plots: dict[ABCMeta, ABCMeta]
+                                 ) -> None:
+        """Show with arrows when multipactor happens.
 
         Parameters
         ----------
-        pick_up : PickUp
-            Pick-up which detected multipactor.
-        axes : dict[ABCMeta, Axes]
-            Dictionary holding the plots and the associated instrument
-            subclass.
-        multipactor_plots : dict[ABCMeta, ABCMeta] | None, optional
-            Keys are the :class:`Instrument` subclass for which you want to see
-            the multipactor zones. Values are the :class:`Instrument` subclass
-            that detect the multipactor.
+        measurement_point : IMeasurementPoint
+            :class:`.PickUp` or :class:`.GlobalDiagnostic` under study.
+        instrument_class_axes : dict[ABCMeta, Axes]
+            Links instrument class with the axes.
+        multipactor_plots : dict[ABCMeta, ABCMeta]
+            Links the instrument plot where multipactor should appear (keys)
+            with the instruments that actually detect the multipactor (values).
 
         """
         for plotted_instr, detector_instr in multipactor_plots.items():
-            pick_up.add_multipacting_zone(axes[plotted_instr],
-                                          plotted_instr,
-                                          detector_instr,
-                                          )
+            measurement_point._add_multipactor_vs_time(
+                instrument_class_axes[plotted_instr],
+                plotted_instr,
+                detector_instr,
+            )
 
     def animate_instruments_vs_position(
             self,
@@ -196,7 +193,7 @@ class MultipactorTest:
             keep_one_frame_over: int = 1,
             interval: int | None = None,
             **fig_kw,
-            ) -> animation.FuncAnimation:
+    ) -> animation.FuncAnimation:
         """Represent measured signals with probe position."""
         fig, axes_instruments = self._prepare_animation_fig(
             instruments_to_plot,
@@ -474,7 +471,7 @@ class MultipactorTest:
             self,
             name: str,
             probes_to_ignore: Sequence[str | FieldProbe],
-            ) -> Reconstructed:
+    ) -> Reconstructed:
         """Reconstruct the voltage profile from the e field probes."""
         e_field_probes = self._filter_instruments(FieldProbe,
                                                   self.pick_ups,

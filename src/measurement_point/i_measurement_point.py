@@ -100,7 +100,7 @@ class IMeasurementPoint(ABC):
             self,
             instrument_class: ABCMeta,
             instruments_to_ignore: Sequence[Instrument | str] = ()
-            ) -> list[Instrument]:
+    ) -> list[Instrument]:
         """
         Get instruments which are (sub) classes of ``instrument_class``.
 
@@ -125,17 +125,31 @@ class IMeasurementPoint(ABC):
         instrument = instruments[0]
         return instrument.ydata
 
-    def plot_instruments(self,
-                         axes: dict[ABCMeta, Axes],
-                         instruments_to_plot: tuple[ABCMeta, ...] = (),
-                         raw: bool = False,
-                         **subplot_kw,
-                         ) -> None:
-        """Plot the signal of every instrument at this pick-up."""
+    def plot_instrument_vs_time(self,
+                                instrument_class_axes: dict[ABCMeta, Axes],
+                                instruments_to_plot: tuple[ABCMeta, ...] = (),
+                                raw: bool = False,
+                                **subplot_kw,
+                                ) -> None:
+        """Plot the signal of the ``instruments_to_plot`` of this object.
+
+        Parameters
+        ----------
+        instrument_class_axes : dict[ABCMeta, Axes]
+            Dictionary linking the class of the instruments to plot with the
+            associated axes.
+        instruments_to_plot : tuple[ABCMeta, ...]
+            Class of the instruments to be plotted.
+        raw : bool
+            If the raw of the post-treated signal should be plotted.
+        subplot_kw :
+            Other keyword arguments passed to the ``plot_vs_time`` methods.
+
+        """
         for instrument_class in instruments_to_plot:
             affected_instruments = self.get_affected_instruments(
                 instrument_class)
-            axe = axes[instrument_class]
+            axe = instrument_class_axes[instrument_class]
 
             for instrument in affected_instruments:
                 line1 = instrument.plot_vs_time(axe,
@@ -145,11 +159,11 @@ class IMeasurementPoint(ABC):
                 if self._color is None:
                     self._color = line1.get_color()
 
-    def add_multipacting_zone(self,
-                              axe: Axes,
-                              plotted_instrument_class: ABCMeta,
-                              detector_instrument_class: ABCMeta,
-                              ) -> None:
+    def _add_multipactor_vs_time(self,
+                                 axe: Axes,
+                                 plotted_instrument_class: ABCMeta,
+                                 detector_instrument_class: ABCMeta,
+                                 ) -> None:
         """Add multipacting zone on a ``plot_instruments`` plot.
 
         Parameters
