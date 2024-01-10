@@ -77,14 +77,18 @@ class IMeasurementPoint(ABC):
             instrument.multipac_detector = multipac_detector
 
     def _where_is_multipactor(self,
-                              detector_instrument: Instrument
+                              detector_instrument: Instrument | ABCMeta
                               ) -> Sequence[tuple[int, int]]:
         """Get the list of multipacting zones (indexes).
 
-        Need to pass in a ``referee_instrument_class`` to tell which type of
+        Need to pass in a ``detector_instrument`` to tell which type of
         :class:`.Instrument` we should trust to detect multipactor.
 
         """
+        if isinstance(detector_instrument, ABCMeta):
+            detector_instrument = self.get_instrument(detector_instrument)
+
+        assert isinstance(detector_instrument, Instrument)
         assert hasattr(detector_instrument, 'multipac_detector'), "No " \
             "multipacting detector defined for instrument under study."
 
@@ -170,7 +174,7 @@ class IMeasurementPoint(ABC):
                                  plotted_instrument_class: ABCMeta,
                                  detector_instrument_class: ABCMeta,
                                  ) -> None:
-        """Add multipacting zone on a ``plot_instruments`` plot.
+        """Add arrows to display multipactor.
 
         Parameters
         ----------
@@ -184,36 +188,32 @@ class IMeasurementPoint(ABC):
             or it can be different.
 
         """
-        instruments = self.get_instruments(detector_instrument_class)
-        if len(instruments) == 0:
+        detector_instrument = self.get_instrument(detector_instrument_class)
+        if detector_instrument is None:
             return
 
-        if len(instruments) > 1:
-            print(f"Warning! More than one {detector_instrument_class} "
-                  "instrument at current GlobalDiagnostics/PickUp. So I am not"
-                  " sure which one should be used to determine when "
-                  "multipactor appeared. I will take the first one.")
-        detector_instrument = instruments[0]
-        zones = self._where_is_multipactor(detector_instrument)
+        plotted_instrument = self.get_instrument(plotted_instrument_class)
+        if plotted_instrument is None:
+            return
 
-        plotted_instruments = self.get_instruments(
-            plotted_instrument_class)
-        if len(plotted_instruments) > 1:
-            print("Warning! More than one instrument to be plotted with "
-                  "multipactor. Only taking first one.")
-        plotted_instrument = plotted_instruments[0]
-        y_position_of_multipactor_zone = np.nanmax(plotted_instrument.ydata)
-        y_position_of_multipactor_zone *= 1.05
+        zones = self._where_is_multipactor(detector_instrument)
+        y_pos_of_multipactor_zone = 1.05 * np.nanmax(plotted_instrument.ydata)
 
         vline_kw = self._typical_vline_keywords()
         arrow_kw = self._typical_arrow_keywords(plotted_instrument)
 
         for zone in zones:
             delta_x = zone[1] - zone[0]
-            axe.arrow(zone[0], y_position_of_multipactor_zone,
-                      delta_x, 0., **arrow_kw)
-            axe.arrow(zone[1], y_position_of_multipactor_zone,
-                      -delta_x, 0., **arrow_kw)
+            axe.arrow(zone[0],
+                      y_pos_of_multipactor_zone,
+                      delta_x,
+                      0.,
+                      **arrow_kw)
+            axe.arrow(zone[1],
+                      y_pos_of_multipactor_zone,
+                      -delta_x,
+                      0.,
+                      **arrow_kw)
             axe.axvline(zone[0], **vline_kw)
             axe.axvline(zone[1], **vline_kw)
 
