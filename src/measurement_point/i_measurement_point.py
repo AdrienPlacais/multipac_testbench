@@ -57,45 +57,6 @@ class IMeasurementPoint(ABC):
         """
         self.instruments.append(instrument)
 
-    def add_post_treater(self,
-                         post_treater: Callable[[np.ndarray], np.ndarray],
-                         instrument_class: ABCMeta = Instrument,
-                         ) -> None:
-        """Add post-treatment functions to instruments."""
-        instruments = self.get_instruments(instrument_class)
-        for instrument in instruments:
-            instrument.add_post_treater(post_treater)
-
-    def set_multipac_detector(
-            self,
-            multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
-            instrument_class: ABCMeta = Instrument,
-    ) -> None:
-        """Add multipactor detection function to instruments."""
-        instruments = self.get_instruments(instrument_class)
-        for instrument in instruments:
-            instrument.multipac_detector = multipac_detector
-
-    def _where_is_multipactor(self,
-                              detector_instrument: Instrument | ABCMeta
-                              ) -> Sequence[tuple[int, int]]:
-        """Get the list of multipacting zones (indexes).
-
-        Need to pass in a ``detector_instrument`` to tell which type of
-        :class:`.Instrument` we should trust to detect multipactor.
-
-        """
-        if isinstance(detector_instrument, ABCMeta):
-            detector_instrument = self.get_instrument(detector_instrument)
-
-        assert isinstance(detector_instrument, Instrument)
-        assert hasattr(detector_instrument, 'multipac_detector'), "No " \
-            "multipacting detector defined for instrument under study."
-
-        multipactor = detector_instrument.multipactor
-        zones = start_and_end_of_contiguous_true_zones(multipactor)
-        return zones
-
     def get_instruments(self,
                         instrument_class: ABCMeta,
                         instruments_to_ignore: Sequence[Instrument | str] = (),
@@ -135,6 +96,45 @@ class IMeasurementPoint(ABC):
         instrument = self.get_instrument(instrument_class)
         assert instrument is not None
         return instrument.ydata
+
+    def add_post_treater(self,
+                         post_treater: Callable[[np.ndarray], np.ndarray],
+                         instrument_class: ABCMeta = Instrument,
+                         ) -> None:
+        """Add post-treatment functions to instruments."""
+        instruments = self.get_instruments(instrument_class)
+        for instrument in instruments:
+            instrument.add_post_treater(post_treater)
+
+    def set_multipac_detector(
+            self,
+            multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
+            instrument_class: ABCMeta = Instrument,
+    ) -> None:
+        """Add multipactor detection function to instruments."""
+        instruments = self.get_instruments(instrument_class)
+        for instrument in instruments:
+            instrument.multipac_detector = multipac_detector
+
+    def _when_is_there_multipactor(self,
+                                   detector_instrument: Instrument | ABCMeta
+                                   ) -> Sequence[tuple[int, int]]:
+        """Get the list of multipacting zones (indexes).
+
+        Need to pass in a ``detector_instrument`` to tell which type of
+        :class:`.Instrument` we should trust to detect multipactor.
+
+        """
+        if isinstance(detector_instrument, ABCMeta):
+            detector_instrument = self.get_instrument(detector_instrument)
+
+        assert isinstance(detector_instrument, Instrument)
+        assert hasattr(detector_instrument, 'multipac_detector'), "No " \
+            "multipacting detector defined for instrument under study."
+
+        multipactor = detector_instrument.multipactor
+        zones = start_and_end_of_contiguous_true_zones(multipactor)
+        return zones
 
     def plot_instrument_vs_time(self,
                                 instrument_class_axes: dict[ABCMeta, Axes],
@@ -196,7 +196,7 @@ class IMeasurementPoint(ABC):
         if plotted_instrument is None:
             return
 
-        zones = self._where_is_multipactor(detector_instrument)
+        zones = self._when_is_there_multipactor(detector_instrument)
         y_pos_of_multipactor_zone = 1.05 * np.nanmax(plotted_instrument.ydata)
 
         vline_kw = self._typical_vline_keywords()
@@ -216,6 +216,23 @@ class IMeasurementPoint(ABC):
                       **arrow_kw)
             axe.axvline(zone[0], **vline_kw)
             axe.axvline(zone[1], **vline_kw)
+
+    def scatter_instruments_data(self,
+                                 instrument_class_axes: dict[ABCMeta, Axes],
+                                 mp_detector_instrument_class: ABCMeta,
+                                 xdata: float,
+                                 ) -> None:
+        """Scatter data measured by desired instruments."""
+        for instrument_class, axes in instrument_class_axes.items():
+            instrument = self.get_instrument(instrument_class)
+            if instrument is None:
+                continue
+
+            mp_detector = self.get_instrument(mp_detector_instrument_class)
+            assert mp_detector is not None
+            multipactor = mp_detector.multipactor
+
+            instrument.scatter_data(axes, multipactor, xdata)
 
     def _typical_vline_keywords(self) -> dict[str, Any]:
         """Set consistent plot properties."""

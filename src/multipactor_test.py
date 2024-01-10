@@ -91,13 +91,13 @@ class MultipactorTest:
             pick_up.set_multipac_detector(*args, **kwargs)
 
     def plot_instruments_vs_time(
-            self,
-            instruments_to_plot: tuple[ABCMeta, ...],
-            measurement_points_to_exclude: tuple[str, ...] = (),
-            png_path: Path | None = None,
-            raw: bool = False,
-            multipactor_plots: dict[ABCMeta, ABCMeta] | None = None,
-            **fig_kw,
+        self,
+        instruments_to_plot: tuple[ABCMeta, ...],
+        measurement_points_to_exclude: tuple[str, ...] = (),
+        png_path: Path | None = None,
+        raw: bool = False,
+        multipactor_plots: dict[ABCMeta, ABCMeta] | None = None,
+        **fig_kw,
     ) -> tuple[Figure, Axes]:
         """Plot signals measured by ``instruments_to_plot``.
 
@@ -158,7 +158,7 @@ class MultipactorTest:
         if png_path is not None:
             fig.savefig(png_path)
 
-        return fig, instrument_class_axes
+        return fig, [axes for axes in instrument_class_axes.values()]
 
     def _add_multipactor_vs_time(self,
                                  measurement_point: IMeasurementPoint,
@@ -271,8 +271,44 @@ class MultipactorTest:
                 i += 1
         return artists
 
+    def scatter_instruments_data(self,
+                                 instruments_to_plot: Sequence[ABCMeta],
+                                 mp_detector_instrument: ABCMeta,
+                                 png_path: Path | None = None,
+                                 **fig_kw,
+                                 ) -> tuple[Figure, Axes]:
+        """Plot the data measured by instruments.
+
+        This plot results in important amount of points. It becomes interesting
+        when setting different colors for multipactor/no multipactor points and
+        can help see trends.
+
+        .. todo::
+            Also show from global diagnostic
+
+        .. todo::
+            User should be able to select: reconstructed or measured electric
+            field.
+
+        """
+        fig, instrument_class_axes = self._create_fig(instruments_to_plot,
+                                                      **fig_kw)
+        for i, pick_up in enumerate(self.pick_ups):
+            if i == 0:
+                continue
+            pick_up.scatter_instruments_data(instrument_class_axes,
+                                             mp_detector_instrument,
+                                             xdata=float(i),
+                                             )
+        if png_path is not None:
+            fig.savefig(png_path)
+        axes = [axes for axes in instrument_class_axes.values()]
+        axes[0].legend()
+
+        return fig, axes
+
     def _create_fig(self,
-                    instruments_to_plot: tuple[ABCMeta, ...] = (),
+                    instruments_to_plot: Sequence[ABCMeta] = (),
                     **fig_kw,
                     ) -> tuple[Figure, dict[ABCMeta, Axes]]:
         """Create the figure and axes.

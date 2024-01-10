@@ -51,8 +51,8 @@ class Instrument(ABC):
             self._position = position
 
         self.is_2d = is_2d
-        self.plot_vs_time, self.plot_vs_position = self._get_plot_methods(
-            is_2d)
+        plotters = self._get_plot_methods(is_2d)
+        self.plot_vs_time, self.plot_vs_position, self.scatter_data = plotters
 
         self._ydata: np.ndarray | None = None
         self._post_treaters: list[Callable[[np.ndarray], np.ndarray]] = []
@@ -166,11 +166,17 @@ class Instrument(ABC):
             self._multipactor = None
         self._ydata = value
 
-    def _get_plot_methods(self, is_2d: bool) -> tuple[Callable, Callable]:
+    def _get_plot_methods(self, is_2d: bool
+                          ) -> tuple[Callable, Callable, Callable]:
         """Give the proper plotting functions according to ``is_2d``."""
+        plotters = (self._plot_vs_time_for_1d,
+                    self._plot_vs_position_for_1d,
+                    self._scatter_data_1d)
         if is_2d:
-            return self._plot_vs_time_for_2d, self._plot_vs_position_for_2d
-        return self._plot_vs_time_for_1d, self._plot_vs_position_for_1d
+            plotters = (self._plot_vs_time_for_2d,
+                        self._plot_vs_position_for_2d,
+                        self._scatter_data_2d)
+        return plotters
 
     @property
     def post_treaters(self) -> list[Callable[[np.ndarray], np.ndarray]]:
@@ -430,3 +436,55 @@ class Instrument(ABC):
                            **kwargs)
         axe.legend()
         return artist
+
+    def _scatter_data_1d(self,
+                         axes: Axes,
+                         multipactor: np.ndarray | None = None,
+                         xdata: float | np.ndarray | None = None,
+                         ) -> None:
+        """Plot ``ydata``, discriminating where there is multipactor or not.
+
+        Parameters
+        ----------
+        axes : Axes
+            Where to plot.
+        multipactor : np.ndarray | None, optional
+            True where there is multipactor, False elsewhere. The default is
+            None, in which case we take :attr:`self.multipactor`.
+        xdata : float | np.ndarray | None, optional
+            x position of the data. The default is None, in which case we take
+            :attr:`self._position`.
+
+        """
+        if multipactor is None:
+            multipactor = self.multipactor
+        if xdata is None:
+            xdata = self._position
+
+        ydata = self.ydata
+        if isinstance(xdata, float):
+            xdata = np.full(len(ydata), xdata)
+
+        mp_kwargs = {'c': 'r',
+                     'marker': 's',
+                     'alpha': 0.1,
+                     }
+        no_mp_kwargs = {'c': 'k',
+                        'alpha': 0.1,
+                        'marker': 'x',
+                        }
+        if axes.get_legend_handles_labels() == ([], []):
+            mp_kwargs['label'] = 'MP'
+            no_mp_kwargs['label'] = 'No MP'
+
+        axes.scatter(xdata[multipactor] - 0.1,
+                     ydata[multipactor],
+                     **mp_kwargs)
+        axes.scatter(xdata[~multipactor] + 0.1,
+                     ydata[~multipactor],
+                     **no_mp_kwargs)
+        return
+
+    def _scatter_data_2d(self, *args, **kwargs) -> None:
+        """Hold place."""
+        raise NotImplementedError()
