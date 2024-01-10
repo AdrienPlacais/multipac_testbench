@@ -20,4 +20,5 @@ Some type hints will not be supported.
 In all files, you should replace:
  - `from typing import Self` to remove
  - `-> Self:` to `:`
+
 (maybe other type hints will not be supported, delete it as well)
