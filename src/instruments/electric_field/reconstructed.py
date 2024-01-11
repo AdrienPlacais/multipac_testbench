@@ -58,7 +58,7 @@ class Reconstructed(IElectricField):
     @classmethod
     def ylabel(cls) -> str:
         """Label used for plots."""
-        return r"$V_{coax}$ [V]"
+        return r"Reconstructed voltage [V]"
 
     @property
     def ydata(self) -> np.ndarray:
