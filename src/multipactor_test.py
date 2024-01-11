@@ -8,6 +8,10 @@
 .. todo::
     name of pick ups in animation
 
+.. todo::
+    histograms for mp voltages? Maybe then add a gaussian fit, then we can
+    determine the 3sigma multipactor limits?
+
 """
 from abc import ABCMeta
 from pathlib import Path
