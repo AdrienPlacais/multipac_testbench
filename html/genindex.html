@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; MULTIPAC test bench 1.1.0 documentation</title>
+  <title>Index &mdash; MULTIPAC test bench 1.1.0-15-g9cb3a0e documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -34,7 +34,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.1.0
+                1.1.0-15-g9cb3a0e
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -98,12 +98,6 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="src.measurement_point.i_measurement_point.html#src.measurement_point.i_measurement_point.IMeasurementPoint.add_instrument">add_instrument() (IMeasurementPoint method)</a>
 </li>
-      <li><a href="src.measurement_point.i_measurement_point.html#src.measurement_point.i_measurement_point.IMeasurementPoint.add_multipacting_zone">add_multipacting_zone() (IMeasurementPoint method)</a>
-</li>
-      <li><a href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.add_multipacting_zones">add_multipacting_zones() (MultipactorTest method)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="src.measurement_point.i_measurement_point.html#src.measurement_point.i_measurement_point.IMeasurementPoint.add_post_treater">add_post_treater() (IMeasurementPoint method)</a>
 
       <ul>
@@ -112,6 +106,8 @@
         <li><a href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.add_post_treater">(MultipactorTest method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.animate_instruments_vs_position">animate_instruments_vs_position() (MultipactorTest method)</a>
 </li>
   </ul></td>
@@ -124,6 +120,8 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="src.util.plot.html#src.util.plot.create_fig">create_fig() (in module src.util.plot)</a>
+</li>
       <li><a href="src.instruments.current_probe.html#src.instruments.current_probe.CurrentProbe">CurrentProbe (class in src.instruments.current_probe)</a>
 </li>
   </ul></td>
@@ -134,12 +132,14 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="src.instruments.electric_field.field_probe.html#src.instruments.electric_field.field_probe.FieldProbe">FieldProbe (class in src.instruments.electric_field.field_probe)</a>
 </li>
-      <li><a href="src.instruments.electric_field.reconstructed.html#src.instruments.electric_field.reconstructed.Reconstructed.fit_info">fit_info (Reconstructed property)</a>
+      <li><a href="src.util.plot.html#src.util.plot.finish_fig">finish_fig() (in module src.util.plot)</a>
 </li>
-      <li><a href="src.instruments.electric_field.reconstructed.html#src.instruments.electric_field.reconstructed.Reconstructed.fit_voltage">fit_voltage() (Reconstructed method)</a>
+      <li><a href="src.instruments.electric_field.reconstructed.html#src.instruments.electric_field.reconstructed.Reconstructed.fit_info">fit_info (Reconstructed property)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="src.instruments.electric_field.reconstructed.html#src.instruments.electric_field.reconstructed.Reconstructed.fit_voltage">fit_voltage() (Reconstructed method)</a>
+</li>
       <li><a href="src.instruments.instrument.html#src.instruments.instrument.Instrument.from_array">from_array() (Instrument class method)</a>
 </li>
       <li><a href="src.instruments.instrument.html#src.instruments.instrument.Instrument.from_pd_dataframe">from_pd_dataframe() (Instrument class method)</a>
@@ -154,11 +154,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="src.instruments.powers.html#src.instruments.powers.Powers.gamma">gamma (Powers property)</a>
 </li>
-      <li><a href="src.measurement_point.i_measurement_point.html#src.measurement_point.i_measurement_point.IMeasurementPoint.get_affected_instruments">get_affected_instruments() (IMeasurementPoint method)</a>
+      <li><a href="src.measurement_point.i_measurement_point.html#src.measurement_point.i_measurement_point.IMeasurementPoint.get_data">get_data() (IMeasurementPoint method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="src.measurement_point.i_measurement_point.html#src.measurement_point.i_measurement_point.IMeasurementPoint.get_instrument_data">get_instrument_data() (IMeasurementPoint method)</a>
+      <li><a href="src.measurement_point.i_measurement_point.html#src.measurement_point.i_measurement_point.IMeasurementPoint.get_instrument">get_instrument() (IMeasurementPoint method)</a>
+</li>
+      <li><a href="src.measurement_point.i_measurement_point.html#src.measurement_point.i_measurement_point.IMeasurementPoint.get_instruments">get_instruments() (IMeasurementPoint method)</a>
 </li>
       <li><a href="src.measurement_point.global_diagnostics.html#src.measurement_point.global_diagnostics.GlobalDiagnostics">GlobalDiagnostics (class in src.measurement_point.global_diagnostics)</a>
 </li>
@@ -246,7 +248,11 @@
 </li>
         <li><a href="src.util.html#module-src.util">src.util</a>
 </li>
+        <li><a href="src.util.helper.html#module-src.util.helper">src.util.helper</a>
+</li>
         <li><a href="src.util.multipactor_detectors.html#module-src.util.multipactor_detectors">src.util.multipactor_detectors</a>
+</li>
+        <li><a href="src.util.plot.html#module-src.util.plot">src.util.plot</a>
 </li>
         <li><a href="src.util.post_treaters.html#module-src.util.post_treaters">src.util.post_treaters</a>
 </li>
@@ -268,6 +274,10 @@
       <li><a href="src.instruments.optical_fibre.html#src.instruments.optical_fibre.OpticalFibre">OpticalFibre (class in src.instruments.optical_fibre)</a>
 </li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="src.util.helper.html#src.util.helper.output_filepath">output_filepath() (in module src.util.helper)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="P">P</h2>
@@ -277,7 +287,7 @@
 </li>
       <li><a href="src.measurement_point.pick_up.html#src.measurement_point.pick_up.PickUp">PickUp (class in src.measurement_point.pick_up)</a>
 </li>
-      <li><a href="src.measurement_point.i_measurement_point.html#src.measurement_point.i_measurement_point.IMeasurementPoint.plot_instruments">plot_instruments() (IMeasurementPoint method)</a>
+      <li><a href="src.measurement_point.i_measurement_point.html#src.measurement_point.i_measurement_point.IMeasurementPoint.plot_instrument_vs_time">plot_instrument_vs_time() (IMeasurementPoint method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -325,6 +335,12 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="src.measurement_point.i_measurement_point.html#src.measurement_point.i_measurement_point.IMeasurementPoint.scatter_instruments_data">scatter_instruments_data() (IMeasurementPoint method)</a>
+
+      <ul>
+        <li><a href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.scatter_instruments_data">(MultipactorTest method)</a>
+</li>
+      </ul></li>
       <li><a href="src.measurement_point.i_measurement_point.html#src.measurement_point.i_measurement_point.IMeasurementPoint.set_multipac_detector">set_multipac_detector() (IMeasurementPoint method)</a>
 
       <ul>
@@ -488,10 +504,24 @@
 </li>
       </ul></li>
       <li>
+    src.util.helper
+
+      <ul>
+        <li><a href="src.util.helper.html#module-src.util.helper">module</a>
+</li>
+      </ul></li>
+      <li>
     src.util.multipactor_detectors
 
       <ul>
         <li><a href="src.util.multipactor_detectors.html#module-src.util.multipactor_detectors">module</a>
+</li>
+      </ul></li>
+      <li>
+    src.util.plot
+
+      <ul>
+        <li><a href="src.util.plot.html#module-src.util.plot">module</a>
 </li>
       </ul></li>
       <li>
