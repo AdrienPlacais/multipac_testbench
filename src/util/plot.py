@@ -12,10 +12,10 @@ from matplotlib.figure import Figure
 
 def create_fig(freq_mhz: float,
                swr: float,
-               xlabel: str,
                instruments_to_plot: Sequence[ABCMeta] = (),
-               fig_kw: dict | None = None,
+               xlabel: str = 'default',
                subplot_kw: dict | None = None,
+               **fig_kw,
                ) -> tuple[Figure, dict[ABCMeta, Axes]]:
     """Create the figure and axes.
 
@@ -35,8 +35,6 @@ def create_fig(freq_mhz: float,
         associated axes.
 
     """
-    if fig_kw is None:
-        fig_kw = {}
     fig = plt.figure(**fig_kw)
 
     if subplot_kw is None:
