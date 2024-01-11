@@ -57,15 +57,53 @@ class IMeasurementPoint(ABC):
         """
         self.instruments.append(instrument)
 
+    def get_instruments(self,
+                        instrument_class: ABCMeta,
+                        instruments_to_ignore: Sequence[Instrument | str] = (),
+                        ) -> list[Instrument]:
+        """
+        Get instruments which are (sub) classes of ``instrument_class``.
+
+        An empty list is returned when current pick-up has no instrument of the
+        desired instrument class.
+
+        """
+        instrument_names_to_ignore = [x if isinstance(x, str)
+                                      else x.name
+                                      for x in instruments_to_ignore]
+        affected_instruments = [
+            instrument for instrument in self.instruments
+            if isinstance(instrument, instrument_class)
+            and instrument.name not in instrument_names_to_ignore]
+        return affected_instruments
+
+    def get_instrument(self, *args, **kwargs) -> Instrument | None:
+        """Get instrument which is (sub) class of ``instrument_class``.
+
+        Raise an error if several instruments match the condition.
+
+        """
+        instruments = self.get_instruments(*args, **kwargs)
+        if len(instruments) == 0:
+            return
+        if len(instruments) == 1:
+            return instruments[0]
+        raise IOError(f"More than one instrument found with {args = } and "
+                      f"{kwargs = }.")
+
+    def get_data(self, instrument_class: ABCMeta) -> np.ndarray:
+        """Get the ``ydata`` from first ``instrument_class`` instrument."""
+        instrument = self.get_instrument(instrument_class)
+        assert instrument is not None
+        return instrument.ydata
+
     def add_post_treater(self,
                          post_treater: Callable[[np.ndarray], np.ndarray],
                          instrument_class: ABCMeta = Instrument,
                          ) -> None:
         """Add post-treatment functions to instruments."""
-        affected_instruments = self.get_affected_instruments(
-            instrument_class)
-
-        for instrument in affected_instruments:
+        instruments = self.get_instruments(instrument_class)
+        for instrument in instruments:
             instrument.add_post_treater(post_treater)
 
     def set_multipac_detector(
@@ -74,21 +112,23 @@ class IMeasurementPoint(ABC):
             instrument_class: ABCMeta = Instrument,
     ) -> None:
         """Add multipactor detection function to instruments."""
-        affected_instruments = self.get_affected_instruments(
-            instrument_class)
-
-        for instrument in affected_instruments:
+        instruments = self.get_instruments(instrument_class)
+        for instrument in instruments:
             instrument.multipac_detector = multipac_detector
 
-    def _where_is_multipactor(self,
-                              detector_instrument: Instrument
-                              ) -> Sequence[tuple[int, int]]:
+    def _when_is_there_multipactor(self,
+                                   detector_instrument: Instrument | ABCMeta
+                                   ) -> Sequence[tuple[int, int]]:
         """Get the list of multipacting zones (indexes).
 
-        Need to pass in a ``referee_instrument_class`` to tell which type of
+        Need to pass in a ``detector_instrument`` to tell which type of
         :class:`.Instrument` we should trust to detect multipactor.
 
         """
+        if isinstance(detector_instrument, ABCMeta):
+            detector_instrument = self.get_instrument(detector_instrument)
+
+        assert isinstance(detector_instrument, Instrument)
         assert hasattr(detector_instrument, 'multipac_detector'), "No " \
             "multipacting detector defined for instrument under study."
 
@@ -96,48 +136,32 @@ class IMeasurementPoint(ABC):
         zones = start_and_end_of_contiguous_true_zones(multipactor)
         return zones
 
-    def get_affected_instruments(
-            self,
-            instrument_class: ABCMeta,
-            instruments_to_ignore: Sequence[Instrument | str] = ()
-            ) -> list[Instrument]:
+    def plot_instrument_vs_time(self,
+                                instrument_class_axes: dict[ABCMeta, Axes],
+                                instruments_to_plot: tuple[ABCMeta, ...] = (),
+                                raw: bool = False,
+                                **subplot_kw,
+                                ) -> None:
+        """Plot the signal of the ``instruments_to_plot`` of this object.
+
+        Parameters
+        ----------
+        instrument_class_axes : dict[ABCMeta, Axes]
+            Dictionary linking the class of the instruments to plot with the
+            associated axes.
+        instruments_to_plot : tuple[ABCMeta, ...]
+            Class of the instruments to be plotted.
+        raw : bool
+            If the raw of the post-treated signal should be plotted.
+        subplot_kw :
+            Other keyword arguments passed to the ``plot_vs_time`` methods.
+
         """
-        Get instruments which are (sub) classes of ``instrument_class``.
-
-        An empty list is returned when current pick-up has no instrument of the
-        desired instrument class.
-
-        """
-        instrument_names_to_ignore = [
-            x if isinstance(x, str)
-            else x.name
-            for x in instruments_to_ignore]
-        affected_instruments = [
-            instrument for instrument in self.instruments
-            if isinstance(instrument, instrument_class)
-            and instrument.name not in instrument_names_to_ignore]
-        return affected_instruments
-
-    def get_instrument_data(self, instrument_class: ABCMeta) -> np.ndarray:
-        """Get the ``ydata`` from first ``instrument_class`` instrument."""
-        instruments = self.get_affected_instruments(instrument_class)
-        assert len(instruments) < 2
-        instrument = instruments[0]
-        return instrument.ydata
-
-    def plot_instruments(self,
-                         axes: dict[ABCMeta, Axes],
-                         instruments_to_plot: tuple[ABCMeta, ...] = (),
-                         raw: bool = False,
-                         **subplot_kw,
-                         ) -> None:
-        """Plot the signal of every instrument at this pick-up."""
         for instrument_class in instruments_to_plot:
-            affected_instruments = self.get_affected_instruments(
-                instrument_class)
-            axe = axes[instrument_class]
+            instruments = self.get_instruments(instrument_class)
+            axe = instrument_class_axes[instrument_class]
 
-            for instrument in affected_instruments:
+            for instrument in instruments:
                 line1 = instrument.plot_vs_time(axe,
                                                 raw,
                                                 color=self._color,
@@ -145,12 +169,12 @@ class IMeasurementPoint(ABC):
                 if self._color is None:
                     self._color = line1.get_color()
 
-    def add_multipacting_zone(self,
-                              axe: Axes,
-                              plotted_instrument_class: ABCMeta,
-                              detector_instrument_class: ABCMeta,
-                              ) -> None:
-        """Add multipacting zone on a ``plot_instruments`` plot.
+    def _add_multipactor_vs_time(self,
+                                 axe: Axes,
+                                 plotted_instrument_class: ABCMeta,
+                                 detector_instrument_class: ABCMeta,
+                                 ) -> None:
+        """Add arrows to display multipactor.
 
         Parameters
         ----------
@@ -164,38 +188,51 @@ class IMeasurementPoint(ABC):
             or it can be different.
 
         """
-        instruments = self.get_affected_instruments(detector_instrument_class)
-        if len(instruments) == 0:
+        detector_instrument = self.get_instrument(detector_instrument_class)
+        if detector_instrument is None:
             return
 
-        if len(instruments) > 1:
-            print(f"Warning! More than one {detector_instrument_class} "
-                  "instrument at current GlobalDiagnostics/PickUp. So I am not"
-                  " sure which one should be used to determine when "
-                  "multipactor appeared. I will take the first one.")
-        detector_instrument = instruments[0]
-        zones = self._where_is_multipactor(detector_instrument)
+        plotted_instrument = self.get_instrument(plotted_instrument_class)
+        if plotted_instrument is None:
+            return
 
-        plotted_instruments = self.get_affected_instruments(
-            plotted_instrument_class)
-        if len(plotted_instruments) > 1:
-            print("Warning! More than one instrument to be plotted with "
-                  "multipactor. Only taking first one.")
-        plotted_instrument = plotted_instruments[0]
-        y_position_of_multipactor_zone = np.nanmax(plotted_instrument.ydata)
-        y_position_of_multipactor_zone *= 1.05
+        zones = self._when_is_there_multipactor(detector_instrument)
+        y_pos_of_multipactor_zone = 1.05 * np.nanmax(plotted_instrument.ydata)
 
         vline_kw = self._typical_vline_keywords()
         arrow_kw = self._typical_arrow_keywords(plotted_instrument)
 
         for zone in zones:
             delta_x = zone[1] - zone[0]
-            axe.arrow(zone[0], y_position_of_multipactor_zone,
-                      delta_x, 0., **arrow_kw)
-            axe.arrow(zone[1], y_position_of_multipactor_zone,
-                      -delta_x, 0., **arrow_kw)
+            axe.arrow(zone[0],
+                      y_pos_of_multipactor_zone,
+                      delta_x,
+                      0.,
+                      **arrow_kw)
+            axe.arrow(zone[1],
+                      y_pos_of_multipactor_zone,
+                      -delta_x,
+                      0.,
+                      **arrow_kw)
             axe.axvline(zone[0], **vline_kw)
             axe.axvline(zone[1], **vline_kw)
+
+    def scatter_instruments_data(self,
+                                 instrument_class_axes: dict[ABCMeta, Axes],
+                                 mp_detector_instrument_class: ABCMeta,
+                                 xdata: float,
+                                 ) -> None:
+        """Scatter data measured by desired instruments."""
+        for instrument_class, axes in instrument_class_axes.items():
+            instrument = self.get_instrument(instrument_class)
+            if instrument is None:
+                continue
+
+            mp_detector = self.get_instrument(mp_detector_instrument_class)
+            assert mp_detector is not None
+            multipactor = mp_detector.multipactor
+
+            instrument.scatter_data(axes, multipactor, xdata)
 
     def _typical_vline_keywords(self) -> dict[str, Any]:
         """Set consistent plot properties."""

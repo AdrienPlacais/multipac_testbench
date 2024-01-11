@@ -10,11 +10,9 @@
 
 """
 from abc import ABCMeta
-from functools import partial
 from pathlib import Path
 from typing import Sequence
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib import animation
@@ -32,7 +30,7 @@ from multipac_testbench.src.measurement_point.factory import \
     IMeasurementPointFactory
 from multipac_testbench.src.measurement_point.i_measurement_point import \
     IMeasurementPoint
-from multipac_testbench.src.measurement_point.pick_up import PickUp
+from multipac_testbench.src.util import plot
 
 
 class MultipactorTest:
@@ -69,12 +67,12 @@ class MultipactorTest:
                          only_pick_up_which_name_is: tuple[str, ...] = (),
                          **kwargs) -> None:
         """Add post-treatment functions to instruments."""
-        affected_pick_ups = self.pick_ups
+        pick_ups = self.pick_ups
         if len(only_pick_up_which_name_is) > 0:
-            affected_pick_ups = [pick_up for pick_up in self.pick_ups
-                                 if pick_up.name in only_pick_up_which_name_is]
+            pick_ups = [pick_up for pick_up in self.pick_ups
+                        if pick_up.name in only_pick_up_which_name_is]
 
-        for pick_up in affected_pick_ups:
+        for pick_up in pick_ups:
             pick_up.add_post_treater(*args, **kwargs)
 
     def set_multipac_detector(self,
@@ -82,24 +80,28 @@ class MultipactorTest:
                               only_pick_up_which_name_is: tuple[str, ...] = (),
                               **kwargs) -> None:
         """Set multipactor detection functions to instruments."""
-        affected_pick_ups = self.pick_ups
+        pick_ups = self.pick_ups
         if len(only_pick_up_which_name_is) > 0:
-            affected_pick_ups = [pick_up for pick_up in self.pick_ups
-                                 if pick_up.name in only_pick_up_which_name_is]
+            pick_ups = [pick_up for pick_up in self.pick_ups
+                        if pick_up.name in only_pick_up_which_name_is]
 
-        for pick_up in affected_pick_ups:
+        for pick_up in pick_ups:
             pick_up.set_multipac_detector(*args, **kwargs)
 
     def plot_instruments_vs_time(
-            self,
-            instruments_to_plot: tuple[ABCMeta, ...],
-            measurement_points_to_exclude: tuple[str, ...] = (),
-            png_path: Path | None = None,
-            raw: bool = False,
-            multipactor_plots: dict[ABCMeta, ABCMeta] | None = None,
-            **fig_kw,
+        self,
+        instruments_to_plot: tuple[ABCMeta, ...],
+        measurement_points_to_exclude: tuple[str, ...] = (),
+        png_path: Path | None = None,
+        raw: bool = False,
+        multipactor_plots: dict[ABCMeta, ABCMeta] | None = None,
+        **fig_kw,
     ) -> tuple[Figure, Axes]:
         """Plot signals measured by ``instruments_to_plot``.
+
+        .. todo::
+            Add a ``instruments_to_exclude`` argument. Could replace
+            ``measurement_points_to_exclude``.
 
         Parameters
         ----------
@@ -132,67 +134,64 @@ class MultipactorTest:
             The created axes.
 
         """
-        fig, instrument_class_axes = self._create_fig(instruments_to_plot,
-                                                      **fig_kw)
+        fig, instrument_class_axes = plot.create_fig(
+            self.freq_mhz,
+            self.swr,
+            instruments_to_plot,
+            xlabel='Measurement index',
+            **fig_kw)
 
         measurement_points = self._filter_measurement_points(
             to_exclude=measurement_points_to_exclude)
 
         for measurement_point in measurement_points:
-            measurement_point.plot_instruments(instrument_class_axes,
-                                               instruments_to_plot,
-                                               raw=raw)
+            measurement_point.plot_instrument_vs_time(instrument_class_axes,
+                                                      instruments_to_plot,
+                                                      raw=raw)
 
             if multipactor_plots is not None:
-                self.add_multipacting_zones(measurement_point,
-                                            instrument_class_axes,
-                                            multipactor_plots)
+                self._add_multipactor_vs_time(measurement_point,
+                                              instrument_class_axes,
+                                              multipactor_plots)
 
-        for axe in instrument_class_axes.values():
-            axe.legend()
+        plot.finish_fig(fig, instrument_class_axes.values(), png_path)
 
-        if png_path is not None:
-            fig.savefig(png_path)
+        return fig, [axes for axes in instrument_class_axes.values()]
 
-        return fig, instrument_class_axes
-
-# to reformulate
-    def add_multipacting_zones(
-            self,
-            pick_up: PickUp,
-            axes: dict[ABCMeta, Axes],
-            multipactor_plots: dict[ABCMeta, ABCMeta]
-    ) -> None:
-        """Add multipacting zones on pick-up plot.
+    def _add_multipactor_vs_time(self,
+                                 measurement_point: IMeasurementPoint,
+                                 instrument_class_axes: dict[ABCMeta, Axes],
+                                 multipactor_plots: dict[ABCMeta, ABCMeta]
+                                 ) -> None:
+        """Show with arrows when multipactor happens.
 
         Parameters
         ----------
-        pick_up : PickUp
-            Pick-up which detected multipactor.
-        axes : dict[ABCMeta, Axes]
-            Dictionary holding the plots and the associated instrument
-            subclass.
-        multipactor_plots : dict[ABCMeta, ABCMeta] | None, optional
-            Keys are the :class:`Instrument` subclass for which you want to see
-            the multipactor zones. Values are the :class:`Instrument` subclass
-            that detect the multipactor.
+        measurement_point : IMeasurementPoint
+            :class:`.PickUp` or :class:`.GlobalDiagnostic` under study.
+        instrument_class_axes : dict[ABCMeta, Axes]
+            Links instrument class with the axes.
+        multipactor_plots : dict[ABCMeta, ABCMeta]
+            Links the instrument plot where multipactor should appear (keys)
+            with the instruments that actually detect the multipactor (values).
 
         """
         for plotted_instr, detector_instr in multipactor_plots.items():
-            pick_up.add_multipacting_zone(axes[plotted_instr],
-                                          plotted_instr,
-                                          detector_instr,
-                                          )
+            measurement_point._add_multipactor_vs_time(
+                instrument_class_axes[plotted_instr],
+                plotted_instr,
+                detector_instr,
+            )
 
     def animate_instruments_vs_position(
             self,
-            instruments_to_plot: tuple[ABCMeta, ...],
+            instruments_to_plot: Sequence[ABCMeta],
             gif_path: Path | None = None,
             fps: int = 50,
             keep_one_frame_over: int = 1,
             interval: int | None = None,
             **fig_kw,
-            ) -> animation.FuncAnimation:
+    ) -> animation.FuncAnimation:
         """Represent measured signals with probe position."""
         fig, axes_instruments = self._prepare_animation_fig(
             instruments_to_plot,
@@ -270,58 +269,51 @@ class MultipactorTest:
                 i += 1
         return artists
 
-    def _create_fig(self,
-                    instruments_to_plot: tuple[ABCMeta, ...] = (),
-                    **fig_kw,
-                    ) -> tuple[Figure, dict[ABCMeta, Axes]]:
-        """Create the figure and axes.
+    def scatter_instruments_data(
+        self,
+        instruments_to_plot: Sequence[ABCMeta],
+        mp_detector_instrument: ABCMeta,
+        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
+        png_path: Path | None = None,
+        **fig_kw,
+    ) -> tuple[Figure, Axes]:
+        """Plot the data measured by instruments.
 
-        Parameters
-        ----------
-        instruments_to_plot : tuple[ABCMeta, ...]
-            Class of the instruments to be plotted.
-        fig_kw :
-            Keyword arguments passsed to the Figure constructor.
+        This plot results in important amount of points. It becomes interesting
+        when setting different colors for multipactor/no multipactor points and
+        can help see trends.
 
-        Returns
-        -------
-        fig : Figure
-            Figure holding the axes.
-        instrument_class_axes : dict[ABCMeta, Axes]
-            Dictionary linking the class of the instruments to plot with the
-            associated axes.
+        .. todo::
+            Also show from global diagnostic
+
+        .. todo::
+            User should be able to select: reconstructed or measured electric
+            field.
 
         """
-        nrows = len(instruments_to_plot)
-        fig, instrument_class_axes = plt.subplots(
-            nrows=nrows,
-            ncols=1,
-            sharex=True,
-            **fig_kw
-        )
+        if fig_kw is None:
+            fig_kw = {}
+        fig, instrument_class_axes = plot.create_fig(self.freq_mhz,
+                                                     self.swr,
+                                                     instruments_to_plot,
+                                                     xlabel='Probe index',
+                                                     **fig_kw)
+        measurement_points = self._filter_measurement_points(
+            measurement_points_to_exclude)
+        for i, measurement_point in enumerate(measurement_points):
+            measurement_point.scatter_instruments_data(instrument_class_axes,
+                                                       mp_detector_instrument,
+                                                       xdata=float(i),
+                                                       )
 
-        # ensure that axes is an iterable
-        if nrows == 1:
-            instrument_class_axes = [instrument_class_axes, ]
-
-        instrument_class_axes = dict(zip(instruments_to_plot,
-                                         instrument_class_axes))
-
-        axe = None
-        for instrument_class, axe in instrument_class_axes.items():
-            axe.grid(True)
-            axe.set_ylabel(instrument_class.ylabel())
-        assert isinstance(axe, Axes)
-        if axe is not None:
-            axe.set_xlabel("Measurement index")
-
-        fig.suptitle(f"f = {self.freq_mhz}MHz; SWR = {self.swr}")
-
-        return fig, instrument_class_axes
+        fig, axes = plot.finish_fig(fig,
+                                    instrument_class_axes.values(),
+                                    png_path)
+        return fig, axes
 
     def _filter_measurement_points(
             self,
-            to_exclude: tuple[str | IMeasurementPoint, ...] = (),
+            to_exclude: Sequence[str | IMeasurementPoint] = (),
     ) -> list[IMeasurementPoint]:
         """Get measurement points (Pick-Ups and GlobalDiagnostic)."""
         names_to_exclude = [x if isinstance(x, str) else x.name
@@ -361,7 +353,7 @@ class MultipactorTest:
 
         """
         instruments_2d = [
-            measurement_point.get_affected_instruments(
+            measurement_point.get_instruments(
                 instrument_class,
                 instruments_to_ignore=instruments_to_ignore,
             )
@@ -427,8 +419,12 @@ class MultipactorTest:
             on.
 
         """
-        fig, instrument_class_axes = self._create_fig(instruments_to_plot,
-                                                      **fig_kw)
+        fig, instrument_class_axes = plot.create_fig(self.freq_mhz,
+                                                     self.swr,
+                                                     instruments_to_plot,
+                                                     xlabel='Position [m]',
+                                                     **fig_kw)
+
         for instrument_class, axe in instrument_class_axes.items():
             axe.set_ylabel(instrument_class.ylabel())
 
@@ -450,19 +446,6 @@ class MultipactorTest:
         axe = None
         for axe, y_lim in y_limits.items():
             axe.set_ylim(y_lim)
-            axe.grid(True)
-        if axe is not None:
-            axe.set_xlabel('Position [m]')
-
-        # print("Warning!! Dirty add an reconstructed voltage to animation")
-        # for instruments in axes_instruments.values():
-        #     reconstructed = self.global_diagnostics.instruments[-1]
-        #     reconstructed.plot_vs_position = partial(
-        #         reconstructed.plot_vs_position,
-        #         label=reconstructed.fit_info)
-        #     assert isinstance(reconstructed, Reconstructed)
-        #     if isinstance(instruments[0], FieldProbe):
-        #         instruments.append(reconstructed)
 
         return fig, axes_instruments
 
@@ -470,7 +453,7 @@ class MultipactorTest:
             self,
             name: str,
             probes_to_ignore: Sequence[str | FieldProbe],
-            ) -> Reconstructed:
+    ) -> Reconstructed:
         """Reconstruct the voltage profile from the e field probes."""
         e_field_probes = self._filter_instruments(FieldProbe,
                                                   self.pick_ups,

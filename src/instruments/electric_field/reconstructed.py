@@ -1,6 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Define voltage along line."""
+"""Define voltage along line.
+
+.. todo::
+    Implement a way to get reconstructed voltage at given pick-up and sample
+    index.
+
+.. todo::
+    voltage fitting, overload: they work but this not clean, not clean at all
+
+"""
 import math
 from functools import partial
 from typing import overload
