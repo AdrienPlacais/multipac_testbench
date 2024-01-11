@@ -13,6 +13,8 @@ def output_filepath(filepath: Path,
                     ) -> Path:
     """Return a new path to save output files."""
     filename = filepath.with_stem(f"{swr}_"
-                                  + filepath.stem).with_suffix(extension)
-    output_filepath = filename.parent / out_folder / filename.name
-    return output_filepath
+                                  + filepath.stem).with_suffix(extension).name
+    folder = filepath.parent / out_folder
+    if not folder.is_dir():
+        folder.mkdir(parents=True)
+    return folder / filename
