@@ -95,8 +95,7 @@ class MultipactorTest:
         png_path: Path | None = None,
         raw: bool = False,
         multipactor_plots: dict[ABCMeta, ABCMeta] | None = None,
-        fig_kw: dict | None = None,
-        subplot_kw: dict | None = None,
+        **fig_kw,
     ) -> tuple[Figure, Axes]:
         """Plot signals measured by ``instruments_to_plot``.
 
@@ -135,11 +134,12 @@ class MultipactorTest:
             The created axes.
 
         """
-        fig, instrument_class_axes = plot.create_fig(self.freq_mhz,
-                                                     self.swr,
-                                                     'Measurement index',
-                                                     instruments_to_plot,
-                                                     fig_kw, subplot_kw)
+        fig, instrument_class_axes = plot.create_fig(
+            self.freq_mhz,
+            self.swr,
+            instruments_to_plot,
+            xlabel='Measurement index',
+            **fig_kw)
 
         measurement_points = self._filter_measurement_points(
             to_exclude=measurement_points_to_exclude)
@@ -185,7 +185,7 @@ class MultipactorTest:
 
     def animate_instruments_vs_position(
             self,
-            instruments_to_plot: tuple[ABCMeta, ...],
+            instruments_to_plot: Sequence[ABCMeta],
             gif_path: Path | None = None,
             fps: int = 50,
             keep_one_frame_over: int = 1,
@@ -275,8 +275,7 @@ class MultipactorTest:
         mp_detector_instrument: ABCMeta,
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
         png_path: Path | None = None,
-        fig_kw: dict | None = None,
-        subplot_kw: dict | None = None,
+        **fig_kw,
     ) -> tuple[Figure, Axes]:
         """Plot the data measured by instruments.
 
@@ -292,12 +291,13 @@ class MultipactorTest:
             field.
 
         """
+        if fig_kw is None:
+            fig_kw = {}
         fig, instrument_class_axes = plot.create_fig(self.freq_mhz,
                                                      self.swr,
-                                                     'Probe index',
                                                      instruments_to_plot,
-                                                     fig_kw,
-                                                     subplot_kw)
+                                                     xlabel='Probe index',
+                                                     **fig_kw)
         measurement_points = self._filter_measurement_points(
             measurement_points_to_exclude)
         for i, measurement_point in enumerate(measurement_points):
@@ -393,8 +393,7 @@ class MultipactorTest:
         measurement_points_to_exclude: tuple[str, ...] = (),
         instruments_to_ignore_for_limits: tuple[str, ...] = (),
         instruments_to_ignore: Sequence[Instrument | str] = (),
-        fig_kw: dict | None = None,
-        subplot_kw: dict | None = None,
+        **fig_kw,
     ) -> tuple[Figure, dict[Axes, list[Instrument]]]:
         """Prepare the figure and axes for the animation.
 
@@ -422,9 +421,9 @@ class MultipactorTest:
         """
         fig, instrument_class_axes = plot.create_fig(self.freq_mhz,
                                                      self.swr,
-                                                     'Position [m]',
                                                      instruments_to_plot,
-                                                     fig_kw, subplot_kw)
+                                                     xlabel='Position [m]',
+                                                     **fig_kw)
 
         for instrument_class, axe in instrument_class_axes.items():
             axe.set_ylabel(instrument_class.ylabel())
