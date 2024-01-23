@@ -100,21 +100,30 @@ class IMeasurementPoint(ABC):
     def add_post_treater(self,
                          post_treater: Callable[[np.ndarray], np.ndarray],
                          instrument_class: ABCMeta = Instrument,
+                         verbose: bool = False,
                          ) -> None:
         """Add post-treatment functions to instruments."""
         instruments = self.get_instruments(instrument_class)
         for instrument in instruments:
             instrument.add_post_treater(post_treater)
 
+            if verbose:
+                print(f"A post-treater was added to {str(instrument)}.")
+
     def set_multipac_detector(
             self,
             multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
             instrument_class: ABCMeta = Instrument,
+            verbose: bool = False,
     ) -> None:
         """Add multipactor detection function to instruments."""
         instruments = self.get_instruments(instrument_class)
         for instrument in instruments:
             instrument.multipac_detector = multipac_detector
+
+            if verbose:
+                print(f"A multipactor detector was added to {str(instrument)}."
+                      )
 
     def _when_is_there_multipactor(self,
                                    detector_instrument: Instrument | ABCMeta
@@ -129,8 +138,9 @@ class IMeasurementPoint(ABC):
             detector_instrument = self.get_instrument(detector_instrument)
 
         assert isinstance(detector_instrument, Instrument)
-        assert hasattr(detector_instrument, 'multipac_detector'), "No " \
-            "multipacting detector defined for instrument under study."
+        assert hasattr(detector_instrument, 'multipac_detector'), (
+            "You asked me to detect multipactor with "
+            f"{str(detector_instrument)} but it has no multipacting detector.")
 
         multipactor = detector_instrument.multipactor
         zones = start_and_end_of_contiguous_true_zones(multipactor)
