@@ -518,11 +518,45 @@ class MultipactorTest:
             measurement_points_to_exclude: Sequence[str
                                                     | IMeasurementPoint] = (),
             png_path: Path | None = None,
-            raw: bool = False,
             power_is_growing_kw: dict[str, int | float] | None = None,
             **fig_kw,
     ) -> tuple[Figure, Axes]:
-        """Plot evolution of multipacting limits with time."""
+        """Plot lower and upper multipacting limits evolution.
+
+        As for now, only one instrument should be plotted, and only one
+        detector instrument should be defined.
+
+        .. note::
+            In order to discriminate lower multipacting barrier from upper
+            multipacting barrier, we need to determine when the power is
+            growing and when it is increasing. This can be non-trivial. Check
+            :meth:`.Powers.where_is_growing` and ``power_is_growing_kw``.
+
+        Parameters
+        ----------
+        instrument_class_to_plot : {Powers, FieldProbe, Reconstructed}
+            The instrument which data will be plotted. As the goal of this
+            method is to plot multipacting limits, it is expected that the
+            instrument class is related to power/electric field/voltage.
+        multipactor_detector : ABCMeta
+            The instrument that will tell when multipactor happens. It must
+            have a ``multipac_detector``. Also, it must be unique.
+        measurement_points_to_exclude : Sequence[str | IMeasurementPoint]
+            Some measurement points to exclude from plot.
+        png_path : Path | None
+            If provided, will save the Figure. The default is None.
+        power_is_growing_kw : dict[str, int | float] | None
+            Arguments that are passed to the function that detects if the
+            power is growing or not.
+        fig_kw :
+            Other keyword arguments passed to the ``Figure``.
+
+        Returns
+        -------
+        tuple[Figure, Axes]
+            Created fig and axes.
+
+        """
         if instrument_class_to_plot not in (Powers, FieldProbe, Reconstructed):
             print("multipactor_test.plot_multipactor_limits warning: you want "
                   f"to plot the values measured by {instrument_class_to_plot} "
