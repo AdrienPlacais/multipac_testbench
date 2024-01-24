@@ -12,6 +12,9 @@ from matplotlib.axes._axes import Axes
 from matplotlib.container import StemContainer
 from matplotlib.lines import Line2D
 
+from multipac_testbench.src.util.multipactor_detectors import \
+    start_and_end_of_contiguous_true_zones
+
 
 class Instrument(ABC):
     """Hold measurements of a single instrument."""
@@ -267,6 +270,70 @@ class Instrument(ABC):
         if self._multipactor is None:
             self._multipactor = self.multipac_detector(self.ydata)
         return self._multipactor
+
+    @property
+    def indexes_of_contiguous_multipactor_zones(self
+                                                ) -> Sequence[tuple[int, int]]:
+        """Get list of indexes of entry and exit of multipacting zones.
+
+        .. warning::
+            Assuming that the upper multipactor threshold is crossed, two cases
+            of figure.
+            If the power is growing, ``Power[entry] < Power[exit]`` hence
+            ``Power[entry]`` is the lower multipactor barrier and
+            ``Power[exit]`` is the upper multipactor barrier.
+            If the power is in its decreasing, ``Power[entry] > Power[exit]``
+            hence ``Power[entry]`` is the *upper* multipactor barrier and
+            ``Power[exit]`` is the *lower* multipactor barrier.
+
+        .. See Also::
+            indexes_of_lower_and_upper_multipactor_barriers
+
+        """
+        return start_and_end_of_contiguous_true_zones(self.multipactor)
+
+    def indexes_of_lower_and_upper_multipactor_barriers(
+            self,
+            power_is_growing: np.ndarray,
+            ) -> tuple[Sequence[int], Sequence[int]]:
+        """Get list of indexes of lower and upper multipactor barriers.
+
+        .. todo::
+            Handle when upper mp barrier is not reached.
+
+        Parameters
+        ----------
+        power_is_growing : np.ndarray
+            Array of booleans. True where the power is growing, False where the
+            power is decreasing.
+
+        """
+        lower_indexes = []
+        upper_indexes = []
+        multipactor = self.multipactor
+        multipactor_change = np.diff(multipactor)
+        for index, (mp, mp_change, is_growing) in enumerate(
+                zip(multipactor[:-1],
+                    multipactor_change,
+                    power_is_growing[1:]),
+                start=1):
+            if not mp_change:
+                continue
+
+            # Enter a MP zone
+            if mp:
+                if is_growing:
+                    lower_indexes.append(index)
+                if not is_growing:
+                    upper_indexes.append(index)
+                continue
+
+            # Exit a MP zone
+            if not is_growing:
+                lower_indexes.append(index)
+            if is_growing:
+                upper_indexes.append(index)
+        return lower_indexes, upper_indexes
 
     def _post_treat(self, data: np.ndarray) -> np.ndarray:
         """Apply all post-treatment functions."""

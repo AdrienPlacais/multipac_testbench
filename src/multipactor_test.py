@@ -381,12 +381,17 @@ class MultipactorTest:
             instruments_to_ignore=instruments_to_ignore)
         return instruments
 
-    def get_instrument(self,
-                       *args: ABCMeta,
-                       **kwargs: Sequence[IMeasurementPoint | str]
-                       | Sequence[Instrument | str]) -> Instrument | None:
+    def get_instrument(
+            self,
+            instrument_class: ABCMeta,
+            measurement_points_to_exclude: Sequence[IMeasurementPoint
+                                                    | str] = (),
+            instruments_to_ignore: Sequence[Instrument | str] = (),
+            ) -> Instrument | None:
         """Get a single instrument of type ``instrument_class``."""
-        instruments = self.get_instruments(*args, **kwargs)
+        instruments = self.get_instruments(instrument_class,
+                                           measurement_points_to_exclude,
+                                           instruments_to_ignore)
         if len(instruments) == 0:
             print("multipactor_test.get_instrument warning! No instrument "
                   "found.")
@@ -399,32 +404,32 @@ class MultipactorTest:
     def _get_limits(
             self,
             axes_instruments: dict[Axes, Sequence[Instrument]],
-            instruments_to_ignore_for_limits: Sequence[Instrument | str]=(),
+            instruments_to_ignore_for_limits: Sequence[Instrument | str] = (),
     ) -> dict[Axes, tuple[float, float]]:
         """Set limits for the plots."""
-        names_to_ignore=[x if isinstance(x, str) else x.name
+        names_to_ignore = [x if isinstance(x, str) else x.name
                            for x in instruments_to_ignore_for_limits]
-        limits={}
+        limits = {}
         for axe, instruments in axes_instruments.items():
-            all_ydata=[instrument.ydata for instrument in instruments
+            all_ydata = [instrument.ydata for instrument in instruments
                          if instrument.name not in names_to_ignore]
 
-            lowers=[np.nanmin(ydata) for ydata in all_ydata]
-            lower=min(lowers)
+            lowers = [np.nanmin(ydata) for ydata in all_ydata]
+            lower = min(lowers)
 
-            uppers=[np.nanmax(ydata) for ydata in all_ydata]
-            upper=max(uppers)
-            amplitude=abs(upper - lower)
+            uppers = [np.nanmax(ydata) for ydata in all_ydata]
+            upper = max(uppers)
+            amplitude = abs(upper - lower)
 
-            limits[axe]=(lower - .1 * amplitude, upper + .1 * amplitude)
+            limits[axe] = (lower - .1 * amplitude, upper + .1 * amplitude)
         return limits
 
     def _prepare_animation_fig(
         self,
         instruments_to_plot: tuple[ABCMeta, ...],
-        measurement_points_to_exclude: tuple[str, ...]=(),
-        instruments_to_ignore_for_limits: tuple[str, ...]=(),
-        instruments_to_ignore: Sequence[Instrument | str]=(),
+        measurement_points_to_exclude: tuple[str, ...] = (),
+        instruments_to_ignore_for_limits: tuple[str, ...] = (),
+        instruments_to_ignore: Sequence[Instrument | str] = (),
         **fig_kw,
     ) -> tuple[Figure, dict[Axes, list[Instrument]]]:
         """Prepare the figure and axes for the animation.
@@ -491,11 +496,7 @@ class MultipactorTest:
                                                   self.pick_ups,
                                                   probes_to_ignore)
         assert self.global_diagnostics is not None
-        powers = self._filter_instruments(Powers,
-                                          [self.global_diagnostics],
-                                          probes_to_ignore)
-        assert len(powers) == 1
-        powers = powers[0]
+        powers = self.get_instrument(Powers)
 
         reconstructed = Reconstructed(
             name=name,
@@ -509,3 +510,63 @@ class MultipactorTest:
         self.global_diagnostics.add_instrument(reconstructed)
 
         return reconstructed
+
+    def plot_multipactor_limits(
+            self,
+            instrument_class_to_plot: ABCMeta,
+            multipactor_detector: ABCMeta,
+            measurement_points_to_exclude: Sequence[str
+                                                    | IMeasurementPoint] = (),
+            png_path: Path | None = None,
+            raw: bool = False,
+            power_is_growing_kw: dict[str, int | float] | None = None,
+            **fig_kw,
+    ) -> tuple[Figure, Axes]:
+        """Plot evolution of multipacting limits with time."""
+        if instrument_class_to_plot not in (Powers, FieldProbe, Reconstructed):
+            print("multipactor_test.plot_multipactor_limits warning: you want "
+                  f"to plot the values measured by {instrument_class_to_plot} "
+                  "at entry and exit of multipactor zones. Does it have any "
+                  "sense?")
+
+        fig, instrument_class_axes = plot.create_fig(
+            self.freq_mhz,
+            self.swr,
+            (instrument_class_to_plot, ),
+            xlabel='Measurement index',
+            **fig_kw
+        )
+
+        instrument_to_plot = self.get_instrument(instrument_class_to_plot,
+                                                 measurement_points_to_exclude,
+                                                 )
+        assert instrument_to_plot is not None
+        data = instrument_to_plot.ydata
+        if isinstance(instrument_to_plot, Powers):
+            data = instrument_to_plot.forward
+
+        detector_instrument = self.get_instrument(
+            multipactor_detector,
+            measurement_points_to_exclude)
+        assert detector_instrument is not None
+
+        powers = self.get_instrument(Powers)
+        assert isinstance(powers, Powers)
+        if power_is_growing_kw is None:
+            power_is_growing_kw = {}
+        power_is_growing = powers.where_is_growing(**power_is_growing_kw)
+
+        lowers_indexes, upper_indexes = detector_instrument.\
+            indexes_of_lower_and_upper_multipactor_barriers(power_is_growing)
+
+        instrument_class_axes[instrument_class_to_plot].plot(
+            lowers_indexes,
+            data[lowers_indexes],
+            label='MP start')
+        instrument_class_axes[instrument_class_to_plot].plot(
+            upper_indexes,
+            data[upper_indexes],
+            label='MP end')
+
+        plot.finish_fig(fig, instrument_class_axes.values(), png_path)
+        return fig, [axes for axes in instrument_class_axes.values()]

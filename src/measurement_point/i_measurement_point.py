@@ -10,8 +10,6 @@ import pandas as pd
 
 from multipac_testbench.src.instruments.factory import InstrumentFactory
 from multipac_testbench.src.instruments.instrument import Instrument
-from multipac_testbench.src.util.multipactor_detectors import \
-    start_and_end_of_contiguous_true_zones
 
 
 class IMeasurementPoint(ABC):
@@ -125,13 +123,15 @@ class IMeasurementPoint(ABC):
                 print(f"A multipactor detector was added to {str(instrument)}."
                       )
 
-    def _when_is_there_multipactor(self,
+    def _start_and_end_of_mp_zones(self,
                                    detector_instrument: Instrument | ABCMeta
                                    ) -> Sequence[tuple[int, int]]:
         """Get the list of multipacting zones (indexes).
 
-        Need to pass in a ``detector_instrument`` to tell which type of
-        :class:`.Instrument` we should trust to detect multipactor.
+        Returns
+        -------
+        zones : Sequence[tuple[int, int]]
+            List of ``(entry, exit)`` indexes of multipacting zones.
 
         """
         if isinstance(detector_instrument, ABCMeta):
@@ -142,9 +142,29 @@ class IMeasurementPoint(ABC):
             "You asked me to detect multipactor with "
             f"{str(detector_instrument)} but it has no multipacting detector.")
 
-        multipactor = detector_instrument.multipactor
-        zones = start_and_end_of_contiguous_true_zones(multipactor)
-        return zones
+        return detector_instrument.indexes_of_contiguous_multipactor_zones
+
+    def _indexes_of_lower_and_upper_multipactor_barriers(
+            self,
+            detector_instrument: Instrument | ABCMeta,
+            power_is_growing: np.ndarray
+    ) -> tuple[Sequence[int], Sequence[int]]:
+        """Get the indexes corresponding to lower and upper mp barrier.
+
+        detector_instrument : Instrument | ABCMeta
+
+        """
+        if isinstance(detector_instrument, ABCMeta):
+            detector_instrument = self.get_instrument(detector_instrument)
+
+        assert isinstance(detector_instrument, Instrument)
+        assert hasattr(detector_instrument, 'multipac_detector'), (
+            "You asked me to detect multipactor with "
+            f"{str(detector_instrument)} but it has no multipacting detector.")
+
+        indexes = detector_instrument.\
+            indexes_of_lower_and_upper_multipactor_barriers(power_is_growing)
+        return indexes
 
     def plot_instrument_vs_time(self,
                                 instrument_class_axes: dict[ABCMeta, Axes],
@@ -206,7 +226,7 @@ class IMeasurementPoint(ABC):
         if plotted_instrument is None:
             return
 
-        zones = self._when_is_there_multipactor(detector_instrument)
+        zones = self._start_and_end_of_mp_zones(detector_instrument)
         y_pos_of_multipactor_zone = 1.05 * np.nanmax(plotted_instrument.ydata)
 
         vline_kw = self._typical_vline_keywords()
