@@ -596,11 +596,10 @@ class MultipactorTest:
         instrument_class_axes[instrument_class_to_plot].plot(
             lowers_indexes,
             data[lowers_indexes],
-            label='MP start')
+            label=f'MP start according to {str(detector_instrument)}')
         instrument_class_axes[instrument_class_to_plot].plot(
             upper_indexes,
             data[upper_indexes],
-            label='MP end')
-
+            label=f'MP end according to {str(detector_instrument)}')
         plot.finish_fig(fig, instrument_class_axes.values(), png_path)
         return fig, [axes for axes in instrument_class_axes.values()]
