@@ -62,6 +62,7 @@ class Instrument(ABC):
 
         self._multipac_detector: Callable[[np.ndarray], np.ndarray]
         self._multipactor: np.ndarray | None = None
+        self.ydata_at_multipacting_barrier = pd.DataFrame()
 
     def __str__(self) -> str:
         """Give concise information on instrument."""
@@ -294,15 +295,15 @@ class Instrument(ABC):
 
     def indexes_of_lower_and_upper_multipactor_barriers(
             self,
-            power_is_growing: np.ndarray,
-            ) -> tuple[Sequence[int], Sequence[int]]:
+            power_is_growing: list[bool | float]
+    ) -> tuple[Sequence[int], Sequence[int]]:
         """Get list of indexes of lower and upper multipactor barriers.
 
         Parameters
         ----------
-        power_is_growing : np.ndarray
-            Array of floats. 1. where the power is growing, 0. where the
-            power is decreasing.
+        power_is_growing : list[bool | float]
+            True where the power is growing, False where the power is
+            decreasing, NaN where undetermined.
 
         Returns
         -------
@@ -323,21 +324,52 @@ class Instrument(ABC):
                 start=1):
             if not mp_change:
                 continue
+            if np.isnan(is_growing):
+                continue
 
             # Enter a MP zone
             if mp:
                 if is_growing:
                     lower_indexes.append(index)
-                if not is_growing:
+                else:
                     upper_indexes.append(index)
                 continue
 
             # Exit a MP zone
             if not is_growing:
                 lower_indexes.append(index)
-            if is_growing:
+            else:
                 upper_indexes.append(index)
         return lower_indexes, upper_indexes
+
+    def values_of_lower_and_upper_multipactor_barriers(
+        self,
+        lower_indexes: list[int],
+        upper_indexes: list[int],
+        name_of_detector: str
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
+        """Get measured data at lower and upper multipactor barriers."""
+        columns = self.raw_data.columns
+        lower_values = pd.DataFrame(
+            data=self.ydata[lower_indexes],
+            index=lower_indexes,
+            columns="Lower barrier " + columns + " according to "
+            + name_of_detector,
+        )
+
+        upper_values = pd.DataFrame(
+            data=self.ydata[upper_indexes],
+            index=upper_indexes,
+            columns="Upper barrier " + columns + " according to "
+            + name_of_detector,
+        )
+        self.ydata_at_multipacting_barrier = \
+            pd.concat([self.ydata_at_multipacting_barrier,
+                       lower_values,
+                       upper_values],
+                      axis=1).sort_index()
+
+        return lower_values, upper_values
 
     def _post_treat(self, data: np.ndarray) -> np.ndarray:
         """Apply all post-treatment functions."""
