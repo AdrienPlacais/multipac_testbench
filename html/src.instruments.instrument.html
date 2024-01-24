@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>src.instruments.instrument module &mdash; MULTIPAC test bench 1.1.1-9-g9317046 documentation</title>
+  <title>src.instruments.instrument module &mdash; MULTIPAC test bench 1.1.1-16-g56cd316 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,7 +15,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=bced23b6"></script>
+        <script src="_static/documentation_options.js?v=ac74646a"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -38,7 +38,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.1.1-9-g9317046
+                1.1.1-16-g56cd316
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -248,12 +248,12 @@ hence <code class="docutils literal notranslate"><span class="pre">Power[entry]<
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.instruments.instrument.Instrument.indexes_of_lower_and_upper_multipactor_barriers">
-<span class="sig-name descname"><span class="pre">indexes_of_lower_and_upper_multipactor_barriers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">power_is_growing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#src.instruments.instrument.Instrument.indexes_of_lower_and_upper_multipactor_barriers" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">indexes_of_lower_and_upper_multipactor_barriers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">power_is_growing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#src.instruments.instrument.Instrument.indexes_of_lower_and_upper_multipactor_barriers" title="Link to this definition"></a></dt>
 <dd><p>Get list of indexes of lower and upper multipactor barriers.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>power_is_growing</strong> (<em>np.ndarray</em>) – Array of floats. 1. where the power is growing, 0. where the
-power is decreasing.</p>
+<dd class="field-odd"><p><strong>power_is_growing</strong> (<em>list</em><em>[</em><em>bool</em><em> | </em><em>float</em><em>]</em>) – True where the power is growing, False where the power is
+decreasing, NaN where undetermined.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
@@ -263,6 +263,12 @@ power is decreasing.</p>
 </p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.instrument.Instrument.values_of_lower_and_upper_multipactor_barriers">
+<span class="sig-name descname"><span class="pre">values_of_lower_and_upper_multipactor_barriers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lower_indexes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_indexes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_of_detector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataFrame</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#src.instruments.instrument.Instrument.values_of_lower_and_upper_multipactor_barriers" title="Link to this definition"></a></dt>
+<dd><p>Get measured data at lower and upper multipactor barriers.</p>
 </dd></dl>
 
 </dd></dl>
