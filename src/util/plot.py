@@ -13,7 +13,7 @@ from matplotlib.figure import Figure
 def create_fig(freq_mhz: float,
                swr: float,
                instruments_to_plot: Sequence[ABCMeta] = (),
-               xlabel: str = 'default',
+               xlabel: str | None = None,
                subplot_kw: dict | None = None,
                **fig_kw,
                ) -> tuple[Figure, dict[ABCMeta, Axes]]:
@@ -53,7 +53,7 @@ def create_fig(freq_mhz: float,
 def _create_axes(instruments_to_plot: Sequence[ABCMeta],
                  fig: Figure,
                  nrows: int,
-                 xlabel,
+                 xlabel: str | None = None,
                  **subplot_kw,
                  ) -> dict[ABCMeta, Axes]:
     """Create the axes."""
@@ -66,7 +66,8 @@ def _create_axes(instruments_to_plot: Sequence[ABCMeta],
         axes.append(axe)
         sharex = axes[0]
 
-    axes[-1].set_xlabel(xlabel)
+    if xlabel is not None:
+        axes[-1].set_xlabel(xlabel)
 
     instrument_class_axes = dict(zip(instruments_to_plot, axes))
 
