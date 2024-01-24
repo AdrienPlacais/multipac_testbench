@@ -11,6 +11,7 @@
 """
 from abc import ABCMeta
 from pathlib import Path
+from re import A
 from typing import Sequence
 
 import numpy as np
@@ -532,6 +533,9 @@ class MultipactorTest:
             growing and when it is increasing. This can be non-trivial. Check
             :meth:`.Powers.where_is_growing` and ``power_is_growing_kw``.
 
+        .. todo::
+            Save the values of the multipacting barriers somewhere.
+
         Parameters
         ----------
         instrument_class_to_plot : {Powers, FieldProbe, Reconstructed}
@@ -575,9 +579,6 @@ class MultipactorTest:
                                                  measurement_points_to_exclude,
                                                  )
         assert instrument_to_plot is not None
-        data = instrument_to_plot.ydata
-        if isinstance(instrument_to_plot, Powers):
-            data = instrument_to_plot.forward
 
         detector_instrument = self.get_instrument(
             multipactor_detector,
@@ -590,16 +591,16 @@ class MultipactorTest:
             power_is_growing_kw = {}
         power_is_growing = powers.where_is_growing(**power_is_growing_kw)
 
-        lowers_indexes, upper_indexes = detector_instrument.\
+        indexes = detector_instrument.\
             indexes_of_lower_and_upper_multipactor_barriers(power_is_growing)
+        lower_values, upper_values = \
+            instrument_to_plot.values_of_lower_and_upper_multipactor_barriers(
+                    *indexes,
+                    str(detector_instrument))
 
-        instrument_class_axes[instrument_class_to_plot].plot(
-            lowers_indexes,
-            data[lowers_indexes],
-            label=f'MP start according to {str(detector_instrument)}')
-        instrument_class_axes[instrument_class_to_plot].plot(
-            upper_indexes,
-            data[upper_indexes],
-            label=f'MP end according to {str(detector_instrument)}')
+        axe = instrument_class_axes[instrument_class_to_plot]
+        lower_values.plot(ax=axe, kind='line', drawstyle='steps-post')
+        upper_values.plot(ax=axe, kind='line', drawstyle='steps-post')
+        axe.grid(True)
         plot.finish_fig(fig, instrument_class_axes.values(), png_path)
         return fig, [axes for axes in instrument_class_axes.values()]
