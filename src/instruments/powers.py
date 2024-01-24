@@ -84,3 +84,59 @@ class Powers(Instrument):
         if self._swr is None:
             self._swr = (1. + self.gamma) / (1. - self.gamma)
         return self._swr
+
+    @property
+    def forward(self) -> np.ndarray:
+        """Return forward power only."""
+        return self.ydata[:, 0]
+
+    @property
+    def reflected(self) -> np.ndarray:
+        """Return reflected power only."""
+        return self.ydata[:, 1]
+
+    def where_is_increasing(self, **kwargs) -> np.ndarray:
+        """Determine where power is growing (``True``) and where it is not."""
+        n_points = self.raw_data.index[-1]
+        is_increasing = [_array_is_increasing(self.forward, i, **kwargs)
+                         for i in range(n_points)]
+        return np.array(is_increasing)
+
+
+def _array_is_increasing(array: np.ndarray,
+                         index: int,
+                         width: int,
+                         tol: float = 1e-5) -> bool | float:
+    """Tell if ``array`` is locally increasing at ``index``.
+
+    Parameters
+    ----------
+    array : np.ndarray
+        Array under study.
+    index : int
+        Where you want to know if we increase.
+    width : int
+        Width of the sample to determine increase.
+    tol : float, optional
+        If absolute value of variation between ``array[idx-width/2]`` and
+        ``array[idx+width/2]`` is lower than ``tol``, we return a ``NaN``. The
+        default is ``1e-5``.
+
+    Returns
+    -------
+    bool | float
+        If the array is locally increasing, ``NaN`` if undetermined.
+
+    """
+    semi_width = width // 2
+    if index <= semi_width:
+        return np.NaN
+    if index >= len(array) - semi_width:
+        return np.NaN
+
+    local_diff = array[index + semi_width] - array[index - semi_width]
+    if abs(local_diff) < tol:
+        return np.NaN
+    if local_diff < 0.:
+        return False
+    return True
