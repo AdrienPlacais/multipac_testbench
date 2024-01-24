@@ -298,14 +298,18 @@ class Instrument(ABC):
             ) -> tuple[Sequence[int], Sequence[int]]:
         """Get list of indexes of lower and upper multipactor barriers.
 
-        .. todo::
-            Handle when upper mp barrier is not reached.
-
         Parameters
         ----------
         power_is_growing : np.ndarray
-            Array of booleans. True where the power is growing, False where the
+            Array of floats. 1. where the power is growing, 0. where the
             power is decreasing.
+
+        Returns
+        -------
+        lower_indexes : Sequence[int]
+            List containing all indexes of entry in a multipacting zone.
+        upper_indexes : Sequence[int]
+            List containing all indexes of exit of a multipacting zone.
 
         """
         lower_indexes = []
