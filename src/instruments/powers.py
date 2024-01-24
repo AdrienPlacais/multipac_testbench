@@ -95,18 +95,18 @@ class Powers(Instrument):
         """Return reflected power only."""
         return self.ydata[:, 1]
 
-    def where_is_increasing(self, **kwargs) -> np.ndarray:
+    def where_is_growing(self, **kwargs) -> np.ndarray:
         """Determine where power is growing (``True``) and where it is not."""
         n_points = self.raw_data.index[-1]
-        is_increasing = [_array_is_increasing(self.forward, i, **kwargs)
-                         for i in range(n_points)]
-        return np.array(is_increasing)
+        is_growing = [_array_is_growing(self.forward, i, **kwargs)
+                      for i in range(n_points)]
+        return np.array(is_growing)
 
 
-def _array_is_increasing(array: np.ndarray,
-                         index: int,
-                         width: int,
-                         tol: float = 1e-5) -> bool | float:
+def _array_is_growing(array: np.ndarray,
+                      index: int,
+                      width: int = 10,
+                      tol: float = 1e-5) -> bool | float:
     """Tell if ``array`` is locally increasing at ``index``.
 
     Parameters
@@ -115,8 +115,8 @@ def _array_is_increasing(array: np.ndarray,
         Array under study.
     index : int
         Where you want to know if we increase.
-    width : int
-        Width of the sample to determine increase.
+    width : int, optional
+        Width of the sample to determine increase. The default is ``10``.
     tol : float, optional
         If absolute value of variation between ``array[idx-width/2]`` and
         ``array[idx+width/2]`` is lower than ``tol``, we return a ``NaN``. The
