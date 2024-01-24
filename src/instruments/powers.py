@@ -95,12 +95,12 @@ class Powers(Instrument):
         """Return reflected power only."""
         return self.ydata[:, 1]
 
-    def where_is_growing(self, **kwargs) -> np.ndarray:
+    def where_is_growing(self, **kwargs) -> list[bool | float]:
         """Determine where power is growing (``True``) and where it is not."""
         n_points = self.raw_data.index[-1]
         is_growing = [_array_is_growing(self.forward, i, **kwargs)
                       for i in range(n_points)]
-        return np.array(is_growing)
+        return is_growing
 
 
 def _array_is_growing(array: np.ndarray,
