@@ -1,22 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>src.instruments.factory module &mdash; MULTIPAC test bench 1.1.0-15-g9cb3a0e documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <title>src.instruments.factory module &mdash; MULTIPAC test bench 1.1.1-9-g9317046 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=bced23b6"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -37,7 +38,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.1.0-15-g9cb3a0e
+                1.1.1-9-g9317046
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -102,24 +103,24 @@
            <div itemprop="articleBody">
              
   <section id="module-src.instruments.factory">
-<span id="src-instruments-factory-module"></span><h1>src.instruments.factory module<a class="headerlink" href="#module-src.instruments.factory" title="Permalink to this heading"></a></h1>
+<span id="src-instruments-factory-module"></span><h1>src.instruments.factory module<a class="headerlink" href="#module-src.instruments.factory" title="Link to this heading"></a></h1>
 <p>Define a class to create the proper <a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument" title="src.instruments.instrument.Instrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code></a>.</p>
 <dl class="py data">
 <dt class="sig sig-object py" id="src.instruments.factory.STRING_TO_INSTRUMENT_CLASS">
-<span class="sig-name descname"><span class="pre">STRING_TO_INSTRUMENT_CLASS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'CurrentProbe':</span> <span class="pre">&lt;class</span> <span class="pre">'multipac_testbench.src.instruments.current_probe.CurrentProbe'&gt;,</span> <span class="pre">'ElectricFieldProbe':</span> <span class="pre">&lt;class</span> <span class="pre">'multipac_testbench.src.instruments.electric_field.field_probe.FieldProbe'&gt;,</span> <span class="pre">'FieldProbe':</span> <span class="pre">&lt;class</span> <span class="pre">'multipac_testbench.src.instruments.electric_field.field_probe.FieldProbe'&gt;,</span> <span class="pre">'OpticalFibre':</span> <span class="pre">&lt;class</span> <span class="pre">'multipac_testbench.src.instruments.optical_fibre.OpticalFibre'&gt;,</span> <span class="pre">'Penning':</span> <span class="pre">&lt;class</span> <span class="pre">'multipac_testbench.src.instruments.penning.Penning'&gt;,</span> <span class="pre">'Powers':</span> <span class="pre">&lt;class</span> <span class="pre">'multipac_testbench.src.instruments.powers.Powers'&gt;,</span> <span class="pre">'RfPower':</span> <span class="pre">&lt;class</span> <span class="pre">'multipac_testbench.src.instruments.rf_power.RfPower'&gt;}</span></em><a class="headerlink" href="#src.instruments.factory.STRING_TO_INSTRUMENT_CLASS" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">STRING_TO_INSTRUMENT_CLASS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'CurrentProbe':</span> <span class="pre">&lt;class</span> <span class="pre">'multipac_testbench.src.instruments.current_probe.CurrentProbe'&gt;,</span> <span class="pre">'ElectricFieldProbe':</span> <span class="pre">&lt;class</span> <span class="pre">'multipac_testbench.src.instruments.electric_field.field_probe.FieldProbe'&gt;,</span> <span class="pre">'FieldProbe':</span> <span class="pre">&lt;class</span> <span class="pre">'multipac_testbench.src.instruments.electric_field.field_probe.FieldProbe'&gt;,</span> <span class="pre">'OpticalFibre':</span> <span class="pre">&lt;class</span> <span class="pre">'multipac_testbench.src.instruments.optical_fibre.OpticalFibre'&gt;,</span> <span class="pre">'Penning':</span> <span class="pre">&lt;class</span> <span class="pre">'multipac_testbench.src.instruments.penning.Penning'&gt;,</span> <span class="pre">'Powers':</span> <span class="pre">&lt;class</span> <span class="pre">'multipac_testbench.src.instruments.powers.Powers'&gt;,</span> <span class="pre">'RfPower':</span> <span class="pre">&lt;class</span> <span class="pre">'multipac_testbench.src.instruments.rf_power.RfPower'&gt;}</span></em><a class="headerlink" href="#src.instruments.factory.STRING_TO_INSTRUMENT_CLASS" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="src.instruments.factory.InstrumentFactory">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstrumentFactory</span></span><a class="headerlink" href="#src.instruments.factory.InstrumentFactory" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstrumentFactory</span></span><a class="headerlink" href="#src.instruments.factory.InstrumentFactory" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class to create instruments.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.instruments.factory.InstrumentFactory.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column_header</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">instruments_kw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Instrument</span></span></span><a class="headerlink" href="#src.instruments.factory.InstrumentFactory.run" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column_header</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">instruments_kw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Instrument</span></span></span><a class="headerlink" href="#src.instruments.factory.InstrumentFactory.run" title="Link to this definition"></a></dt>
 <dd><p>Take the proper subclass, instantiate it and return it.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> (<em>str</em>) – Name of the instrument. For clarity, it should match the name of a
 column in <code class="docutils literal notranslate"><span class="pre">df_data</span></code> when it is possible.</p></li>
@@ -133,10 +134,10 @@ instrument.</p></li>
 <li><p><strong>instruments_kw</strong> (<em>Any</em>) – Other keyword arguments in the <code class="docutils literal notranslate"><span class="pre">.toml</span></code> file.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Instrument properly subclassed.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument" title="src.instruments.instrument.Instrument">Instrument</a></p>
 </dd>
 </dl>

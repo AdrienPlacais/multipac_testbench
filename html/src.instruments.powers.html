@@ -1,22 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>src.instruments.powers module &mdash; MULTIPAC test bench 1.1.0-15-g9cb3a0e documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <title>src.instruments.powers module &mdash; MULTIPAC test bench 1.1.1-9-g9317046 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=bced23b6"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -39,7 +40,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.1.0-15-g9cb3a0e
+                1.1.1-9-g9317046
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -104,24 +105,24 @@
            <div itemprop="articleBody">
              
   <section id="module-src.instruments.powers">
-<span id="src-instruments-powers-module"></span><h1>src.instruments.powers module<a class="headerlink" href="#module-src.instruments.powers" title="Permalink to this heading"></a></h1>
+<span id="src-instruments-powers-module"></span><h1>src.instruments.powers module<a class="headerlink" href="#module-src.instruments.powers" title="Link to this heading"></a></h1>
 <p>Define power probe to measure forward and reflected power.</p>
 <p>Also include calculation of reflection coefficient <span class="math notranslate nohighlight">\(\Gamma\)</span> and (voltage)
 SWR <span class="math notranslate nohighlight">\(SWR\)</span>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="src.instruments.powers.Powers">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Powers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.instruments.powers.Powers" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Powers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.instruments.powers.Powers" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code></p>
 <p>An instrument to measure forward and reflected powers.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.instruments.powers.Powers.ylabel">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ylabel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#src.instruments.powers.Powers.ylabel" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ylabel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#src.instruments.powers.Powers.ylabel" title="Link to this definition"></a></dt>
 <dd><p>Label used for plots.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="src.instruments.powers.Powers.gamma">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gamma</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#src.instruments.powers.Powers.gamma" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gamma</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#src.instruments.powers.Powers.gamma" title="Link to this definition"></a></dt>
 <dd><p>Return the reflection coefficient.</p>
 <p>Reflection coefficient <code class="docutils literal notranslate"><span class="pre">gamma</span></code> is defined as:</p>
 <div class="math notranslate nohighlight">
@@ -131,10 +132,28 @@ SWR <span class="math notranslate nohighlight">\(SWR\)</span>.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="src.instruments.powers.Powers.swr">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">swr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#src.instruments.powers.Powers.swr" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">swr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#src.instruments.powers.Powers.swr" title="Link to this definition"></a></dt>
 <dd><p>Give the voltage Standing Wave Ratio.</p>
 <div class="math notranslate nohighlight">
 \[SWR = \frac{1 + |\Gamma|}{1 - |\Gamma|}\]</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.instruments.powers.Powers.forward">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">forward</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#src.instruments.powers.Powers.forward" title="Link to this definition"></a></dt>
+<dd><p>Return forward power only.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.instruments.powers.Powers.reflected">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reflected</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#src.instruments.powers.Powers.reflected" title="Link to this definition"></a></dt>
+<dd><p>Return reflected power only.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.powers.Powers.where_is_growing">
+<span class="sig-name descname"><span class="pre">where_is_growing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#src.instruments.powers.Powers.where_is_growing" title="Link to this definition"></a></dt>
+<dd><p>Determine where power is growing (<code class="docutils literal notranslate"><span class="pre">True</span></code>) and where it is not.</p>
 </dd></dl>
 
 </dd></dl>

@@ -1,22 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>src.measurement_point.factory module &mdash; MULTIPAC test bench 1.1.0-15-g9cb3a0e documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <title>src.measurement_point.factory module &mdash; MULTIPAC test bench 1.1.1-9-g9317046 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=bced23b6"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -37,7 +38,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.1.0-15-g9cb3a0e
+                1.1.1-9-g9317046
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -96,11 +97,11 @@
            <div itemprop="articleBody">
              
   <section id="module-src.measurement_point.factory">
-<span id="src-measurement-point-factory-module"></span><h1>src.measurement_point.factory module<a class="headerlink" href="#module-src.measurement_point.factory" title="Permalink to this heading"></a></h1>
+<span id="src-measurement-point-factory-module"></span><h1>src.measurement_point.factory module<a class="headerlink" href="#module-src.measurement_point.factory" title="Link to this heading"></a></h1>
 <p>Define a class to create the proper <a class="reference internal" href="src.measurement_point.i_measurement_point.html#src.measurement_point.i_measurement_point.IMeasurementPoint" title="src.measurement_point.i_measurement_point.IMeasurementPoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">IMeasurementPoint</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="src.measurement_point.factory.IMeasurementPointFactory">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IMeasurementPointFactory</span></span><a class="headerlink" href="#src.measurement_point.factory.IMeasurementPointFactory" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IMeasurementPointFactory</span></span><a class="headerlink" href="#src.measurement_point.factory.IMeasurementPointFactory" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class to create the proper <a class="reference internal" href="src.measurement_point.global_diagnostics.html#src.measurement_point.global_diagnostics.GlobalDiagnostics" title="src.measurement_point.global_diagnostics.GlobalDiagnostics"><code class="xref py py-class docutils literal notranslate"><span class="pre">GlobalDiagnostics</span></code></a> <a class="reference internal" href="src.measurement_point.pick_up.html#src.measurement_point.pick_up.PickUp" title="src.measurement_point.pick_up.PickUp"><code class="xref py py-class docutils literal notranslate"><span class="pre">PickUp</span></code></a>.</p>
 <p>It infers the proper type, position of instruments as well as the measured
@@ -108,10 +109,10 @@ data from the configuration <code class="docutils literal notranslate"><span cla
 file.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.measurement_point.factory.IMeasurementPointFactory.run_single">
-<span class="sig-name descname"><span class="pre">run_single</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">IMeasurementPoint</span></span></span><a class="headerlink" href="#src.measurement_point.factory.IMeasurementPointFactory.run_single" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run_single</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">IMeasurementPoint</span></span></span><a class="headerlink" href="#src.measurement_point.factory.IMeasurementPointFactory.run_single" title="Link to this definition"></a></dt>
 <dd><p>Create a single measurement point.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>config_key</strong> (<em>str</em>) – A key from the <code class="docutils literal notranslate"><span class="pre">.toml</span></code> file. If ‘global’ keyword is in the key,
 we return a <a class="reference internal" href="src.measurement_point.global_diagnostics.html#src.measurement_point.global_diagnostics.GlobalDiagnostics" title="src.measurement_point.global_diagnostics.GlobalDiagnostics"><code class="xref py py-class docutils literal notranslate"><span class="pre">GlobalDiagnostics</span></code></a>. Else, we return a
@@ -121,10 +122,10 @@ which will passed down to the created <a class="reference internal" href="src.me
 <li><p><strong>df_data</strong> (<em>pd.DataFrame</em>) – Full data from the <code class="docutils literal notranslate"><span class="pre">.csv</span></code> file.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A <a class="reference internal" href="src.measurement_point.global_diagnostics.html#src.measurement_point.global_diagnostics.GlobalDiagnostics" title="src.measurement_point.global_diagnostics.GlobalDiagnostics"><code class="xref py py-class docutils literal notranslate"><span class="pre">GlobalDiagnostics</span></code></a> or <a class="reference internal" href="src.measurement_point.pick_up.html#src.measurement_point.pick_up.PickUp" title="src.measurement_point.pick_up.PickUp"><code class="xref py py-class docutils literal notranslate"><span class="pre">PickUp</span></code></a>.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="src.measurement_point.i_measurement_point.html#src.measurement_point.i_measurement_point.IMeasurementPoint" title="src.measurement_point.i_measurement_point.IMeasurementPoint">IMeasurementPoint</a></p>
 </dd>
 </dl>
@@ -132,7 +133,7 @@ which will passed down to the created <a class="reference internal" href="src.me
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.measurement_point.factory.IMeasurementPointFactory.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">multipac_testbench.src.measurement_point.global_diagnostics.GlobalDiagnostics</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">multipac_testbench.src.measurement_point.pick_up.PickUp</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#src.measurement_point.factory.IMeasurementPointFactory.run" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">GlobalDiagnostics</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">PickUp</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#src.measurement_point.factory.IMeasurementPointFactory.run" title="Link to this definition"></a></dt>
 <dd><p>Create all the measurement points.</p>
 </dd></dl>
 

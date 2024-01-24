@@ -1,22 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>src.instruments package &mdash; MULTIPAC test bench 1.1.0-15-g9cb3a0e documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <title>src.instruments package &mdash; MULTIPAC test bench 1.1.1-9-g9317046 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=bced23b6"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -37,7 +38,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.1.0-15-g9cb3a0e
+                1.1.1-9-g9317046
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -101,10 +102,10 @@
            <div itemprop="articleBody">
              
   <section id="module-src.instruments">
-<span id="src-instruments-package"></span><h1>src.instruments package<a class="headerlink" href="#module-src.instruments" title="Permalink to this heading"></a></h1>
+<span id="src-instruments-package"></span><h1>src.instruments package<a class="headerlink" href="#module-src.instruments" title="Link to this heading"></a></h1>
 <p>This subpackage holds instrument (current, voltage, etc).</p>
 <section id="subpackages">
-<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading"></a></h2>
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="src.instruments.electric_field.html">src.instruments.electric_field package</a><ul>
@@ -130,7 +131,7 @@
 </div>
 </section>
 <section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="src.instruments.current_probe.html">src.instruments.current_probe module</a><ul>
@@ -160,6 +161,8 @@
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.add_post_treater"><code class="docutils literal notranslate"><span class="pre">Instrument.add_post_treater()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.multipac_detector"><code class="docutils literal notranslate"><span class="pre">Instrument.multipac_detector</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.multipactor"><code class="docutils literal notranslate"><span class="pre">Instrument.multipactor</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.indexes_of_contiguous_multipactor_zones"><code class="docutils literal notranslate"><span class="pre">Instrument.indexes_of_contiguous_multipactor_zones</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.indexes_of_lower_and_upper_multipactor_barriers"><code class="docutils literal notranslate"><span class="pre">Instrument.indexes_of_lower_and_upper_multipactor_barriers()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -183,6 +186,9 @@
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.powers.html#src.instruments.powers.Powers.ylabel"><code class="docutils literal notranslate"><span class="pre">Powers.ylabel()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.powers.html#src.instruments.powers.Powers.gamma"><code class="docutils literal notranslate"><span class="pre">Powers.gamma</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.powers.html#src.instruments.powers.Powers.swr"><code class="docutils literal notranslate"><span class="pre">Powers.swr</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.instruments.powers.html#src.instruments.powers.Powers.forward"><code class="docutils literal notranslate"><span class="pre">Powers.forward</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.instruments.powers.html#src.instruments.powers.Powers.reflected"><code class="docutils literal notranslate"><span class="pre">Powers.reflected</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.instruments.powers.html#src.instruments.powers.Powers.where_is_growing"><code class="docutils literal notranslate"><span class="pre">Powers.where_is_growing()</span></code></a></li>
 </ul>
 </li>
 </ul>

@@ -1,22 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>src.instruments.instrument module &mdash; MULTIPAC test bench 1.1.0-15-g9cb3a0e documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <title>src.instruments.instrument module &mdash; MULTIPAC test bench 1.1.1-9-g9317046 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=bced23b6"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -37,7 +38,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.1.0-15-g9cb3a0e
+                1.1.1-9-g9317046
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -102,31 +103,31 @@
            <div itemprop="articleBody">
              
   <section id="module-src.instruments.instrument">
-<span id="src-instruments-instrument-module"></span><h1>src.instruments.instrument module<a class="headerlink" href="#module-src.instruments.instrument" title="Permalink to this heading"></a></h1>
+<span id="src-instruments-instrument-module"></span><h1>src.instruments.instrument module<a class="headerlink" href="#module-src.instruments.instrument" title="Link to this heading"></a></h1>
 <p>Define object to keep a single instrument measurements.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="src.instruments.instrument.Instrument">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Instrument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.series.Series</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_2d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.instruments.instrument.Instrument" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Instrument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Series</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_2d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.instruments.instrument.Instrument" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>Hold measurements of a single instrument.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.instruments.instrument.Instrument.ylabel">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ylabel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#src.instruments.instrument.Instrument.ylabel" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ylabel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#src.instruments.instrument.Instrument.ylabel" title="Link to this definition"></a></dt>
 <dd><p>Label used for plots.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="src.instruments.instrument.Instrument.label">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">label</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#src.instruments.instrument.Instrument.label" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">label</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#src.instruments.instrument.Instrument.label" title="Link to this definition"></a></dt>
 <dd><p>Label used for legends in plots vs position.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.instruments.instrument.Instrument.from_array">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ydata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xdata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Iterable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#src.instruments.instrument.Instrument.from_array" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ydata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xdata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#src.instruments.instrument.Instrument.from_array" title="Link to this definition"></a></dt>
 <dd><p>Instantiate <a class="reference internal" href="#src.instruments.instrument.Instrument" title="src.instruments.instrument.Instrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code></a> from a numpy array.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> (<em>str</em>) – Name of the instrument.</p></li>
 <li><p><strong>ydata</strong> (<em>np.ndarray</em>) – The data measured by the instrument.</p></li>
@@ -136,10 +137,10 @@ same as all data from the <code class="docutils literal notranslate"><span class
 <li><p><strong>kwargs</strong> – Other keyword arguments passed to the <a class="reference internal" href="#src.instruments.instrument.Instrument" title="src.instruments.instrument.Instrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code></a>.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>instrument</strong> – A regular instrument.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#src.instruments.instrument.Instrument" title="src.instruments.instrument.Instrument">Instrument</a></p>
 </dd>
 </dl>
@@ -147,21 +148,21 @@ same as all data from the <code class="docutils literal notranslate"><span class
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.instruments.instrument.Instrument.from_pd_dataframe">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_pd_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#src.instruments.instrument.Instrument.from_pd_dataframe" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_pd_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#src.instruments.instrument.Instrument.from_pd_dataframe" title="Link to this definition"></a></dt>
 <dd><p>Instantiate the object from several <code class="docutils literal notranslate"><span class="pre">.csv</span></code> file columns.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> (<em>str</em>) – Name of the instrument.</p></li>
 <li><p><strong>raw_data</strong> (<em>pd.DataFrame</em>) – Object holding several columns of the <code class="docutils literal notranslate"><span class="pre">.csv</span></code>.</p></li>
 <li><p><strong>kwargs</strong> – Other keyword arguments passed to the <a class="reference internal" href="#src.instruments.instrument.Instrument" title="src.instruments.instrument.Instrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code></a>.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>instrument</strong> – An instrument. Note that its <code class="docutils literal notranslate"><span class="pre">ydata</span></code> attribute will be a 2D
 array.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#src.instruments.instrument.Instrument" title="src.instruments.instrument.Instrument">Instrument</a></p>
 </dd>
 </dl>
@@ -169,13 +170,13 @@ array.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="src.instruments.instrument.Instrument.class_name">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">class_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#src.instruments.instrument.Instrument.class_name" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">class_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#src.instruments.instrument.Instrument.class_name" title="Link to this definition"></a></dt>
 <dd><p>Shortcut to the name of the instrument class.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="src.instruments.instrument.Instrument.ydata">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ydata</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#src.instruments.instrument.Instrument.ydata" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ydata</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#src.instruments.instrument.Instrument.ydata" title="Link to this definition"></a></dt>
 <dd><p>Get the treated data.</p>
 <p>Note that in order to save time, <code class="docutils literal notranslate"><span class="pre">_ydata</span></code> is not re-calculated
 from <code class="docutils literal notranslate"><span class="pre">raw_data</span></code> every time. Hence, it is primordial to re-set
@@ -185,16 +186,16 @@ from <code class="docutils literal notranslate"><span class="pre">raw_data</span
 
 <dl class="py property">
 <dt class="sig sig-object py" id="src.instruments.instrument.Instrument.post_treaters">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">post_treaters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#src.instruments.instrument.Instrument.post_treaters" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">post_treaters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#src.instruments.instrument.Instrument.post_treaters" title="Link to this definition"></a></dt>
 <dd><p>Get the list of the post-treating functions.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.instruments.instrument.Instrument.add_post_treater">
-<span class="sig-name descname"><span class="pre">add_post_treater</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">post_treater</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#src.instruments.instrument.Instrument.add_post_treater" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_post_treater</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">post_treater</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#src.instruments.instrument.Instrument.add_post_treater" title="Link to this definition"></a></dt>
 <dd><p>Append a single post-treating function.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>post_treater</strong> (<em>Callable</em><em>[</em><em>[</em><em>np.ndarray</em><em>]</em><em>, </em><em>np.ndarray</em><em>]</em>) – Post-treating function to add. It must take an array as input, and
 return an array with the same size as output.</p>
 </dd>
@@ -203,7 +204,7 @@ return an array with the same size as output.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="src.instruments.instrument.Instrument.multipac_detector">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">multipac_detector</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#src.instruments.instrument.Instrument.multipac_detector" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">multipac_detector</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#src.instruments.instrument.Instrument.multipac_detector" title="Link to this definition"></a></dt>
 <dd><p>Get access to the function that determines where is multipactor.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -215,15 +216,51 @@ instrument.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="src.instruments.instrument.Instrument.multipactor">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">multipactor</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#src.instruments.instrument.Instrument.multipactor" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">multipactor</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#src.instruments.instrument.Instrument.multipactor" title="Link to this definition"></a></dt>
 <dd><p>Use <code class="docutils literal notranslate"><span class="pre">multipac_detector</span></code> to determine where multipac happens.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>_multipactor</strong> – Array with the same shape as <a class="reference internal" href="#src.instruments.instrument.Instrument.ydata" title="src.instruments.instrument.Instrument.ydata"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ydata</span></code></a>. It is <code class="docutils literal notranslate"><span class="pre">True</span></code> where
 there is multipactor and <code class="docutils literal notranslate"><span class="pre">False</span></code> elsewhere.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.instruments.instrument.Instrument.indexes_of_contiguous_multipactor_zones">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">indexes_of_contiguous_multipactor_zones</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#src.instruments.instrument.Instrument.indexes_of_contiguous_multipactor_zones" title="Link to this definition"></a></dt>
+<dd><p>Get list of indexes of entry and exit of multipacting zones.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Assuming that the upper multipactor threshold is crossed, two cases
+of figure.
+If the power is growing, <code class="docutils literal notranslate"><span class="pre">Power[entry]</span> <span class="pre">&lt;</span> <span class="pre">Power[exit]</span></code> hence
+<code class="docutils literal notranslate"><span class="pre">Power[entry]</span></code> is the lower multipactor barrier and
+<code class="docutils literal notranslate"><span class="pre">Power[exit]</span></code> is the upper multipactor barrier.
+If the power is in its decreasing, <code class="docutils literal notranslate"><span class="pre">Power[entry]</span> <span class="pre">&gt;</span> <span class="pre">Power[exit]</span></code>
+hence <code class="docutils literal notranslate"><span class="pre">Power[entry]</span></code> is the <em>upper</em> multipactor barrier and
+<code class="docutils literal notranslate"><span class="pre">Power[exit]</span></code> is the <em>lower</em> multipactor barrier.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.instrument.Instrument.indexes_of_lower_and_upper_multipactor_barriers">
+<span class="sig-name descname"><span class="pre">indexes_of_lower_and_upper_multipactor_barriers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">power_is_growing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#src.instruments.instrument.Instrument.indexes_of_lower_and_upper_multipactor_barriers" title="Link to this definition"></a></dt>
+<dd><p>Get list of indexes of lower and upper multipactor barriers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>power_is_growing</strong> (<em>np.ndarray</em>) – Array of floats. 1. where the power is growing, 0. where the
+power is decreasing.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>lower_indexes</strong> (<em>Sequence[int]</em>) – List containing all indexes of entry in a multipacting zone.</p></li>
+<li><p><strong>upper_indexes</strong> (<em>Sequence[int]</em>) – List containing all indexes of exit of a multipacting zone.</p></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>
