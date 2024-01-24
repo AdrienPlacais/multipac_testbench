@@ -328,11 +328,12 @@ class MultipactorTest:
         measurement_points.append(self.global_diagnostics)
         return measurement_points
 
-    def _filter_instruments(self,
-                            instrument_class: ABCMeta,
-                            measurement_points: Sequence[IMeasurementPoint],
-                            instruments_to_ignore: Sequence[Instrument | str],
-                            ) -> list[Instrument]:
+    def _filter_instruments(
+            self,
+            instrument_class: ABCMeta,
+            measurement_points: Sequence[IMeasurementPoint],
+            instruments_to_ignore: Sequence[Instrument | str] = (),
+    ) -> list[Instrument]:
         """Get all instruments of desired class from ``measurement_points``.
 
         But remove the instruments to ignore.
@@ -364,35 +365,66 @@ class MultipactorTest:
                        for instrument in instrument_1d]
         return instruments
 
+    def get_instruments(
+            self,
+            instrument_class: ABCMeta,
+            measurement_points_to_exclude: Sequence[IMeasurementPoint
+                                                    | str] = (),
+            instruments_to_ignore: Sequence[Instrument | str] = (),
+    ) -> list[Instrument]:
+        """Get all instruments of type ``instrument_class``."""
+        measurement_points = self._filter_measurement_points(
+            to_exclude=measurement_points_to_exclude)
+        instruments = self._filter_instruments(
+            instrument_class,
+            measurement_points,
+            instruments_to_ignore=instruments_to_ignore)
+        return instruments
+
+    def get_instrument(self,
+                       *args: ABCMeta,
+                       **kwargs: Sequence[IMeasurementPoint | str]
+                       | Sequence[Instrument | str]) -> Instrument | None:
+        """Get a single instrument of type ``instrument_class``."""
+        instruments = self.get_instruments(*args, **kwargs)
+        if len(instruments) == 0:
+            print("multipactor_test.get_instrument warning! No instrument "
+                  "found.")
+            return
+        if len(instruments) > 1:
+            print("multipactor_test.get_instrument warning! Several "
+                  "instruments found. Returning first one.")
+        return instruments[0]
+
     def _get_limits(
             self,
             axes_instruments: dict[Axes, Sequence[Instrument]],
-            instruments_to_ignore_for_limits: Sequence[Instrument | str] = (),
+            instruments_to_ignore_for_limits: Sequence[Instrument | str]=(),
     ) -> dict[Axes, tuple[float, float]]:
         """Set limits for the plots."""
-        names_to_ignore = [x if isinstance(x, str) else x.name
+        names_to_ignore=[x if isinstance(x, str) else x.name
                            for x in instruments_to_ignore_for_limits]
-        limits = {}
+        limits={}
         for axe, instruments in axes_instruments.items():
-            all_ydata = [instrument.ydata for instrument in instruments
+            all_ydata=[instrument.ydata for instrument in instruments
                          if instrument.name not in names_to_ignore]
 
-            lowers = [np.nanmin(ydata) for ydata in all_ydata]
-            lower = min(lowers)
+            lowers=[np.nanmin(ydata) for ydata in all_ydata]
+            lower=min(lowers)
 
-            uppers = [np.nanmax(ydata) for ydata in all_ydata]
-            upper = max(uppers)
-            amplitude = abs(upper - lower)
+            uppers=[np.nanmax(ydata) for ydata in all_ydata]
+            upper=max(uppers)
+            amplitude=abs(upper - lower)
 
-            limits[axe] = (lower - .1 * amplitude, upper + .1 * amplitude)
+            limits[axe]=(lower - .1 * amplitude, upper + .1 * amplitude)
         return limits
 
     def _prepare_animation_fig(
         self,
         instruments_to_plot: tuple[ABCMeta, ...],
-        measurement_points_to_exclude: tuple[str, ...] = (),
-        instruments_to_ignore_for_limits: tuple[str, ...] = (),
-        instruments_to_ignore: Sequence[Instrument | str] = (),
+        measurement_points_to_exclude: tuple[str, ...]=(),
+        instruments_to_ignore_for_limits: tuple[str, ...]=(),
+        instruments_to_ignore: Sequence[Instrument | str]=(),
         **fig_kw,
     ) -> tuple[Figure, dict[Axes, list[Instrument]]]:
         """Prepare the figure and axes for the animation.
