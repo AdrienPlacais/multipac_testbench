@@ -533,9 +533,6 @@ class MultipactorTest:
             growing and when it is increasing. This can be non-trivial. Check
             :meth:`.Powers.where_is_growing` and ``power_is_growing_kw``.
 
-        .. todo::
-            Save the values of the multipacting barriers somewhere.
-
         Parameters
         ----------
         instrument_class_to_plot : {Powers, FieldProbe, Reconstructed}
