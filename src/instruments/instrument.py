@@ -317,7 +317,7 @@ class Instrument(ABC):
         multipactor = self.multipactor
         multipactor_change = np.diff(multipactor)
         for index, (mp, mp_change, is_growing) in enumerate(
-                zip(multipactor[:-1],
+                zip(multipactor[1:],
                     multipactor_change,
                     power_is_growing[1:]),
                 start=1):
