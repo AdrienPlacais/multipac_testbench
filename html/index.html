@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Welcome to MULTIPAC test bench’s documentation! &mdash; MULTIPAC test bench 1.1.1-16-g56cd316 documentation</title>
+  <title>Welcome to MULTIPAC test bench’s documentation! &mdash; MULTIPAC test bench 1.2.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,14 +15,14 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=ac74646a"></script>
+        <script src="_static/documentation_options.js?v=6efca38a"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Examples" href="manual/examples.html" /> 
+    <link rel="next" title="Presentation of the library" href="manual/presentation.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -37,7 +37,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.1.1-16-g56cd316
+                1.2.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -49,6 +49,8 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="manual/presentation.html">Presentation of the library</a></li>
+<li class="toctree-l1"><a class="reference internal" href="manual/configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="manual/examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">API Reference</a></li>
 </ul>
@@ -82,6 +84,12 @@
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="manual/presentation.html">Presentation of the library</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="manual/configuration.html">Configuration</a><ul class="simple">
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="manual/examples.html">Examples</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="manual/notebooks/basics.html">MULTIPAC test bench example</a></li>
 </ul>
@@ -122,6 +130,23 @@
 </li>
 </ul>
 </div>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Proper documentation for the configuration.</p>
+</div>
+<p class="todo-source">(The <a class="reference internal" href="manual/configuration.html#id2"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/docs/source/manual/configuration.rst, line 33.)</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Create a <code class="docutils literal notranslate"><span class="pre">TestCampaign</span></code> object.
+It would gather several <a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest" title="src.multipactor_test.MultipactorTest"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipactorTest</span></code></a> objects, with different <code class="docutils literal notranslate"><span class="pre">SWR</span></code> and/or <code class="docutils literal notranslate"><span class="pre">f_mhz</span></code>.
+It would have a <code class="docutils literal notranslate"><span class="pre">Sommersalo_plot</span></code> and <code class="docutils literal notranslate"><span class="pre">Hatch_diagram</span></code> methods.</p>
+</div>
+<p class="todo-source">(The <a class="reference internal" href="manual/presentation.html#id1"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/docs/source/manual/presentation.rst, line 13.)</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Add an example for the <a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.plot_multipactor_limits" title="src.multipactor_test.MultipactorTest.plot_multipactor_limits"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MultipactorTest.plot_multipactor_limits()</span></code></a> once it works for several positions.</p>
+</div>
+<p class="todo-source">(The <a class="reference internal" href="manual/examples.html#id2"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/docs/source/manual/examples.rst, line 12.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>Implement a way to get reconstructed voltage at given pick-up and sample
@@ -184,7 +209,7 @@ field.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="manual/examples.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="manual/presentation.html" class="btn btn-neutral float-right" title="Presentation of the library" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
