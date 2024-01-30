@@ -9,7 +9,7 @@ Documentation is available at following link: https://adrienplacais.github.io/mu
 
 ## Quick tour of available studies
 ### Plot what the probes measured, precise when multipactor happened
-![probes](docs/source/manual/data/120MHz-SWR4.multipactor.gif)
+![probes](docs/source/manual/data/120MHz-SWR4.probes.png)
 
 ### Reconstruct and animate electric field along coaxial line, as well as multipactor current probes
 ![animation](docs/source/manual/data/120MHz-SWR4.gif)
