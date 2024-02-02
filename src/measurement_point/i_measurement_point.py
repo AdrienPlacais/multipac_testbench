@@ -136,8 +136,8 @@ class IMeasurementPoint(ABC):
         """
         if isinstance(detector_instrument, ABCMeta):
             detector_instrument = self.get_instrument(detector_instrument)
-
         assert isinstance(detector_instrument, Instrument)
+
         assert hasattr(detector_instrument, 'multipac_detector'), (
             "You asked me to detect multipactor with "
             f"{str(detector_instrument)} but it has no multipacting detector.")
@@ -147,17 +147,29 @@ class IMeasurementPoint(ABC):
     def _indexes_of_lower_and_upper_multipactor_barriers(
             self,
             detector_instrument: Instrument | ABCMeta,
-            power_is_growing: np.ndarray
+            power_is_growing: list[bool | float]
     ) -> tuple[Sequence[int], Sequence[int]]:
         """Get the indexes corresponding to lower and upper mp barrier.
 
+        Parameters
+        ----------
         detector_instrument : Instrument | ABCMeta
+            Instrument that will detect multipactor.
+        power_is_growing: list[bool | float]
+            True where the power is growing, False where the power is
+            decreasing, NaN where undetermined.
+
+        Returns
+        -------
+        indexes : Sequence[int], Sequence[int]
+            Lists of indexes corresponding to lower and upper multipactor
+            barriers.
 
         """
         if isinstance(detector_instrument, ABCMeta):
             detector_instrument = self.get_instrument(detector_instrument)
-
         assert isinstance(detector_instrument, Instrument)
+
         assert hasattr(detector_instrument, 'multipac_detector'), (
             "You asked me to detect multipactor with "
             f"{str(detector_instrument)} but it has no multipacting detector.")
