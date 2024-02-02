@@ -11,7 +11,7 @@
 """
 from abc import ABCMeta
 from pathlib import Path
-from typing import Sequence
+from typing import Sequence, overload
 
 import numpy as np
 import pandas as pd
@@ -378,15 +378,13 @@ class MultipactorTest:
             measurement_points_to_exclude: Sequence[IMeasurementPoint
                                                     | str] = (),
             instruments_to_ignore: Sequence[Instrument | str] = (),
-            ) -> Instrument | None:
+    ) -> Instrument:
         """Get a single instrument of type ``instrument_class``."""
         instruments = self.get_instruments(instrument_class,
                                            measurement_points_to_exclude,
                                            instruments_to_ignore)
         if len(instruments) == 0:
-            print("multipactor_test.get_instrument warning! No instrument "
-                  "found.")
-            return
+            raise IOError("No instrument found.")
         if len(instruments) > 1:
             print("multipactor_test.get_instrument warning! Several "
                   "instruments found. Returning first one.")
@@ -520,8 +518,12 @@ class MultipactorTest:
         .. note::
             In order to discriminate lower multipacting barrier from upper
             multipacting barrier, we need to determine when the power is
-            growing and when it is increasing. This can be non-trivial. Check
+            growing and when it is decreasing. This can be non-trivial. Check
             :meth:`.Powers.where_is_growing` and ``power_is_growing_kw``.
+
+        .. todo::
+            Simplify this thing. Lower and upper multipacting barriers should
+            be easier to get. Maybe pandas dataframe is the way to go?
 
         Parameters
         ----------
@@ -565,15 +567,12 @@ class MultipactorTest:
         instrument_to_plot = self.get_instrument(instrument_class_to_plot,
                                                  measurement_points_to_exclude,
                                                  )
-        assert instrument_to_plot is not None
 
         detector_instrument = self.get_instrument(
             multipactor_detector,
             measurement_points_to_exclude)
-        assert detector_instrument is not None
 
         powers = self.get_instrument(Powers)
-        assert isinstance(powers, Powers)
         if power_is_growing_kw is None:
             power_is_growing_kw = {}
         power_is_growing = powers.where_is_growing(**power_is_growing_kw)
@@ -582,8 +581,8 @@ class MultipactorTest:
             indexes_of_lower_and_upper_multipactor_barriers(power_is_growing)
         lower_values, upper_values = \
             instrument_to_plot.values_of_lower_and_upper_multipactor_barriers(
-                    *indexes,
-                    str(detector_instrument))
+                *indexes,
+                str(detector_instrument))
 
         axe = instrument_class_axes[instrument_class_to_plot]
         lower_values.plot(ax=axe, kind='line', drawstyle='steps-post')
