@@ -58,6 +58,7 @@ class Instrument(ABC):
         self.plot_vs_time, self.plot_vs_position, self.scatter_data = plotters
 
         self._ydata: np.ndarray | None = None
+        self._ydata_as_pd: pd.Series | pd.DataFrame | None = None
         self._post_treaters: list[Callable[[np.ndarray], np.ndarray]] = []
 
         self._multipac_detector: Callable[[np.ndarray], np.ndarray]
@@ -162,6 +163,26 @@ class Instrument(ABC):
             self._ydata = self._post_treat(self.raw_data.to_numpy())
         return self._ydata
 
+    @property
+    def ydata_as_pd(self) -> pd.Series | pd.DataFrame:
+        """Get the treated data as a pandas object."""
+        if self._ydata_as_pd is not None:
+            return self._ydata_as_pd
+
+        index = self.raw_data.index
+        if self.is_2d:
+            assert isinstance(self.raw_data, pd.DataFrame)
+            columns = self.raw_data.columns
+            self._ydata_as_pd = pd.DataFrame(self.ydata,
+                                             columns=columns,
+                                             index=index,
+                                             )
+        else:
+            self._ydata_as_pd = pd.Series(self.ydata,
+                                          index=index,
+                                          )
+        return self._ydata_as_pd
+
     @ydata.setter
     def ydata(self, value: np.ndarray | None) -> None:
         if self._multipactor is not None:
@@ -169,6 +190,7 @@ class Instrument(ABC):
                   "previously calculated multipactor zones obsolete.")
             self._multipactor = None
         self._ydata = value
+        self._ydata_as_pd = None
 
     def _get_plot_methods(self, is_2d: bool
                           ) -> tuple[Callable, Callable, Callable]:
