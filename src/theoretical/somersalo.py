@@ -19,21 +19,23 @@ import pandas as pd
 
 
 @overload
-def _one_point(log_power: np.ndarray,
-               order: int,
-               to_dict: bool = True) -> dict[str, np.ndarray]: ...
+def _one_point_analytical(log_power: np.ndarray,
+                          order: int,
+                          to_dict: bool = True) -> dict[str, np.ndarray]: ...
 
 
 @overload
-def _one_point(log_power: np.ndarray,
-               order: int,
-               to_dict: bool = False) -> tuple[np.ndarray, np.ndarray]: ...
+def _one_point_analytical(log_power: np.ndarray,
+                          order: int,
+                          to_dict: bool = False
+                          ) -> tuple[np.ndarray, np.ndarray]: ...
 
 
-def _one_point(log_power: np.ndarray,
-               order: int,
-               to_dict: bool = False
-               ) -> tuple[np.ndarray, np.ndarray] | dict[str, np.ndarray]:
+def _one_point_analytical(
+    log_power: np.ndarray,
+        order: int,
+        to_dict: bool = False
+) -> tuple[np.ndarray, np.ndarray] | dict[str, np.ndarray]:
     r"""Compute one-point multipactor bands of order ``order``.
 
     Parameters
@@ -62,21 +64,23 @@ def _one_point(log_power: np.ndarray,
 
 
 @overload
-def _two_point(log_power: np.ndarray,
-               order: int,
-               to_dict: bool = True) -> dict[str, np.ndarray]: ...
+def _two_point_analytical(log_power: np.ndarray,
+                          order: int,
+                          to_dict: bool = True) -> dict[str, np.ndarray]: ...
 
 
 @overload
-def _two_point(log_power: np.ndarray,
-               order: int,
-               to_dict: bool = False) -> tuple[np.ndarray, np.ndarray]: ...
+def _two_point_analytical(log_power: np.ndarray,
+                          order: int,
+                          to_dict: bool = False
+                          ) -> tuple[np.ndarray, np.ndarray]: ...
 
 
-def _two_point(log_power: np.ndarray,
-               order: int,
-               to_dict: bool = False
-               ) -> tuple[np.ndarray, np.ndarray] | dict[str, np.ndarray]:
+def _two_point_analytical(
+    log_power: np.ndarray,
+        order: int,
+        to_dict: bool = False
+) -> tuple[np.ndarray, np.ndarray] | dict[str, np.ndarray]:
     r"""Compute two-point multipactor bands of order ``order``.
 
     Parameters
@@ -112,7 +116,7 @@ def plot_somersalo_analytical(points: str | int,
                               **plot_kw,
                               ) -> None:
     """Compute and plot single Somersalo plot, several orders."""
-    fun = _proper_somersalo_func(points)
+    fun = _somersalo_analytical_fun(points)
     somersalo_theory = {}
     for order in orders:
         somersalo_theory.update(fun(log_power, order, to_dict=True))
@@ -120,14 +124,39 @@ def plot_somersalo_analytical(points: str | int,
     df_somersalo.plot(ax=ax, **plot_kw)
 
 
-def _proper_somersalo_func(points: str | int) -> Callable:
+def _somersalo_analytical_fun(points: str | int) -> Callable:
     """Get one or two point Somersalo function."""
     one_allowed = ('one', 'One', 1)
     two_allowed = ('two', 'Two', 2)
     if points in one_allowed:
-        return _one_point
+        return _one_point_analytical
     if points in two_allowed:
-        return _two_point
+        return _two_point_analytical
 
     raise IOError(f"{points = } not recognized. Must be in {one_allowed}"
                   f"or {two_allowed}")
+
+
+def measured_to_somersalo_coordinates(
+    power: np.ndarray,
+    d_mm: float | np.ndarray,
+    freq_mhz: float | np.ndarray,
+    z_ohm: float | np.ndarray = 50.,
+) -> pd.DataFrame:
+    """Convert measured data to coordinates for Somersalo plot."""
+    n_points = len(power)
+    log_power = np.log10(power)
+
+    one_point = np.log10((freq_mhz * d_mm)**4 * z_ohm)
+    if isinstance(one_point, float):
+        one_point = np.full(n_points, one_point)
+
+    two_point = np.log10((freq_mhz * d_mm)**4 * z_ohm**2)
+    if isinstance(two_point, float):
+        two_point = np.full(n_points, two_point)
+
+    points = {'Log power': log_power,
+              'One-point': one_point,
+              'Two-point': two_point}
+    out = pd.DataFrame(points)
+    return out
