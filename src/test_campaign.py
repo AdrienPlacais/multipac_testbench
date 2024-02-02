@@ -11,8 +11,8 @@ from matplotlib.figure import Figure
 import numpy as np
 
 from multipac_testbench.src.multipactor_test import MultipactorTest
-from multipac_testbench.src.theoretical.somersalo import one_point, two_point
-from multipac_testbench.src.util import plot
+from multipac_testbench.src.theoretical.somersalo import \
+    plot_somersalo_analytical
 
 
 class TestCampaign(list):
@@ -63,8 +63,8 @@ class TestCampaign(list):
         xlim = (0., 3.5)
         fig, ax1, ax2 = self._somersalo_base_plot(xlim=xlim, **fig_kw)
 
-        x_values = np.linspace(xlim[0], xlim[1], 51)
-        self._add_somersalo_analytical(x_values, ax1, ax2)
+        log_power = np.linspace(xlim[0], xlim[1], 51)
+        self._add_somersalo_analytical(log_power, ax1, ax2)
         self._add_somersalo_measured(ax1, ax2)
         return fig, ax1, ax2
 
@@ -88,19 +88,17 @@ class TestCampaign(list):
         return fig, ax1, ax2
 
     def _add_somersalo_analytical(self,
-                                  x_values: np.ndarray,
+                                  log_power: np.ndarray,
                                   ax1: Axes,
                                   ax2: Axes) -> None:
-        """Represent the theoretical plots from Somersalo."""
-        one_points = [one_point(x_values, order) for order in (1, 2)]
-        two_points = [two_point(x_values, order) for order in (1, 2)]
-
-        for op in one_points:
-            ax1.plot(x_values, op[0])
-            ax1.plot(x_values, op[1])
-        for tp in two_points:
-            ax2.plot(x_values, tp[0])
-            ax2.plot(x_values, tp[1])
+        """Cmpute and plot all Somersalo."""
+        one_orders = (1, 2)
+        two_orders = (2, 3)
+        for points, orders, ax in zip(['one', 'two'],
+                                      [one_orders, two_orders],
+                                      [ax1, ax2]):
+            plot_somersalo_analytical(points, log_power, orders, ax)
+        ax1.grid(True)
 
     def _add_somersalo_measured(*args: Axes) -> None:
         """Represent the theoretical plots from Somersalo."""
