@@ -92,13 +92,9 @@ class TestCampaign(list):
                                   ax1: Axes,
                                   ax2: Axes) -> None:
         """Cmpute and plot all Somersalo."""
-        one_orders = (1, 2)
-        two_orders = (2, 3)
-        for points, orders, ax in zip(['one', 'two'],
-                                      [one_orders, two_orders],
-                                      [ax1, ax2]):
-            plot_somersalo_analytical(points, log_power, orders, ax)
+        plot_somersalo_analytical('one', log_power, (1, 2), ax1)
         ax1.grid(True)
+        plot_somersalo_analytical('two', log_power, (1, 2), ax2)
 
     def _add_somersalo_measured(*args: Axes) -> None:
         """Represent the theoretical plots from Somersalo."""
