@@ -69,11 +69,11 @@ class IMeasurementPoint(ABC):
         instrument_names_to_ignore = [x if isinstance(x, str)
                                       else x.name
                                       for x in instruments_to_ignore]
-        affected_instruments = [
+        instruments = [
             instrument for instrument in self.instruments
             if isinstance(instrument, instrument_class)
             and instrument.name not in instrument_names_to_ignore]
-        return affected_instruments
+        return instruments
 
     def get_instrument(self, *args, **kwargs) -> Instrument | None:
         """Get instrument which is (sub) class of ``instrument_class``.

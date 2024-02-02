@@ -8,10 +8,13 @@
 .. todo::
     name of pick ups in animation
 
+.. todo::
+    histograms for mp voltages? Maybe then add a gaussian fit, then we can
+    determine the 3sigma multipactor limits?
+
 """
 from abc import ABCMeta
 from pathlib import Path
-from re import A
 from typing import Sequence
 
 import numpy as np
@@ -142,7 +145,7 @@ class MultipactorTest:
             xlabel='Measurement index',
             **fig_kw)
 
-        measurement_points = self._filter_measurement_points(
+        measurement_points = self.filter_measurement_points(
             to_exclude=measurement_points_to_exclude)
 
         for measurement_point in measurement_points:
@@ -299,7 +302,7 @@ class MultipactorTest:
                                                      instruments_to_plot,
                                                      xlabel='Probe index',
                                                      **fig_kw)
-        measurement_points = self._filter_measurement_points(
+        measurement_points = self.filter_measurement_points(
             measurement_points_to_exclude)
         for i, measurement_point in enumerate(measurement_points):
             measurement_point.scatter_instruments_data(instrument_class_axes,
@@ -312,7 +315,7 @@ class MultipactorTest:
                                     png_path)
         return fig, axes
 
-    def _filter_measurement_points(
+    def filter_measurement_points(
             self,
             to_exclude: Sequence[str | IMeasurementPoint] = (),
     ) -> list[IMeasurementPoint]:
@@ -329,12 +332,12 @@ class MultipactorTest:
         measurement_points.append(self.global_diagnostics)
         return measurement_points
 
-    def _filter_instruments(
+    def filter_instruments(
             self,
             instrument_class: ABCMeta,
-            measurement_points: Sequence[IMeasurementPoint],
+            measurement_points: Sequence[IMeasurementPoint] | None = None,
             instruments_to_ignore: Sequence[Instrument | str] = (),
-    ) -> list[Instrument]:
+            ) -> list[Instrument]:
         """Get all instruments of desired class from ``measurement_points``.
 
         But remove the instruments to ignore.
@@ -343,10 +346,13 @@ class MultipactorTest:
         ----------
         instrument_class : ABCMeta
             Class of the desired instruments.
-        measurement_points : Sequence[IMeasurementPoint]
-            The measurement points from which you want the instruments.
-        instruments_to_ignore : Sequence[Instrument | str]
-            The :class:`.Instrument` or instrument names you do not want.
+        measurement_points : Sequence[IMeasurementPoint] | None, optional
+            The measurement points from which you want the instruments. The
+            default is None, in which case we look into every
+            :class:`IMeasurementPoint` attribute of self.
+        instruments_to_ignore : Sequence[Instrument | str], optional
+            The :class:`.Instrument` or instrument names you do not want. The
+            default is an empty tuple, in which case no instrument is ignored.
 
         Returns
         -------
@@ -354,6 +360,9 @@ class MultipactorTest:
             All the instruments matching the required conditions.
 
         """
+        if measurement_points is None:
+            measurement_points = self.filter_measurement_points()
+
         instruments_2d = [
             measurement_point.get_instruments(
                 instrument_class,
@@ -374,9 +383,9 @@ class MultipactorTest:
             instruments_to_ignore: Sequence[Instrument | str] = (),
     ) -> list[Instrument]:
         """Get all instruments of type ``instrument_class``."""
-        measurement_points = self._filter_measurement_points(
+        measurement_points = self.filter_measurement_points(
             to_exclude=measurement_points_to_exclude)
-        instruments = self._filter_instruments(
+        instruments = self.filter_instruments(
             instrument_class,
             measurement_points,
             instruments_to_ignore=instruments_to_ignore)
@@ -466,11 +475,11 @@ class MultipactorTest:
         for instrument_class, axe in instrument_class_axes.items():
             axe.set_ylabel(instrument_class.ylabel())
 
-        measurement_points = self._filter_measurement_points(
+        measurement_points = self.filter_measurement_points(
             to_exclude=measurement_points_to_exclude)
 
         axes_instruments = {
-            axe: self._filter_instruments(
+            axe: self.filter_instruments(
                 instrument_class,
                 measurement_points,
                 instruments_to_ignore=instruments_to_ignore)
@@ -493,9 +502,9 @@ class MultipactorTest:
             probes_to_ignore: Sequence[str | FieldProbe],
     ) -> Reconstructed:
         """Reconstruct the voltage profile from the e field probes."""
-        e_field_probes = self._filter_instruments(FieldProbe,
-                                                  self.pick_ups,
-                                                  probes_to_ignore)
+        e_field_probes = self.filter_instruments(FieldProbe,
+                                                 self.pick_ups,
+                                                 probes_to_ignore)
         assert self.global_diagnostics is not None
         powers = self.get_instrument(Powers)
 
