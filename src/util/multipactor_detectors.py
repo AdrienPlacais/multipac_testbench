@@ -122,7 +122,7 @@ def start_and_end_of_contiguous_true_zones(
     .. warning::
         ``starts`` is not the list of lower multipactor barrier indexes,
         ``ends`` is not the list of upper multipactor barrier indexes. To get
-        this data, use :fun:`indexes_of_lower_and_upper_multipactor_barriers`.
+        this data, use :func:`indexes_of_lower_and_upper_multipactor_barriers`.
 
     Parameters
     ----------
