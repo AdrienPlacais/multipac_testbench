@@ -5,15 +5,16 @@ from abc import ABC
 from collections.abc import Iterable, Sequence
 from typing import Callable, Self
 
-
 import numpy as np
 import pandas as pd
 from matplotlib.axes._axes import Axes
 from matplotlib.container import StemContainer
 from matplotlib.lines import Line2D
 
-from multipac_testbench.src.util.multipactor_detectors import \
+from multipac_testbench.src.util.multipactor_detectors import (
+    indexes_of_lower_and_upper_multipactor_barriers,
     start_and_end_of_contiguous_true_zones
+)
 
 
 class Instrument(ABC):
@@ -252,8 +253,7 @@ class Instrument(ABC):
 
         .. note::
             It is not mandatory to define a multipactor detector for every
-            :class:`Instrument`, as it may be unrelatable with some types of
-            instrument.
+            :class:`Instrument`.
 
         """
         return self._multipac_detector
@@ -299,18 +299,11 @@ class Instrument(ABC):
                                                 ) -> Sequence[tuple[int, int]]:
         """Get list of indexes of entry and exit of multipacting zones.
 
-        .. warning::
-            Assuming that the upper multipactor threshold is crossed, two cases
-            of figure.
-            If the power is growing, ``Power[entry] < Power[exit]`` hence
-            ``Power[entry]`` is the lower multipactor barrier and
-            ``Power[exit]`` is the upper multipactor barrier.
-            If the power is in its decreasing, ``Power[entry] > Power[exit]``
-            hence ``Power[entry]`` is the *upper* multipactor barrier and
-            ``Power[exit]`` is the *lower* multipactor barrier.
-
-        .. See Also::
-            indexes_of_lower_and_upper_multipactor_barriers
+        Returns
+        -------
+        zones : Sequence[tuple[int, int]]
+            List of first and last index of every multipactor band (multipactor
+            contiguous zone).
 
         """
         return start_and_end_of_contiguous_true_zones(self.multipactor)
@@ -335,34 +328,9 @@ class Instrument(ABC):
             List containing all indexes of exit of a multipacting zone.
 
         """
-        lower_indexes = []
-        upper_indexes = []
-        multipactor = self.multipactor
-        multipactor_change = np.diff(multipactor)
-        for index, (mp, mp_change, is_growing) in enumerate(
-                zip(multipactor[1:],
-                    multipactor_change,
-                    power_is_growing[1:]),
-                start=1):
-            if not mp_change:
-                continue
-            if np.isnan(is_growing):
-                continue
-
-            # Enter a MP zone
-            if mp:
-                if is_growing:
-                    lower_indexes.append(index)
-                else:
-                    upper_indexes.append(index)
-                continue
-
-            # Exit a MP zone
-            if not is_growing:
-                lower_indexes.append(index)
-            else:
-                upper_indexes.append(index)
-        return lower_indexes, upper_indexes
+        return indexes_of_lower_and_upper_multipactor_barriers(
+            self.multipactor,
+            power_is_growing)
 
     def values_of_lower_and_upper_multipactor_barriers(
         self,
