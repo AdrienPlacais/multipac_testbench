@@ -47,11 +47,6 @@ class MultipactorBands(list):
         starts_ends: list[tuple[int, int]]
         starts_ends = start_and_end_of_contiguous_true_zones(multipactor)
 
-        # lower_upper = indexes_of_lower_and_upper_multipactor_barriers(
-        #     multipactor,
-        #     power_is_growing
-        # )
-
         multipactor_bands = [
             MultipactorBand(start, end, detector_instrument_name)
             for start, end in starts_ends
