@@ -115,7 +115,7 @@ def _remove_isolated(multipactor: np.ndarray,
 
 
 def start_and_end_of_contiguous_true_zones(
-    multipactor: np.ndarray | list[bool | float]
+    multipactor: np.ndarray[np.bool_],
 ) -> list[tuple[int, int]]:
     """Get indexes of the entry and exit of contiguous multipactor zones.
 
@@ -126,7 +126,7 @@ def start_and_end_of_contiguous_true_zones(
 
     Parameters
     ----------
-    multipactor :  np.ndarray | list[bool | float]
+    multipactor :  np.ndarray[np.bool_]
         Iterable where True means there is multipactor, False no multipactor,
         and np.NaN undetermined.
 
@@ -137,8 +137,6 @@ def start_and_end_of_contiguous_true_zones(
         contiguous zone).
 
     """
-    if isinstance(multipactor, list):
-        multipactor = np.array(multipactor)
     diff = np.where(np.diff(multipactor))[0]
     n_changes = diff.size
 
@@ -167,16 +165,15 @@ def start_and_end_of_contiguous_true_zones(
 
 
 def indexes_of_lower_and_upper_multipactor_barriers(
-    multipactor: np.ndarray | list[bool | float],
+    multipactor: np.ndarray[np.bool_],
     power_is_growing: list[bool | float]
 ) -> tuple[Sequence[int], Sequence[int]]:
     """Get list of indexes of lower and upper multipactor barriers.
 
     Parameters
     ----------
-    multipactor :  np.ndarray | list[bool | float]
-        Iterable where True means there is multipactor, False no multipactor,
-        and np.NaN undetermined.
+    multipactor :  np.ndarray[np.bool_]
+        Array where True means there is multipactor, False no multipactor.
     power_is_growing : list[bool | float]
         True where the power is growing, False where the power is
         decreasing, NaN where undetermined.
@@ -191,8 +188,6 @@ def indexes_of_lower_and_upper_multipactor_barriers(
     """
     lower_indexes = []
     upper_indexes = []
-    if isinstance(multipactor, list):
-        multipactor = np.array(multipactor)
     multipactor_change = np.diff(multipactor)
 
     for index, (mp, mp_change, is_growing) in enumerate(
