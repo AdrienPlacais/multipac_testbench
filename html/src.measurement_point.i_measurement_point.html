@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>src.measurement_point.i_measurement_point module &mdash; MULTIPAC test bench 1.2.0 documentation</title>
+  <title>src.measurement_point.i_measurement_point module &mdash; MULTIPAC test bench 1.2.0-20-g71bba11 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,7 +15,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=6efca38a"></script>
+        <script src="_static/documentation_options.js?v=47a07315"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -38,7 +38,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.2.0
+                1.2.0-20-g71bba11
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -63,6 +63,7 @@
 <li class="toctree-l4"><a class="reference internal" href="src.measurement_point.pick_up.html">src.measurement_point.pick_up module</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="src.multipactor_band.html">src.multipactor_band package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.util.html">src.util package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html">src.multipactor_test module</a></li>
 </ul>
@@ -143,9 +144,9 @@ desired instrument class.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="src.measurement_point.i_measurement_point.IMeasurementPoint.set_multipac_detector">
-<span class="sig-name descname"><span class="pre">set_multipac_detector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">multipac_detector:</span> <span class="pre">~typing.Callable[[~numpy.ndarray],</span> <span class="pre">~numpy.ndarray[~numpy.bool_]],</span> <span class="pre">instrument_class:</span> <span class="pre">~abc.ABCMeta</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'multipac_testbench.src.instruments.instrument.Instrument'&gt;,</span> <span class="pre">verbose:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#src.measurement_point.i_measurement_point.IMeasurementPoint.set_multipac_detector" title="Link to this definition"></a></dt>
-<dd><p>Add multipactor detection function to instruments.</p>
+<dt class="sig sig-object py" id="src.measurement_point.i_measurement_point.IMeasurementPoint.detect_multipactor">
+<span class="sig-name descname"><span class="pre">detect_multipactor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">multipac_detector:</span> <span class="pre">~typing.Callable[[~numpy.ndarray],</span> <span class="pre">~numpy.ndarray[~numpy.bool_]],</span> <span class="pre">instrument_class:</span> <span class="pre">~abc.ABCMeta</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'multipac_testbench.src.instruments.instrument.Instrument'&gt;</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#src.measurement_point.i_measurement_point.IMeasurementPoint.detect_multipactor" title="Link to this definition"></a></dt>
+<dd><p>Detect multipactor with <code class="docutils literal notranslate"><span class="pre">multipac_detector</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -167,7 +168,7 @@ associated axes.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.measurement_point.i_measurement_point.IMeasurementPoint.scatter_instruments_data">
-<span class="sig-name descname"><span class="pre">scatter_instruments_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instrument_class_axes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">ABCMeta</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Axes</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mp_detector_instrument_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ABCMeta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xdata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#src.measurement_point.i_measurement_point.IMeasurementPoint.scatter_instruments_data" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">scatter_instruments_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instrument_class_axes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">ABCMeta</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Axes</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xdata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#src.measurement_point.i_measurement_point.IMeasurementPoint.scatter_instruments_data" title="Link to this definition"></a></dt>
 <dd><p>Scatter data measured by desired instruments.</p>
 </dd></dl>
 

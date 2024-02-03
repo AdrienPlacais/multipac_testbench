@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>src.instruments.instrument module &mdash; MULTIPAC test bench 1.2.0 documentation</title>
+  <title>src.instruments.instrument module &mdash; MULTIPAC test bench 1.2.0-20-g71bba11 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,7 +15,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=6efca38a"></script>
+        <script src="_static/documentation_options.js?v=47a07315"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -38,7 +38,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.2.0
+                1.2.0-20-g71bba11
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -69,6 +69,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="src.measurement_point.html">src.measurement_point package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.multipactor_band.html">src.multipactor_band package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.util.html">src.util package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html">src.multipactor_test module</a></li>
 </ul>
@@ -177,6 +178,12 @@ array.</p>
 </dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="src.instruments.instrument.Instrument.ydata_as_pd">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ydata_as_pd</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Series</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">DataFrame</span></em><a class="headerlink" href="#src.instruments.instrument.Instrument.ydata_as_pd" title="Link to this definition"></a></dt>
+<dd><p>Get the treated data as a pandas object.</p>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="src.instruments.instrument.Instrument.ydata">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ydata</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#src.instruments.instrument.Instrument.ydata" title="Link to this definition"></a></dt>
 <dd><p>Get the treated data.</p>
@@ -200,69 +207,6 @@ from <code class="docutils literal notranslate"><span class="pre">raw_data</span
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>post_treater</strong> (<em>Callable</em><em>[</em><em>[</em><em>np.ndarray</em><em>]</em><em>, </em><em>np.ndarray</em><em>]</em>) – Post-treating function to add. It must take an array as input, and
 return an array with the same size as output.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="src.instruments.instrument.Instrument.multipac_detector">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">multipac_detector</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#src.instruments.instrument.Instrument.multipac_detector" title="Link to this definition"></a></dt>
-<dd><p>Get access to the function that determines where is multipactor.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>It is not mandatory to define a multipactor detector for every
-<a class="reference internal" href="#src.instruments.instrument.Instrument" title="src.instruments.instrument.Instrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code></a>, as it may be unrelatable with some types of
-instrument.</p>
-</div>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="src.instruments.instrument.Instrument.multipactor">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">multipactor</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#src.instruments.instrument.Instrument.multipactor" title="Link to this definition"></a></dt>
-<dd><p>Use <code class="docutils literal notranslate"><span class="pre">multipac_detector</span></code> to determine where multipac happens.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>_multipactor</strong> – Array with the same shape as <a class="reference internal" href="#src.instruments.instrument.Instrument.ydata" title="src.instruments.instrument.Instrument.ydata"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ydata</span></code></a>. It is <code class="docutils literal notranslate"><span class="pre">True</span></code> where
-there is multipactor and <code class="docutils literal notranslate"><span class="pre">False</span></code> elsewhere.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>np.ndarray</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="src.instruments.instrument.Instrument.indexes_of_contiguous_multipactor_zones">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">indexes_of_contiguous_multipactor_zones</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#src.instruments.instrument.Instrument.indexes_of_contiguous_multipactor_zones" title="Link to this definition"></a></dt>
-<dd><p>Get list of indexes of entry and exit of multipacting zones.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Assuming that the upper multipactor threshold is crossed, two cases
-of figure.
-If the power is growing, <code class="docutils literal notranslate"><span class="pre">Power[entry]</span> <span class="pre">&lt;</span> <span class="pre">Power[exit]</span></code> hence
-<code class="docutils literal notranslate"><span class="pre">Power[entry]</span></code> is the lower multipactor barrier and
-<code class="docutils literal notranslate"><span class="pre">Power[exit]</span></code> is the upper multipactor barrier.
-If the power is in its decreasing, <code class="docutils literal notranslate"><span class="pre">Power[entry]</span> <span class="pre">&gt;</span> <span class="pre">Power[exit]</span></code>
-hence <code class="docutils literal notranslate"><span class="pre">Power[entry]</span></code> is the <em>upper</em> multipactor barrier and
-<code class="docutils literal notranslate"><span class="pre">Power[exit]</span></code> is the <em>lower</em> multipactor barrier.</p>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="src.instruments.instrument.Instrument.indexes_of_lower_and_upper_multipactor_barriers">
-<span class="sig-name descname"><span class="pre">indexes_of_lower_and_upper_multipactor_barriers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">power_is_growing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#src.instruments.instrument.Instrument.indexes_of_lower_and_upper_multipactor_barriers" title="Link to this definition"></a></dt>
-<dd><p>Get list of indexes of lower and upper multipactor barriers.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>power_is_growing</strong> (<em>list</em><em>[</em><em>bool</em><em> | </em><em>float</em><em>]</em>) – True where the power is growing, False where the power is
-decreasing, NaN where undetermined.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>lower_indexes</strong> (<em>Sequence[int]</em>) – List containing all indexes of entry in a multipacting zone.</p></li>
-<li><p><strong>upper_indexes</strong> (<em>Sequence[int]</em>) – List containing all indexes of exit of a multipacting zone.</p></li>
-</ul>
-</p>
 </dd>
 </dl>
 </dd></dl>
