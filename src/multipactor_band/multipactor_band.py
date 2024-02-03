@@ -19,6 +19,9 @@ class MultipactorBand(list):
 
     Also, holds some methods to ease plotting.
 
+    .. todo::
+        A .plot method for IMeasurementPoint._add_multipactor_vs_time
+
     """
 
     def __init__(self,
@@ -32,8 +35,13 @@ class MultipactorBand(list):
 
         self.detector_instrument_name = detector_instrument_name
 
-        # this is position in MultipactorBands object, so may be unnecessary
-        self.multipactor_band_index: int
+        self.multipactor_band_index: int = 0
+
+    def __str__(self) -> str:
+        """Give concise information on object."""
+        out = f"zone #{self.multipactor_band_index}, "
+        out += f"detected by {self.detector_instrument_name}"
+        return out
 
     def to_range(self) -> range:
         """Convert objet to a ``range`` object holding all ``indexes``.
@@ -47,7 +55,9 @@ class MultipactorBand(list):
 
 if __name__ == '__main__':
     my_indexes = [3, 8]
-    my_band = MultipactorBand(my_indexes[0], my_indexes[-1])
+    my_band = MultipactorBand(my_indexes[0],
+                              my_indexes[-1],
+                              "doigt mouillé")
 
     my_instrument_data = np.linspace(0, 10, 11)
     my_mp_data = my_instrument_data[my_band]
