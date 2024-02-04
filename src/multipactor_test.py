@@ -656,10 +656,8 @@ class MultipactorTest:
                 name=multipactor_measured_at,
                 to_exclude=measurement_points_to_exclude)
 
-        multipactor_bands = multipactor_measured_at.multipactor_bands
-
         lower_values, upper_values = instrument_to_plot.values_at_barriers(
-            multipactor_bands
+            multipactor_measured_at
         )
 
         axe = instrument_class_axes[instrument_class_to_plot]

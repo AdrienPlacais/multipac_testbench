@@ -238,29 +238,52 @@ class Instrument(ABC):
                   "previously post-treated data obsolete.")
             self.ydata = None
 
-    def values_at_barriers(self,
-                           multipactor_bands: MultipactorBands,
-                           ) -> tuple[pd.DataFrame, pd.DataFrame]:
-        """Get measured data at lower and upper multipactor barriers."""
+    def values_at_barriers(
+            self,
+            multipactor_bands: MultipactorBands,
+            ) -> tuple[pd.DataFrame, pd.DataFrame]:
+        """Get measured data at lower and upper multipactor barriers.
+
+        Parameters
+        ----------
+        multipactor_bands : MultipactorBands
+            Object holding the multipacting barriers. If an other object is
+            given, we take its ``multipactor_bands`` attribute. As for now,
+            the only object that can work is :class:`IMeasurementPoint`.
+
+        Returns
+        -------
+        tuple[pd.DataFrame, pd.DataFrame]
+            Holds measured data at lower and upper multipacting barriers.
+
+        """
+        match multipactor_bands:
+            case MultipactorBands():
+                pass
+            case object() as other_object:
+                assert hasattr(other_object, 'multipactor_bands')
+                multipactor_bands = getattr(other_object, 'multipactor_bands')
+                assert isinstance(multipactor_bands, MultipactorBands)
+            case _:
+                raise TypeError("Wrong type for multipactor_bands")
+
         barriers_idx = multipactor_bands.barriers
         lower_barrier_idx, upper_barrier_idx = barriers_idx
         assert isinstance(lower_barrier_idx, list)
         assert isinstance(upper_barrier_idx, list)
         name_of_detector = multipactor_bands.detector_instrument_name
 
-        columns = self.raw_data.columns
+        label = self.raw_data.columns + f" according to {name_of_detector}"
         lower_values = pd.DataFrame(
             data=self.ydata[lower_barrier_idx],
             index=lower_barrier_idx,
-            columns="Lower barrier " + columns + " according to "
-            + name_of_detector,
+            columns="Lower barrier " + label,
         )
 
         upper_values = pd.DataFrame(
             data=self.ydata[upper_barrier_idx],
             index=upper_barrier_idx,
-            columns="Upper barrier " + columns + " according to "
-            + name_of_detector,
+            columns="Upper barrier " + label,
         )
         self.ydata_at_multipacting_barrier = \
             pd.concat([self.ydata_at_multipacting_barrier,
