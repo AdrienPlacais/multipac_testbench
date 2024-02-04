@@ -58,6 +58,10 @@ class MultipactorTest:
         self.freq_mhz = freq_mhz
         self.swr = swr
 
+    def __str__(self) -> str:
+        """Print info on object."""
+        return f"{self.freq_mhz}MHz, SWR {self.swr}"
+
     def add_post_treater(self,
                          *args,
                          only_pick_up_which_name_is: tuple[str, ...] = (),
@@ -660,3 +664,29 @@ class MultipactorTest:
         axe.grid(True)
         plot.finish_fig(fig, instrument_class_axes.values(), png_path)
         return fig, [axes for axes in instrument_class_axes.values()]
+
+    def data_for_somersalo(self,
+                           multipactor_measured_at: IMeasurementPoint | str,
+                           ) -> dict[str, float | list[float]]:
+        """Get the data required to create the Somersalo plot."""
+        if isinstance(multipactor_measured_at, str):
+            multipactor_measured_at = self.get_measurement_point(
+                multipactor_measured_at)
+        multipactor_bands = multipactor_measured_at.multipactor_bands
+
+        powers = self.get_instrument(Powers)
+        assert powers is not None
+        last_powers = powers.values_at_barriers_fully_conditioned(
+            multipactor_bands)
+
+        z_ohm = 50.
+        d_mm = .5 * (46.6 - 18.6)
+        print("MultipactorTest.data_for_somersalo warning! Used default "
+              f"{d_mm = }")
+        somersalo_data = {
+            'powers_kw': [last_powers[0][0] * 1e-3, last_powers[1][0] * 1e-3],
+            'z_ohm': z_ohm,
+            'd_mm': d_mm,
+            'freq_ghz': self.freq_mhz * 1e-3,
+        }
+        return somersalo_data

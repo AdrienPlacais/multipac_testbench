@@ -247,9 +247,7 @@ class Instrument(ABC):
         Parameters
         ----------
         multipactor_bands : MultipactorBands
-            Object holding the multipacting barriers. If an other object is
-            given, we take its ``multipactor_bands`` attribute. As for now,
-            the only object that can work is :class:`IMeasurementPoint`.
+            Object holding the multipacting barriers.
 
         Returns
         -------
@@ -257,16 +255,6 @@ class Instrument(ABC):
             Holds measured data at lower and upper multipacting barriers.
 
         """
-        match multipactor_bands:
-            case MultipactorBands():
-                pass
-            case object() as other_object:
-                assert hasattr(other_object, 'multipactor_bands')
-                multipactor_bands = getattr(other_object, 'multipactor_bands')
-                assert isinstance(multipactor_bands, MultipactorBands)
-            case _:
-                raise TypeError("Wrong type for multipactor_bands")
-
         barriers_idx = multipactor_bands.barriers
         lower_barrier_idx, upper_barrier_idx = barriers_idx
         assert isinstance(lower_barrier_idx, list)
@@ -292,6 +280,22 @@ class Instrument(ABC):
                       axis=1).sort_index()
 
         return lower_values, upper_values
+
+    def values_at_barriers_fully_conditioned(
+            self,
+            multipactor_bands: MultipactorBands,
+            ) -> tuple[float, float]:
+        """Get measured data at last mp limits."""
+        barriers_idx = multipactor_bands.barriers
+        last_low = barriers_idx[0][-1]
+        last_upp = barriers_idx[1][-1]
+
+        if isinstance(last_low, (list, np.ndarray)):
+            last_low = last_low[0]
+        if isinstance(last_upp, (list, np.ndarray)):
+            last_upp = last_upp[0]
+
+        return self.ydata[last_low], self.ydata[last_upp]
 
     def _post_treat(self, data: np.ndarray) -> np.ndarray:
         """Apply all post-treatment functions."""

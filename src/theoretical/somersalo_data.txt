@@ -1,0 +1,25 @@
+# This data was manually extracted from Somersalo's plot, using
+# WebPlotDigitizer.
+# For each curve, the two extreme coordinates were extracted. Then the slope
+# `a` and the ordinate `b` were calculated.
+# This is not very precise, and definitely not how science should be done.
+# Use at your own risks!
+Barrier  MP points   Lower/Upper    x0    x1    y0    y1  
+1        1           Lower          1.69  2.97  7.40  8.69
+1        1           Upper          1.59  2.99  7.40  8.79
+2        1           Lower          1.39  2.97  7.40  8.99
+2        1           Upper          1.31  3.11  7.40  9.19
+3        1           Lower          1.08  2.87  7.40  9.19
+3        1           Upper          1.04  2.83  7.40  9.19
+4        1           Lower          0.860 2.64  7.40  9.19
+4        1           Upper          0.833 2.61  7.41  9.19
+5        1           Lower          0.679 2.46  7.40  9.19
+5        1           Upper          0.674 2.44  7.40  9.19
+6        1           Lower          0.533 2.31  7.40  9.19
+6        1           Upper          0.520 2.30  7.40  9.20
+7        1           Lower          0.411 2.19  7.40  9.19
+7        1           Upper          0.399 2.18  7.40  9.19
+8        1           Lower          0.310 2.08  7.41  9.20
+8        1           Upper          0.310 2.07  7.42  9.19
+1        2           Lower          1.54  2.98  9.08  10.7
+1        2           Upper          1.51  2.99  9.08  10.7
