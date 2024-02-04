@@ -15,6 +15,8 @@ from multipac_testbench.src.theoretical.somersalo import (
     measured_to_somersalo_coordinates,
     plot_somersalo_analytical
 )
+from multipac_testbench.src.theoretical.susceptibility import \
+    measured_to_susceptibility_coordinates
 
 
 class TestCampaign(list):
@@ -135,3 +137,43 @@ class TestCampaign(list):
                         marker='*', label=str(mp_test))
         ax1.legend()
         ax2.legend()
+
+    def susceptibility_plot(self,
+                            multipactor_measured_at: str,
+                            electric_field_at: str,
+                            fig_kw: dict | None = None,
+                            ax_kw: dict | None = None) -> tuple[Figure, Axes]:
+        """Create a scusceptiblity chart."""
+        fig, ax1 = self._susceptibility_base_plot(fig_kw, ax_kw)
+
+        for mp_test in self:
+            susceptibility_data = mp_test.data_for_susceptibility(
+                multipactor_measured_at,
+                electric_field_at)
+            points = measured_to_susceptibility_coordinates(
+                **susceptibility_data)
+            ax1.scatter(points[:, 0], points[:, 1], label=str(mp_test))
+        ax1.legend()
+        return fig, ax1
+
+    def _susceptibility_base_plot(self,
+                                  fig_kw: dict | None = None,
+                                  ax_kw: dict | None = None,
+                                  ) -> tuple[Figure, Axes]:
+        """Create the base figure."""
+        if fig_kw is None:
+            fig_kw = {}
+        fig = plt.figure(**fig_kw)
+
+        if ax_kw is None:
+            ax_kw = {}
+        ax1 = fig.add_subplot(
+            111,
+            xlabel=r"$f \times d~[\mathrm{MHz~cm}]$",
+            ylabel=r"Threshold $V~[\mathrm{V}]$",
+            **ax_kw,
+        )
+        ax1.set_xscale('log', base=10)
+        ax1.set_yscale('log', base=10)
+        ax1.grid(True)
+        return fig, ax1

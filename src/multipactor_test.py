@@ -690,3 +690,32 @@ class MultipactorTest:
             'freq_ghz': self.freq_mhz * 1e-3,
         }
         return somersalo_data
+
+    def data_for_susceptibility(
+            self,
+            multipactor_measured_at: IMeasurementPoint | str,
+            electric_field_at: IMeasurementPoint | str,
+            ) -> dict[str, float | list[float]]:
+        """Get the data required to create the susceptibility plot."""
+        if isinstance(multipactor_measured_at, str):
+            multipactor_measured_at = self.get_measurement_point(
+                multipactor_measured_at)
+        multipactor_bands = multipactor_measured_at.multipactor_bands
+
+        if isinstance(electric_field_at, str):
+            electric_field_at = self.get_measurement_point(
+                electric_field_at)
+        electric_field = electric_field_at.get_instrument(FieldProbe)
+        assert electric_field is not None
+        last_fields = electric_field.values_at_barriers_fully_conditioned(
+            multipactor_bands)
+
+        d_mm = .5 * (46.6 - 18.6)
+        print("MultipactorTest.data_for_susceptibility warning! Used default "
+              f"{d_mm = }")
+        somersalo_data = {
+            'voltages_v': [last_fields[0], last_fields[1]],
+            'd_cm': d_mm * 1e-1,
+            'freq_mhz': self.freq_mhz,
+        }
+        return somersalo_data
