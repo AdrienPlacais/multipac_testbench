@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Define object to keep a single instrument measurements."""
 from abc import ABC
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable
 from typing import Callable, Self
 
 import numpy as np
@@ -10,6 +10,9 @@ import pandas as pd
 from matplotlib.axes._axes import Axes
 from matplotlib.container import StemContainer
 from matplotlib.lines import Line2D
+
+from multipac_testbench.src.multipactor_band.multipactor_bands import \
+    MultipactorBands
 
 
 class Instrument(ABC):
@@ -235,24 +238,27 @@ class Instrument(ABC):
                   "previously post-treated data obsolete.")
             self.ydata = None
 
-    def values_of_lower_and_upper_multipactor_barriers(
-        self,
-        lower_indexes: list[int],
-        upper_indexes: list[int],
-        name_of_detector: str
-    ) -> tuple[pd.DataFrame, pd.DataFrame]:
+    def values_at_barriers(self,
+                           multipactor_bands: MultipactorBands,
+                           ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Get measured data at lower and upper multipactor barriers."""
+        barriers_idx = multipactor_bands.barriers
+        lower_barrier_idx, upper_barrier_idx = barriers_idx
+        assert isinstance(lower_barrier_idx, list)
+        assert isinstance(upper_barrier_idx, list)
+        name_of_detector = multipactor_bands.detector_instrument_name
+
         columns = self.raw_data.columns
         lower_values = pd.DataFrame(
-            data=self.ydata[lower_indexes],
-            index=lower_indexes,
+            data=self.ydata[lower_barrier_idx],
+            index=lower_barrier_idx,
             columns="Lower barrier " + columns + " according to "
             + name_of_detector,
         )
 
         upper_values = pd.DataFrame(
-            data=self.ydata[upper_indexes],
-            index=upper_indexes,
+            data=self.ydata[upper_barrier_idx],
+            index=upper_barrier_idx,
             columns="Upper barrier " + columns + " according to "
             + name_of_detector,
         )

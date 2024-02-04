@@ -26,6 +26,7 @@ class MultipactorBands(list):
         super().__init__(multipactor_bands)
         self.multipactor = multipactor
         self.detector_instrument_name = detector_instrument_name
+        self.power_is_growing: list[bool | float]
 
     def __str__(self) -> str:
         """Give concise information on the bands."""
@@ -54,9 +55,8 @@ class MultipactorBands(list):
 
         return cls(multipactor_bands, multipactor, detector_instrument_name)
 
-    def barriers(self,
-                 power_is_growing: list[bool | float]
-                 ) -> tuple[Sequence[int], Sequence[int]]:
+    @property
+    def barriers(self) -> tuple[Sequence[int], Sequence[int]]:
         """Get list of indexes of lower and upper barriers.
 
         Parameters
@@ -73,7 +73,8 @@ class MultipactorBands(list):
             Indexes corresponding to a crossing of upper multipactor barrier.
 
         """
-        return indexes_of_lower_and_upper_multipactor_barriers(
+        assert hasattr(self, 'power_is_growing')
+        barriers = indexes_of_lower_and_upper_multipactor_barriers(
             self.multipactor,
-            power_is_growing
-        )
+            self.power_is_growing)
+        return barriers

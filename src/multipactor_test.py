@@ -80,30 +80,43 @@ class MultipactorTest:
         for pick_up in pick_ups:
             pick_up.add_post_treater(*args, **kwargs)
 
-    def set_multipac_detector(self,
-                              *args,
-                              only_pick_up_which_name_is: tuple[str, ...] = (),
-                              **kwargs) -> None:
-        """Set multipactor detection functions to instruments."""
-        print("MultipactorTest.set_multipac_detector warning: deprecated.",
-              "Use .detect_multipactor instead.")
-        pick_ups = self.pick_ups
-        if len(only_pick_up_which_name_is) > 0:
-            pick_ups = [pick_up for pick_up in self.pick_ups
-                        if pick_up.name in only_pick_up_which_name_is]
-
-        for pick_up in pick_ups:
-            pick_up.set_multipac_detector(*args, **kwargs)
-
     def detect_multipactor(
             self,
             multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
-            instrument_class: ABCMeta = Instrument,
+            instrument_class: ABCMeta,
+            power_is_growing_kw: dict[str, int | float] | None = None,
     ) -> None:
-        """Detect multipactor with ``multipac_detector``."""
+        """Create the :class:`.MultipactorBands` objects.
+
+        Parameters
+        ----------
+        multipac_detector : Callable[[np.ndarray], np.ndarray[np.bool_]]
+            Function that takes in the ``ydata`` of an :class:`.Instrument` and
+            returns an array, where True means multipactor and False no
+            multipactor.
+        instrument_class : ABCMeta
+            Type of instrument on which ``multipac_detector`` should be
+            applied.
+        power_is_growing_kw : dict[str, int | float] | None, optional
+            Keyword arguments passed to the function that determines when power
+            is increasing, when it is decreasing. The default is None.
+
+        """
+        powers = self.get_instrument(Powers)
+
         for measurement_point in self.get_measurement_points():
             measurement_point.detect_multipactor(multipac_detector,
                                                  instrument_class)
+            if not hasattr(measurement_point, 'multipactor_bands'):
+                continue
+            if not isinstance(powers, Powers):
+                continue
+
+            if power_is_growing_kw is None:
+                power_is_growing_kw = {}
+            power_is_growing = powers.where_is_growing(**power_is_growing_kw)
+            measurement_point.multipactor_bands.power_is_growing = \
+                power_is_growing
 
     def plot_instruments_vs_time(
         self,
@@ -371,7 +384,7 @@ class MultipactorTest:
 
     def get_measurement_points(
         self,
-        names: Sequence[str] = (),
+        names: Sequence[str] | None = None,
         to_exclude: Sequence[str | IMeasurementPoint] = (),
     ) -> Sequence[IMeasurementPoint]:
         """Get all or some measurement points.
@@ -398,7 +411,7 @@ class MultipactorTest:
             if x is not None and x.name not in names_to_exclude
         ]
 
-        if len(names) > 0:
+        if names is not None and len(names) > 0:
             return [x for x in measurement_points if x.name in names]
         return measurement_points
 
@@ -423,10 +436,9 @@ class MultipactorTest:
             The desired object.
 
         """
-        names = ()
         if name is not None:
-            names = (name, )
-        measurement_points = self.get_measurement_points(names, to_exclude)
+            name = name,
+        measurement_points = self.get_measurement_points(name, to_exclude)
         assert len(measurement_points) == 1, ("Only one IMeasurementPoint "
                                               "should match.")
         return measurement_points[0]
@@ -583,7 +595,6 @@ class MultipactorTest:
             measurement_points_to_exclude: Sequence[str
                                                     | IMeasurementPoint] = (),
             png_path: Path | None = None,
-            power_is_growing_kw: dict[str, int | float] | None = None,
             multipactor_measured_at: IMeasurementPoint | str | None = None,
             **fig_kw,
     ) -> tuple[Figure, Axes]:
@@ -604,16 +615,13 @@ class MultipactorTest:
             The instrument which data will be plotted. As the goal of this
             method is to plot multipacting limits, it is expected that the
             instrument class is related to power/electric field/voltage.
-        multipactor_detector : ABCMeta
-            The instrument that will tell when multipactor happens. It must
-            have a ``multipac_detector``. Also, it must be unique.
         measurement_points_to_exclude : Sequence[str | IMeasurementPoint]
             Some measurement points to exclude from plot.
         png_path : Path | None
             If provided, will save the Figure. The default is None.
-        power_is_growing_kw : dict[str, int | float] | None
-            Arguments that are passed to the function that detects if the
-            power is growing or not.
+        multipactor_measured_at: IMeasurementPoint | str | None = None
+            If you want to plot the multipactor bands from an instrument that
+            is not at the same position as the instrument data to plot.
         fig_kw :
             Other keyword arguments passed to the ``Figure``.
 
@@ -643,34 +651,16 @@ class MultipactorTest:
         assert instrument_to_plot is not None, (
             f"No {instrument_class_to_plot} instrument was found.")
 
-        powers = self.get_instrument(Powers)
-        assert isinstance(powers, Powers)
-        if power_is_growing_kw is None:
-            power_is_growing_kw = {}
-        power_is_growing = powers.where_is_growing(**power_is_growing_kw)
+        if not isinstance(multipactor_measured_at, IMeasurementPoint):
+            multipactor_measured_at = self.get_measurement_point(
+                name=multipactor_measured_at,
+                to_exclude=measurement_points_to_exclude)
 
-        match (multipactor_measured_at):
-            case IMeasurementPoint():
-                pass
-            case None:
-                multipactor_measured_at = self.get_measurement_point(
-                    to_exclude=measurement_points_to_exclude)
-            case str():
-                multipactor_measured_at = self.get_measurement_point(
-                    name=multipactor_measured_at,
-                    to_exclude=measurement_points_to_exclude)
-            case _:
-                raise IOError(f"{type(multipactor_measured_at)} not supported")
+        multipactor_bands = multipactor_measured_at.multipactor_bands
 
-        lower_indexes, upper_indexes = \
-            multipactor_measured_at.multipactor_bands.barriers(power_is_growing
-                                                               )
-        lower_values, upper_values = \
-            instrument_to_plot.values_of_lower_and_upper_multipactor_barriers(
-                lower_indexes,
-                upper_indexes,
-                str(multipactor_measured_at.multipactor_bands)
-            )
+        lower_values, upper_values = instrument_to_plot.values_at_barriers(
+            multipactor_bands
+        )
 
         axe = instrument_class_axes[instrument_class_to_plot]
         lower_values.plot(ax=axe, kind='line', drawstyle='steps-post')
