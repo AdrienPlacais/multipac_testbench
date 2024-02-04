@@ -8,8 +8,13 @@
 .. todo::
     name of pick ups in animation
 
+.. todo::
+    histograms for mp voltages? Maybe then add a gaussian fit, then we can
+    determine the 3sigma multipactor limits?
+
 """
 from abc import ABCMeta
+from collections.abc import Callable
 from pathlib import Path
 from typing import Sequence, overload
 
@@ -66,18 +71,43 @@ class MultipactorTest:
         for pick_up in pick_ups:
             pick_up.add_post_treater(*args, **kwargs)
 
-    def set_multipac_detector(self,
-                              *args,
-                              only_pick_up_which_name_is: tuple[str, ...] = (),
-                              **kwargs) -> None:
-        """Set multipactor detection functions to instruments."""
-        pick_ups = self.pick_ups
-        if len(only_pick_up_which_name_is) > 0:
-            pick_ups = [pick_up for pick_up in self.pick_ups
-                        if pick_up.name in only_pick_up_which_name_is]
+    def detect_multipactor(
+            self,
+            multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
+            instrument_class: ABCMeta,
+            power_is_growing_kw: dict[str, int | float] | None = None,
+    ) -> None:
+        """Create the :class:`.MultipactorBands` objects.
 
-        for pick_up in pick_ups:
-            pick_up.set_multipac_detector(*args, **kwargs)
+        Parameters
+        ----------
+        multipac_detector : Callable[[np.ndarray], np.ndarray[np.bool_]]
+            Function that takes in the ``ydata`` of an :class:`.Instrument` and
+            returns an array, where True means multipactor and False no
+            multipactor.
+        instrument_class : ABCMeta
+            Type of instrument on which ``multipac_detector`` should be
+            applied.
+        power_is_growing_kw : dict[str, int | float] | None, optional
+            Keyword arguments passed to the function that determines when power
+            is increasing, when it is decreasing. The default is None.
+
+        """
+        powers = self.get_instrument(Powers)
+
+        for measurement_point in self.get_measurement_points():
+            measurement_point.detect_multipactor(multipac_detector,
+                                                 instrument_class)
+            if not hasattr(measurement_point, 'multipactor_bands'):
+                continue
+            if not isinstance(powers, Powers):
+                continue
+
+            if power_is_growing_kw is None:
+                power_is_growing_kw = {}
+            power_is_growing = powers.where_is_growing(**power_is_growing_kw)
+            measurement_point.multipactor_bands.power_is_growing = \
+                power_is_growing
 
     def plot_instruments_vs_time(
         self,
@@ -85,7 +115,7 @@ class MultipactorTest:
         measurement_points_to_exclude: tuple[str, ...] = (),
         png_path: Path | None = None,
         raw: bool = False,
-        multipactor_plots: dict[ABCMeta, ABCMeta] | None = None,
+        plot_multipactor: bool = False,
         **fig_kw,
     ) -> tuple[Figure, Axes]:
         """Plot signals measured by ``instruments_to_plot``.
@@ -109,11 +139,8 @@ class MultipactorTest:
             post-treatment. The default is False. Note that when the
             :attr:`.Instrument.post_treaters` list is empty, raw data is
             plotted even if ``raw==True``.
-        multipactor_plots : dict[ABCMeta, ABCMeta] | None, optional
-            Keys are the Instrument subclass for which you want to see the
-            multipactor zones. Values are the Instrument subclass that detect
-            the multipactor. The default is None, in which case no multipacting
-            zone is drawn.
+        multipactor_plots : bool, optional
+            To add arrows to detect multipactor. The default is False.
         fig_kw :
             Keyword arguments passed to the ``Figure``.
 
@@ -132,7 +159,7 @@ class MultipactorTest:
             xlabel='Measurement index',
             **fig_kw)
 
-        measurement_points = self._filter_measurement_points(
+        measurement_points = self.get_measurement_points(
             to_exclude=measurement_points_to_exclude)
 
         for measurement_point in measurement_points:
@@ -140,19 +167,16 @@ class MultipactorTest:
                                                       instruments_to_plot,
                                                       raw=raw)
 
-            if multipactor_plots is not None:
+            if plot_multipactor:
                 self._add_multipactor_vs_time(measurement_point,
-                                              instrument_class_axes,
-                                              multipactor_plots)
+                                              instrument_class_axes)
 
         plot.finish_fig(fig, instrument_class_axes.values(), png_path)
-
         return fig, [axes for axes in instrument_class_axes.values()]
 
     def _add_multipactor_vs_time(self,
                                  measurement_point: IMeasurementPoint,
                                  instrument_class_axes: dict[ABCMeta, Axes],
-                                 multipactor_plots: dict[ABCMeta, ABCMeta]
                                  ) -> None:
         """Show with arrows when multipactor happens.
 
@@ -162,17 +186,14 @@ class MultipactorTest:
             :class:`.PickUp` or :class:`.GlobalDiagnostic` under study.
         instrument_class_axes : dict[ABCMeta, Axes]
             Links instrument class with the axes.
-        multipactor_plots : dict[ABCMeta, ABCMeta]
-            Links the instrument plot where multipactor should appear (keys)
-            with the instruments that actually detect the multipactor (values).
 
         """
-        for plotted_instr, detector_instr in multipactor_plots.items():
+        if not hasattr(measurement_point, 'multipactor_bands'):
+            return
+        for plotted_instrument_class, axe in instrument_class_axes.items():
             measurement_point._add_multipactor_vs_time(
-                instrument_class_axes[plotted_instr],
-                plotted_instr,
-                detector_instr,
-            )
+                axe,
+                plotted_instrument_class)
 
     def animate_instruments_vs_position(
             self,
@@ -263,7 +284,6 @@ class MultipactorTest:
     def scatter_instruments_data(
         self,
         instruments_to_plot: Sequence[ABCMeta],
-        mp_detector_instrument: ABCMeta,
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
         png_path: Path | None = None,
         **fig_kw,
@@ -289,11 +309,10 @@ class MultipactorTest:
                                                      instruments_to_plot,
                                                      xlabel='Probe index',
                                                      **fig_kw)
-        measurement_points = self._filter_measurement_points(
-            measurement_points_to_exclude)
+        measurement_points = self.get_measurement_points(
+            to_exclude=measurement_points_to_exclude)
         for i, measurement_point in enumerate(measurement_points):
             measurement_point.scatter_instruments_data(instrument_class_axes,
-                                                       mp_detector_instrument,
                                                        xdata=float(i),
                                                        )
 
@@ -302,27 +321,19 @@ class MultipactorTest:
                                     png_path)
         return fig, axes
 
-    def _filter_measurement_points(
+    def filter_measurement_points(
             self,
             to_exclude: Sequence[str | IMeasurementPoint] = (),
-    ) -> list[IMeasurementPoint]:
+    ) -> Sequence[IMeasurementPoint]:
         """Get measurement points (Pick-Ups and GlobalDiagnostic)."""
-        names_to_exclude = [x if isinstance(x, str) else x.name
-                            for x in to_exclude]
+        print("MultipactorTest.filter_measurement_points is deprecated. "
+              "Use MultipactorTest.get_measurement_points instead.")
+        return self.get_measurement_points(to_exclude=to_exclude)
 
-        measurement_points = [x for x in self.pick_ups
-                              if x.name not in names_to_exclude]
-        if self.global_diagnostics is None:
-            return measurement_points
-        if self.global_diagnostics.name in names_to_exclude:
-            return measurement_points
-        measurement_points.append(self.global_diagnostics)
-        return measurement_points
-
-    def _filter_instruments(
+    def filter_instruments(
             self,
             instrument_class: ABCMeta,
-            measurement_points: Sequence[IMeasurementPoint],
+            measurement_points: Sequence[IMeasurementPoint] | None = None,
             instruments_to_ignore: Sequence[Instrument | str] = (),
     ) -> list[Instrument]:
         """Get all instruments of desired class from ``measurement_points``.
@@ -333,10 +344,13 @@ class MultipactorTest:
         ----------
         instrument_class : ABCMeta
             Class of the desired instruments.
-        measurement_points : Sequence[IMeasurementPoint]
-            The measurement points from which you want the instruments.
-        instruments_to_ignore : Sequence[Instrument | str]
-            The :class:`.Instrument` or instrument names you do not want.
+        measurement_points : Sequence[IMeasurementPoint] | None, optional
+            The measurement points from which you want the instruments. The
+            default is None, in which case we look into every
+            :class:`IMeasurementPoint` attribute of self.
+        instruments_to_ignore : Sequence[Instrument | str], optional
+            The :class:`.Instrument` or instrument names you do not want. The
+            default is an empty tuple, in which case no instrument is ignored.
 
         Returns
         -------
@@ -344,6 +358,9 @@ class MultipactorTest:
             All the instruments matching the required conditions.
 
         """
+        if measurement_points is None:
+            measurement_points = self.get_measurement_points()
+
         instruments_2d = [
             measurement_point.get_instruments(
                 instrument_class,
@@ -356,6 +373,67 @@ class MultipactorTest:
                        for instrument in instrument_1d]
         return instruments
 
+    def get_measurement_points(
+        self,
+        names: Sequence[str] | None = None,
+        to_exclude: Sequence[str | IMeasurementPoint] = (),
+    ) -> Sequence[IMeasurementPoint]:
+        """Get all or some measurement points.
+
+        Parameters
+        ----------
+        names : Sequence[str], optional
+            If given, only the :class:`.IMeasurementPoint` which name is in
+            ``names`` will be returned.
+        to_exclude : Sequence[str | IMeasurementPoint], optional
+            List of objects or objects names to exclude from returned list.
+
+        Returns
+        -------
+        i_measurement_points : Sequence[IMeasurementPoint]
+            The desired objects.
+
+        """
+        names_to_exclude = [x if isinstance(x, str) else x.name
+                            for x in to_exclude]
+
+        measurement_points = [
+            x for x in self.pick_ups + [self.global_diagnostics]
+            if x is not None and x.name not in names_to_exclude
+        ]
+
+        if names is not None and len(names) > 0:
+            return [x for x in measurement_points if x.name in names]
+        return measurement_points
+
+    def get_measurement_point(
+        self,
+        name: str | None = None,
+        to_exclude: Sequence[str | IMeasurementPoint] = (),
+    ) -> IMeasurementPoint:
+        """Get all or some measurement points. Ensure there is only one.
+
+        Parameters
+        ----------
+        name : str | None, optional
+            If given, only the :class:`.IMeasurementPoint` which name is in
+            ``names`` will be returned.
+        to_exclude : Sequence[str | IMeasurementPoint], optional
+            List of objects or objects names to exclude from returned list.
+
+        Returns
+        -------
+        measurement_point : IMeasurementPoint
+            The desired object.
+
+        """
+        if name is not None:
+            name = name,
+        measurement_points = self.get_measurement_points(name, to_exclude)
+        assert len(measurement_points) == 1, ("Only one IMeasurementPoint "
+                                              "should match.")
+        return measurement_points[0]
+
     def get_instruments(
             self,
             instrument_class: ABCMeta,
@@ -364,9 +442,9 @@ class MultipactorTest:
             instruments_to_ignore: Sequence[Instrument | str] = (),
     ) -> list[Instrument]:
         """Get all instruments of type ``instrument_class``."""
-        measurement_points = self._filter_measurement_points(
+        measurement_points = self.get_measurement_points(
             to_exclude=measurement_points_to_exclude)
-        instruments = self._filter_instruments(
+        instruments = self.filter_instruments(
             instrument_class,
             measurement_points,
             instruments_to_ignore=instruments_to_ignore)
@@ -378,7 +456,7 @@ class MultipactorTest:
             measurement_points_to_exclude: Sequence[IMeasurementPoint
                                                     | str] = (),
             instruments_to_ignore: Sequence[Instrument | str] = (),
-    ) -> Instrument:
+    ) -> Instrument | None:
         """Get a single instrument of type ``instrument_class``."""
         instruments = self.get_instruments(instrument_class,
                                            measurement_points_to_exclude,
@@ -454,11 +532,11 @@ class MultipactorTest:
         for instrument_class, axe in instrument_class_axes.items():
             axe.set_ylabel(instrument_class.ylabel())
 
-        measurement_points = self._filter_measurement_points(
+        measurement_points = self.get_measurement_points(
             to_exclude=measurement_points_to_exclude)
 
         axes_instruments = {
-            axe: self._filter_instruments(
+            axe: self.filter_instruments(
                 instrument_class,
                 measurement_points,
                 instruments_to_ignore=instruments_to_ignore)
@@ -481,9 +559,9 @@ class MultipactorTest:
             probes_to_ignore: Sequence[str | FieldProbe],
     ) -> Reconstructed:
         """Reconstruct the voltage profile from the e field probes."""
-        e_field_probes = self._filter_instruments(FieldProbe,
-                                                  self.pick_ups,
-                                                  probes_to_ignore)
+        e_field_probes = self.filter_instruments(FieldProbe,
+                                                 self.pick_ups,
+                                                 probes_to_ignore)
         assert self.global_diagnostics is not None
         powers = self.get_instrument(Powers)
 
@@ -503,11 +581,10 @@ class MultipactorTest:
     def plot_multipactor_limits(
             self,
             instrument_class_to_plot: ABCMeta,
-            multipactor_detector: ABCMeta,
             measurement_points_to_exclude: Sequence[str
                                                     | IMeasurementPoint] = (),
             png_path: Path | None = None,
-            power_is_growing_kw: dict[str, int | float] | None = None,
+            multipactor_measured_at: IMeasurementPoint | str | None = None,
             **fig_kw,
     ) -> tuple[Figure, Axes]:
         """Plot lower and upper multipacting limits evolution.
@@ -531,16 +608,13 @@ class MultipactorTest:
             The instrument which data will be plotted. As the goal of this
             method is to plot multipacting limits, it is expected that the
             instrument class is related to power/electric field/voltage.
-        multipactor_detector : ABCMeta
-            The instrument that will tell when multipactor happens. It must
-            have a ``multipac_detector``. Also, it must be unique.
         measurement_points_to_exclude : Sequence[str | IMeasurementPoint]
             Some measurement points to exclude from plot.
         png_path : Path | None
             If provided, will save the Figure. The default is None.
-        power_is_growing_kw : dict[str, int | float] | None
-            Arguments that are passed to the function that detects if the
-            power is growing or not.
+        multipactor_measured_at: IMeasurementPoint | str | None = None
+            If you want to plot the multipactor bands from an instrument that
+            is not at the same position as the instrument data to plot.
         fig_kw :
             Other keyword arguments passed to the ``Figure``.
 
@@ -567,22 +641,18 @@ class MultipactorTest:
         instrument_to_plot = self.get_instrument(instrument_class_to_plot,
                                                  measurement_points_to_exclude,
                                                  )
+        assert instrument_to_plot is not None, (
+            f"No {instrument_class_to_plot} instrument was found.")
 
-        detector_instrument = self.get_instrument(
-            multipactor_detector,
-            measurement_points_to_exclude)
+        if not isinstance(multipactor_measured_at, IMeasurementPoint):
+            multipactor_measured_at = self.get_measurement_point(
+                name=multipactor_measured_at,
+                to_exclude=measurement_points_to_exclude)
 
-        powers = self.get_instrument(Powers)
-        if power_is_growing_kw is None:
-            power_is_growing_kw = {}
-        power_is_growing = powers.where_is_growing(**power_is_growing_kw)
-
-        indexes = detector_instrument.\
-            indexes_of_lower_and_upper_multipactor_barriers(power_is_growing)
-        lower_values, upper_values = \
-            instrument_to_plot.values_of_lower_and_upper_multipactor_barriers(
-                *indexes,
-                str(detector_instrument))
+        multipactor_bands = multipactor_measured_at.multipactor_bands
+        lower_values, upper_values = instrument_to_plot.values_at_barriers(
+            multipactor_bands
+        )
 
         axe = instrument_class_axes[instrument_class_to_plot]
         lower_values.plot(ax=axe, kind='line', drawstyle='steps-post')

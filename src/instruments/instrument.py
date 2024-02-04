@@ -2,9 +2,8 @@
 # -*- coding: utf-8 -*-
 """Define object to keep a single instrument measurements."""
 from abc import ABC
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable
 from typing import Callable, Self
-
 
 import numpy as np
 import pandas as pd
@@ -12,8 +11,8 @@ from matplotlib.axes._axes import Axes
 from matplotlib.container import StemContainer
 from matplotlib.lines import Line2D
 
-from multipac_testbench.src.util.multipactor_detectors import \
-    start_and_end_of_contiguous_true_zones
+from multipac_testbench.src.multipactor_band.multipactor_bands import \
+    MultipactorBands
 
 
 class Instrument(ABC):
@@ -58,10 +57,9 @@ class Instrument(ABC):
         self.plot_vs_time, self.plot_vs_position, self.scatter_data = plotters
 
         self._ydata: np.ndarray | None = None
+        self._ydata_as_pd: pd.Series | pd.DataFrame | None = None
         self._post_treaters: list[Callable[[np.ndarray], np.ndarray]] = []
 
-        self._multipac_detector: Callable[[np.ndarray], np.ndarray]
-        self._multipactor: np.ndarray | None = None
         self.ydata_at_multipacting_barrier = pd.DataFrame()
 
     def __str__(self) -> str:
@@ -162,13 +160,30 @@ class Instrument(ABC):
             self._ydata = self._post_treat(self.raw_data.to_numpy())
         return self._ydata
 
+    @property
+    def ydata_as_pd(self) -> pd.Series | pd.DataFrame:
+        """Get the treated data as a pandas object."""
+        if self._ydata_as_pd is not None:
+            return self._ydata_as_pd
+
+        index = self.raw_data.index
+        if self.is_2d:
+            assert isinstance(self.raw_data, pd.DataFrame)
+            columns = self.raw_data.columns
+            self._ydata_as_pd = pd.DataFrame(self.ydata,
+                                             columns=columns,
+                                             index=index,
+                                             )
+        else:
+            self._ydata_as_pd = pd.Series(self.ydata,
+                                          index=index,
+                                          )
+        return self._ydata_as_pd
+
     @ydata.setter
     def ydata(self, value: np.ndarray | None) -> None:
-        if self._multipactor is not None:
-            print("Warning! Modifying the ydata (post-treated) makes "
-                  "previously calculated multipactor zones obsolete.")
-            self._multipactor = None
         self._ydata = value
+        self._ydata_as_pd = None
 
     def _get_plot_methods(self, is_2d: bool
                           ) -> tuple[Callable, Callable, Callable]:
@@ -223,145 +238,52 @@ class Instrument(ABC):
                   "previously post-treated data obsolete.")
             self.ydata = None
 
-    @property
-    def multipac_detector(self
-                          ) -> Callable[[np.ndarray], np.ndarray]:
-        """Get access to the function that determines where is multipactor.
-
-        .. note::
-            It is not mandatory to define a multipactor detector for every
-            :class:`Instrument`, as it may be unrelatable with some types of
-            instrument.
-
-        """
-        return self._multipac_detector
-
-    @multipac_detector.setter
-    def multipac_detector(self,
-                          value: Callable[[np.ndarray], np.ndarray]
-                          ) -> None:
-        """Set the function determining where/when there is multipactor.
-
-        Parameters
-        ----------
-        value : Callable[[np.ndarray], np.ndarray]
-            Function taking in the array of :attr:`~ydata`, and returning an
-            array of boolean with the same shape. It contains ``True`` where
-            there is multipactor, and ``False`` where multipactor does not
-            happen.
-
-        """
-        if self._multipactor is not None:
-            print("Warning! Modifying the multipactor detector makes "
-                  "previously calculated multipactor zones obsolete.")
-            self._multipactor = None
-        self._multipac_detector = value
-
-    @property
-    def multipactor(self) -> np.ndarray:
-        """Use ``multipac_detector`` to determine where multipac happens.
-
-        Returns
-        -------
-        _multipactor : np.ndarray
-            Array with the same shape as :attr:`~ydata`. It is ``True`` where
-            there is multipactor and ``False`` elsewhere.
-
-        """
-        if self._multipactor is None:
-            self._multipactor = self.multipac_detector(self.ydata)
-        return self._multipactor
-
-    @property
-    def indexes_of_contiguous_multipactor_zones(self
-                                                ) -> Sequence[tuple[int, int]]:
-        """Get list of indexes of entry and exit of multipacting zones.
-
-        .. warning::
-            Assuming that the upper multipactor threshold is crossed, two cases
-            of figure.
-            If the power is growing, ``Power[entry] < Power[exit]`` hence
-            ``Power[entry]`` is the lower multipactor barrier and
-            ``Power[exit]`` is the upper multipactor barrier.
-            If the power is in its decreasing, ``Power[entry] > Power[exit]``
-            hence ``Power[entry]`` is the *upper* multipactor barrier and
-            ``Power[exit]`` is the *lower* multipactor barrier.
-
-        .. See Also::
-            indexes_of_lower_and_upper_multipactor_barriers
-
-        """
-        return start_and_end_of_contiguous_true_zones(self.multipactor)
-
-    def indexes_of_lower_and_upper_multipactor_barriers(
+    def values_at_barriers(
             self,
-            power_is_growing: list[bool | float]
-    ) -> tuple[Sequence[int], Sequence[int]]:
-        """Get list of indexes of lower and upper multipactor barriers.
+            multipactor_bands: MultipactorBands,
+            ) -> tuple[pd.DataFrame, pd.DataFrame]:
+        """Get measured data at lower and upper multipactor barriers.
 
         Parameters
         ----------
-        power_is_growing : list[bool | float]
-            True where the power is growing, False where the power is
-            decreasing, NaN where undetermined.
+        multipactor_bands : MultipactorBands
+            Object holding the multipacting barriers. If an other object is
+            given, we take its ``multipactor_bands`` attribute. As for now,
+            the only object that can work is :class:`IMeasurementPoint`.
 
         Returns
         -------
-        lower_indexes : Sequence[int]
-            List containing all indexes of entry in a multipacting zone.
-        upper_indexes : Sequence[int]
-            List containing all indexes of exit of a multipacting zone.
+        tuple[pd.DataFrame, pd.DataFrame]
+            Holds measured data at lower and upper multipacting barriers.
 
         """
-        lower_indexes = []
-        upper_indexes = []
-        multipactor = self.multipactor
-        multipactor_change = np.diff(multipactor)
-        for index, (mp, mp_change, is_growing) in enumerate(
-                zip(multipactor[1:],
-                    multipactor_change,
-                    power_is_growing[1:]),
-                start=1):
-            if not mp_change:
-                continue
-            if np.isnan(is_growing):
-                continue
+        match multipactor_bands:
+            case MultipactorBands():
+                pass
+            case object() as other_object:
+                assert hasattr(other_object, 'multipactor_bands')
+                multipactor_bands = getattr(other_object, 'multipactor_bands')
+                assert isinstance(multipactor_bands, MultipactorBands)
+            case _:
+                raise TypeError("Wrong type for multipactor_bands")
 
-            # Enter a MP zone
-            if mp:
-                if is_growing:
-                    lower_indexes.append(index)
-                else:
-                    upper_indexes.append(index)
-                continue
+        barriers_idx = multipactor_bands.barriers
+        lower_barrier_idx, upper_barrier_idx = barriers_idx
+        assert isinstance(lower_barrier_idx, list)
+        assert isinstance(upper_barrier_idx, list)
+        name_of_detector = multipactor_bands.detector_instrument_name
 
-            # Exit a MP zone
-            if not is_growing:
-                lower_indexes.append(index)
-            else:
-                upper_indexes.append(index)
-        return lower_indexes, upper_indexes
-
-    def values_of_lower_and_upper_multipactor_barriers(
-        self,
-        lower_indexes: list[int],
-        upper_indexes: list[int],
-        name_of_detector: str
-    ) -> tuple[pd.DataFrame, pd.DataFrame]:
-        """Get measured data at lower and upper multipactor barriers."""
-        columns = self.raw_data.columns
+        label = self.raw_data.columns + f" according to {name_of_detector}"
         lower_values = pd.DataFrame(
-            data=self.ydata[lower_indexes],
-            index=lower_indexes,
-            columns="Lower barrier " + columns + " according to "
-            + name_of_detector,
+            data=self.ydata[lower_barrier_idx],
+            index=lower_barrier_idx,
+            columns="Lower barrier " + label,
         )
 
         upper_values = pd.DataFrame(
-            data=self.ydata[upper_indexes],
-            index=upper_indexes,
-            columns="Upper barrier " + columns + " according to "
-            + name_of_detector,
+            data=self.ydata[upper_barrier_idx],
+            index=upper_barrier_idx,
+            columns="Upper barrier " + label,
         )
         self.ydata_at_multipacting_barrier = \
             pd.concat([self.ydata_at_multipacting_barrier,
@@ -542,7 +464,7 @@ class Instrument(ABC):
 
     def _scatter_data_1d(self,
                          axes: Axes,
-                         multipactor: np.ndarray | None = None,
+                         multipactor: np.ndarray,
                          xdata: float | np.ndarray | None = None,
                          ) -> None:
         """Plot ``ydata``, discriminating where there is multipactor or not.
@@ -551,22 +473,20 @@ class Instrument(ABC):
         ----------
         axes : Axes
             Where to plot.
-        multipactor : np.ndarray | None, optional
-            True where there is multipactor, False elsewhere. The default is
-            None, in which case we take :attr:`self.multipactor`.
+        multipactor : np.ndarray
+            True where there is multipactor, False elsewhere.
         xdata : float | np.ndarray | None, optional
             x position of the data. The default is None, in which case we take
             :attr:`self._position`.
 
         """
-        if multipactor is None:
-            multipactor = self.multipactor
+        ydata = self.ydata
+
         if xdata is None:
             xdata = self._position
-
-        ydata = self.ydata
         if isinstance(xdata, float):
             xdata = np.full(len(ydata), xdata)
+        assert isinstance(xdata, np.ndarray)
 
         mp_kwargs = {'c': 'r',
                      'marker': 's',

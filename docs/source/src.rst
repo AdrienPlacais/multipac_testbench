@@ -14,6 +14,7 @@ Subpackages
 
    src.instruments
    src.measurement_point
+   src.multipactor_band
    src.theoretical
    src.util
 
