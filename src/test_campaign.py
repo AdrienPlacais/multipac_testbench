@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Define an object to store data from several :class:`.MultipactorTest`."""
-from collections.abc import Sequence
+from abc import ABCMeta
+from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Self
 
@@ -61,6 +62,38 @@ class TestCampaign(list):
             for filepath, freq_mhz, swr in args
         ]
         return cls(multipactor_tests)
+
+    def add_post_treater(self, *args, **kwargs) -> None:
+        """Add post-treatment functions to instruments."""
+        for test in self:
+            test.add_post_treater(*args, **kwargs)
+
+    def detect_multipactor(
+            self,
+            multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
+            instrument_class: ABCMeta,
+            power_is_growing_kw: dict[str, int | float] | None = None,
+    ) -> None:
+        """Create the :class:`.MultipactorBands` objects.
+
+        Parameters
+        ----------
+        multipac_detector : Callable[[np.ndarray], np.ndarray[np.bool_]]
+            Function that takes in the ``ydata`` of an :class:`.Instrument` and
+            returns an array, where True means multipactor and False no
+            multipactor.
+        instrument_class : ABCMeta
+            Type of instrument on which ``multipac_detector`` should be
+            applied.
+        power_is_growing_kw : dict[str, int | float] | None, optional
+            Keyword arguments passed to the function that determines when power
+            is increasing, when it is decreasing. The default is None.
+
+        """
+        for test in self:
+            test.detect_multipactor(multipac_detector,
+                                    instrument_class,
+                                    power_is_growing_kw)
 
     def somersalo(self,
                   multipactor_measured_at: str,
