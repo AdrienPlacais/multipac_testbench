@@ -44,24 +44,9 @@ def webdplotdigitizerpoints_to_data(log_power: np.ndarray,
     return a * log_power + b
 
 
-@overload
 def _one_point_analytical(log_power: np.ndarray,
                           order: int,
-                          to_dict: bool = True) -> dict[str, np.ndarray]: ...
-
-
-@overload
-def _one_point_analytical(log_power: np.ndarray,
-                          order: int,
-                          to_dict: bool = False
-                          ) -> tuple[np.ndarray, np.ndarray]: ...
-
-
-def _one_point_analytical(
-    log_power: np.ndarray,
-        order: int,
-        to_dict: bool = False
-) -> tuple[np.ndarray, np.ndarray] | dict[str, np.ndarray]:
+                          ) -> pd.DataFrame:
     r"""Compute one-point multipactor bands of order ``order``.
 
     .. note::
@@ -76,7 +61,7 @@ def _one_point_analytical(
 
     Returns
     -------
-    np.ndarray, np.ndarray | dict[str, np.ndarray]
+    pd.DataFrame
         Lower and upper multipactor limits, in :math:`(\mathrm{GHz} \times
         \mathrm{mm})^4 \times \Omega`.
 
@@ -87,33 +72,17 @@ def _one_point_analytical(
     low = webdplotdigitizerpoints_to_data(log_power, *param_low)
     upp = webdplotdigitizerpoints_to_data(log_power, *param_upp)
 
-    if to_dict:
-        out = {
-            f'One-point order {order} (lower lim)': low,
-            f'One-point order {order} (upper lim)': upp,
-        }
-        return out
-    return low, upp
+    df_one_point = pd.DataFrame(data={
+        f'One-point order {order} (lower lim)': low,
+        f'One-point order {order} (upper lim)': upp,
+    },
+        index=log_power)
+    return df_one_point
 
 
-@overload
 def _two_point_analytical(log_power: np.ndarray,
                           order: int,
-                          to_dict: bool = True) -> dict[str, np.ndarray]: ...
-
-
-@overload
-def _two_point_analytical(log_power: np.ndarray,
-                          order: int,
-                          to_dict: bool = False
-                          ) -> tuple[np.ndarray, np.ndarray]: ...
-
-
-def _two_point_analytical(
-    log_power: np.ndarray,
-    order: int,
-    to_dict: bool = False
-) -> tuple[np.ndarray, np.ndarray] | dict[str, np.ndarray]:
+                          ) -> pd.DataFrame:
     r"""Compute two-point multipactor bands of order ``order``.
 
     .. note::
@@ -128,7 +97,7 @@ def _two_point_analytical(
 
     Returns
     -------
-    np.ndarray, np.ndarray | dict[str, np.ndarray]
+    pd.DataFrame
         Lower and upper multipactor limits, in :math:`(\mathrm{GHz} \times
         \mathrm{mm})^4 \times \Omega^2`.
 
@@ -139,13 +108,12 @@ def _two_point_analytical(
     low = webdplotdigitizerpoints_to_data(log_power, *param_low)
     upp = webdplotdigitizerpoints_to_data(log_power, *param_upp)
 
-    if to_dict:
-        out = {
-            f'Two-point order {order} (lower lim)': low,
-            f'Two-point order {order} (upper lim)': upp,
-        }
-        return out
-    return low, upp
+    df_two_point = pd.DataFrame(data={
+        f'Two-point order {order} (lower lim)': low,
+        f'Two-point order {order} (upper lim)': upp,
+    },
+        index=log_power)
+    return df_two_point
 
 
 def plot_somersalo_analytical(points: str | int,
@@ -156,10 +124,8 @@ def plot_somersalo_analytical(points: str | int,
                               ) -> None:
     """Compute and plot single Somersalo plot, several orders."""
     fun = _somersalo_analytical_fun(points)
-    somersalo_theory = {}
-    for order in orders:
-        somersalo_theory.update(fun(log_power, order, to_dict=True))
-    df_somersalo = pd.DataFrame(somersalo_theory, index=log_power)
+    df_somersalos = (fun(log_power, order) for order in orders)
+    df_somersalo = pd.concat(df_somersalos, axis=1)
     df_somersalo.plot(ax=ax, **plot_kw)
 
 
