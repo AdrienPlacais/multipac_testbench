@@ -33,7 +33,7 @@ class TestCampaign(list):
                        frequencies: Sequence[float],
                        swrs: Sequence[float],
                        config: dict,
-                       info: Sequence[str],
+                       info: Sequence[str] = (),
                        sep: str = ';') -> Self:
         """Instantiate the :class:`.MultipactorTest` and :class:`TestCampaign`.
 
@@ -58,6 +58,8 @@ class TestCampaign(list):
             List of :class:`.MultipactorTest`.
 
         """
+        if len(info) == 0:
+            info = ['' for _ in filepaths]
         args = zip(filepaths, frequencies, swrs, info, strict=True)
 
         multipactor_tests = [
