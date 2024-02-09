@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>src.test_campaign module &mdash; MULTIPAC test bench 1.2.0-7-gaf4cbd4 documentation</title>
+  <title>src.test_campaign module &mdash; MULTIPAC test bench 1.3.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,7 +15,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=b92ef4e6"></script>
+        <script src="_static/documentation_options.js?v=8ca9e7a0"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -37,7 +37,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.2.0-7-gaf4cbd4
+                1.3.2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -56,6 +56,7 @@
 <li class="toctree-l2 current"><a class="reference internal" href="src.html">src package</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.html">src.instruments package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.measurement_point.html">src.measurement_point package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.multipactor_band.html">src.multipactor_band package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.theoretical.html">src.theoretical package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.util.html">src.util package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html">src.multipactor_test module</a></li>
@@ -102,7 +103,7 @@
 <p>Hold several multipactor tests together.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.test_campaign.TestCampaign.from_filepaths">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_filepaths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepaths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequencies</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swrs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">';'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#src.test_campaign.TestCampaign.from_filepaths" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_filepaths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepaths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequencies</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swrs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">';'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#src.test_campaign.TestCampaign.from_filepaths" title="Link to this definition"></a></dt>
 <dd><p>Instantiate the <a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest" title="src.multipactor_test.MultipactorTest"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipactorTest</span></code></a> and <a class="reference internal" href="#src.test_campaign.TestCampaign" title="src.test_campaign.TestCampaign"><code class="xref py py-class docutils literal notranslate"><span class="pre">TestCampaign</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -111,6 +112,7 @@
 <li><p><strong>frequencies</strong> (<em>Sequence</em><em>[</em><em>float</em><em>]</em>) – Frequencies matching the filepaths.</p></li>
 <li><p><strong>swrs</strong> (<em>Sequence</em><em>[</em><em>float</em><em>]</em>) – SWRs matching the filepaths.</p></li>
 <li><p><strong>config</strong> (<em>dict</em>) – Configuration of the test bench.</p></li>
+<li><p><strong>info</strong> (<em>Sequence</em><em>[</em><em>str</em><em>]</em>) – Other information string to identify each multipactor test.</p></li>
 <li><p><strong>sep</strong> (<em>str</em>) – Delimiter between the columns.</p></li>
 </ul>
 </dd>
@@ -124,9 +126,67 @@
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="src.test_campaign.TestCampaign.add_post_treater">
+<span class="sig-name descname"><span class="pre">add_post_treater</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#src.test_campaign.TestCampaign.add_post_treater" title="Link to this definition"></a></dt>
+<dd><p>Add post-treatment functions to instruments.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.test_campaign.TestCampaign.detect_multipactor">
+<span class="sig-name descname"><span class="pre">detect_multipactor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">multipac_detector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">bool_</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ABCMeta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power_is_growing_kw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#src.test_campaign.TestCampaign.detect_multipactor" title="Link to this definition"></a></dt>
+<dd><p>Create the <a class="reference internal" href="src.multipactor_band.multipactor_bands.html#src.multipactor_band.multipactor_bands.MultipactorBands" title="src.multipactor_band.multipactor_bands.MultipactorBands"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipactorBands</span></code></a> objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>multipac_detector</strong> (Callable[[np.ndarray], np.ndarray[<a href="#id2"><span class="problematic" id="id3">np.bool_</span></a>]]) – Function that takes in the <code class="docutils literal notranslate"><span class="pre">ydata</span></code> of an <a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument" title="src.instruments.instrument.Instrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code></a> and
+returns an array, where True means multipactor and False no
+multipactor.</p></li>
+<li><p><strong>instrument_class</strong> (<em>ABCMeta</em>) – Type of instrument on which <code class="docutils literal notranslate"><span class="pre">multipac_detector</span></code> should be
+applied.</p></li>
+<li><p><strong>power_is_growing_kw</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>int</em><em> | </em><em>float</em><em>] </em><em>| </em><em>None</em><em>, </em><em>optional</em>) – Keyword arguments passed to the function that determines when power
+is increasing, when it is decreasing. The default is None.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="src.test_campaign.TestCampaign.somersalo">
-<span class="sig-name descname"><span class="pre">somersalo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">fig_kw</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Figure</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Axes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Axes</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#src.test_campaign.TestCampaign.somersalo" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">somersalo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">multipactor_measured_at</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orders_one_point</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(1,</span> <span class="pre">2,</span> <span class="pre">3,</span> <span class="pre">4,</span> <span class="pre">5,</span> <span class="pre">6,</span> <span class="pre">7)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orders_two_point</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(1,)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">fig_kw</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Figure</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Axes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Axes</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#src.test_campaign.TestCampaign.somersalo" title="Link to this definition"></a></dt>
 <dd><p>Create a Somersalo plot, with theoretical results and measured.</p>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>For some reason, two point is plotted on the one point ax instead
+of the two point…</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>multipactor_measured_at</strong> (<em>str</em>) – Name of the <a class="reference internal" href="src.measurement_point.i_measurement_point.html#src.measurement_point.i_measurement_point.IMeasurementPoint" title="src.measurement_point.i_measurement_point.IMeasurementPoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">IMeasurementPoint</span></code></a> where the multipactor is
+detected. It must have a <a class="reference internal" href="src.multipactor_band.multipactor_bands.html#src.multipactor_band.multipactor_bands.MultipactorBands" title="src.multipactor_band.multipactor_bands.MultipactorBands"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipactorBands</span></code></a> attribute,
+which is set by the <a class="reference internal" href="#src.test_campaign.TestCampaign.detect_multipactor" title="src.test_campaign.TestCampaign.detect_multipactor"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TestCampaign.detect_multipactor()</span></code></a> method.</p></li>
+<li><p><strong>orders_one_point</strong> (<em>tuple</em><em>[</em><em>int</em><em>, </em><em>...</em><em>]</em><em>, </em><em>optional</em>) – The multipactor orders to plot for one point multipactor. The
+default is orders 1 to 8, as in Somersalo’s plot.</p></li>
+<li><p><strong>orders_two_point</strong> (<em>tuple</em><em>[</em><em>int</em><em>, </em><em>...</em><em>]</em>) – The multipactor orders to plot for two point multipactor. The
+default is order 1 only, as in Somersalo’s plot.</p></li>
+<li><p><strong>fig_kw</strong> – Other keyword arguments passed to the Figure constructor.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>Figure</em> – Holds the plotted figure.</p></li>
+<li><p><em>Axes</em> – Left axis (one-point multipactor).</p></li>
+<li><p><em>Axes</em> – Right axis (two-point multipactor).</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.test_campaign.TestCampaign.susceptibility_plot">
+<span class="sig-name descname"><span class="pre">susceptibility_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">multipactor_measured_at</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">electric_field_at</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_kw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax_kw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Figure</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Axes</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#src.test_campaign.TestCampaign.susceptibility_plot" title="Link to this definition"></a></dt>
+<dd><p>Create a scusceptiblity chart.</p>
 </dd></dl>
 
 </dd></dl>

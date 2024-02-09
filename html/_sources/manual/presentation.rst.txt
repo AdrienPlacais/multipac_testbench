@@ -11,6 +11,7 @@ Check :ref:`examples` for a quick tour of the available commands.
 
 
 .. todo::
-   Create a ``TestCampaign`` object.
-   It would gather several :class:`.MultipactorTest` objects, with different ``SWR`` and/or ``f_mhz``.
-   It would have a ``Sommersalo_plot`` and ``Hatch_diagram`` methods.
+   Ease selection of last/first n measurement points. Rely more on pd.DataFrame?
+
+.. todo::
+   Ease plotting anything vs anyotherthing. Rely more on pd.DataFrame?
