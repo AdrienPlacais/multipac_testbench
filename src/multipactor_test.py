@@ -354,7 +354,7 @@ class MultipactorTest:
               "Use MultipactorTest.get_measurement_points instead.")
         return self.get_measurement_points(to_exclude=to_exclude)
 
-    def filter_instruments(
+    def _instruments_by_class(
             self,
             instrument_class: ABCMeta,
             measurement_points: Sequence[IMeasurementPoint] | None = None,
@@ -395,6 +395,39 @@ class MultipactorTest:
         instruments = [instrument
                        for instrument_1d in instruments_2d
                        for instrument in instrument_1d]
+        return instruments
+
+    def _instruments_by_name(
+            self,
+            instrument_names: Sequence[str],
+    ) -> list[Instrument]:
+        """Get all instruments of desired name from ``measurement_points``.
+
+        But remove the instruments to ignore.
+
+        Parameters
+        ----------
+        instrument_name : Sequence[str]
+            Name of the desired instruments.
+
+        Returns
+        -------
+        instruments : list[Instrument]
+            All the instruments matching the required conditions.
+
+        """
+        all_measurement_points = self.get_measurement_points()
+        instruments = [
+            instr
+            for measurement_point in all_measurement_points
+            for instr in measurement_point.instruments
+            if instr.name in instrument_names
+        ]
+        if len(instrument_names) != len(instruments):
+            print("MultipactorTest._instruments_by_name warning: ",
+                  f"you asked for {instrument_names = }, I give you ",
+                  f"{[instr.name for instr in instruments]} which has a ",
+                  "different length.")
         return instruments
 
     def get_measurement_points(
@@ -460,31 +493,47 @@ class MultipactorTest:
 
     def get_instruments(
             self,
-            instrument_class: ABCMeta,
+            instruments: ABCMeta | Sequence[str],
             measurement_points_to_exclude: Sequence[IMeasurementPoint
                                                     | str] = (),
             instruments_to_ignore: Sequence[Instrument | str] = (),
     ) -> list[Instrument]:
         """Get all instruments of type ``instrument_class``."""
-        measurement_points = self.get_measurement_points(
-            to_exclude=measurement_points_to_exclude)
-        instruments = self.filter_instruments(
-            instrument_class,
-            measurement_points,
-            instruments_to_ignore=instruments_to_ignore)
-        return instruments
+        match (instruments):
+            case list() as instrument_names:
+                out = self._instruments_by_name(instrument_names)
+
+            case ABCMeta() as instrument_class:
+                measurement_points = self.get_measurement_points(
+                    to_exclude=measurement_points_to_exclude)
+                out = self._instruments_by_class(
+                    instrument_class,
+                    measurement_points,
+                    instruments_to_ignore=instruments_to_ignore)
+            case _:
+                raise IOError(f"instruments is {type(instruments)} which is ",
+                              "not supported.")
+        return out
 
     def get_instrument(
             self,
-            instrument_class: ABCMeta,
+            instrument_id: ABCMeta | str | Instrument,
             measurement_points_to_exclude: Sequence[IMeasurementPoint
                                                     | str] = (),
             instruments_to_ignore: Sequence[Instrument | str] = (),
     ) -> Instrument | None:
-        """Get a single instrument of type ``instrument_class``."""
-        instruments = self.get_instruments(instrument_class,
-                                           measurement_points_to_exclude,
-                                           instruments_to_ignore)
+        """Get a single instrument matching ``instrument_id``."""
+        match (instrument_id):
+            case Instrument():
+                return instrument_id
+            case str() as instrument_name:
+                instruments = self.get_instruments((instrument_name, ))
+            case ABCMeta() as instrument_class:
+                instruments = self.get_instruments(
+                    instrument_class,
+                    measurement_points_to_exclude,
+                    instruments_to_ignore)
+
         if len(instruments) == 0:
             raise IOError("No instrument found.")
         if len(instruments) > 1:
@@ -559,7 +608,7 @@ class MultipactorTest:
             to_exclude=measurement_points_to_exclude)
 
         axes_instruments = {
-            axe: self.filter_instruments(
+            axe: self._instruments_by_class(
                 instrument_class,
                 measurement_points,
                 instruments_to_ignore=instruments_to_ignore)
@@ -582,9 +631,9 @@ class MultipactorTest:
             probes_to_ignore: Sequence[str | FieldProbe],
     ) -> Reconstructed:
         """Reconstruct the voltage profile from the e field probes."""
-        e_field_probes = self.filter_instruments(FieldProbe,
-                                                 self.pick_ups,
-                                                 probes_to_ignore)
+        e_field_probes = self._instruments_by_class(FieldProbe,
+                                                    self.pick_ups,
+                                                    probes_to_ignore)
         assert self.global_diagnostics is not None
         powers = self.get_instrument(Powers)
 
@@ -713,7 +762,7 @@ class MultipactorTest:
             self,
             multipactor_measured_at: IMeasurementPoint | str,
             electric_field_at: IMeasurementPoint | str,
-            ) -> dict[str, float | list[float]]:
+    ) -> dict[str, float | list[float]]:
         """Get the data required to create the susceptibility plot."""
         if isinstance(multipactor_measured_at, str):
             multipactor_measured_at = self.get_measurement_point(
@@ -737,3 +786,47 @@ class MultipactorTest:
             'freq_mhz': self.freq_mhz,
         }
         return somersalo_data
+
+    def plot_instrument_x_vs_instrument_y(
+            self,
+            instrument_id_x: ABCMeta | str | Instrument,
+            instrument_id_y: ABCMeta | str | Instrument,
+            measurement_points_to_exclude: Sequence[IMeasurementPoint
+                                                    | str] = (),
+            instruments_to_ignore: Sequence[Instrument | str] = (),
+            tail: int = -1,
+            fig_kw: dict | None = None,
+            subplot_kw: dict | None = None
+    ) -> tuple[Figure, Axes]:
+        """Plot data measured by ``instrument_a`` vs ``instrument_b``."""
+        instruments = []
+        for instrument_id in (instrument_id_x, instrument_id_y):
+            instrument = self.get_instrument(instrument_id,
+                                             measurement_points_to_exclude,
+                                             instruments_to_ignore)
+            assert isinstance(instrument, Instrument)
+            instruments.append(instrument)
+        instrument_x, instrument_y = instruments
+
+        if fig_kw is None:
+            fig_kw = {}
+        fig, instrument_class_axes = plot.create_fig(
+            str(self),
+            (type(instrument_y), ),
+            instrument_x.ylabel(),
+            subplot_kw,
+            **fig_kw
+        )
+        axes = instrument_class_axes[type(instrument_y)]
+
+        dict_to_plot = {instrument.name: instrument.ydata_as_pd
+                        for instrument in instruments}
+        df_to_plot = pd.DataFrame(dict_to_plot)
+
+        axes = df_to_plot.tail(tail).plot(x=0,
+                                          y=1,
+                                          ax=axes,
+                                          xlabel=instrument_x.ylabel(),
+                                          )
+        axes.grid(True)
+        return fig, axes
