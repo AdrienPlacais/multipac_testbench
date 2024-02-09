@@ -16,13 +16,13 @@
 from abc import ABCMeta
 from collections.abc import Callable
 from pathlib import Path
-from typing import Sequence, overload
+from typing import Sequence
 
 import numpy as np
 import pandas as pd
 from matplotlib import animation
 from matplotlib.artist import Artist
-from matplotlib.axes._axes import Axes
+from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
 from multipac_testbench.src.instruments.electric_field.field_probe import \
@@ -46,8 +46,26 @@ class MultipactorTest:
                  config: dict,
                  freq_mhz: float,
                  swr: float,
+                 info: str = '',
                  sep: str = ';') -> None:
-        """Create all the pick-ups."""
+        r"""Create all the pick-ups.
+
+        Parameters
+        ----------
+        filepath : Path
+            Path to the results file produced by LabViewer.
+        config : dict
+            Configuration ``.toml`` of the testbench.
+        freq_mhz : float
+            Frequency of the test in :math:\mathrm{MHz}:
+        swr : float
+            Expected Voltage Signal Wave Ratio.
+        info : str, optional
+            An additional string to identify this test in plots.
+        sep : str
+            Delimiter between two columns in ``filepath``.
+
+        """
         df_data = pd.read_csv(filepath, sep=sep, index_col="Sample index")
         self._n_points = len(df_data)
 
@@ -57,10 +75,14 @@ class MultipactorTest:
 
         self.freq_mhz = freq_mhz
         self.swr = swr
+        self.info = info
 
     def __str__(self) -> str:
         """Print info on object."""
-        return f"{self.freq_mhz}MHz, SWR {self.swr}"
+        out = [f"{self.freq_mhz}MHz", f"SWR {self.swr}"]
+        if len(self.info) > 0:
+            out.append(f"({self.info})")
+        return ', '.join(out)
 
     def add_post_treater(self,
                          *args,

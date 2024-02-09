@@ -5,12 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.2] 2024.02.--
+
+### Added
+
+- `MultipactorTest` and `TestCampaign` accept `info` key to identify each test more easily.
+
 ## [1.3.1] 2024.02.04
 
 ### Added
+
 - `power_is_growing` is now an attribute of `MultipactorBands`.
 
 ### Changed
+
 - Calculation of when power is growing performed within `MultipactorTest.detect_multipactor()`. This methods accepts `power_is_growing_kw`.
 
 ### Removed

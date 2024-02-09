@@ -33,6 +33,7 @@ class TestCampaign(list):
                        frequencies: Sequence[float],
                        swrs: Sequence[float],
                        config: dict,
+                       info: Sequence[str],
                        sep: str = ';') -> Self:
         """Instantiate the :class:`.MultipactorTest` and :class:`TestCampaign`.
 
@@ -46,6 +47,8 @@ class TestCampaign(list):
             SWRs matching the filepaths.
         config : dict
             Configuration of the test bench.
+        info : Sequence[str]
+            Other information string to identify each multipactor test.
         sep : str
             Delimiter between the columns.
 
@@ -55,11 +58,11 @@ class TestCampaign(list):
             List of :class:`.MultipactorTest`.
 
         """
-        args = zip(filepaths, frequencies, swrs, strict=True)
+        args = zip(filepaths, frequencies, swrs, info, strict=True)
 
         multipactor_tests = [
-            MultipactorTest(filepath, config, freq_mhz, swr, sep=sep)
-            for filepath, freq_mhz, swr in args
+            MultipactorTest(filepath, config, freq_mhz, swr, info, sep=sep)
+            for filepath, freq_mhz, swr, info in args
         ]
         return cls(multipactor_tests)
 
