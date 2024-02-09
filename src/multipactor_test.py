@@ -36,6 +36,7 @@ from multipac_testbench.src.measurement_point.factory import \
 from multipac_testbench.src.measurement_point.i_measurement_point import \
     IMeasurementPoint
 from multipac_testbench.src.util import plot
+import itertools
 
 
 class MultipactorTest:
@@ -493,15 +494,29 @@ class MultipactorTest:
 
     def get_instruments(
             self,
-            instruments: ABCMeta | Sequence[str],
+            instruments_id: ABCMeta | Sequence[ABCMeta] | Sequence[str] | Sequence[Instrument],
             measurement_points_to_exclude: Sequence[IMeasurementPoint
                                                     | str] = (),
             instruments_to_ignore: Sequence[Instrument | str] = (),
     ) -> list[Instrument]:
-        """Get all instruments of type ``instrument_class``."""
-        match (instruments):
-            case list() as instrument_names:
-                out = self._instruments_by_name(instrument_names)
+        """Get all instruments matching ``instrument_id``."""
+        match (instruments_id):
+            case list() | tuple() as instruments if types_match(instruments,
+                                                                Instrument):
+                return instruments
+
+            case list() | tuple() as names if types_match(names, str):
+                out = self._instruments_by_name(names)
+
+            case list() | tuple() as classes if types_match(classes, ABCMeta):
+                measurement_points = self.get_measurement_points(
+                    to_exclude=measurement_points_to_exclude)
+                out_2d = [self._instruments_by_class(
+                    instrument_class,
+                    measurement_points,
+                    instruments_to_ignore=instruments_to_ignore)
+                    for instrument_class in classes]
+                out = list(itertools.chain.from_iterable(out_2d))
 
             case ABCMeta() as instrument_class:
                 measurement_points = self.get_measurement_points(
@@ -511,7 +526,7 @@ class MultipactorTest:
                     measurement_points,
                     instruments_to_ignore=instruments_to_ignore)
             case _:
-                raise IOError(f"instruments is {type(instruments)} which is ",
+                raise IOError(f"instruments is {type(instruments_id)} which is ",
                               "not supported.")
         return out
 
@@ -787,46 +802,45 @@ class MultipactorTest:
         }
         return somersalo_data
 
-    def plot_instrument_x_vs_instrument_y(
+    def plot_instruments_y_vs_instrument_x(
             self,
             instrument_id_x: ABCMeta | str | Instrument,
-            instrument_id_y: ABCMeta | str | Instrument,
+            instrument_ids_y: Sequence[ABCMeta] | Sequence[str] | Sequence[Instrument],
             measurement_points_to_exclude: Sequence[IMeasurementPoint
                                                     | str] = (),
             instruments_to_ignore: Sequence[Instrument | str] = (),
             tail: int = -1,
             fig_kw: dict | None = None,
-            subplot_kw: dict | None = None
-    ) -> tuple[Figure, Axes]:
+    ) -> Axes:
         """Plot data measured by ``instrument_a`` vs ``instrument_b``."""
-        instruments = []
-        for instrument_id in (instrument_id_x, instrument_id_y):
-            instrument = self.get_instrument(instrument_id,
+        instrument_x = self.get_instrument(instrument_id_x,
+                                           measurement_points_to_exclude,
+                                           instruments_to_ignore)
+        assert isinstance(instrument_x, Instrument)
+
+        instruments_y = self.get_instruments(instrument_ids_y,
                                              measurement_points_to_exclude,
                                              instruments_to_ignore)
-            assert isinstance(instrument, Instrument)
-            instruments.append(instrument)
-        instrument_x, instrument_y = instruments
-
         if fig_kw is None:
             fig_kw = {}
-        fig, instrument_class_axes = plot.create_fig(
-            str(self),
-            (type(instrument_y), ),
-            instrument_x.ylabel(),
-            subplot_kw,
-            **fig_kw
-        )
-        axes = instrument_class_axes[type(instrument_y)]
 
         dict_to_plot = {instrument.name: instrument.ydata_as_pd
-                        for instrument in instruments}
+                        for instrument in [instrument_x] + instruments_y}
         df_to_plot = pd.DataFrame(dict_to_plot)
 
         axes = df_to_plot.tail(tail).plot(x=0,
-                                          y=1,
-                                          ax=axes,
                                           xlabel=instrument_x.ylabel(),
+                                          # ylabel=instrument_y.ylabel(),
                                           )
         axes.grid(True)
-        return fig, axes
+        return axes
+
+
+def types(my_list: Sequence) -> set[type]:
+    """Get all different types in given list."""
+    return set(type(x) for x in my_list)
+
+
+def types_match(my_list: Sequence, to_match: type) -> bool:
+    """Check if all elements of ``my_list`` have type ``type``."""
+    return types(my_list) == {to_match}
