@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `MultipactorTest` and `TestCampaign` accept `info` key to identify each test more easily.
 - `MultipactorTest.get_instruments` handles more use cases.
+- `MultipactorTest.plot_instruments_y_vs_instrument_x` method.
 
 ## [1.3.1] 2024.02.04
 
