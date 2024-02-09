@@ -10,8 +10,7 @@ from matplotlib.axes._axes import Axes
 from matplotlib.figure import Figure
 
 
-def create_fig(freq_mhz: float,
-               swr: float,
+def create_fig(title: str = '',
                instruments_to_plot: Sequence[ABCMeta] = (),
                xlabel: str | None = None,
                subplot_kw: dict | None = None,
@@ -46,7 +45,8 @@ def create_fig(freq_mhz: float,
                                          xlabel,
                                          **subplot_kw)
 
-    fig.suptitle(f"f = {freq_mhz}MHz; SWR = {swr}")
+    if len(title) > 0:
+        fig.suptitle(title)
     return fig, instrument_class_axes
 
 

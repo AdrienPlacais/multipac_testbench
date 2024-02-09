@@ -179,8 +179,7 @@ class MultipactorTest:
 
         """
         fig, instrument_class_axes = plot.create_fig(
-            self.freq_mhz,
-            self.swr,
+            str(self),
             instruments_to_plot,
             xlabel='Measurement index',
             **fig_kw)
@@ -330,8 +329,7 @@ class MultipactorTest:
         """
         if fig_kw is None:
             fig_kw = {}
-        fig, instrument_class_axes = plot.create_fig(self.freq_mhz,
-                                                     self.swr,
+        fig, instrument_class_axes = plot.create_fig(str(self),
                                                      instruments_to_plot,
                                                      xlabel='Probe index',
                                                      **fig_kw)
@@ -549,8 +547,7 @@ class MultipactorTest:
             on.
 
         """
-        fig, instrument_class_axes = plot.create_fig(self.freq_mhz,
-                                                     self.swr,
+        fig, instrument_class_axes = plot.create_fig(str(self),
                                                      instruments_to_plot,
                                                      xlabel='Position [m]',
                                                      **fig_kw)
@@ -657,8 +654,7 @@ class MultipactorTest:
                   "sense?")
 
         fig, instrument_class_axes = plot.create_fig(
-            self.freq_mhz,
-            self.swr,
+            str(self),
             (instrument_class_to_plot, ),
             xlabel='Measurement index',
             **fig_kw
