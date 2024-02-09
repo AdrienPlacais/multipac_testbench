@@ -2,20 +2,20 @@
 # -*- coding: utf-8 -*-
 """Define an object to store data from several :class:`.MultipactorTest`."""
 from abc import ABCMeta
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Iterable, Sequence
 from pathlib import Path
 from typing import Self
 
 import matplotlib.pyplot as plt
-from matplotlib.axes._axes import Axes
-from matplotlib.figure import Figure
 import numpy as np
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 
 from multipac_testbench.src.multipactor_test import MultipactorTest
 from multipac_testbench.src.theoretical.somersalo import (
-    measured_to_somersalo_coordinates,
-    plot_somersalo_analytical
-)
+    plot_somersalo_analytical,
+    plot_somersalo_measured,
+    somersalo_base_plot)
 from multipac_testbench.src.theoretical.susceptibility import \
     measured_to_susceptibility_coordinates
 
@@ -97,79 +97,87 @@ class TestCampaign(list):
 
     def somersalo(self,
                   multipactor_measured_at: str,
+                  orders_one_point: tuple[int, ...] = (1, 2, 3, 4, 5, 6, 7),
+                  orders_two_point: tuple[int, ...] = (1, ),
                   **fig_kw) -> tuple[Figure, Axes, Axes]:
-        """Create a Somersalo plot, with theoretical results and measured."""
-        xlim = (-1.5, 3.5)
-        # xlim = (0, 3.5)  # Somersalo original
-        fig, ax1, ax2 = self._somersalo_base_plot(xlim=xlim, **fig_kw)
-
-        log_power = np.linspace(xlim[0], xlim[1], 51)
-        self._add_somersalo_analytical(log_power, ax1, ax2)
-        self._add_somersalo_measured(multipactor_measured_at, ax1, ax2)
-        ax1.grid(True)
-        return fig, ax1, ax2
-
-    def _somersalo_base_plot(self,
-                             xlim: tuple[float, float],
-                             **fig_kw) -> tuple[Figure, Axes, Axes]:
-        fig = plt.figure(**fig_kw)
-        ax1 = fig.add_subplot(
-            111,
-            xlabel=r"$\log_{10}(P~\mathrm{[kW]})$",
-            ylabel=r"$\log_{10}((f_\mathrm{GHz} d_\mathrm{mm})^4$"
-            + r"$\dot Z_\Omega)$",
-            xlim=xlim,
-            ylim=(2.2, 9.2),
-            # ylim=(7.4, 9.2),  # Somersalo original
-        )
-        ax1.grid(True)
-        ax2 = plt.twinx(ax1)
-        ax2.set_ylabel(
-            r"$\log_{10}((f_\mathrm{GHz} d_\mathrm{mm})^4 \dot Z_\Omega^2)$")
-        ax2.set_ylim(3.8, 11)
-        # ax2.set_ylim(9.1, 11)  # Somersalo original
-        return fig, ax1, ax2
-
-    def _add_somersalo_analytical(self,
-                                  log_power: np.ndarray,
-                                  ax1: Axes,
-                                  ax2: Axes) -> None:
-        """Cmpute and plot all Somersalo.
+        """Create a Somersalo plot, with theoretical results and measured.
 
         .. todo::
             For some reason, two point is plotted on the one point ax instead
             of the two point...
 
+        Parameters
+        ----------
+        multipactor_measured_at : str
+            Name of the :class:`.IMeasurementPoint` where the multipactor is
+            detected. It must have a :class:`.MultipactorBands` attribute,
+            which is set by the :meth:`TestCampaign.detect_multipactor` method.
+        orders_one_point : tuple[int, ...], optional
+            The multipactor orders to plot for one point multipactor. The
+            default is orders 1 to 8, as in Somersalo's plot.
+        orders_two_point : tuple[int, ...]
+            The multipactor orders to plot for two point multipactor. The
+            default is order 1 only, as in Somersalo's plot.
+        fig_kw :
+            Other keyword arguments passed to the Figure constructor.
+
+        Returns
+        -------
+        Figure :
+            Holds the plotted figure.
+        Axes :
+            Left axis (one-point multipactor).
+        Axes :
+            Right axis (two-point multipactor).
+
         """
-        orders_one = (1, 2, 3, 4, 5, 6, 7)
-        orders_two = (1, )
-        plot_somersalo_analytical('one', log_power, orders_one, ax1)
-        # plot_somersalo_analytical('two', log_power, orders_two, ax2, ls='--')
+        log_power = np.linspace(-1.5, 3.5, 2)
+        xlim = (log_power[0], log_power[-1])
+        ylim_one_point = (2.2, 9.2)
+        ylim_two_point = (3.8, 11.)
+
+        fig, ax1, ax2 = somersalo_base_plot(xlim=xlim,
+                                            ylim_one_point=ylim_one_point,
+                                            ylim_two_point=ylim_two_point,
+                                            **fig_kw)
+        one_point_kw = {'points': 'one',
+                        'orders': orders_one_point,
+                        'ax': ax1,
+                        'ls': '-'}
+        two_point_kw = {'points': 'two',
+                        'orders': orders_two_point,
+                        'ax': ax2,
+                        'ls': '--'}
+        for kwargs in (one_point_kw, two_point_kw):
+            plot_somersalo_analytical(log_power=log_power, **kwargs)
+
+        self._add_somersalo_measured(multipactor_measured_at,
+                                     ax1, ax2)
+
+        ax1.grid(True)
+        return fig, ax1, ax2
 
     def _add_somersalo_measured(self,
                                 multipactor_measured_at: str,
-                                ax1: Axes,
-                                ax2: Axes) -> None:
-        """Represent the theoretical plots from Somersalo.
+                                ax1: Axes, ax2: Axes,
+                                **plot_kw
+                                ) -> None:
+        """Put the measured multipacting limits on Somersalo plot.
 
         .. todo::
-            Determine what this function should precisely return. As for now,
-            it returns last lower and upper power barriers. Alternatives would
-            be to plot every power that led to multipactind during last power
+            Determine what this function should precisely plot. As for now,
+            it plots last lower and upper power barriers. Alternatives would
+            be to plot every power that led to multipacting during last power
             cycle, or every power that led to multipacting during whole test.
 
         """
         for mp_test in self:
             somersalo_data = mp_test.data_for_somersalo(
                 multipactor_measured_at)
-            one_point, two_point = measured_to_somersalo_coordinates(
-                **somersalo_data)
-            ax1.scatter(one_point[:, 0], one_point[:, 1],
-                        marker='o', label=str(mp_test))
-            ax2.scatter(two_point[:, 0], two_point[:, 1],
-                        marker='*', label=str(mp_test))
-        ax1.legend()
-        ax2.legend()
+            plot_somersalo_measured(mp_test_name=str(mp_test),
+                                    somersalo_data=somersalo_data,
+                                    ax1=ax1, ax2=ax2,
+                                    **plot_kw)
 
     def susceptibility_plot(self,
                             multipactor_measured_at: str,

@@ -10,12 +10,13 @@ In : Part. Accel. 59 (1998), p. 107-141. \
 url : http://cds.cern.ch/record/1120302/files/p107.pdf.
 
 """
-from collections.abc import Callable, Iterable, Sequence
-from typing import overload
+from collections.abc import Callable, Sequence
 
-from matplotlib.axes import Axes
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 
 
 SOMERSALO_ANALYTICAL_PARAMETERS_ONE = {
@@ -32,6 +33,49 @@ SOMERSALO_ANALYTICAL_PARAMETERS_ONE = {
 SOMERSALO_ANALYTICAL_PARAMETERS_TWO = {
     1: ((1.54, 2.98, 9.08, 10.7), (1.51, 2.99, 9.08, 10.7))  # wrong
 }
+
+
+def somersalo_base_plot(xlim: tuple[float, float] = (0., 3.5),
+                        ylim_one_point: tuple[float, float] = (7.4, 9.2),
+                        ylim_two_point: tuple[float, float] = (9.1, 11.),
+                        **fig_kw) -> tuple[Figure, Axes, Axes]:
+    """Create base figure and axes for Somersalo.
+
+    Parameters
+    ----------
+    xlim : tuple[float, float], optional
+        Limits for the x axis. The default matches the figure from Somersalo's
+        paper.
+    ylim_one_point : tuple[float, float], optional
+        Limits for the one-point (left) y axis. The default matches the figure
+        from Somersalo's paper.
+    ylim_two_point : tuple[float, float], optional
+        Limits for the two-point (right) y axis. The default matches the figure
+        from Somersalo's paper.
+    fig_kw :
+        Other keyword arguments passed to the Figure constructor.
+
+    Returns
+    -------
+    tuple[Figure, Axes, Axes]
+        Figure, left and right Axis.
+
+    """
+    fig = plt.figure(**fig_kw)
+    ax1 = fig.add_subplot(
+        111,
+        xlabel=r"$\log_{10}(P~\mathrm{[kW]})$",
+        ylabel=r"$\log_{10}((f_\mathrm{GHz} d_\mathrm{mm})^4$"
+        + r"$\dot Z_\Omega)$",
+        xlim=xlim,
+        ylim=ylim_one_point,
+    )
+    ax1.grid(True)
+    ax2 = plt.twinx(ax1)
+    ax2.set_ylabel(
+        r"$\log_{10}((f_\mathrm{GHz} d_\mathrm{mm})^4 \dot Z_\Omega^2)$")
+    ax2.set_ylim(ylim_two_point)
+    return fig, ax1, ax2
 
 
 def webdplotdigitizerpoints_to_data(log_power: np.ndarray,
@@ -116,6 +160,16 @@ def _two_point_analytical(log_power: np.ndarray,
     return df_two_point
 
 
+SOMERSALO_ANALYTICAL_FUNC = {
+    'one': _one_point_analytical,
+    'One': _one_point_analytical,
+    1: _one_point_analytical,
+    'two': _two_point_analytical,
+    'Two': _two_point_analytical,
+    2: _two_point_analytical,
+}
+
+
 def plot_somersalo_analytical(points: str | int,
                               log_power: np.ndarray,
                               orders: Sequence[int],
@@ -123,30 +177,18 @@ def plot_somersalo_analytical(points: str | int,
                               **plot_kw,
                               ) -> None:
     """Compute and plot single Somersalo plot, several orders."""
-    fun = _somersalo_analytical_fun(points)
-    df_somersalos = (fun(log_power, order) for order in orders)
+    func = SOMERSALO_ANALYTICAL_FUNC[points]
+    df_somersalos = (func(log_power, order) for order in orders)
     df_somersalo = pd.concat(df_somersalos, axis=1)
     df_somersalo.plot(ax=ax, **plot_kw)
 
 
-def _somersalo_analytical_fun(points: str | int) -> Callable:
-    """Get one or two point Somersalo function."""
-    one_allowed = ('one', 'One', 1)
-    two_allowed = ('two', 'Two', 2)
-    if points in one_allowed:
-        return _one_point_analytical
-    if points in two_allowed:
-        return _two_point_analytical
-
-    raise IOError(f"{points = } not recognized. Must be in {one_allowed}"
-                  f"or {two_allowed}")
-
-
-def measured_to_somersalo_coordinates(powers_kw: np.ndarray | list[float],
-                                      d_mm: float,
-                                      freq_ghz: float,
-                                      z_ohm: float,
-                                      ) -> tuple[np.ndarray, np.ndarray]:
+def _somersalo_coordinates(powers_kw: np.ndarray | list[float],
+                           d_mm: float,
+                           freq_ghz: float,
+                           z_ohm: float,
+                           mp_test_name: str,
+                           ) -> pd.DataFrame:
     """Convert measured data to coordinates for Somersalo plot."""
     x_coordinates = np.log10(powers_kw)
     n_coordinates = len(x_coordinates)
@@ -158,6 +200,27 @@ def measured_to_somersalo_coordinates(powers_kw: np.ndarray | list[float],
         n_coordinates,
         np.log10((d_mm * freq_ghz)**4 * z_ohm**2)
     )
-    one_point = np.column_stack((x_coordinates, y_coordinates_one))
-    two_point = np.column_stack((x_coordinates, y_coordinates_two))
-    return one_point, two_point
+    df_somersalo = pd.DataFrame({
+        f"One-point {mp_test_name}": y_coordinates_one,
+        f"Two-point {mp_test_name}": y_coordinates_two,
+    }, index=x_coordinates)
+    return df_somersalo
+
+
+def plot_somersalo_measured(mp_test_name: str,
+                            somersalo_data: dict[str, float | np.ndarray],
+                            ax1: Axes,
+                            ax2: Axes,
+                            **plot_kw,
+                            ) -> None:
+    """Plot the data on Somersalo plot."""
+    df_somersalo = _somersalo_coordinates(mp_test_name=mp_test_name,
+                                          **somersalo_data)
+    for (_, series), ax, marker in zip(df_somersalo.items(),
+                                       (ax1, ax2),
+                                       ('o', '*')):
+        series.plot(ax=ax,
+                    marker=marker,
+                    lw=0,
+                    legend=True,
+                    **plot_kw)
