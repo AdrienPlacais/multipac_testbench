@@ -12,6 +12,8 @@ Welcome to MULTIPAC test bench's documentation!
    :titlesonly:
    :glob:
 
+   manual/presentation
+   manual/configuration
    manual/examples
    API Reference <modules>
 

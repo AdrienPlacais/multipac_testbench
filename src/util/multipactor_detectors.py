@@ -114,10 +114,30 @@ def _remove_isolated(multipactor: np.ndarray,
     return multipactor
 
 
-def start_and_end_of_contiguous_true_zones(array: np.ndarray
-                                           ) -> Sequence[tuple[int, int]]:
-    """Get indexes of the contiguous zones where array is True."""
-    diff = np.where(np.diff(array))[0]
+def start_and_end_of_contiguous_true_zones(
+    multipactor: np.ndarray[np.bool_],
+) -> list[tuple[int, int]]:
+    """Get indexes of the entry and exit of contiguous multipactor zones.
+
+    .. warning::
+        ``starts`` is not the list of lower multipactor barrier indexes,
+        ``ends`` is not the list of upper multipactor barrier indexes. To get
+        this data, use :func:`indexes_of_lower_and_upper_multipactor_barriers`.
+
+    Parameters
+    ----------
+    multipactor :  np.ndarray[np.bool_]
+        Iterable where True means there is multipactor, False no multipactor,
+        and np.NaN undetermined.
+
+    Returns
+    -------
+    zones : Sequence[tuple[int, int]]
+        List of first and last index of every multipactor band (multipactor
+        contiguous zone).
+
+    """
+    diff = np.where(np.diff(multipactor))[0]
     n_changes = diff.size
 
     starts = (diff[::2] + 1).tolist()
@@ -125,9 +145,8 @@ def start_and_end_of_contiguous_true_zones(array: np.ndarray
 
     # Multipacting zones are "closed"
     if n_changes % 2 == 0:
-        # Multipacting zones are not closed, this is non-multipacting zones
-        # that are
-        if array[0]:
+        # Multipacting zones are not closed
+        if multipactor[0]:
             starts, ends = ends, starts
             starts.insert(0, 0)
             ends.append(None)
@@ -136,10 +155,62 @@ def start_and_end_of_contiguous_true_zones(array: np.ndarray
     else:
         ends.append(None)
 
-        if array[0]:
+        if multipactor[0]:
             starts, ends = ends, starts
             starts = ends
             starts.insert(0, 0)
 
     zones = [(start, end) for start, end in zip(starts, ends)]
     return zones
+
+
+def indexes_of_lower_and_upper_multipactor_barriers(
+    multipactor: np.ndarray[np.bool_],
+    power_is_growing: list[bool | float]
+) -> tuple[Sequence[int], Sequence[int]]:
+    """Get list of indexes of lower and upper multipactor barriers.
+
+    Parameters
+    ----------
+    multipactor :  np.ndarray[np.bool_]
+        Array where True means there is multipactor, False no multipactor.
+    power_is_growing : list[bool | float]
+        True where the power is growing, False where the power is
+        decreasing, NaN where undetermined.
+
+    Returns
+    -------
+    lower_indexes : Sequence[int]
+        Indexes corresponding to a crossing of lower multipactor barrier.
+    upper_indexes : Sequence[int]
+        Indexes corresponding to a crossing of upper multipactor barrier.
+
+    """
+    lower_indexes = []
+    upper_indexes = []
+    multipactor_change = np.diff(multipactor)
+
+    for index, (mp, mp_change, is_growing) in enumerate(
+            zip(multipactor[1:],
+                multipactor_change,
+                power_is_growing[1:]),
+            start=1):
+        if not mp_change:
+            continue
+        if np.isnan(is_growing):
+            continue
+
+        # Enter a MP zone
+        if mp:
+            if is_growing:
+                lower_indexes.append(index)
+            else:
+                upper_indexes.append(index)
+            continue
+
+        # Exit a MP zone
+        if not is_growing:
+            lower_indexes.append(index)
+        else:
+            upper_indexes.append(index)
+    return lower_indexes, upper_indexes

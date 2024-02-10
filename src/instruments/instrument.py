@@ -2,15 +2,17 @@
 # -*- coding: utf-8 -*-
 """Define object to keep a single instrument measurements."""
 from abc import ABC
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable
 from typing import Callable, Self
-
 
 import numpy as np
 import pandas as pd
 from matplotlib.axes._axes import Axes
 from matplotlib.container import StemContainer
 from matplotlib.lines import Line2D
+
+from multipac_testbench.src.multipactor_band.multipactor_bands import \
+    MultipactorBands
 
 
 class Instrument(ABC):
@@ -55,10 +57,10 @@ class Instrument(ABC):
         self.plot_vs_time, self.plot_vs_position, self.scatter_data = plotters
 
         self._ydata: np.ndarray | None = None
+        self._ydata_as_pd: pd.Series | pd.DataFrame | None = None
         self._post_treaters: list[Callable[[np.ndarray], np.ndarray]] = []
 
-        self._multipac_detector: Callable[[np.ndarray], np.ndarray]
-        self._multipactor: np.ndarray | None = None
+        self.ydata_at_multipacting_barrier = pd.DataFrame()
 
     def __str__(self) -> str:
         """Give concise information on instrument."""
@@ -158,13 +160,30 @@ class Instrument(ABC):
             self._ydata = self._post_treat(self.raw_data.to_numpy())
         return self._ydata
 
+    @property
+    def ydata_as_pd(self) -> pd.Series | pd.DataFrame:
+        """Get the treated data as a pandas object."""
+        if self._ydata_as_pd is not None:
+            return self._ydata_as_pd
+
+        index = self.raw_data.index
+        if self.is_2d:
+            assert isinstance(self.raw_data, pd.DataFrame)
+            columns = self.raw_data.columns
+            self._ydata_as_pd = pd.DataFrame(self.ydata,
+                                             columns=columns,
+                                             index=index,
+                                             )
+        else:
+            self._ydata_as_pd = pd.Series(self.ydata,
+                                          index=index,
+                                          )
+        return self._ydata_as_pd
+
     @ydata.setter
     def ydata(self, value: np.ndarray | None) -> None:
-        if self._multipactor is not None:
-            print("Warning! Modifying the ydata (post-treated) makes "
-                  "previously calculated multipactor zones obsolete.")
-            self._multipactor = None
         self._ydata = value
+        self._ydata_as_pd = None
 
     def _get_plot_methods(self, is_2d: bool
                           ) -> tuple[Callable, Callable, Callable]:
@@ -219,54 +238,64 @@ class Instrument(ABC):
                   "previously post-treated data obsolete.")
             self.ydata = None
 
-    @property
-    def multipac_detector(self
-                          ) -> Callable[[np.ndarray], np.ndarray]:
-        """Get access to the function that determines where is multipactor.
-
-        .. note::
-            It is not mandatory to define a multipactor detector for every
-            :class:`Instrument`, as it may be unrelatable with some types of
-            instrument.
-
-        """
-        return self._multipac_detector
-
-    @multipac_detector.setter
-    def multipac_detector(self,
-                          value: Callable[[np.ndarray], np.ndarray]
-                          ) -> None:
-        """Set the function determining where/when there is multipactor.
+    def values_at_barriers(
+            self,
+            multipactor_bands: MultipactorBands,
+            ) -> tuple[pd.DataFrame, pd.DataFrame]:
+        """Get measured data at lower and upper multipactor barriers.
 
         Parameters
         ----------
-        value : Callable[[np.ndarray], np.ndarray]
-            Function taking in the array of :attr:`~ydata`, and returning an
-            array of boolean with the same shape. It contains ``True`` where
-            there is multipactor, and ``False`` where multipactor does not
-            happen.
-
-        """
-        if self._multipactor is not None:
-            print("Warning! Modifying the multipactor detector makes "
-                  "previously calculated multipactor zones obsolete.")
-            self._multipactor = None
-        self._multipac_detector = value
-
-    @property
-    def multipactor(self) -> np.ndarray:
-        """Use ``multipac_detector`` to determine where multipac happens.
+        multipactor_bands : MultipactorBands
+            Object holding the multipacting barriers.
 
         Returns
         -------
-        _multipactor : np.ndarray
-            Array with the same shape as :attr:`~ydata`. It is ``True`` where
-            there is multipactor and ``False`` elsewhere.
+        tuple[pd.DataFrame, pd.DataFrame]
+            Holds measured data at lower and upper multipacting barriers.
 
         """
-        if self._multipactor is None:
-            self._multipactor = self.multipac_detector(self.ydata)
-        return self._multipactor
+        barriers_idx = multipactor_bands.barriers
+        lower_barrier_idx, upper_barrier_idx = barriers_idx
+        assert isinstance(lower_barrier_idx, list)
+        assert isinstance(upper_barrier_idx, list)
+        name_of_detector = multipactor_bands.detector_instrument_name
+
+        label = self.raw_data.columns + f" according to {name_of_detector}"
+        lower_values = pd.DataFrame(
+            data=self.ydata[lower_barrier_idx],
+            index=lower_barrier_idx,
+            columns="Lower barrier " + label,
+        )
+
+        upper_values = pd.DataFrame(
+            data=self.ydata[upper_barrier_idx],
+            index=upper_barrier_idx,
+            columns="Upper barrier " + label,
+        )
+        self.ydata_at_multipacting_barrier = \
+            pd.concat([self.ydata_at_multipacting_barrier,
+                       lower_values,
+                       upper_values],
+                      axis=1).sort_index()
+
+        return lower_values, upper_values
+
+    def values_at_barriers_fully_conditioned(
+            self,
+            multipactor_bands: MultipactorBands,
+            ) -> tuple[float, float]:
+        """Get measured data at last mp limits."""
+        barriers_idx = multipactor_bands.barriers
+        last_low = barriers_idx[0][-1]
+        last_upp = barriers_idx[1][-1]
+
+        if isinstance(last_low, (list, np.ndarray)):
+            last_low = last_low[0]
+        if isinstance(last_upp, (list, np.ndarray)):
+            last_upp = last_upp[0]
+
+        return self.ydata[last_low], self.ydata[last_upp]
 
     def _post_treat(self, data: np.ndarray) -> np.ndarray:
         """Apply all post-treatment functions."""
@@ -439,7 +468,7 @@ class Instrument(ABC):
 
     def _scatter_data_1d(self,
                          axes: Axes,
-                         multipactor: np.ndarray | None = None,
+                         multipactor: np.ndarray,
                          xdata: float | np.ndarray | None = None,
                          ) -> None:
         """Plot ``ydata``, discriminating where there is multipactor or not.
@@ -448,22 +477,20 @@ class Instrument(ABC):
         ----------
         axes : Axes
             Where to plot.
-        multipactor : np.ndarray | None, optional
-            True where there is multipactor, False elsewhere. The default is
-            None, in which case we take :attr:`self.multipactor`.
+        multipactor : np.ndarray
+            True where there is multipactor, False elsewhere.
         xdata : float | np.ndarray | None, optional
             x position of the data. The default is None, in which case we take
             :attr:`self._position`.
 
         """
-        if multipactor is None:
-            multipactor = self.multipactor
+        ydata = self.ydata
+
         if xdata is None:
             xdata = self._position
-
-        ydata = self.ydata
         if isinstance(xdata, float):
             xdata = np.full(len(ydata), xdata)
+        assert isinstance(xdata, np.ndarray)
 
         mp_kwargs = {'c': 'r',
                      'marker': 's',

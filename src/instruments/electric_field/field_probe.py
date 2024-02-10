@@ -32,3 +32,8 @@ class FieldProbe(IElectricField):
         super().__init__(*args, **kwargs)
         self._g_probe = g_probe
         self._a_rack, self._b_rack = a_rack, b_rack
+
+    @classmethod
+    def ylabel(cls) -> str:
+        """Label used for plots."""
+        return r"Measured voltage [V]"

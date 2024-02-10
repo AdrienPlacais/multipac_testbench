@@ -10,8 +10,8 @@ import pandas as pd
 
 from multipac_testbench.src.instruments.factory import InstrumentFactory
 from multipac_testbench.src.instruments.instrument import Instrument
-from multipac_testbench.src.util.multipactor_detectors import \
-    start_and_end_of_contiguous_true_zones
+from multipac_testbench.src.multipactor_band.multipactor_bands import \
+    MultipactorBands
 
 
 class IMeasurementPoint(ABC):
@@ -47,6 +47,7 @@ class IMeasurementPoint(ABC):
             for instr_name, instr_kw in instruments_kw.items()
         ]
         self._color: tuple[float, float, float] | None = None
+        self.multipactor_bands: MultipactorBands
 
     def add_instrument(self, instrument: Instrument) -> None:
         """Add a new instrument :attr:`.instruments`.
@@ -71,11 +72,11 @@ class IMeasurementPoint(ABC):
         instrument_names_to_ignore = [x if isinstance(x, str)
                                       else x.name
                                       for x in instruments_to_ignore]
-        affected_instruments = [
+        instruments = [
             instrument for instrument in self.instruments
             if isinstance(instrument, instrument_class)
             and instrument.name not in instrument_names_to_ignore]
-        return affected_instruments
+        return instruments
 
     def get_instrument(self, *args, **kwargs) -> Instrument | None:
         """Get instrument which is (sub) class of ``instrument_class``.
@@ -100,41 +101,30 @@ class IMeasurementPoint(ABC):
     def add_post_treater(self,
                          post_treater: Callable[[np.ndarray], np.ndarray],
                          instrument_class: ABCMeta = Instrument,
+                         verbose: bool = False,
                          ) -> None:
         """Add post-treatment functions to instruments."""
         instruments = self.get_instruments(instrument_class)
         for instrument in instruments:
             instrument.add_post_treater(post_treater)
 
-    def set_multipac_detector(
+            if verbose:
+                print(f"A post-treater was added to {str(instrument)}.")
+
+    def detect_multipactor(
             self,
             multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
             instrument_class: ABCMeta = Instrument,
     ) -> None:
-        """Add multipactor detection function to instruments."""
-        instruments = self.get_instruments(instrument_class)
-        for instrument in instruments:
-            instrument.multipac_detector = multipac_detector
-
-    def _when_is_there_multipactor(self,
-                                   detector_instrument: Instrument | ABCMeta
-                                   ) -> Sequence[tuple[int, int]]:
-        """Get the list of multipacting zones (indexes).
-
-        Need to pass in a ``detector_instrument`` to tell which type of
-        :class:`.Instrument` we should trust to detect multipactor.
-
-        """
-        if isinstance(detector_instrument, ABCMeta):
-            detector_instrument = self.get_instrument(detector_instrument)
-
-        assert isinstance(detector_instrument, Instrument)
-        assert hasattr(detector_instrument, 'multipac_detector'), "No " \
-            "multipacting detector defined for instrument under study."
-
-        multipactor = detector_instrument.multipactor
-        zones = start_and_end_of_contiguous_true_zones(multipactor)
-        return zones
+        """Detect multipactor with ``multipac_detector``."""
+        instrument = self.get_instrument(instrument_class)
+        if instrument is None:
+            return
+        self.multipactor_bands = MultipactorBands.from_ydata(
+            multipac_detector,
+            instrument.ydata,
+            instrument.name,
+        )
 
     def plot_instrument_vs_time(self,
                                 instrument_class_axes: dict[ABCMeta, Axes],
@@ -172,9 +162,11 @@ class IMeasurementPoint(ABC):
     def _add_multipactor_vs_time(self,
                                  axe: Axes,
                                  plotted_instrument_class: ABCMeta,
-                                 detector_instrument_class: ABCMeta,
                                  ) -> None:
         """Add arrows to display multipactor.
+
+        .. todo::
+            To refactor, should rely on MultipactorBand(s) methods
 
         Parameters
         ----------
@@ -182,44 +174,33 @@ class IMeasurementPoint(ABC):
             Matplotlib object on which multipacting zones should be added.
         plotted_instrument_class : ABCMeta
             The nature of the instrument which ``ydata`` is already plotted.
-        detector_instrument_class : ABCMeta
-            The nature of the instrument that determines where there is
-            multipactor. It can be the same than ``plotted_instrument_class``,
-            or it can be different.
 
         """
-        detector_instrument = self.get_instrument(detector_instrument_class)
-        if detector_instrument is None:
-            return
-
         plotted_instrument = self.get_instrument(plotted_instrument_class)
         if plotted_instrument is None:
             return
 
-        zones = self._when_is_there_multipactor(detector_instrument)
         y_pos_of_multipactor_zone = 1.05 * np.nanmax(plotted_instrument.ydata)
-
         vline_kw = self._typical_vline_keywords()
         arrow_kw = self._typical_arrow_keywords(plotted_instrument)
 
-        for zone in zones:
-            delta_x = zone[1] - zone[0]
-            axe.arrow(zone[0],
+        for multipactor_band in self.multipactor_bands:
+            delta_x = multipactor_band[-1] - multipactor_band[0]
+            axe.arrow(multipactor_band[0],
                       y_pos_of_multipactor_zone,
                       delta_x,
                       0.,
                       **arrow_kw)
-            axe.arrow(zone[1],
+            axe.arrow(multipactor_band[-1],
                       y_pos_of_multipactor_zone,
                       -delta_x,
                       0.,
                       **arrow_kw)
-            axe.axvline(zone[0], **vline_kw)
-            axe.axvline(zone[1], **vline_kw)
+            axe.axvline(multipactor_band[0], **vline_kw)
+            axe.axvline(multipactor_band[-1], **vline_kw)
 
     def scatter_instruments_data(self,
                                  instrument_class_axes: dict[ABCMeta, Axes],
-                                 mp_detector_instrument_class: ABCMeta,
                                  xdata: float,
                                  ) -> None:
         """Scatter data measured by desired instruments."""
@@ -228,11 +209,9 @@ class IMeasurementPoint(ABC):
             if instrument is None:
                 continue
 
-            mp_detector = self.get_instrument(mp_detector_instrument_class)
-            assert mp_detector is not None
-            multipactor = mp_detector.multipactor
-
-            instrument.scatter_data(axes, multipactor, xdata)
+            instrument.scatter_data(axes,
+                                    self.multipactor_bands.multipactor,
+                                    xdata)
 
     def _typical_vline_keywords(self) -> dict[str, Any]:
         """Set consistent plot properties."""

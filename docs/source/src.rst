@@ -14,6 +14,8 @@ Subpackages
 
    src.instruments
    src.measurement_point
+   src.multipactor_band
+   src.theoretical
    src.util
 
 Submodules
@@ -23,3 +25,4 @@ Submodules
    :maxdepth: 4
 
    src.multipactor_test
+   src.test_campaign
