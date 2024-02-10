@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Define field probe to measure electric field."""
+import numpy as np
 from pathlib import Path
 from functools import partial
 import pandas as pd
@@ -70,20 +71,22 @@ class FieldProbe(IElectricField):
     def _load_calibration_file(self,
                                calibration_file: Path,
                                freq_mhz: float = 120.,
+                               freq_col: str = "Frequency [MHz]",
+                               a_col: str = 'a [dBm / V]',
+                               b_col: str = 'b [dBm]',
                                ) -> tuple[float, float]:
         """Load calibration file, interpolate proper calibration data."""
         data = pd.read_csv(calibration_file,
                            sep='\t',
                            comment='#',
-                           index_col="Frequency [MHz]",
+                           index_col=freq_col,
+                           usecols=[a_col, b_col, freq_col],
                            )
         if freq_mhz not in data.index:
-            raise NotImplementedError(f"Given frequency {freq_mhz} not "
-                                      + "found in calibration file. "
-                                      + "Interpolation over freq not "
-                                      + f"implemented yet {data = }")
-        print(data.loc[freq_mhz])
+            data.loc[freq_mhz] = [np.NaN, np.NaN]
+            data.sort_index(inplace=True)
+            data.interpolate(inplace=True)
         ser = data.loc[freq_mhz]
-        a_rack = ser['a [dBm / V]']
-        b_rack = ser['b [dBm]']
+        a_rack = ser[a_col]
+        b_rack = ser[b_col]
         return a_rack, b_rack
