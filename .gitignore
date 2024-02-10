@@ -61,3 +61,4 @@ target/
 *.swp
 docs/source/manual/data/*.csv
 docs/source/manual/notebooks/.ipynb_checkpoints/*
+src/experimental/*
