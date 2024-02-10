@@ -48,9 +48,9 @@ moving-average-or-running-mean
 
 
 def v_coax_to_v_acquisition(v_coax: np.ndarray,
-                            g_probe: float = 1.,
-                            a_rack: float = 10.3,
-                            b_rack: float = -51.7,
+                            g_probe: float,
+                            a_rack: float,
+                            b_rack: float,
                             z_0: float = 50.,
                             ) -> np.ndarray:
     r"""Convert coaxial voltage to acquisition voltage.
@@ -62,15 +62,12 @@ def v_coax_to_v_acquisition(v_coax: np.ndarray,
     v_coax : np.ndarray
         :math:`V_\mathrm{coax}` in :math:`\mathrm{V}`, which should be the
         content of the ``NI9205_Ex`` columns.
-    g_probe : float, optional
-        Total attenuation. Probe specific, also depends on frequency. The
-        default is 1., which is the default value when LabVIEWER bugs.
-    a_rack : float, optional
-        Rack calibration slope in :math:`\mathrm{dBm/V}`. The default
-        corresponds to E1 value, which is also the default in LabVIEWER.
-    b_rack : float, optional
-        Rack calibration constant in :math:`\mathrm{dBm}`. The default
-        corresponds to E1 value, which is also the default in LabVIEWER.
+    g_probe : float
+        Total attenuation. Probe specific, also depends on frequency.
+    a_rack : float
+        Rack calibration slope in :math:`\mathrm{dBm/V}`.
+    b_rack : float
+        Rack calibration constant in :math:`\mathrm{dBm}`.
     z_0 : float, optional
         Line impedance in :math:`\Ohm`. The default is 50.
 
@@ -88,9 +85,9 @@ def v_coax_to_v_acquisition(v_coax: np.ndarray,
 
 
 def v_acquisition_to_v_coax(v_acq: np.ndarray,
-                            g_probe: float = 1.,
-                            a_rack: float = 10.3,
-                            b_rack: float = -51.7,
+                            g_probe: float,
+                            a_rack: float,
+                            b_rack: float,
                             z_0: float = 50.,
                             ) -> np.ndarray:
     r"""Convert acquisition voltage to coaxial voltage.
@@ -101,15 +98,12 @@ def v_acquisition_to_v_coax(v_acq: np.ndarray,
     ----------
     v_acq : np.ndarray
         Acquisition voltage in :math:`[0, 10~\mathrm{V}]`.
-    g_probe : float, optional
-        Total attenuation. Probe specific, also depends on frequency. The
-        default is 1., which is the default value when LabVIEWER bugs.
-    a_rack : float, optional
-        Rack calibration slope in :math:`\mathrm{dBm/V}`. The default
-        corresponds to E1 value, which is also the default in LabVIEWER.
-    b_rack : float, optional
-        Rack calibration constant in :math:`\mathrm{dBm}`. The default
-        corresponds to E1 value, which is also the default in LabVIEWER.
+    g_probe : float
+        Total attenuation. Probe specific, also depends on frequency.
+    a_rack : float
+        Rack calibration slope in :math:`\mathrm{dBm/V}`.
+    b_rack : float
+        Rack calibration constant in :math:`\mathrm{dBm}`.
     z_0 : float, optional
         Line impedance in :math:`\Ohm`. The default is 50.
 
