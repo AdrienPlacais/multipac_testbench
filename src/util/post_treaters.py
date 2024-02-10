@@ -49,8 +49,8 @@ moving-average-or-running-mean
 
 def v_coax_to_v_acquisition(v_coax: np.ndarray,
                             g_probe: float = 1.,
-                            a_rack: float = 0.0931,
-                            b_rack: float = 4.8802,
+                            a_rack: float = 10.3,
+                            b_rack: float = -51.7,
                             z_0: float = 50.,
                             ) -> np.ndarray:
     r"""Convert coaxial voltage to acquisition voltage.
@@ -66,7 +66,7 @@ def v_coax_to_v_acquisition(v_coax: np.ndarray,
         Total attenuation. Probe specific, also depends on frequency. The
         default is 1., which is the default value when LabVIEWER bugs.
     a_rack : float, optional
-        Rack calibration slope in :math:`\mathrm{V/dBm}`. The default
+        Rack calibration slope in :math:`\mathrm{dBm/V}`. The default
         corresponds to E1 value, which is also the default in LabVIEWER.
     b_rack : float, optional
         Rack calibration constant in :math:`\mathrm{dBm}`. The default
@@ -83,14 +83,14 @@ def v_coax_to_v_acquisition(v_coax: np.ndarray,
     p_w = v_coax**2 / (2. * z_0)
     p_dbm = 30. + 10. * np.log10(p_w)
     p_acq = p_dbm - abs(g_probe + 3.)
-    v_acq = a_rack * p_acq + b_rack
+    v_acq = (p_acq - b_rack) / a_rack
     return v_acq
 
 
 def v_acquisition_to_v_coax(v_acq: np.ndarray,
                             g_probe: float = 1.,
-                            a_rack: float = 0.0951,
-                            b_rack: float = 4.8802,
+                            a_rack: float = 10.3,
+                            b_rack: float = -51.7,
                             z_0: float = 50.,
                             ) -> np.ndarray:
     r"""Convert acquisition voltage to coaxial voltage.
@@ -105,7 +105,7 @@ def v_acquisition_to_v_coax(v_acq: np.ndarray,
         Total attenuation. Probe specific, also depends on frequency. The
         default is 1., which is the default value when LabVIEWER bugs.
     a_rack : float, optional
-        Rack calibration slope in :math:`\mathrm{V/dBm}`. The default
+        Rack calibration slope in :math:`\mathrm{dBm/V}`. The default
         corresponds to E1 value, which is also the default in LabVIEWER.
     b_rack : float, optional
         Rack calibration constant in :math:`\mathrm{dBm}`. The default
@@ -120,9 +120,8 @@ def v_acquisition_to_v_coax(v_acq: np.ndarray,
         content of the ``NI9205_Ex`` columns.
 
     """
-    p_acq = (v_acq - b_rack) / a_rack
+    p_acq = v_acq * a_rack + b_rack
     p_dbm = abs(g_probe + 3.) + p_acq
     p_w = 10**((p_dbm - 30.) / 10.)
     v_coax = np.sqrt(2. * z_0 * p_w)
     return v_coax
-
