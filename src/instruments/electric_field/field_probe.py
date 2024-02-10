@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Define field probe to measure electric field."""
+from pathlib import Path
 from functools import partial
+import pandas as pd
 from multipac_testbench.src.instruments.electric_field.i_electric_field import\
     IElectricField
 from multipac_testbench.src.util.post_treaters import (v_acquisition_to_v_coax,
@@ -14,8 +16,7 @@ class FieldProbe(IElectricField):
     def __init__(self,
                  *args,
                  g_probe: float | None = None,
-                 a_rack: float | None = None,
-                 b_rack: float | None = None,
+                 calibration_file: str | None = None,
                  patch: bool = False,
                  **kwargs) -> None:
         r"""Instantiate with some specific arguments.
@@ -35,7 +36,12 @@ class FieldProbe(IElectricField):
         """
         super().__init__(*args, **kwargs)
         self._g_probe = g_probe
-        self._a_rack, self._b_rack = a_rack, b_rack
+
+        self._a_rack: float
+        self._b_rack: float
+        if calibration_file is not None:
+            self._a_rack, self._b_rack = self._load_calibration_file(
+                Path(calibration_file))
         if patch:
             self._patch_data()
 
@@ -46,9 +52,8 @@ class FieldProbe(IElectricField):
 
     def _patch_data(self, g_probe_in_labview: float = 1.) -> None:
         """Correct when ``g_probe`` in LabVIEWER is wrong."""
-        assert self._a_rack is not None
-        assert self._b_rack is not None
-        assert self._g_probe is not None
+        assert hasattr(self, '_a_rack')
+        assert hasattr(self, '_b_rack')
         fun1 = partial(v_coax_to_v_acquisition,
                        g_probe=g_probe_in_labview,
                        a_rack=self._a_rack,
@@ -61,3 +66,24 @@ class FieldProbe(IElectricField):
                        z_0=50.)
         self.add_post_treater(fun1)
         self.add_post_treater(fun2)
+
+    def _load_calibration_file(self,
+                               calibration_file: Path,
+                               freq_mhz: float = 120.,
+                               ) -> tuple[float, float]:
+        """Load calibration file, interpolate proper calibration data."""
+        data = pd.read_csv(calibration_file,
+                           sep='\t',
+                           comment='#',
+                           index_col="Frequency [MHz]",
+                           )
+        if freq_mhz not in data.index:
+            raise NotImplementedError(f"Given frequency {freq_mhz} not "
+                                      + "found in calibration file. "
+                                      + "Interpolation over freq not "
+                                      + f"implemented yet {data = }")
+        print(data.loc[freq_mhz])
+        ser = data.loc[freq_mhz]
+        a_rack = ser['a [dBm / V]']
+        b_rack = ser['b [dBm]']
+        return a_rack, b_rack
