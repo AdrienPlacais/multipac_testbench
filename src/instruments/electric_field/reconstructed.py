@@ -3,10 +3,6 @@
 """Define voltage along line.
 
 .. todo::
-    Implement a way to get reconstructed voltage at given pick-up and sample
-    index.
-
-.. todo::
     voltage fitting, overload: they work but this not clean, not clean at all
 
 """
@@ -160,6 +156,19 @@ class Reconstructed(IElectricField):
             actual_voltages.append(voltages)
         actual_voltages = np.array(actual_voltages)
         return actual_voltages
+
+    def ydata_at_position(self, pos: float, tol: float = 1e-5) -> np.ndarray:
+        """Get reconstructed field at position ``pos``."""
+        diff = np.abs(self._position - pos)
+        delta_z = np.min(diff)
+        if delta_z > tol:
+            raise ValueError("You asked for the reconstructed field at "
+                             f"position {pos}, but the closest calculated "
+                             f"points in {delta_z}m away for it. Check units,"
+                             " or increase the number of calculated positions."
+                             )
+        idx = np.argmin(diff)
+        return self.ydata[:, idx]
 
 
 def _model(var: np.ndarray,
