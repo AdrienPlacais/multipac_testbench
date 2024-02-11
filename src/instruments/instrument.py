@@ -322,6 +322,7 @@ class Instrument(ABC):
                              axe: Axes,
                              raw: bool = False,
                              color: tuple[float, float, float] | None = None,
+                             xdata: np.ndarray | pd.Index | None = None,
                              **subplot_kw
                              ) -> Line2D:
         """Plot what the instrument measured."""
@@ -332,7 +333,10 @@ class Instrument(ABC):
             ydata = self.raw_data
             label = f"{self.name} (raw)"
 
-        line1, = axe.plot(self.raw_data.index,
+        if xdata is None:
+            xdata = self.raw_data.index
+
+        line1, = axe.plot(xdata,
                           ydata,
                           color=color,
                           label=label,
@@ -343,6 +347,7 @@ class Instrument(ABC):
                              axe: Axes,
                              raw: bool = False,
                              color: tuple[float, float, float] | None = None,
+                             xdata: np.ndarray | pd.Index | None = None,
                              **subplot_kw
                              ) -> Line2D:
         """Plot what the instrument measured."""
@@ -352,11 +357,13 @@ class Instrument(ABC):
         if raw or len(self.post_treaters) == 0:
             ydata = self.raw_data.to_numpy()
             label = f"{self.name} (raw)"
+        if xdata is None:
+            xdata = self.raw_data.index
 
         n_cols = ydata.shape[1]
         line1 = None
         for i in range(n_cols):
-            line1, = axe.plot(self.raw_data.index,
+            line1, = axe.plot(xdata,
                               ydata[:, i],
                               color=color,
                               label=label + f" (column {i})",
