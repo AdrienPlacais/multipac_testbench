@@ -36,6 +36,8 @@ from multipac_testbench.src.measurement_point.factory import \
     IMeasurementPointFactory
 from multipac_testbench.src.measurement_point.i_measurement_point import \
     IMeasurementPoint
+from multipac_testbench.src.multipactor_band.multipactor_bands import \
+    MultipactorBands
 from multipac_testbench.src.util import plot
 from multipac_testbench.src.util.helper import output_filepath
 
@@ -675,7 +677,7 @@ class MultipactorTest:
             png_path: Path | None = None,
             multipactor_measured_at: IMeasurementPoint | str | None = None,
             **fig_kw,
-    ) -> tuple[Figure, Axes]:
+    ) -> tuple[Figure, list[Axes]]:
         """Plot lower and upper multipacting limits evolution.
 
         As for now, only one instrument should be plotted, and only one
@@ -748,6 +750,48 @@ class MultipactorTest:
         axe.grid(True)
         plot.finish_fig(fig, instrument_class_axes.values(), png_path)
         return fig, [axes for axes in instrument_class_axes.values()]
+
+    def plot_data_at_multipactor_thresholds(
+        self,
+        instruments_id_plot: ABCMeta | Sequence[Instrument] | Sequence[str],
+        multipactor_bands: MultipactorBands | Sequence[MultipactorBands],
+        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
+        instruments_to_ignore: Sequence[Instrument | str] = (),
+        png_path: Path | None = None,
+        **fig_kw,
+    ) -> tuple[Figure, Axes]:
+        """Plot the data measured by some instruments at thresholds.
+
+        New version of `plot_multipactor_limits`.
+
+        """
+        instruments_to_plot = self.get_instruments(
+            instruments_id_plot,
+            measurement_points_to_exclude,
+            instruments_to_ignore)
+
+        if isinstance(multipactor_bands, MultipactorBands):
+            multipactor_bands = [multipactor_bands
+                                 for _ in instruments_to_plot]
+
+        instrument_types = list(types(instruments_to_plot))
+        fig, instrument_class_axes = plot.create_fig(
+            str(self),
+            instrument_types,
+            xlabel="Measurement index",
+            **fig_kw
+        )
+        axe = [axe for axe in instrument_class_axes.values()][0]
+
+        zipper = zip(instruments_to_plot, multipactor_bands, strict=True)
+        for instrument, mp_bands in zipper:
+            lower_values, upper_values = instrument.values_at_barriers(
+                mp_bands)
+            lower_values.plot(ax=axe, kind='line', drawstyle='steps-post')
+            upper_values.plot(ax=axe, kind='line', drawstyle='steps-post')
+        axe.grid(True)
+        plot.finish_fig(fig, instrument_class_axes.values(), png_path)
+        return fig, axe
 
     def data_for_somersalo(self,
                            multipactor_measured_at: IMeasurementPoint | str,

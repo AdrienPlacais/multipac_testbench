@@ -61,6 +61,7 @@ class Instrument(ABC):
         self._post_treaters: list[Callable[[np.ndarray], np.ndarray]] = []
 
         self.ydata_at_multipacting_barrier = pd.DataFrame()
+        self.multipactor_bands: MultipactorBands
 
     def __str__(self) -> str:
         """Give concise information on instrument."""
@@ -261,18 +262,29 @@ class Instrument(ABC):
         assert isinstance(upper_barrier_idx, list)
         name_of_detector = multipactor_bands.detector_instrument_name
 
-        label = self.raw_data.columns + f" according to {name_of_detector}"
-        lower_values = pd.DataFrame(
-            data=self.ydata[lower_barrier_idx],
-            index=lower_barrier_idx,
-            columns="Lower barrier " + label,
-        )
+        match (self.raw_data):
+            case pd.Series():
+                label = f"{self} according to {name_of_detector}"
+            case pd.DataFrame() as df:
+                label = df.columns + f" according to {name_of_detector}"
+            case _:
+                raise TypeError
 
-        upper_values = pd.DataFrame(
-            data=self.ydata[upper_barrier_idx],
-            index=upper_barrier_idx,
-            columns="Upper barrier " + label,
-        )
+        lower_dict = {f"Lower barrier {label}": self.ydata[lower_barrier_idx]}
+        lower_values = pd.DataFrame(lower_dict, index=lower_barrier_idx)
+        # lower_values = pd.DataFrame(
+            # data=self.ydata[lower_barrier_idx],
+            # index=lower_barrier_idx,
+            # columns="Lower barrier " + label,
+        # )
+
+        upper_dict = {f"Lower barrier {label}": self.ydata[upper_barrier_idx]}
+        upper_values = pd.DataFrame(upper_dict, index=upper_barrier_idx)
+        # upper_values = pd.DataFrame(
+            # data=self.ydata[upper_barrier_idx],
+            # index=upper_barrier_idx,
+            # columns="Upper barrier " + label,
+        # )
         self.ydata_at_multipacting_barrier = \
             pd.concat([self.ydata_at_multipacting_barrier,
                        lower_values,

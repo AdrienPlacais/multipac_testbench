@@ -120,11 +120,13 @@ class IMeasurementPoint(ABC):
         instrument = self.get_instrument(instrument_class)
         if instrument is None:
             return
-        self.multipactor_bands = MultipactorBands.from_ydata(
+        multipactor_bands = MultipactorBands.from_ydata(
             multipac_detector,
             instrument.ydata,
             instrument.name,
         )
+        self.multipactor_bands = multipactor_bands
+        instrument.multipactor_bands = multipactor_bands
 
     def plot_instrument_vs_time(self,
                                 instrument_class_axes: dict[ABCMeta, Axes],
@@ -230,7 +232,7 @@ class IMeasurementPoint(ABC):
             'color': self._color,
             'length_includes_head': True,
             'width': typical_width,
-            'head_length': typical_length,
-            'head_width': typical_width * 100.,
+            'head_length': 0.2,# typical_length,
+            'head_width': 0.1, #typical_width * 100.,
         }
         return arrow_kw
