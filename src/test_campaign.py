@@ -227,20 +227,19 @@ class TestCampaign(list):
             self,
             *args,
             out_folder: str | None = None,
-            num: int = 100,
+            iternum: int = 100,
             **kwargs
-            ) -> list[animation.FuncAnimation]:
+    ) -> list[animation.FuncAnimation]:
         """Call all :meth:`.MultipactorTest.animate_instruments_vs_position`"""
         animations = []
-        for test in self:
+        for i, test in enumerate(self):
             gif_path = None
             if out_folder is not None:
                 gif_path = test.output_filepath(out_folder, ".gif")
             animation = test.animate_instruments_vs_position(*args,
                                                              gif_path=gif_path,
-                                                             num=num,
+                                                             num=iternum + i,
                                                              **kwargs)
-            num += 1
             animations.append(animation)
         return animations
 
@@ -248,3 +247,21 @@ class TestCampaign(list):
         """Call all :meth:`.MultipactorTest.reconstruct_voltage_along_line`."""
         for test in self:
             test.reconstruct_voltage_along_line(*args, **kwargs)
+
+    def plot_instruments_vs_time(self,
+                                 *args,
+                                 out_folder: str | None = None,
+                                 iternum: int = 50,
+                                 **kwargs) -> None:
+        """Call all :meth:`.MultipactorTest.plot_instruments_vs_time`."""
+        for i, test in enumerate(self):
+            png_path = None
+            if out_folder is not None:
+                png_path = test.output_filepath(out_folder, ".png")
+            _ = test.plot_instruments_vs_time(
+                *args,
+                num=iternum + i,
+                png_path=png_path,
+                **kwargs
+            )
+        return
