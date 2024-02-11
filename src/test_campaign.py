@@ -2,20 +2,19 @@
 # -*- coding: utf-8 -*-
 """Define an object to store data from several :class:`.MultipactorTest`."""
 from abc import ABCMeta
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Self
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib import animation
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
 from multipac_testbench.src.multipactor_test import MultipactorTest
 from multipac_testbench.src.theoretical.somersalo import (
-    plot_somersalo_analytical,
-    plot_somersalo_measured,
-    somersalo_base_plot)
+    plot_somersalo_analytical, plot_somersalo_measured, somersalo_base_plot)
 from multipac_testbench.src.theoretical.susceptibility import \
     measured_to_susceptibility_coordinates
 
@@ -223,3 +222,29 @@ class TestCampaign(list):
         ax1.set_yscale('log', base=10)
         ax1.grid(True)
         return fig, ax1
+
+    def animate_instruments_vs_position(
+            self,
+            *args,
+            out_folder: str | None = None,
+            num: int = 100,
+            **kwargs
+            ) -> list[animation.FuncAnimation]:
+        """Call all :meth:`.MultipactorTest.animate_instruments_vs_position`"""
+        animations = []
+        for test in self:
+            gif_path = None
+            if out_folder is not None:
+                gif_path = test.output_filepath(out_folder, ".gif")
+            animation = test.animate_instruments_vs_position(*args,
+                                                             gif_path=gif_path,
+                                                             num=num,
+                                                             **kwargs)
+            num += 1
+            animations.append(animation)
+        return animations
+
+    def reconstruct_voltage_along_line(self, *args, **kwargs) -> None:
+        """Call all :meth:`.MultipactorTest.reconstruct_voltage_along_line`."""
+        for test in self:
+            test.reconstruct_voltage_along_line(*args, **kwargs)
