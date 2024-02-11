@@ -857,7 +857,7 @@ class MultipactorTest:
 
     def plot_instruments_y_vs_instrument_x(
             self,
-            instrument_id_x: ABCMeta | str | Instrument,
+            instrument_ids_x: Sequence[ABCMeta] | Sequence[str] | Sequence[Instrument],
             instrument_ids_y: Sequence[ABCMeta] | Sequence[str] | Sequence[Instrument],
             measurement_points_to_exclude: Sequence[IMeasurementPoint
                                                     | str] = (),
@@ -865,27 +865,36 @@ class MultipactorTest:
             tail: int = -1,
             fig_kw: dict | None = None,
     ) -> Axes:
-        """Plot data measured by ``instrument_a`` vs ``instrument_b``."""
-        instrument_x = self.get_instrument(instrument_id_x,
-                                           measurement_points_to_exclude,
-                                           instruments_to_ignore)
-        assert isinstance(instrument_x, Instrument)
-
+        """Plot data measured by ``instrument_y`` vs ``instrument_x``."""
         instruments_y = self.get_instruments(instrument_ids_y,
                                              measurement_points_to_exclude,
                                              instruments_to_ignore)
+
+        instruments_x = self.get_instruments(instrument_ids_x,
+                                             measurement_points_to_exclude,
+                                             instruments_to_ignore)
+        if len(instruments_x) == 1:
+            instruments_x = [instruments_x[0] for _ in instruments_y]
+
+        zipper = zip(instruments_x, instruments_y, strict=True)
+
         if fig_kw is None:
             fig_kw = {}
 
-        dict_to_plot = {instrument.name: instrument.ydata_as_pd
-                        for instrument in [instrument_x] + instruments_y}
-        df_to_plot = pd.DataFrame(dict_to_plot)
+        axes = None
+        for x, y in zipper:
+            dict_to_plot = {x.name: x.ydata_as_pd,
+                            y.name: y.ydata_as_pd}
 
-        axes = df_to_plot.tail(tail).plot(x=0,
-                                          xlabel=instrument_x.ylabel(),
-                                          # ylabel=instrument_y.ylabel(),
-                                          )
-        axes.grid(True)
+            df_to_plot = pd.DataFrame(dict_to_plot)
+
+            axes = df_to_plot.tail(tail).plot(x=0,
+                                              xlabel=x.ylabel(),
+                                              ylabel=y.ylabel(),
+                                              ax=axes,
+                                              grid=True,
+                                              )
+        assert axes is not None
         return axes
 
     def output_filepath(self, out_folder: str, extension: str) -> Path:
