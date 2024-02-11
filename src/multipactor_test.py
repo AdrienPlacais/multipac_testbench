@@ -315,7 +315,7 @@ class MultipactorTest:
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
         png_path: Path | None = None,
         **fig_kw,
-    ) -> tuple[Figure, Axes]:
+    ) -> tuple[Figure, list[Axes]]:
         """Plot the data measured by instruments.
 
         This plot results in important amount of points. It becomes interesting
