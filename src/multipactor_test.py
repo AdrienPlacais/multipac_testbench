@@ -646,7 +646,7 @@ class MultipactorTest:
             self,
             name: str,
             probes_to_ignore: Sequence[str | FieldProbe],
-    ) -> Reconstructed:
+    ) -> None:
         """Reconstruct the voltage profile from the e field probes."""
         e_field_probes = self._instruments_by_class(FieldProbe,
                                                     self.pick_ups,
@@ -665,7 +665,7 @@ class MultipactorTest:
 
         self.global_diagnostics.add_instrument(reconstructed)
 
-        return reconstructed
+        return
 
     def plot_multipactor_limits(
             self,
