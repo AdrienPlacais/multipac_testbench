@@ -583,7 +583,7 @@ class MultipactorTest:
 
     def _prepare_animation_fig(
         self,
-        instruments_to_plot: tuple[ABCMeta, ...],
+        instruments_to_plot: Sequence[ABCMeta],
         measurement_points_to_exclude: tuple[str, ...] = (),
         instruments_to_ignore_for_limits: tuple[str, ...] = (),
         instruments_to_ignore: Sequence[Instrument | str] = (),
