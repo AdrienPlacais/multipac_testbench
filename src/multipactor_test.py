@@ -146,7 +146,7 @@ class MultipactorTest:
         raw: bool = False,
         plot_multipactor: bool = False,
         **fig_kw,
-    ) -> tuple[Figure, Axes]:
+    ) -> tuple[Figure, list[Axes]]:
         """Plot signals measured by ``instruments_to_plot``.
 
         .. todo::
