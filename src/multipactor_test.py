@@ -745,8 +745,10 @@ class MultipactorTest:
         )
 
         axe = instrument_class_axes[instrument_class_to_plot]
+
         lower_values.plot(ax=axe, kind='line', drawstyle='steps-post')
         upper_values.plot(ax=axe, kind='line', drawstyle='steps-post')
+
         axe.grid(True)
         plot.finish_fig(fig, instrument_class_axes.values(), png_path)
         return fig, [axes for axes in instrument_class_axes.values()]
@@ -788,7 +790,12 @@ class MultipactorTest:
             lower_values, upper_values = instrument.values_at_barriers(
                 mp_bands)
             lower_values.plot(ax=axe, kind='line', drawstyle='steps-post')
-            upper_values.plot(ax=axe, kind='line', drawstyle='steps-post')
+            color = axe.get_lines()[-1].get_color()
+            upper_values.plot(ax=axe,
+                              kind='line',
+                              drawstyle='steps-post',
+                              color=color,
+                              ls='--')
         axe.grid(True)
         plot.finish_fig(fig, instrument_class_axes.values(), png_path)
         return fig, axe
