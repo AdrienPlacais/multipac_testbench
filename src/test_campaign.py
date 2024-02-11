@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Define an object to store data from several :class:`.MultipactorTest`."""
+"""Define an object to store data from several :class:`.MultipactorTest`.
+
+.. todo::
+    Implement the `plot_barriers_vs_swr` and `plot_barriers_vs_frequency`
+    methods.
+
+"""
 from abc import ABCMeta
 from collections.abc import Callable, Sequence
 from pathlib import Path
@@ -301,3 +307,11 @@ class TestCampaign(list):
                 **kwargs
             )
         return
+
+    def plot_barriers_vs_frequency(self) -> None:
+        """Plot evolution of mp barriers with frequency."""
+        raise NotImplementedError
+
+    def plot_barriers_vs_swr(self) -> None:
+        """Plot evolution of mp barriers with SWR."""
+        raise NotImplementedError
