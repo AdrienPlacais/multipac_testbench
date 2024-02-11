@@ -13,6 +13,7 @@
     determine the 3sigma multipactor limits?
 
 """
+import itertools
 from abc import ABCMeta
 from collections.abc import Callable
 from pathlib import Path
@@ -36,7 +37,7 @@ from multipac_testbench.src.measurement_point.factory import \
 from multipac_testbench.src.measurement_point.i_measurement_point import \
     IMeasurementPoint
 from multipac_testbench.src.util import plot
-import itertools
+from multipac_testbench.src.util.helper import output_filepath
 
 
 class MultipactorTest:
@@ -67,6 +68,7 @@ class MultipactorTest:
             Delimiter between two columns in ``filepath``.
 
         """
+        self.filepath = filepath
         df_data = pd.read_csv(filepath, sep=sep, index_col="Sample index")
         self._n_points = len(df_data)
 
@@ -834,6 +836,15 @@ class MultipactorTest:
                                           )
         axes.grid(True)
         return axes
+
+    def output_filepath(self, out_folder: str, extension: str) -> Path:
+        """Create consistent path for output files."""
+        filepath = output_filepath(self.filepath,
+                                   self.swr,
+                                   self.freq_mhz,
+                                   out_folder,
+                                   extension)
+        return filepath
 
 
 def types(my_list: Sequence) -> set[type]:
