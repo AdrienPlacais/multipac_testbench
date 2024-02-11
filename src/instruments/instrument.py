@@ -245,6 +245,9 @@ class Instrument(ABC):
             ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Get measured data at lower and upper multipactor barriers.
 
+        .. todo::
+            Dirty patch to select 1d/2d data
+
         Parameters
         ----------
         multipactor_bands : MultipactorBands
@@ -265,26 +268,33 @@ class Instrument(ABC):
         match (self.raw_data):
             case pd.Series():
                 label = f"{self} according to {name_of_detector}"
+
+                lower_dict = {
+                    f"Lower barrier {label}": self.ydata[lower_barrier_idx]}
+                lower_values = pd.DataFrame(lower_dict,
+                                            index=lower_barrier_idx)
+
+                upper_dict = {
+                    f"Lower barrier {label}": self.ydata[upper_barrier_idx]}
+                upper_values = pd.DataFrame(upper_dict,
+                                            index=upper_barrier_idx)
+
             case pd.DataFrame() as df:
                 label = df.columns + f" according to {name_of_detector}"
+                lower_values = pd.DataFrame(
+                    data=self.ydata[lower_barrier_idx],
+                    index=lower_barrier_idx,
+                    columns="Lower barrier " + label,
+                )
+
+                upper_values = pd.DataFrame(
+                    data=self.ydata[upper_barrier_idx],
+                    index=upper_barrier_idx,
+                    columns="Upper barrier " + label,
+                )
             case _:
                 raise TypeError
 
-        lower_dict = {f"Lower barrier {label}": self.ydata[lower_barrier_idx]}
-        lower_values = pd.DataFrame(lower_dict, index=lower_barrier_idx)
-        # lower_values = pd.DataFrame(
-            # data=self.ydata[lower_barrier_idx],
-            # index=lower_barrier_idx,
-            # columns="Lower barrier " + label,
-        # )
-
-        upper_dict = {f"Lower barrier {label}": self.ydata[upper_barrier_idx]}
-        upper_values = pd.DataFrame(upper_dict, index=upper_barrier_idx)
-        # upper_values = pd.DataFrame(
-            # data=self.ydata[upper_barrier_idx],
-            # index=upper_barrier_idx,
-            # columns="Upper barrier " + label,
-        # )
         self.ydata_at_multipacting_barrier = \
             pd.concat([self.ydata_at_multipacting_barrier,
                        lower_values,
