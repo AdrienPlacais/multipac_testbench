@@ -251,7 +251,7 @@ class TestCampaign(list):
     def plot_instruments_vs_time(self,
                                  *args,
                                  out_folder: str | None = None,
-                                 iternum: int = 50,
+                                 iternum: int = 300,
                                  **kwargs) -> None:
         """Call all :meth:`.MultipactorTest.plot_instruments_vs_time`."""
         for i, test in enumerate(self):
@@ -259,6 +259,24 @@ class TestCampaign(list):
             if out_folder is not None:
                 png_path = test.output_filepath(out_folder, ".png")
             _ = test.plot_instruments_vs_time(
+                *args,
+                num=iternum + i,
+                png_path=png_path,
+                **kwargs
+            )
+        return
+
+    def scatter_instruments_data(self,
+                                 *args,
+                                 out_folder: str | None = None,
+                                 iternum: int = 200,
+                                 **kwargs) -> None:
+        """Call all :meth:`.MultipactorTest.scatter_instruments_data`."""
+        for i, test in enumerate(self):
+            png_path = None
+            if out_folder is not None:
+                png_path = test.output_filepath(out_folder, ".png")
+            _ = test.scatter_instruments_data(
                 *args,
                 num=iternum + i,
                 png_path=png_path,
