@@ -52,9 +52,10 @@ class FieldProbe(IElectricField):
         return r"Measured voltage [V]"
 
     def _patch_data(self, g_probe_in_labview: float = 1.) -> None:
-        """Correct when ``g_probe`` in LabVIEWER is wrong."""
+        """Correct  ``raw_data`` when ``g_probe`` in LabVIEWER is wrong."""
         assert hasattr(self, '_a_rack')
         assert hasattr(self, '_b_rack')
+        assert self._g_probe is not None
         fun1 = partial(v_coax_to_v_acquisition,
                        g_probe=g_probe_in_labview,
                        a_rack=self._a_rack,
@@ -65,8 +66,8 @@ class FieldProbe(IElectricField):
                        a_rack=self._a_rack,
                        b_rack=self._b_rack,
                        z_0=50.)
-        self.add_post_treater(fun1)
-        self.add_post_treater(fun2)
+        self.raw_data = fun1(self.raw_data)
+        self.raw_data = fun2(self.raw_data)
 
     def _load_calibration_file(self,
                                calibration_file: Path,
