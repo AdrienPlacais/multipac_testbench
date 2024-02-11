@@ -283,3 +283,21 @@ class TestCampaign(list):
                 **kwargs
             )
         return
+
+    def plot_instruments_y_vs_instrument_x(self,
+                                           *args,
+                                           out_folder: str | None = None,
+                                           iternum: int = 250,
+                                           **kwargs) -> None:
+        """Call :meth:`.MultipactorTest.plot_instruments_y_vs_instrument_x`."""
+        for i, test in enumerate(self):
+            png_path = None
+            if out_folder is not None:
+                png_path = test.output_filepath(out_folder, ".png")
+            _ = test.plot_instruments_y_vs_instrument_x(
+                *args,
+                num=iternum + i,
+                png_path=png_path,
+                **kwargs
+            )
+        return
