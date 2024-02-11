@@ -104,7 +104,7 @@ def _remove_isolated(multipactor: np.ndarray,
             # multipactor at end of window
             continue
 
-        if (~window).any():
+        if not window.any():
             # not a single multipactor point
             continue
 
