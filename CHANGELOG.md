@@ -10,6 +10,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `MultipactorTest` has an `output_filepath` method for consistent output file naming.
+- `MultipactorTest` has method `plot_data_at_multipactor_thresholds`, may replace `plot_multipactor_limits`
+- New `TestCampaign` methods, calling their `MultipactorTest` counterpart recursively:
+  - `reconstruct_voltage_along_line`
+  - `animate_instruments_vs_position`
+  - `plot_instruments_vs_time`
+  - `scatter_instruments_data`
+  - `plot_multipactor_limits`
+  - `plot_data_at_multipactor_thresholds`
+- You can now create `MultipactorBands` objects from several other `MultipactorBands` objects. Typical use cases:
+ - At a pick-up with a `Penning` and a `CurrentProbe`, merge their multipactor bands.
+ - Know when multipactor happens somewhere in the testbench, by merging all the detected multipactor bands.
+
+### Modified
+
+- The `FieldProbe._patch_data` method modifies its `raw_data` instead of adding a `post_treater`, so that we can plot 'raw' field measurements that make any sense.
+- `MultipactorTest.susceptiblity_plot` is `MultipactorTest.susceptiblity_chart` 
+- `MultipactorTest.somersalo` is `MultipactorTest.somersalo_chart` 
+- The `detect_multipactor` methods now return a list of `MultipactorBands` objects. Give it to `plot_multipactor_limits`, `plot_data_at_multipactor_thresholds`, `somersalo_chart`, `susceptiblity_chart` methods to explicitely link the plotted instruments to the multipacting bands.
+
+### Deprecated
+
+- The `multipactor_bands` attributes of `Instrument` and `IMeasurementPoint` will be removed. It will be mandatory to explicitely pass this argument to following methods:
+ - `plot_multipactor_limits`
+ - `somersalo_chart`
+ - `susceptibility_chart`
 
 ## [1.3.3] 2024.02.10
 
