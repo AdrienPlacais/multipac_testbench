@@ -807,11 +807,21 @@ class MultipactorTest:
             multipactor_bands: MultipactorBands | Sequence[MultipactorBands] | None = None,
             measurement_points_to_exclude: Sequence[str | IMeasurementPoint] = (),
             ) -> MultipactorBands | Sequence[MultipactorBands]:
-        """Get the most consistent :class:`.MultipactorBands`."""
+        """Get the most consistent :class:`.MultipactorBands`.
+
+        .. deprecated:: 1.4.0
+            Once ``multipactor_measured_at`` and
+            ``measurement_points_to_exclude`` are completely removed, this
+            function will always return ``multipactor_bands`` so it can be
+            removed.
+
+
+        """
         if multipactor_bands is not None:
             if multipactor_measured_at is not None:
                 warnings.warn("multipactor_measured_at key is now superfluous",
                               DeprecationWarning)
+                print(f"You gave me {multipactor_measured_at = }")
             return multipactor_bands
 
         warnings.warn("In the future, it will be mandatory to pass in "
@@ -873,13 +883,22 @@ class MultipactorTest:
         return fig, axe
 
     def data_for_somersalo(self,
-                           multipactor_measured_at: IMeasurementPoint | str,
+                           multipactor_measured_at: IMeasurementPoint | str | None = None,
+                           multipactor_bands: MultipactorBands | None = None,
                            ) -> dict[str, float | list[float]]:
-        """Get the data required to create the Somersalo plot."""
-        if isinstance(multipactor_measured_at, str):
-            multipactor_measured_at = self.get_measurement_point(
-                multipactor_measured_at)
-        multipactor_bands = multipactor_measured_at.multipactor_bands
+        """Get the data required to create the Somersalo plot.
+
+        .. todo::
+            Allow representation of several pick-ups.
+
+        """
+        # if isinstance(multipactor_measured_at, str):
+            # multipactor_measured_at = self.get_measurement_point(
+                # multipactor_measured_at)
+        # multipactor_bands = multipactor_measured_at.multipactor_bands
+        multipactor_bands = self._get_proper_multipactor_bands(
+            multipactor_measured_at, multipactor_bands)
+        assert isinstance(multipactor_bands, MultipactorBands)
 
         powers = self.get_instrument(Powers)
         assert powers is not None
@@ -900,14 +919,23 @@ class MultipactorTest:
 
     def data_for_susceptibility(
             self,
-            multipactor_measured_at: IMeasurementPoint | str,
             electric_field_at: IMeasurementPoint | str,
+            multipactor_measured_at: IMeasurementPoint | str | None = None,
+            multipactor_bands: MultipactorBands | None = None,
     ) -> dict[str, float | list[float]]:
-        """Get the data required to create the susceptibility plot."""
-        if isinstance(multipactor_measured_at, str):
-            multipactor_measured_at = self.get_measurement_point(
-                multipactor_measured_at)
-        multipactor_bands = multipactor_measured_at.multipactor_bands
+        """Get the data required to create the susceptibility plot.
+
+        .. todo::
+            Allow representation of several pick-ups.
+
+        """
+        # if isinstance(multipactor_measured_at, str):
+            # multipactor_measured_at = self.get_measurement_point(
+                # multipactor_measured_at)
+        # multipactor_bands = multipactor_measured_at.multipactor_bands
+        multipactor_bands = self._get_proper_multipactor_bands(
+            multipactor_measured_at, multipactor_bands)
+        assert isinstance(multipactor_bands, MultipactorBands)
 
         if isinstance(electric_field_at, str):
             electric_field_at = self.get_measurement_point(
@@ -931,8 +959,7 @@ class MultipactorTest:
             self,
             instrument_ids_x: Sequence[ABCMeta] | Sequence[str] | Sequence[Instrument],
             instrument_ids_y: Sequence[ABCMeta] | Sequence[str] | Sequence[Instrument],
-            measurement_points_to_exclude: Sequence[IMeasurementPoint
-                                                    | str] = (),
+            measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
             instruments_to_ignore: Sequence[Instrument | str] = (),
             tail: int = -1,
             fig_kw: dict | None = None,

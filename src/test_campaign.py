@@ -88,7 +88,8 @@ class TestCampaign(list):
             instrument_class: ABCMeta,
             *args,
             power_is_growing_kw: dict[str, int | float] | None = None,
-            measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
+            measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (
+            ),
             **kwargs,
     ) -> list[list[MultipactorBands]]:
         """Create the :class:`.MultipactorBands` objects.
@@ -130,7 +131,8 @@ class TestCampaign(list):
         return nested_multipactor_bands
 
     def somersalo(self,
-                  multipactor_measured_at: str,
+                  multipactor_measured_at: str | None = None,
+                  multipactor_bands: Sequence[MultipactorBands] | None = None,
                   orders_one_point: tuple[int, ...] = (1, 2, 3, 4, 5, 6, 7),
                   orders_two_point: tuple[int, ...] = (1, ),
                   **fig_kw) -> tuple[Figure, Axes, Axes]:
@@ -146,6 +148,9 @@ class TestCampaign(list):
             Name of the :class:`.IMeasurementPoint` where the multipactor is
             detected. It must have a :class:`.MultipactorBands` attribute,
             which is set by the :meth:`TestCampaign.detect_multipactor` method.
+        multipactor_bands : Sequence[MultipactorBands]
+            An object holding the multipactor information for every
+            :class:`.MultipactorTest` in ``self``.
         orders_one_point : tuple[int, ...], optional
             The multipactor orders to plot for one point multipactor. The
             default is orders 1 to 8, as in Somersalo's plot.
@@ -185,15 +190,19 @@ class TestCampaign(list):
         for kwargs in (one_point_kw, two_point_kw):
             plot_somersalo_analytical(log_power=log_power, **kwargs)
 
-        self._add_somersalo_measured(multipactor_measured_at,
-                                     ax1, ax2)
+        self._add_somersalo_measured(
+            ax1, ax2,
+            multipactor_measured_at=multipactor_measured_at,
+            multipactor_bands=multipactor_bands,
+        )
 
         ax1.grid(True)
         return fig, ax1, ax2
 
     def _add_somersalo_measured(self,
-                                multipactor_measured_at: str,
                                 ax1: Axes, ax2: Axes,
+                                multipactor_measured_at: str | None = None,
+                                multipactor_bands: Sequence[MultipactorBands] | None = None,
                                 **plot_kw
                                 ) -> None:
         """Put the measured multipacting limits on Somersalo plot.
@@ -205,26 +214,44 @@ class TestCampaign(list):
             cycle, or every power that led to multipacting during whole test.
 
         """
-        for mp_test in self:
+        if multipactor_bands is None:
+            multipactor_bands = [None for _ in self]
+
+        zipper = zip(self, multipactor_bands, strict=True)
+        for mp_test, mp_bands in zipper:
+            if len(mp_bands) > 1:
+                raise NotImplementedError(f"{mp_bands = }, but only one pair "
+                                          "power--mp band is allowed")
             somersalo_data = mp_test.data_for_somersalo(
-                multipactor_measured_at)
+                multipactor_measured_at,
+                mp_bands[0])
             plot_somersalo_measured(mp_test_name=str(mp_test),
                                     somersalo_data=somersalo_data,
                                     ax1=ax1, ax2=ax2,
                                     **plot_kw)
 
     def susceptibility_plot(self,
-                            multipactor_measured_at: str,
                             electric_field_at: str,
+                            multipactor_measured_at: str | None = None,
+                            multipactor_bands: Sequence[MultipactorBands] | None = None,
                             fig_kw: dict | None = None,
                             ax_kw: dict | None = None) -> tuple[Figure, Axes]:
         """Create a scusceptiblity chart."""
         fig, ax1 = self._susceptibility_base_plot(fig_kw, ax_kw)
 
-        for mp_test in self:
+        if multipactor_bands is None:
+            multipactor_bands = [None for _ in self]
+        zipper = zip(self, multipactor_bands, strict=True)
+
+        for mp_test, mp_bands in zipper:
+            if len(mp_bands) > 1:
+                raise NotImplementedError(f"{mp_bands = }, but only one pair "
+                                          "field probe--mp band is allowed")
             susceptibility_data = mp_test.data_for_susceptibility(
-                multipactor_measured_at,
-                electric_field_at)
+                electric_field_at,
+                multipactor_measured_at=multipactor_measured_at,
+                multipactor_bands=mp_bands[0],
+            )
             points = measured_to_susceptibility_coordinates(
                 **susceptibility_data)
             ax1.scatter(points[:, 0], points[:, 1], label=str(mp_test))
