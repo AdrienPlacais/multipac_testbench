@@ -7,7 +7,7 @@ from typing import Callable, Self
 
 import numpy as np
 import pandas as pd
-from matplotlib.axes._axes import Axes
+from matplotlib.axes import Axes
 from matplotlib.container import StemContainer
 from matplotlib.lines import Line2D
 

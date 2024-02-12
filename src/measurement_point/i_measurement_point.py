@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Define an object to keep several related measurements."""
+import warnings
 from abc import ABC, ABCMeta
 from typing import Any, Callable, Sequence
 
-from matplotlib.axes._axes import Axes
 import numpy as np
 import pandas as pd
-
+from matplotlib.axes import Axes
 from multipac_testbench.src.instruments.factory import InstrumentFactory
 from multipac_testbench.src.instruments.instrument import Instrument
 from multipac_testbench.src.multipactor_band.multipactor_bands import \
@@ -162,10 +162,12 @@ class IMeasurementPoint(ABC):
                 if self._color is None:
                     self._color = line1.get_color()
 
-    def _add_multipactor_vs_time(self,
-                                 axe: Axes,
-                                 plotted_instrument_class: ABCMeta,
-                                 ) -> None:
+    def _add_multipactor_vs_time(
+            self,
+            axe: Axes,
+            plotted_instrument_class: ABCMeta,
+            multipactor_bands: MultipactorBands | None = None
+            ) -> None:
         """Add arrows to display multipactor.
 
         .. todo::
@@ -187,7 +189,13 @@ class IMeasurementPoint(ABC):
         vline_kw = self._typical_vline_keywords()
         arrow_kw = self._typical_arrow_keywords(plotted_instrument)
 
-        for multipactor_band in self.multipactor_bands:
+        if multipactor_bands is None:
+            warnings.warn("In the future, it will be mandatory to pass in "
+                          "the desired MultipactorBands object.",
+                          DeprecationWarning)
+            multipactor_bands = self.multipactor_bands
+
+        for multipactor_band in multipactor_bands:
             delta_x = multipactor_band[-1] - multipactor_band[0]
             axe.arrow(multipactor_band[0],
                       y_pos_of_multipactor_zone,
@@ -202,19 +210,25 @@ class IMeasurementPoint(ABC):
             axe.axvline(multipactor_band[0], **vline_kw)
             axe.axvline(multipactor_band[-1], **vline_kw)
 
-    def scatter_instruments_data(self,
-                                 instrument_class_axes: dict[ABCMeta, Axes],
-                                 xdata: float,
-                                 ) -> None:
+    def scatter_instruments_data(
+            self,
+            instrument_class_axes: dict[ABCMeta, Axes],
+            xdata: float,
+            multipactor_bands: MultipactorBands | None = None
+            ) -> None:
         """Scatter data measured by desired instruments."""
+        if multipactor_bands is None:
+            warnings.warn("In the future, it will be mandatory to pass in "
+                          "the desired MultipactorBands object.",
+                          DeprecationWarning)
+            multipactor_bands = self.multipactor_bands
+
         for instrument_class, axes in instrument_class_axes.items():
             instrument = self.get_instrument(instrument_class)
             if instrument is None:
                 continue
 
-            instrument.scatter_data(axes,
-                                    self.multipactor_bands.multipactor,
-                                    xdata)
+            instrument.scatter_data(axes, multipactor_bands.multipactor, xdata)
 
     def _typical_vline_keywords(self) -> dict[str, Any]:
         """Set consistent plot properties."""

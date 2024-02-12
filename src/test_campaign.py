@@ -7,6 +7,7 @@
     methods.
 
 """
+import warnings
 from abc import ABCMeta
 from collections.abc import Callable, Sequence
 from pathlib import Path
@@ -17,6 +18,8 @@ import numpy as np
 from matplotlib import animation
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+from multipac_testbench.src.measurement_point.i_measurement_point import \
+    IMeasurementPoint
 from multipac_testbench.src.multipactor_band.multipactor_bands import \
     MultipactorBands
 from multipac_testbench.src.multipactor_test import MultipactorTest
@@ -83,7 +86,10 @@ class TestCampaign(list):
             self,
             multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
             instrument_class: ABCMeta,
+            *args,
             power_is_growing_kw: dict[str, int | float] | None = None,
+            measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
+            **kwargs,
     ) -> list[list[MultipactorBands]]:
         """Create the :class:`.MultipactorBands` objects.
 
@@ -99,6 +105,9 @@ class TestCampaign(list):
         power_is_growing_kw : dict[str, int | float] | None, optional
             Keyword arguments passed to the function that determines when power
             is increasing, when it is decreasing. The default is None.
+        measurement_points_to_exclude : Sequence[IMeasurementPoint | str] = ()
+            :class:`.IMeasurementPoint` where you do not want to know if there
+            is multipacting.
 
         Returns
         -------
@@ -110,9 +119,13 @@ class TestCampaign(list):
 
         """
         nested_multipactor_bands = [
-            test.detect_multipactor(multipac_detector,
-                                    instrument_class,
-                                    power_is_growing_kw)
+            test.detect_multipactor(
+                multipac_detector=multipac_detector,
+                instrument_class=instrument_class,
+                *args,
+                power_is_growing_kw=power_is_growing_kw,
+                measurement_points_to_exclude=measurement_points_to_exclude,
+                **kwargs)
             for test in self]
         return nested_multipactor_bands
 
@@ -327,18 +340,85 @@ class TestCampaign(list):
         """Plot evolution of mp barriers with SWR."""
         raise NotImplementedError
 
-    def plot_multipactor_limits(self,
-                                *args,
-                                out_folder: str | None = None,
-                                iternum: int = 300,
-                                **kwargs) -> None:
-        """Call :meth:`.MultipactorTest.plot_multipactor_limits`."""
-        for i, test in enumerate(self):
+    def plot_multipactor_limits(
+            self,
+            *args,
+            all_multipactor_bands: list[MultipactorBands] | None = None,
+            out_folder: str | None = None,
+            iternum: int = 300,
+            **kwargs) -> None:
+        """Call :meth:`.MultipactorTest.plot_multipactor_limits`.
+
+        .. deprecated:: 1.4.0
+            Use TestCampaign.plot_data_at_multipactor_thresholds instead.
+
+        """
+        match (all_multipactor_bands):
+            case MultipactorBands() as same_multipactor_bands_for_everyone:
+                multipactor_bands = [same_multipactor_bands_for_everyone
+                                     for _ in self]
+            case list() as one_multipactor_bands_per_simulation:
+                assert len(one_multipactor_bands_per_simulation) == len(self)
+                multipactor_bands = one_multipactor_bands_per_simulation
+            case None:
+                warnings.warn("In the future, it will be mandatory to pass in "
+                              "the desired MultipactorBands object.",
+                              DeprecationWarning)
+                multipactor_bands = [None for _ in self]
+            case _:
+                raise IOError(f"{all_multipactor_bands = } not handled.")
+
+        zipper = zip(self, multipactor_bands, strict=True)
+        for i, (test, mp_band) in enumerate(zipper):
             png_path = None
             if out_folder is not None:
                 png_path = test.output_filepath(out_folder, ".png")
             _ = test.plot_multipactor_limits(
                 *args,
+                multipactor_bands=mp_band,
+                num=iternum + i,
+                png_path=png_path,
+                **kwargs
+            )
+        return
+
+    def plot_data_at_multipactor_thresholds(
+            self,
+            *args,
+            seq_multipactor_bands: Sequence[Sequence[MultipactorBands]] | Sequence[MultipactorBands],
+            out_folder: str | None = None,
+            iternum: int = 350,
+            **kwargs) -> None:
+        """Call :meth:`.MultipactorTest.plot_data_at_multipactor_thresholds`.
+
+        Parameters
+        ----------
+        args :
+            Arguments passed to
+            :meth:`.MultipactorTest.plot_data_at_multipactor_thresholds`.
+        seq_multipactor_bands : Sequence[Sequence[MultipactorBands]] | \
+                Sequence[MultipactorBands]
+            :class:`.MultipactorBands` or lists of :class:`.MultipactorBands`
+            for every :class:`.MultipactorTest` in ``self``.
+        out_folder : str | None, optional
+            Where figures should be saved. The default is None, in which case
+            figures are not saved.
+        iternum : int, optional
+            First figure number. Iterated for every figure. The default is
+            ``350``.
+        kwargs :
+            Keyword arguments passed to
+            :meth:`MultipactorTest.plot_data_at_multipactor_thresholds`.
+
+        """
+        zipper = zip(self, seq_multipactor_bands, strict=True)
+        for i, (test, multipactor_bands) in enumerate(zipper):
+            png_path = None
+            if out_folder is not None:
+                png_path = test.output_filepath(out_folder, ".png")
+            _ = test.plot_data_at_multipactor_thresholds(
+                *args,
+                multipactor_bands=multipactor_bands,
                 num=iternum + i,
                 png_path=png_path,
                 **kwargs

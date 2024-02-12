@@ -18,6 +18,7 @@ from abc import ABCMeta
 from collections.abc import Callable
 from pathlib import Path
 from typing import Sequence
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -107,6 +108,7 @@ class MultipactorTest:
             multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
             instrument_class: ABCMeta,
             power_is_growing_kw: dict[str, int | float] | None = None,
+            measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
     ) -> list[MultipactorBands]:
         """Create the :class:`.MultipactorBands` objects.
 
@@ -132,8 +134,11 @@ class MultipactorTest:
 
         """
         powers = self.get_instrument(Powers)
+
         detected_multipactor_bands = []
-        for measurement_point in self.get_measurement_points():
+        measurement_points = self.get_measurement_points(
+            to_exclude=measurement_points_to_exclude)
+        for measurement_point in measurement_points:
             multipactor_bands = measurement_point.detect_multipactor(
                 multipac_detector,
                 instrument_class
@@ -215,10 +220,12 @@ class MultipactorTest:
         plot.finish_fig(fig, instrument_class_axes.values(), png_path)
         return fig, [axes for axes in instrument_class_axes.values()]
 
-    def _add_multipactor_vs_time(self,
-                                 measurement_point: IMeasurementPoint,
-                                 instrument_class_axes: dict[ABCMeta, Axes],
-                                 ) -> None:
+    def _add_multipactor_vs_time(
+        self,
+        measurement_point: IMeasurementPoint,
+        instrument_class_axes: dict[ABCMeta, Axes],
+        multipactor_bands: MultipactorBands | None = None,
+    ) -> None:
         """Show with arrows when multipactor happens.
 
         Parameters
@@ -229,12 +236,19 @@ class MultipactorTest:
             Links instrument class with the axes.
 
         """
-        if not hasattr(measurement_point, 'multipactor_bands'):
-            return
+        if multipactor_bands is None:
+            warnings.warn("In the future, it will be mandatory to pass in "
+                          "the desired MultipactorBands object.",
+                          DeprecationWarning)
+            if not hasattr(measurement_point, 'multipactor_bands'):
+                return
+            multipactor_bands = measurement_point.multipactor_bands
+
         for plotted_instrument_class, axe in instrument_class_axes.items():
             measurement_point._add_multipactor_vs_time(
                 axe,
-                plotted_instrument_class)
+                plotted_instrument_class,
+                multipactor_bands)
 
     def animate_instruments_vs_position(
             self,
@@ -687,6 +701,7 @@ class MultipactorTest:
                                                     | IMeasurementPoint] = (),
             png_path: Path | None = None,
             multipactor_measured_at: IMeasurementPoint | str | None = None,
+            multipactor_bands: MultipactorBands | None = None,
             **fig_kw,
     ) -> tuple[Figure, list[Axes]]:
         """Plot lower and upper multipacting limits evolution.
@@ -703,6 +718,9 @@ class MultipactorTest:
         .. todo::
             Simplify this thing. Lower and upper multipacting barriers should
             be easier to get. Maybe pandas dataframe is the way to go?
+
+        .. deprecated:: 1.4.0
+            Use MultipactorTest.plot_data_at_multipactor_thresholds instead.
 
         Parameters
         ----------
@@ -726,6 +744,10 @@ class MultipactorTest:
             Created fig and axes.
 
         """
+        warnings.warn("Use plot_data_at_multipactor_thresholds instead. "
+                      "It is the same method, but it handles plots with "
+                      "several instruments and multipactor detectors.",
+                      DeprecationWarning)
         if instrument_class_to_plot not in (Powers, FieldProbe, Reconstructed):
             print("multipactor_test.plot_multipactor_limits warning: you want "
                   f"to plot the values measured by {instrument_class_to_plot} "
@@ -745,24 +767,55 @@ class MultipactorTest:
         assert instrument_to_plot is not None, (
             f"No {instrument_class_to_plot} instrument was found.")
 
-        if not isinstance(multipactor_measured_at, IMeasurementPoint):
-            multipactor_measured_at = self.get_measurement_point(
-                name=multipactor_measured_at,
-                to_exclude=measurement_points_to_exclude)
+        multipactor_bands_to_check = self._get_proper_multipactor_bands(
+            multipactor_measured_at, multipactor_bands)
 
-        multipactor_bands = multipactor_measured_at.multipactor_bands
+        match (multipactor_bands_to_check):
+            case MultipactorBands():
+                multipactor_bands = multipactor_bands_to_check
+            case list() | tuple() as sequence_of_multipactor_bands:
+                multipactor_bands = sequence_of_multipactor_bands[0]
+                assert isinstance(multipactor_bands, MultipactorBands)
+            case _:
+                raise IOError(f"Undefined behavior. {multipactor_bands = }")
+
         lower_values, upper_values = instrument_to_plot.values_at_barriers(
             multipactor_bands
         )
 
         axe = instrument_class_axes[instrument_class_to_plot]
 
-        lower_values.plot(ax=axe, kind='line', drawstyle='steps-post')
+        lower_values.plot(ax=axe,
+                          kind='line',
+                          drawstyle='steps-post',
+                          grid=True)
         upper_values.plot(ax=axe, kind='line', drawstyle='steps-post')
-
-        axe.grid(True)
         plot.finish_fig(fig, instrument_class_axes.values(), png_path)
         return fig, [axes for axes in instrument_class_axes.values()]
+
+    def _get_proper_multipactor_bands(
+            self,
+            multipactor_measured_at: IMeasurementPoint | str | None = None,
+            multipactor_bands: MultipactorBands | Sequence[MultipactorBands] | None = None,
+            measurement_points_to_exclude: Sequence[str | IMeasurementPoint] = (),
+            ) -> MultipactorBands | Sequence[MultipactorBands]:
+        """Get the most consistent :class:`.MultipactorBands`."""
+        if multipactor_bands is not None:
+            if multipactor_measured_at is not None:
+                warnings.warn("multipactor_measured_at key is now superfluous",
+                              DeprecationWarning)
+            return multipactor_bands
+
+        warnings.warn("In the future, it will be mandatory to pass in "
+                      "the desired MultipactorBands object.",
+                      DeprecationWarning)
+        if not isinstance(multipactor_measured_at, IMeasurementPoint):
+            multipactor_measured_at = self.get_measurement_point(
+                name=multipactor_measured_at,
+                to_exclude=measurement_points_to_exclude)
+
+        multipactor_bands = multipactor_measured_at.multipactor_bands
+        return multipactor_bands
 
     def plot_data_at_multipactor_thresholds(
         self,

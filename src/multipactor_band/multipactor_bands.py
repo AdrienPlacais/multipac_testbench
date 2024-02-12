@@ -77,9 +77,15 @@ class MultipactorBands(list):
         if power_is_growing is not None:
             self.power_is_growing = power_is_growing
 
+        self._n_bands = len(self)
+
     def __str__(self) -> str:
         """Give concise information on the bands."""
         return self.detector_instrument_name
+
+    def __repr__(self) -> str:
+        """Give information on how many bands were detected and how."""
+        return f"{str(self)}: {self._n_bands} bands detected."
 
     @classmethod
     def from_ydata(
