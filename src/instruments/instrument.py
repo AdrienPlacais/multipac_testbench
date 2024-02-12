@@ -59,8 +59,6 @@ class Instrument(ABC):
         self._ydata: np.ndarray | None = None
         self._ydata_as_pd: pd.Series | pd.DataFrame | None = None
         self._post_treaters: list[Callable[[np.ndarray], np.ndarray]] = []
-
-        self.ydata_at_multipacting_barrier = pd.DataFrame()
         self.multipactor_bands: MultipactorBands
 
     def __str__(self) -> str:
@@ -242,7 +240,7 @@ class Instrument(ABC):
     def values_at_barriers(
             self,
             multipactor_bands: MultipactorBands,
-            ) -> tuple[pd.DataFrame, pd.DataFrame]:
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Get measured data at lower and upper multipactor barriers.
 
         .. todo::
@@ -294,19 +292,12 @@ class Instrument(ABC):
                 )
             case _:
                 raise TypeError
-
-        self.ydata_at_multipacting_barrier = \
-            pd.concat([self.ydata_at_multipacting_barrier,
-                       lower_values,
-                       upper_values],
-                      axis=1).sort_index()
-
         return lower_values, upper_values
 
     def values_at_barriers_fully_conditioned(
             self,
             multipactor_bands: MultipactorBands,
-            ) -> tuple[float, float]:
+    ) -> tuple[float, float]:
         """Get measured data at last mp limits."""
         barriers_idx = multipactor_bands.barriers
         last_low = barriers_idx[0][-1]
