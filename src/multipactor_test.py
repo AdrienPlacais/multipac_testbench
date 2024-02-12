@@ -226,6 +226,9 @@ class MultipactorTest:
                                                       raw=raw)
 
             if plot_multipactor:
+                warnings.warn("In the future, it will be mandatory to pass in "
+                              "the desired MultipactorBands object.",
+                              DeprecationWarning)
                 self._add_multipactor_vs_time(measurement_point,
                                               instrument_class_axes)
 
