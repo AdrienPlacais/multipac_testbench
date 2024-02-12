@@ -115,7 +115,7 @@ class IMeasurementPoint(ABC):
             self,
             multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
             instrument_class: ABCMeta = Instrument,
-    ) -> None:
+    ) -> MultipactorBands | None:
         """Detect multipactor with ``multipac_detector``."""
         instrument = self.get_instrument(instrument_class)
         if instrument is None:
@@ -127,6 +127,7 @@ class IMeasurementPoint(ABC):
         )
         self.multipactor_bands = multipactor_bands
         instrument.multipactor_bands = multipactor_bands
+        return multipactor_bands
 
     def plot_instrument_vs_time(self,
                                 instrument_class_axes: dict[ABCMeta, Axes],

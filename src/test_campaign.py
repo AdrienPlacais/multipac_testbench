@@ -17,7 +17,8 @@ import numpy as np
 from matplotlib import animation
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-
+from multipac_testbench.src.multipactor_band.multipactor_bands import \
+    MultipactorBands
 from multipac_testbench.src.multipactor_test import MultipactorTest
 from multipac_testbench.src.theoretical.somersalo import (
     plot_somersalo_analytical, plot_somersalo_measured, somersalo_base_plot)
@@ -83,7 +84,7 @@ class TestCampaign(list):
             multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
             instrument_class: ABCMeta,
             power_is_growing_kw: dict[str, int | float] | None = None,
-    ) -> None:
+    ) -> list[list[MultipactorBands]]:
         """Create the :class:`.MultipactorBands` objects.
 
         Parameters
@@ -99,11 +100,21 @@ class TestCampaign(list):
             Keyword arguments passed to the function that determines when power
             is increasing, when it is decreasing. The default is None.
 
+        Returns
+        -------
+        nested_multipactor_bands : list[list[MultipactorBands]]
+            :class:`.MultipactorBands` objects holding when multipactor
+            happens. They are sorted first by :class:`.MultipactorTest` (outer
+            level), then per :class:`.Instrument` of class ``instrument_class``
+            (inner level).
+
         """
-        for test in self:
+        nested_multipactor_bands = [
             test.detect_multipactor(multipac_detector,
                                     instrument_class,
                                     power_is_growing_kw)
+            for test in self]
+        return nested_multipactor_bands
 
     def somersalo(self,
                   multipactor_measured_at: str,

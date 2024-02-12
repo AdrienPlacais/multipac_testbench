@@ -107,7 +107,7 @@ class MultipactorTest:
             multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
             instrument_class: ABCMeta,
             power_is_growing_kw: dict[str, int | float] | None = None,
-    ) -> None:
+    ) -> list[MultipactorBands]:
         """Create the :class:`.MultipactorBands` objects.
 
         Parameters
@@ -123,13 +123,23 @@ class MultipactorTest:
             Keyword arguments passed to the function that determines when power
             is increasing, when it is decreasing. The default is None.
 
+        Returns
+        -------
+        detected_multipactor_bands : list[MultipactorBands]
+            Objets containing when multipactor happens, according to
+            ``multipac_detector``, at every pick-up holding an
+            :class:`.Instrument` of type ``instrument_class``.
+
         """
         powers = self.get_instrument(Powers)
-
+        detected_multipactor_bands = []
         for measurement_point in self.get_measurement_points():
-            measurement_point.detect_multipactor(multipac_detector,
-                                                 instrument_class)
-            if not hasattr(measurement_point, 'multipactor_bands'):
+            multipactor_bands = measurement_point.detect_multipactor(
+                multipac_detector,
+                instrument_class
+            )
+            # if not hasattr(measurement_point, 'multipactor_bands'):
+            if multipactor_bands is None:
                 continue
             if not isinstance(powers, Powers):
                 continue
@@ -137,8 +147,9 @@ class MultipactorTest:
             if power_is_growing_kw is None:
                 power_is_growing_kw = {}
             power_is_growing = powers.where_is_growing(**power_is_growing_kw)
-            measurement_point.multipactor_bands.power_is_growing = \
-                power_is_growing
+            multipactor_bands.power_is_growing = power_is_growing
+            detected_multipactor_bands.append(multipactor_bands)
+        return detected_multipactor_bands
 
     def plot_instruments_vs_time(
         self,
