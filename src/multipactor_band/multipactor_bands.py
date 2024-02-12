@@ -14,6 +14,31 @@ from multipac_testbench.src.util.multipactor_detectors import (
 )
 
 
+def _and(multipactor_in: list[np.ndarray[np.bool_]]) -> np.ndarray[np.bool_]:
+    """Gather multipactor boolean arrays with the ``and`` operator.
+
+    In other words: "Multipactor happens if all given instruments agree on it."
+
+    """
+    return np.array(multipactor_in).all(axis=0)
+
+
+def _or(multipactor_in: list[np.ndarray[np.bool_]]) -> np.ndarray[np.bool_]:
+    """Gather multipactor boolean arrays with the ``or`` operator.
+
+    In other words: "Multipactor happens if one of the given instruments says
+    that there is multipactor."
+
+    """
+    return np.array(multipactor_in).any(axis=0)
+
+
+MULTIPACTOR_BANDS_MERGERS = {
+    'strict': _and,
+    'relaxed': _or,
+}  #:
+
+
 class MultipactorBands(list):
     """All :class:`MultipactorBand` of a test, at a given localisation.
 
@@ -62,7 +87,7 @@ class MultipactorBands(list):
             multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
             instrument_ydata: np.ndarray,
             detector_instrument_name: str,
-            ) -> Self:
+    ) -> Self:
         """Detect where multipactor happens, create :class:`MultipactorBand`.
 
         Parameters
@@ -95,6 +120,56 @@ class MultipactorBands(list):
 
         return cls(multipactor_bands, multipactor, detector_instrument_name)
 
+    @classmethod
+    def from_other_multipactor_bands(cls,
+                                     multiple_multipactor_bands: list[Self],
+                                     union: str,
+                                     name: str = '') -> Self:
+        """Merge several :class:`MultipactorBands` objects.
+
+        .. todo::
+            Determine how and if transferring the list of
+            :class:`.MultipactorBand` is useful.
+
+        Parameters
+        ----------
+        multipactor_bands : list[MultipactorBands]
+            Objects to merge.
+        union : {'strict', 'relaxed'}
+            How the multipactor zones should be merged. It 'strict', all
+            instruments must detect multipactor to consider that multipactor
+            happened. If 'relaxed', only one instrument suffices.
+        name : str, optional
+            Name that will be given to the returned :class:`MultipactorBands`.
+            The default is an empty string, in which case a default meaningful
+            name will be given.
+
+        Returns
+        -------
+        multipactor_bands : MultipactorBands
+
+        """
+        allowed = list(MULTIPACTOR_BANDS_MERGERS.keys())
+        if union not in allowed:
+            raise IOError(f"{union = }, while {allowed = }")
+
+        dummy_multipactor_band = [0, 1, 2, 3]
+        raise NotImplementedError("Determine how individual MultipactorBand "
+                                  "objects should be transferred.")
+
+        multipactor_in = [multipactor_band.multipactor
+                          for multipactor_band in multiple_multipactor_bands]
+        multipactor = MULTIPACTOR_BANDS_MERGERS[union](multipactor_in)
+
+        if not name:
+            name = f"{len(multiple_multipactor_bands)} instruments ({union})"
+
+        multipactor_bands = cls(dummy_multipactor_band,
+                                multipactor,
+                                name,
+                                )
+        return multipactor_bands
+
     @property
     def barriers(self) -> tuple[Sequence[int], Sequence[int]]:
         """Get list of indexes of lower and upper barriers.
@@ -114,3 +189,21 @@ class MultipactorBands(list):
             self.multipactor,
             self.power_is_growing)
         return barriers
+
+
+if __name__ == '__main__':
+    import pandas as pd
+
+    multipac1 = np.array([True, True, True, False])
+    multipac2 = np.array([True, True, False, False])
+    multipac3 = np.array([True, False, False, False])
+    multipac_in = [multipac1, multipac2, multipac3]
+
+    df = pd.DataFrame({
+        "MP1": multipac1,
+        "MP2": multipac2,
+        "MP3": multipac3,
+        "strict": _and(multipac_in),
+        "relaxed": _or(multipac_in)
+    })
+    print(df)
