@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Keep track of all multipactor bands, at a given position."""
+"""Keep track of all multipactor bands."""
 from collections.abc import Callable, Sequence
 from typing import Self
 
@@ -51,6 +51,7 @@ class MultipactorBands(list):
                  multipactor_bands: list[MultipactorBand],
                  multipactor: np.ndarray[np.bool_],
                  detector_instrument_name: str,
+                 position: float | None = None,
                  power_is_growing: list[bool | float] | None = None,
                  ) -> None:
         """Create the object.
@@ -63,6 +64,10 @@ class MultipactorBands(list):
             Array where True means multipactor, False no multipactor.
         detector_instrument_name : str
             Name of the instrument that detected multipactor.
+        position : float
+            Where multipactor was detected. If not applicable, in particular if
+            the object represents multipactor anywhere in the testbench, it
+            will be np.NaN.
         power_is_growing : list[bool | float] | None, optional
             True where the power is growing, False where the power is
             decreasing, NaN where undetermined. The default is None, in which
@@ -72,6 +77,12 @@ class MultipactorBands(list):
         super().__init__(multipactor_bands)
         self.multipactor = multipactor
         self.detector_instrument_name = detector_instrument_name
+
+        if position is None:
+            print("MultipactorBands.__init__ warning: give it a position to "
+                  "enable some consistency checkings.")
+            position = 0.
+        self.position = position
 
         self.power_is_growing: list[bool | float]
         if power_is_growing is not None:
@@ -93,6 +104,7 @@ class MultipactorBands(list):
             multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
             instrument_ydata: np.ndarray,
             detector_instrument_name: str,
+            position: float,
     ) -> Self:
         """Detect where multipactor happens, create :class:`MultipactorBand`.
 
@@ -106,6 +118,10 @@ class MultipactorBands(list):
             The ``ydata`` from the :class:`.Instrument`.
         detector_instrument_name : str
             Name of the :class:`.Instrument`.
+        position : float
+            Where multipactor was detected. If not applicable, in particular if
+            the object represents multipactor anywhere in the testbench, it
+            will be np.NaN.
 
         Returns
         -------
@@ -119,12 +135,16 @@ class MultipactorBands(list):
         starts_ends: list[tuple[int, int]]
         starts_ends = start_and_end_of_contiguous_true_zones(multipactor)
 
-        multipactor_bands = [
+        my_multipactor_bands = [
             MultipactorBand(start, end, detector_instrument_name)
             for start, end in starts_ends
         ]
 
-        return cls(multipactor_bands, multipactor, detector_instrument_name)
+        multipactor_bands = cls(my_multipactor_bands,
+                                multipactor,
+                                detector_instrument_name,
+                                position)
+        return multipactor_bands
 
     @classmethod
     def from_other_multipactor_bands(cls,

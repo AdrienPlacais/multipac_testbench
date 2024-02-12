@@ -216,8 +216,8 @@ class Instrument(ABC):
 
         """
         if self.ydata is not None:
-            print("Warning! Modifying the post treaters makes "
-                  "previously post-treated data obsolete.")
+            # print("Warning! Modifying the post treaters makes "
+            #       "previously post-treated data obsolete.")
             self.ydata = None
 
         self._post_treaters = post_treaters
@@ -235,8 +235,8 @@ class Instrument(ABC):
         """
         self._post_treaters.append(post_treater)
         if self.ydata is not None:
-            print("Warning! Modifying the post treaters makes "
-                  "previously post-treated data obsolete.")
+            # print("Warning! Modifying the post treaters makes "
+            #       "previously post-treated data obsolete.")
             self.ydata = None
 
     def values_at_barriers(

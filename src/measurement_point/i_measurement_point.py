@@ -124,6 +124,7 @@ class IMeasurementPoint(ABC):
             multipac_detector,
             instrument.ydata,
             instrument.name,
+            position=instrument._position,
         )
         self.multipactor_bands = multipactor_bands
         instrument.multipactor_bands = multipactor_bands

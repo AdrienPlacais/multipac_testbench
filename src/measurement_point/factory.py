@@ -62,7 +62,8 @@ class IMeasurementPointFactory:
 
     def run(self,
             config: dict[str, dict],
-            df_data: pd.DataFrame
+            df_data: pd.DataFrame,
+            verbose: bool = False,
             ) -> tuple[GlobalDiagnostics | None, list[PickUp]]:
         """Create all the measurement points."""
         measurement_points = [
@@ -71,23 +72,27 @@ class IMeasurementPointFactory:
         ]
 
         global_diagnostics = self._filter_global_diagnostics(
-            measurement_points)
-        pick_ups = self._filter_pick_ups(measurement_points)
+            measurement_points,
+            verbose)
+        pick_ups = self._filter_pick_ups(measurement_points, verbose)
         return global_diagnostics, pick_ups
 
     def _filter_global_diagnostics(self,
                                    measurement_points: list[IMeasurementPoint],
+                                   verbose: bool = False,
                                    ) -> GlobalDiagnostics | None:
         """Ensure that we have only one :class:GlobalDiagnostics` object."""
         global_diagnostics = [x for x in measurement_points
                               if isinstance(x, GlobalDiagnostics)
                               ]
         if len(global_diagnostics) == 0:
-            print("No global diagnostic defined.")
+            if verbose:
+                print("No global diagnostic defined.")
             return
         if len(global_diagnostics) == 1:
-            print("1 set of global diagnostics defined:\n\t"
-                  f"{global_diagnostics[0]}")
+            if verbose:
+                print("1 set of global diagnostics defined:\n\t"
+                      f"{global_diagnostics[0]}")
             return global_diagnostics[0]
 
         raise IOError("Several global diagnostics were found! It means that"
@@ -95,7 +100,8 @@ class IMeasurementPointFactory:
                       "'global' in their entries. Please gather them.")
 
     def _filter_pick_ups(self,
-                         measurement_points: list[IMeasurementPoint]
+                         measurement_points: list[IMeasurementPoint],
+                         verbose: bool = False,
                          ) -> list[PickUp]:
         """Print information on the created pick-ups."""
         pick_ups = [x for x in measurement_points if isinstance(x, PickUp)]
@@ -103,8 +109,9 @@ class IMeasurementPointFactory:
         if len(pick_ups) == 0:
             raise IOError("No pick-up was defined.")
 
-        print(f"{n_pick_ups} pick-ups created:")
-        for pick_up in pick_ups:
-            print(f"\t{pick_up}")
+        if verbose:
+            print(f"{n_pick_ups} pick-ups created:")
+            for pick_up in pick_ups:
+                print(f"\t{pick_up}")
 
         return pick_ups

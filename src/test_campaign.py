@@ -72,8 +72,14 @@ class TestCampaign(list):
         args = zip(filepaths, frequencies, swrs, info, strict=True)
 
         multipactor_tests = [
-            MultipactorTest(filepath, config, freq_mhz, swr, info, sep=sep)
-            for filepath, freq_mhz, swr, info in args
+            MultipactorTest(filepath,
+                            config,
+                            freq_mhz,
+                            swr,
+                            info,
+                            sep=sep,
+                            verbose=i == 0,)
+            for i, (filepath, freq_mhz, swr, info) in enumerate(args)
         ]
         return cls(multipactor_tests)
 

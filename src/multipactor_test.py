@@ -60,7 +60,9 @@ class MultipactorTest:
                  freq_mhz: float,
                  swr: float,
                  info: str = '',
-                 sep: str = ';') -> None:
+                 sep: str = ';',
+                 verbose: bool = False,
+                 ) -> None:
         r"""Create all the pick-ups.
 
         Parameters
@@ -84,7 +86,9 @@ class MultipactorTest:
         self._n_points = len(df_data)
 
         imeasurement_point_factory = IMeasurementPointFactory()
-        imeasurement_points = imeasurement_point_factory.run(config, df_data)
+        imeasurement_points = imeasurement_point_factory.run(config,
+                                                             df_data,
+                                                             verbose)
         self.global_diagnostics, self.pick_ups = imeasurement_points
 
         self.freq_mhz = freq_mhz
