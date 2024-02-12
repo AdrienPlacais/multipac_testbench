@@ -130,12 +130,12 @@ class TestCampaign(list):
             for test in self]
         return nested_multipactor_bands
 
-    def somersalo(self,
-                  multipactor_measured_at: str | None = None,
-                  multipactor_bands: Sequence[MultipactorBands] | None = None,
-                  orders_one_point: tuple[int, ...] = (1, 2, 3, 4, 5, 6, 7),
-                  orders_two_point: tuple[int, ...] = (1, ),
-                  **fig_kw) -> tuple[Figure, Axes, Axes]:
+    def somersalo_chart(self,
+                        multipactor_measured_at: str | None = None,
+                        multipactor_bands: Sequence[MultipactorBands] | None = None,
+                        orders_one_point: tuple[int, ...] = (1, 2, 3, 4, 5, 6, 7),
+                        orders_two_point: tuple[int, ...] = (1, ),
+                        **fig_kw) -> tuple[Figure, Axes, Axes]:
         """Create a Somersalo plot, with theoretical results and measured.
 
         .. todo::
@@ -230,13 +230,13 @@ class TestCampaign(list):
                                     ax1=ax1, ax2=ax2,
                                     **plot_kw)
 
-    def susceptibility_plot(self,
+    def susceptibility_chart(self,
                             electric_field_at: str,
                             multipactor_measured_at: str | None = None,
                             multipactor_bands: Sequence[MultipactorBands] | None = None,
                             fig_kw: dict | None = None,
                             ax_kw: dict | None = None) -> tuple[Figure, Axes]:
-        """Create a scusceptiblity chart."""
+        """Create a susceptiblity chart."""
         fig, ax1 = self._susceptibility_base_plot(fig_kw, ax_kw)
 
         if multipactor_bands is None:
