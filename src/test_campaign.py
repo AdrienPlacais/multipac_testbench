@@ -315,3 +315,21 @@ class TestCampaign(list):
     def plot_barriers_vs_swr(self) -> None:
         """Plot evolution of mp barriers with SWR."""
         raise NotImplementedError
+
+    def plot_multipactor_limits(self,
+                                *args,
+                                out_folder: str | None = None,
+                                iternum: int = 300,
+                                **kwargs) -> None:
+        """Call :meth:`.MultipactorTest.plot_multipactor_limits`."""
+        for i, test in enumerate(self):
+            png_path = None
+            if out_folder is not None:
+                png_path = test.output_filepath(out_folder, ".png")
+            _ = test.plot_multipactor_limits(
+                *args,
+                num=iternum + i,
+                png_path=png_path,
+                **kwargs
+            )
+        return
