@@ -137,6 +137,10 @@ class MultipactorBands(list):
             Determine how and if transferring the list of
             :class:`.MultipactorBand` is useful.
 
+        .. todo::
+            Put a flag that will check consistency of position of MP bands.
+            Like: ``assert_multipactor_bands_detected_at_same_position: bool``.
+
         Parameters
         ----------
         multipactor_bands : list[MultipactorBands]

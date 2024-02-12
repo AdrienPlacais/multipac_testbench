@@ -12,6 +12,14 @@
     histograms for mp voltages? Maybe then add a gaussian fit, then we can
     determine the 3sigma multipactor limits?
 
+.. todo::
+    ``to_ignore``, ``to_exclude`` arguments should have more consistent names.
+
+.. todo::
+    Find a way to check consistency between the MultipactorBands and
+    corresponding Instruments. First idea would be to check their respective
+    positions.
+
 """
 import itertools
 from abc import ABCMeta
