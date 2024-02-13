@@ -991,6 +991,23 @@ class MultipactorTest:
         }
         return somersalo_data
 
+    def data_for_somersalo_scaling_law(self,
+                                       multipactor_bands: MultipactorBands
+                                       ) -> pd.Series:
+        """Get the data necessary to plot the Somersalo scaling law."""
+        powers = self.get_instrument(Powers)
+        assert isinstance(powers, Powers)
+
+        last_low_idx = multipactor_bands[-1][-1]
+        reflection_coeff = powers.gamma[last_low_idx]
+        last_forward_power = powers.forward[last_low_idx]
+        ser = pd.Series(
+            {'$R$': reflection_coeff,
+             r'Lower multipactor threshold $P_{f, low}$': last_forward_power,
+             }
+        )
+        return ser
+
     def plot_instruments_y_vs_instrument_x(
             self,
             instrument_ids_x: Sequence[ABCMeta] | Sequence[str] | Sequence[Instrument],

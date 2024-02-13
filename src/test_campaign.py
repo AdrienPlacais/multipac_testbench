@@ -15,18 +15,21 @@ from typing import Self
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from matplotlib import animation
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+from multipac_testbench.src.instruments.powers import Powers
 from multipac_testbench.src.measurement_point.i_measurement_point import \
     IMeasurementPoint
 from multipac_testbench.src.multipactor_band.multipactor_bands import \
     MultipactorBands
 from multipac_testbench.src.multipactor_test import MultipactorTest
 from multipac_testbench.src.theoretical.somersalo import (
-    plot_somersalo_analytical, plot_somersalo_measured, somersalo_base_plot)
+    plot_somersalo_analytical, plot_somersalo_measured, somersalo_base_plot, somersalo_scaling_law)
 from multipac_testbench.src.theoretical.susceptibility import \
     measured_to_susceptibility_coordinates
+from scipy.optimize import curve_fit
 
 
 class TestCampaign(list):
@@ -237,6 +240,97 @@ class TestCampaign(list):
                                     ax1=ax1, ax2=ax2,
                                     **plot_kw)
 
+    def check_somersalo_scaling_law(self,
+                                    multipactor_bands: Sequence[MultipactorBands],
+                                    show_fit: bool = True,
+                                    png_path: Path | None = None,
+                                    remove_last_point_for_fit: bool = False,
+                                    **fig_kw,
+                                    ) -> Axes:
+        r"""Represent evolution of forward power threshold with :math:`R`.
+
+        Somersalo links the mixed wave (:math:`MW`) forward power with the
+        traveling wave (:math:`TW`) forward power through reflection
+        coefficient :math:`R`.
+
+        .. math::
+
+            P_\mathrm{MW} \approx \frac{1}{(1 + R)^2}P\mathrm{TW}
+
+        .. warning::
+            Here, we need one :class:`.MultipactorBands` per
+            :class:`.MultipactorTest`, in contrary to most of the
+            :class:`TestCampaign` methods where we need a full list matching a
+            list of :class:`.Instrument` or of :class:`.IMeasurementPoint`.
+
+        .. todo::
+            Clean this anti-patternic method.
+
+        Parameters
+        ----------
+        multipactor_bands : Sequence[MultipactorBands]
+            Object holding the information on where multipactor happens.
+        show_fit : bool
+            To perform a fit and plot it.
+        png_path : Path | None
+            If provided, the resulting figure will be saved at this location.
+        remove_last_point_for_fit : bool
+            A dirty patch to remove the last point from the fit. Used in a
+            study were I wanted to plot this point but exclude it from the fit.
+        fig_kw :
+            Other keyword arguments passed to Figure.
+
+        Returns
+        -------
+        Axes
+
+        """
+        frequencies = set([test.freq_mhz for test in self])
+        if len(frequencies) != 1:
+            raise NotImplementedError("Plot over several freqs to implement")
+
+        fig = plt.figure(**fig_kw)
+        axe = fig.add_subplot(111)
+        zipper = zip(self, multipactor_bands, strict=True)
+        data_for_somersalo = [test.data_for_somersalo_scaling_law(mp_band)
+                              for (test, mp_band) in zipper]
+        df_for_somersalo = pd.concat(data_for_somersalo, axis=1).T
+
+        axe = df_for_somersalo.plot(
+            x=0,
+            y=1,
+            ylabel=Powers.ylabel(),
+            grid=True,
+            ax=axe,
+            ms=15,
+            marker='+')
+
+        if show_fit:
+            R = np.linspace(0, 1, 101)
+            r_fit = df_for_somersalo[df_for_somersalo.columns[0]]
+            p_fit = df_for_somersalo[df_for_somersalo.columns[1]]
+            if remove_last_point_for_fit:
+                r_fit = r_fit[:-1]
+                p_fit = p_fit[:-1]
+
+            out = curve_fit(f=somersalo_scaling_law,
+                            xdata=r_fit,
+                            ydata=p_fit)
+            popt = out[0]
+            tmp_str = r'$P_{TW}$'
+            df_fitted = pd.DataFrame(
+                {'$R$': R,
+                 f'Fit ({tmp_str} = {popt[0]:3.1f}W)': somersalo_scaling_law(R, *popt)
+                 })
+            df_fitted.plot(ax=axe,
+                           x=0,
+                           y=1,
+                           grid=True)
+        if png_path is not None:
+            fig.savefig(png_path)
+
+        return axe
+
     def susceptibility_chart(self,
                              electric_field_at: str,
                              multipactor_measured_at: str | None = None,
@@ -315,7 +409,8 @@ class TestCampaign(list):
     def plot_instruments_vs_time(
         self,
         *args,
-        seq_multipactor_bands: Sequence[Sequence[MultipactorBands]] | Sequence[MultipactorBands] | None = None,
+        seq_multipactor_bands: Sequence[Sequence[MultipactorBands]
+                                        ] | Sequence[MultipactorBands] | None = None,
         out_folder: str | None = None,
         iternum: int = 300,
         **kwargs

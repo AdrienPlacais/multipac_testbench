@@ -224,3 +224,15 @@ def plot_somersalo_measured(mp_test_name: str,
                     lw=0,
                     legend=True,
                     **plot_kw)
+
+
+def somersalo_scaling_law(reflected: np.ndarray,
+                          p_tw: float) -> np.ndarray:
+    """Somersalo scaling law.
+
+    .. todo::
+        Docstring.
+
+    """
+    p_mw = p_tw / (1. + reflected)**2
+    return p_mw

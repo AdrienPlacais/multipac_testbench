@@ -42,13 +42,13 @@ MULTIPACTOR_BANDS_MERGERS = {
 class MultipactorBands(list):
     """All :class:`MultipactorBand` of a test, at a given localisation.
 
-    .. todo::
+    .. deprecated:: 1.4.0
         Same instance is stored in Instrument and IMeasurementPoint.
 
     """
 
     def __init__(self,
-                 multipactor_bands: list[MultipactorBand],
+                 list_of_multipactor_band: list[MultipactorBand],
                  multipactor: np.ndarray[np.bool_],
                  instrument_name: str,
                  measurement_point_name: str,
@@ -59,7 +59,7 @@ class MultipactorBands(list):
 
         Parameters
         ----------
-        multipactor_bands : list[MultipactorBand]
+        list_of_multipactor_band : list[MultipactorBand]
             Individual multipactor bands.
         multipactor : np.ndarray[np.bool_]
             Array where True means multipactor, False no multipactor.
@@ -77,7 +77,7 @@ class MultipactorBands(list):
             case it is not used.
 
         """
-        super().__init__(multipactor_bands)
+        super().__init__(list_of_multipactor_band)
         self.multipactor = multipactor
         self.instrument_name = instrument_name
         self.measurement_point_name = measurement_point_name
@@ -139,15 +139,11 @@ class MultipactorBands(list):
         multipactor: np.ndarray[np.bool_]
         multipactor = multipac_detector(instrument_ydata)
 
-        starts_ends: list[tuple[int, int]]
-        starts_ends = start_and_end_of_contiguous_true_zones(multipactor)
+        list_of_multipactor_band = \
+            _boolean_multipactor_array_to_list_of_mp_band(multipactor,
+                                                          instrument_name)
 
-        my_multipactor_bands = [
-            MultipactorBand(start, end, instrument_name)
-            for start, end in starts_ends
-        ]
-
-        multipactor_bands = cls(my_multipactor_bands,
+        multipactor_bands = cls(list_of_multipactor_band,
                                 multipactor,
                                 instrument_name,
                                 measurement_point_name,
@@ -190,21 +186,27 @@ class MultipactorBands(list):
         allowed = list(MULTIPACTOR_BANDS_MERGERS.keys())
         if union not in allowed:
             raise IOError(f"{union = }, while {allowed = }")
-
-        dummy_multipactor_band = [0, 1, 2, 3]
-        raise NotImplementedError("Determine how individual MultipactorBand "
-                                  "objects should be transferred.")
+        if not name:
+            name = f"{len(multiple_multipactor_bands)} instruments ({union})"
 
         multipactor_in = [multipactor_band.multipactor
                           for multipactor_band in multiple_multipactor_bands]
         multipactor = MULTIPACTOR_BANDS_MERGERS[union](multipactor_in)
+        list_of_multipactor_band = \
+            _boolean_multipactor_array_to_list_of_mp_band(multipactor, name)
 
-        if not name:
-            name = f"{len(multiple_multipactor_bands)} instruments ({union})"
+        positions = [mp_band.position
+                     for mp_band in multiple_multipactor_bands]
+        if len(set(positions)) == 1:
+            position = positions[0]
+        else:
+            position = np.NaN
 
-        multipactor_bands = cls(dummy_multipactor_band,
+        multipactor_bands = cls(list_of_multipactor_band,
                                 multipactor,
                                 name,
+                                name,
+                                position=position,
                                 )
         return multipactor_bands
 
@@ -227,6 +229,21 @@ class MultipactorBands(list):
             self.multipactor,
             self.power_is_growing)
         return barriers
+
+
+def _boolean_multipactor_array_to_list_of_mp_band(
+        multipactor: np.ndarray[np.bool_],
+        instrument_name: str,
+) -> list[MultipactorBand]:
+    """Determine the contiguous multipacting zones."""
+    starts_ends: list[tuple[int, int]]
+    starts_ends = start_and_end_of_contiguous_true_zones(multipactor)
+
+    list_of_multipactor_band = [
+        MultipactorBand(start, end, instrument_name)
+        for start, end in starts_ends
+    ]
+    return list_of_multipactor_band
 
 
 if __name__ == '__main__':
