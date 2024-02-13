@@ -44,7 +44,7 @@ class Reconstructed(IElectricField):
         self._e_field_probes = e_field_probes
         self._powers = powers
         self._sample_indexes = self._e_field_probes[0].raw_data.index
-        self._pos_for_fit = [probe._position for probe in self._e_field_probes]
+        self._pos_for_fit = [probe.position for probe in self._e_field_probes]
         self._beta = c / freq_mhz * 1e-6
 
         self._sqrt_power_scaler: float
@@ -76,7 +76,7 @@ class Reconstructed(IElectricField):
         ydata = []
         for power, gamma in zip(self._powers.ydata[:, 0], self._powers.gamma):
             v_f = math.sqrt(power) * self._sqrt_power_scaler
-            ydata.append(voltage_vs_position(self._position,
+            ydata.append(voltage_vs_position(self.position,
                                              v_f,
                                              gamma,
                                              self._beta,
@@ -119,7 +119,7 @@ class Reconstructed(IElectricField):
             for p_f, gamma, e_field in zip(self._powers.ydata[:, 0],
                                            self._powers.gamma,
                                            e_probe.ydata):
-                xdata.append([p_f, gamma, e_probe._position])
+                xdata.append([p_f, gamma, e_probe.position])
                 ydata.append(e_field)
 
         to_fit = partial(_model, beta=self._beta)
@@ -148,7 +148,7 @@ class Reconstructed(IElectricField):
         gamma = self._powers.gamma
 
         for sample_index in self._sample_indexes:
-            voltages = voltage_vs_position(self._position,
+            voltages = voltage_vs_position(self.position,
                                            v_f[sample_index - 1],
                                            gamma[sample_index - 1],
                                            beta,
@@ -159,7 +159,7 @@ class Reconstructed(IElectricField):
 
     def ydata_at_position(self, pos: float, tol: float = 1e-5) -> np.ndarray:
         """Get reconstructed field at position ``pos``."""
-        diff = np.abs(self._position - pos)
+        diff = np.abs(self.position - pos)
         delta_z = np.min(diff)
         if delta_z > tol:
             raise ValueError("You asked for the reconstructed field at "

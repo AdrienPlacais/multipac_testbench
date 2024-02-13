@@ -139,7 +139,8 @@ class TestCampaign(list):
     def somersalo_chart(self,
                         multipactor_measured_at: str | None = None,
                         multipactor_bands: Sequence[MultipactorBands] | None = None,
-                        orders_one_point: tuple[int, ...] = (1, 2, 3, 4, 5, 6, 7),
+                        orders_one_point: tuple[int, ...] = (
+                            1, 2, 3, 4, 5, 6, 7),
                         orders_two_point: tuple[int, ...] = (1, ),
                         **fig_kw) -> tuple[Figure, Axes, Axes]:
         """Create a Somersalo plot, with theoretical results and measured.
@@ -237,11 +238,11 @@ class TestCampaign(list):
                                     **plot_kw)
 
     def susceptibility_chart(self,
-                            electric_field_at: str,
-                            multipactor_measured_at: str | None = None,
-                            multipactor_bands: Sequence[MultipactorBands] | None = None,
-                            fig_kw: dict | None = None,
-                            ax_kw: dict | None = None) -> tuple[Figure, Axes]:
+                             electric_field_at: str,
+                             multipactor_measured_at: str | None = None,
+                             multipactor_bands: Sequence[MultipactorBands] | None = None,
+                             fig_kw: dict | None = None,
+                             ax_kw: dict | None = None) -> tuple[Figure, Axes]:
         """Create a susceptiblity chart."""
         fig, ax1 = self._susceptibility_base_plot(fig_kw, ax_kw)
 
@@ -311,18 +312,25 @@ class TestCampaign(list):
         for test in self:
             test.reconstruct_voltage_along_line(*args, **kwargs)
 
-    def plot_instruments_vs_time(self,
-                                 *args,
-                                 out_folder: str | None = None,
-                                 iternum: int = 300,
-                                 **kwargs) -> None:
+    def plot_instruments_vs_time(
+        self,
+        *args,
+        seq_multipactor_bands: Sequence[Sequence[MultipactorBands]] | Sequence[MultipactorBands] | None = None,
+        out_folder: str | None = None,
+        iternum: int = 300,
+        **kwargs
+    ) -> None:
         """Call all :meth:`.MultipactorTest.plot_instruments_vs_time`."""
-        for i, test in enumerate(self):
+        if seq_multipactor_bands is None:
+            seq_multipactor_bands = [None for _ in self]
+        zipper = zip(self, seq_multipactor_bands, strict=True)
+        for i, (test, multipactor_bands) in enumerate(zipper):
             png_path = None
             if out_folder is not None:
                 png_path = test.output_filepath(out_folder, ".png")
             _ = test.plot_instruments_vs_time(
                 *args,
+                multipactor_bands=multipactor_bands,
                 num=iternum + i,
                 png_path=png_path,
                 **kwargs

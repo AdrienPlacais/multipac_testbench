@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Define an object to keep global measurements."""
 import pandas as pd
+import numpy as np
 
 from multipac_testbench.src.instruments.factory import InstrumentFactory
 from multipac_testbench.src.measurement_point.i_measurement_point import \
@@ -31,7 +32,11 @@ class GlobalDiagnostics(IMeasurementPoint):
             passed to the proper :class:`.Instrument`.
 
         """
-        super().__init__(name, df_data, instrument_factory, instruments_kw)
+        super().__init__(name,
+                         df_data,
+                         instrument_factory,
+                         instruments_kw)
+        self.position = np.NaN
 
     def __str__(self) -> str:
         """Give concise info on global diagnostics."""

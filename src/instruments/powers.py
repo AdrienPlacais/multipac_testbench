@@ -20,6 +20,7 @@ class Powers(Instrument):
 
         self._gamma: np.ndarray | None = None
         self._swr: np.ndarray | None = None
+        self.position = np.NaN
 
     @classmethod
     def ylabel(cls) -> str:

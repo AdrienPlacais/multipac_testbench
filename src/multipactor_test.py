@@ -22,11 +22,10 @@
 
 """
 import itertools
-from abc import ABCMeta
-from collections.abc import Callable
-from pathlib import Path
-from typing import Sequence
 import warnings
+from abc import ABCMeta
+from collections.abc import Callable, Sequence
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -47,6 +46,7 @@ from multipac_testbench.src.measurement_point.i_measurement_point import \
     IMeasurementPoint
 from multipac_testbench.src.multipactor_band.multipactor_bands import \
     MultipactorBands
+from multipac_testbench.src.multipactor_band.util import match_with_mp_band
 from multipac_testbench.src.util import plot
 from multipac_testbench.src.util.helper import output_filepath
 
@@ -171,11 +171,12 @@ class MultipactorTest:
 
     def plot_instruments_vs_time(
         self,
-        instruments_to_plot: tuple[ABCMeta, ...],
-        measurement_points_to_exclude: tuple[str, ...] = (),
+        instruments_class_to_plot: Sequence[ABCMeta],
+        measurement_points_to_exclude: Sequence[str | IMeasurementPoint] = (),
         png_path: Path | None = None,
         raw: bool = False,
         plot_multipactor: bool = False,
+        multipactor_bands: Sequence[MultipactorBands] | None = None,
         **fig_kw,
     ) -> tuple[Figure, list[Axes]]:
         """Plot signals measured by ``instruments_to_plot``.
@@ -214,24 +215,36 @@ class MultipactorTest:
         """
         fig, instrument_class_axes = plot.create_fig(
             str(self),
-            instruments_to_plot,
+            instruments_class_to_plot,
             xlabel='Measurement index',
             **fig_kw)
 
         measurement_points = self.get_measurement_points(
             to_exclude=measurement_points_to_exclude)
 
-        for measurement_point in measurement_points:
-            measurement_point.plot_instrument_vs_time(instrument_class_axes,
-                                                      instruments_to_plot,
-                                                      raw=raw)
+        if multipactor_bands is None or not plot_multipactor:
+            multipactor_bands = [None for _ in measurement_points]
+            zipper = zip(measurement_points, multipactor_bands, strict=True)
+            # zipper = zip(measurement_points, multipactor_bands, strict=True)
+        else:
+            zipper = match_with_mp_band(
+                measurement_points,
+                multipactor_bands,
+                assert_positions_match=True,
+                find_matching_pairs=True,
+                assert_every_obj_has_multipactor_bands=False,
+            )
 
-            if plot_multipactor:
-                warnings.warn("In the future, it will be mandatory to pass in "
-                              "the desired MultipactorBands object.",
-                              DeprecationWarning)
+        for measurement_point, mp_bands in zipper:
+            measurement_point.plot_instruments_vs_time(
+                instrument_class_axes,
+                instruments_class_to_plot,
+                raw=raw)
+
+            if mp_bands is not None:
                 self._add_multipactor_vs_time(measurement_point,
-                                              instrument_class_axes)
+                                              instrument_class_axes,
+                                              mp_bands)
 
         plot.finish_fig(fig, instrument_class_axes.values(), png_path)
         return fig, [axes for axes in instrument_class_axes.values()]
@@ -240,7 +253,7 @@ class MultipactorTest:
         self,
         measurement_point: IMeasurementPoint,
         instrument_class_axes: dict[ABCMeta, Axes],
-        multipactor_bands: MultipactorBands | None = None,
+        multipactor_bands: MultipactorBands,
     ) -> None:
         """Show with arrows when multipactor happens.
 
@@ -250,16 +263,10 @@ class MultipactorTest:
             :class:`.PickUp` or :class:`.GlobalDiagnostic` under study.
         instrument_class_axes : dict[ABCMeta, Axes]
             Links instrument class with the axes.
+        multipactor_bands : MultipactorBands
+            Should correspond to the :class:`IMeasurementPoint` under study.
 
         """
-        if multipactor_bands is None:
-            warnings.warn("In the future, it will be mandatory to pass in "
-                          "the desired MultipactorBands object.",
-                          DeprecationWarning)
-            if not hasattr(measurement_point, 'multipactor_bands'):
-                return
-            multipactor_bands = measurement_point.multipactor_bands
-
         for plotted_instrument_class, axe in instrument_class_axes.items():
             measurement_point._add_multipactor_vs_time(
                 axe,
@@ -867,6 +874,9 @@ class MultipactorTest:
     ) -> tuple[Figure, Axes]:
         """Plot the data measured by some instruments at thresholds.
 
+        .. todo::
+            Docstring, match_with_mp_band keywords
+
         New version of `plot_multipactor_limits`.
 
         """
@@ -888,7 +898,12 @@ class MultipactorTest:
         )
         axe = [axe for axe in instrument_class_axes.values()][0]
 
-        zipper = zip(instruments_to_plot, multipactor_bands, strict=True)
+        zipper = match_with_mp_band(instruments_to_plot,
+                                    multipactor_bands,
+                                    assert_positions_match=True,
+                                    find_matching_pairs=False,
+                                    # should already match
+                                    )
         for instrument, mp_bands in zipper:
             lower_values, upper_values = instrument.values_at_barriers(
                 mp_bands)

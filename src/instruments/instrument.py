@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Define object to keep a single instrument measurements."""
+"""Define object to keep a single instrument measurements.
+
+.. todo::
+    Ensure that all instruments have a position (float, can be np.NaN)
+
+"""
 from abc import ABC
 from collections.abc import Iterable
 from typing import Callable, Self
@@ -48,9 +53,9 @@ class Instrument(ABC):
         self.name = name
         self.raw_data = raw_data
 
-        self._position: np.ndarray | float
+        self.position: np.ndarray | float
         if position is not None:
-            self._position = position
+            self.position = position
 
         self.is_2d = is_2d
         plotters = self._get_plot_methods(is_2d)
@@ -261,7 +266,7 @@ class Instrument(ABC):
         lower_barrier_idx, upper_barrier_idx = barriers_idx
         assert isinstance(lower_barrier_idx, list)
         assert isinstance(upper_barrier_idx, list)
-        name_of_detector = multipactor_bands.detector_instrument_name
+        name_of_detector = multipactor_bands.instrument_name
 
         match (self.raw_data):
             case pd.Series():
@@ -408,7 +413,7 @@ class Instrument(ABC):
             The plotted stem.
 
         """
-        position = getattr(self, '_position', -1.)
+        position = getattr(self, 'position', -1.)
         assert isinstance(position, float)
 
         ydata = self.ydata[sample_index]
@@ -466,19 +471,19 @@ class Instrument(ABC):
             The plotted line.
 
         """
-        assert hasattr(self, '_position')
-        assert isinstance(self._position, np.ndarray)
+        assert hasattr(self, 'position')
+        assert isinstance(self.position, np.ndarray)
 
         ydata = self.ydata[sample_index, :]
         assert isinstance(ydata, np.ndarray)
-        assert ydata.shape == self._position.shape
+        assert ydata.shape == self.position.shape
 
         if artist is not None:
-            artist.set_data(self._position, ydata)
+            artist.set_data(self.position, ydata)
             return artist
 
         assert axe is not None
-        artist, = axe.plot(self._position,
+        artist, = axe.plot(self.position,
                            ydata,
                            color=color,
                            label=self.label,
@@ -507,7 +512,7 @@ class Instrument(ABC):
         ydata = self.ydata
 
         if xdata is None:
-            xdata = self._position
+            xdata = self.position
         if isinstance(xdata, float):
             xdata = np.full(len(ydata), xdata)
         assert isinstance(xdata, np.ndarray)

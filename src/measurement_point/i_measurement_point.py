@@ -48,6 +48,7 @@ class IMeasurementPoint(ABC):
         ]
         self._color: tuple[float, float, float] | None = None
         self.multipactor_bands: MultipactorBands
+        self.position: float
 
     def add_instrument(self, instrument: Instrument) -> None:
         """Add a new instrument :attr:`.instruments`.
@@ -124,26 +125,28 @@ class IMeasurementPoint(ABC):
             multipac_detector,
             instrument.ydata,
             instrument.name,
-            position=instrument._position,
+            self.name,
+            position=instrument.position,
         )
         self.multipactor_bands = multipactor_bands
         instrument.multipactor_bands = multipactor_bands
         return multipactor_bands
 
-    def plot_instrument_vs_time(self,
-                                instrument_class_axes: dict[ABCMeta, Axes],
-                                instruments_to_plot: tuple[ABCMeta, ...] = (),
-                                raw: bool = False,
-                                **subplot_kw,
-                                ) -> None:
-        """Plot the signal of the ``instruments_to_plot`` of this object.
+    def plot_instruments_vs_time(
+        self,
+        instrument_class_axes: dict[ABCMeta, Axes],
+        instruments_class_to_plot: Sequence[ABCMeta] = (),
+        raw: bool = False,
+        **subplot_kw,
+    ) -> None:
+        """Plot signal of ``instruments_class_to_plot`` of this object.
 
         Parameters
         ----------
         instrument_class_axes : dict[ABCMeta, Axes]
             Dictionary linking the class of the instruments to plot with the
             associated axes.
-        instruments_to_plot : tuple[ABCMeta, ...]
+        instruments_class_to_plot : Sequence[ABCMeta]
             Class of the instruments to be plotted.
         raw : bool
             If the raw of the post-treated signal should be plotted.
@@ -151,7 +154,7 @@ class IMeasurementPoint(ABC):
             Other keyword arguments passed to the ``plot_vs_time`` methods.
 
         """
-        for instrument_class in instruments_to_plot:
+        for instrument_class in instruments_class_to_plot:
             instruments = self.get_instruments(instrument_class)
             axe = instrument_class_axes[instrument_class]
 
@@ -168,7 +171,7 @@ class IMeasurementPoint(ABC):
             axe: Axes,
             plotted_instrument_class: ABCMeta,
             multipactor_bands: MultipactorBands | None = None
-            ) -> None:
+    ) -> None:
         """Add arrows to display multipactor.
 
         .. todo::
@@ -216,7 +219,7 @@ class IMeasurementPoint(ABC):
             instrument_class_axes: dict[ABCMeta, Axes],
             xdata: float,
             multipactor_bands: MultipactorBands | None = None
-            ) -> None:
+    ) -> None:
         """Scatter data measured by desired instruments."""
         if multipactor_bands is None:
             warnings.warn("In the future, it will be mandatory to pass in "
@@ -248,7 +251,7 @@ class IMeasurementPoint(ABC):
             'color': self._color,
             'length_includes_head': True,
             'width': typical_width,
-            'head_length': 0.2,# typical_length,
-            'head_width': 0.1, #typical_width * 100.,
+            'head_length': 0.2,  # typical_length,
+            'head_width': 0.1,  # typical_width * 100.,
         }
         return arrow_kw

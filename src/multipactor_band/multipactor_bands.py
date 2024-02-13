@@ -50,7 +50,8 @@ class MultipactorBands(list):
     def __init__(self,
                  multipactor_bands: list[MultipactorBand],
                  multipactor: np.ndarray[np.bool_],
-                 detector_instrument_name: str,
+                 instrument_name: str,
+                 measurement_point_name: str,
                  position: float | None = None,
                  power_is_growing: list[bool | float] | None = None,
                  ) -> None:
@@ -62,8 +63,10 @@ class MultipactorBands(list):
             Individual multipactor bands.
         multipactor : np.ndarray[np.bool_]
             Array where True means multipactor, False no multipactor.
-        detector_instrument_name : str
-            Name of the instrument that detected multipactor.
+        instrument_name : str
+            Name of the instrument that detected this multipactor.
+        measurement_point_name : str
+            Where this multipactor was detected.
         position : float
             Where multipactor was detected. If not applicable, in particular if
             the object represents multipactor anywhere in the testbench, it
@@ -76,7 +79,8 @@ class MultipactorBands(list):
         """
         super().__init__(multipactor_bands)
         self.multipactor = multipactor
-        self.detector_instrument_name = detector_instrument_name
+        self.instrument_name = instrument_name
+        self.measurement_point_name = measurement_point_name
 
         if position is None:
             print("MultipactorBands.__init__ warning: give it a position to "
@@ -92,7 +96,7 @@ class MultipactorBands(list):
 
     def __str__(self) -> str:
         """Give concise information on the bands."""
-        return self.detector_instrument_name
+        return self.instrument_name
 
     def __repr__(self) -> str:
         """Give information on how many bands were detected and how."""
@@ -103,7 +107,8 @@ class MultipactorBands(list):
             cls,
             multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
             instrument_ydata: np.ndarray,
-            detector_instrument_name: str,
+            instrument_name: str,
+            measurement_point_name: str,
             position: float,
     ) -> Self:
         """Detect where multipactor happens, create :class:`MultipactorBand`.
@@ -116,8 +121,10 @@ class MultipactorBands(list):
             multipactor.
         instrument_ydata : np.ndarray
             The ``ydata`` from the :class:`.Instrument`.
-        detector_instrument_name : str
+        instrument_name : str
             Name of the :class:`.Instrument`.
+        measurement_point_name : str
+            Name of the :class:`.IMeasurementPoint`.
         position : float
             Where multipactor was detected. If not applicable, in particular if
             the object represents multipactor anywhere in the testbench, it
@@ -136,13 +143,14 @@ class MultipactorBands(list):
         starts_ends = start_and_end_of_contiguous_true_zones(multipactor)
 
         my_multipactor_bands = [
-            MultipactorBand(start, end, detector_instrument_name)
+            MultipactorBand(start, end, instrument_name)
             for start, end in starts_ends
         ]
 
         multipactor_bands = cls(my_multipactor_bands,
                                 multipactor,
-                                detector_instrument_name,
+                                instrument_name,
+                                measurement_point_name,
                                 position)
         return multipactor_bands
 
