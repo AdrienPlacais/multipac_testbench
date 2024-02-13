@@ -120,7 +120,8 @@ class MultipactorTest:
             multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
             instrument_class: ABCMeta,
             power_is_growing_kw: dict[str, int | float] | None = None,
-            measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
+            measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (
+            ),
     ) -> list[MultipactorBands]:
         """Create the :class:`.MultipactorBands` objects.
 
@@ -355,6 +356,7 @@ class MultipactorTest:
         self,
         instruments_to_plot: Sequence[ABCMeta],
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
+        multipactor_bands: Sequence[MultipactorBands] | None = None,
         png_path: Path | None = None,
         **fig_kw,
     ) -> tuple[Figure, list[Axes]]:
@@ -371,7 +373,12 @@ class MultipactorTest:
             User should be able to select: reconstructed or measured electric
             field.
 
+        .. todo::
+            Fix this. Or not? This is not the most explicit way to display
+            data...
+
         """
+        raise NotImplementedError("currently broken")
         if fig_kw is None:
             fig_kw = {}
         fig, instrument_class_axes = plot.create_fig(str(self),
@@ -380,6 +387,12 @@ class MultipactorTest:
                                                      **fig_kw)
         measurement_points = self.get_measurement_points(
             to_exclude=measurement_points_to_exclude)
+
+        multipactor_bands = self._get_proper_multipactor_bands(
+            multipactor_measured_at=measurement_points,
+            multipactor_bands=multipactor_bands,
+            measurement_points_to_exclude=measurement_points_to_exclude)
+
         for i, measurement_point in enumerate(measurement_points):
             measurement_point.scatter_instruments_data(instrument_class_axes,
                                                        xdata=float(i),
@@ -812,8 +825,9 @@ class MultipactorTest:
             self,
             multipactor_measured_at: IMeasurementPoint | str | None = None,
             multipactor_bands: MultipactorBands | Sequence[MultipactorBands] | None = None,
-            measurement_points_to_exclude: Sequence[str | IMeasurementPoint] = (),
-            ) -> MultipactorBands | Sequence[MultipactorBands]:
+            measurement_points_to_exclude: Sequence[str | IMeasurementPoint] = (
+            ),
+    ) -> MultipactorBands | Sequence[MultipactorBands]:
         """Get the most consistent :class:`.MultipactorBands`.
 
         .. deprecated:: 1.4.0
@@ -900,8 +914,8 @@ class MultipactorTest:
 
         """
         # if isinstance(multipactor_measured_at, str):
-            # multipactor_measured_at = self.get_measurement_point(
-                # multipactor_measured_at)
+        # multipactor_measured_at = self.get_measurement_point(
+        # multipactor_measured_at)
         # multipactor_bands = multipactor_measured_at.multipactor_bands
         multipactor_bands = self._get_proper_multipactor_bands(
             multipactor_measured_at, multipactor_bands)
@@ -937,8 +951,8 @@ class MultipactorTest:
 
         """
         # if isinstance(multipactor_measured_at, str):
-            # multipactor_measured_at = self.get_measurement_point(
-                # multipactor_measured_at)
+        # multipactor_measured_at = self.get_measurement_point(
+        # multipactor_measured_at)
         # multipactor_bands = multipactor_measured_at.multipactor_bands
         multipactor_bands = self._get_proper_multipactor_bands(
             multipactor_measured_at, multipactor_bands)
@@ -966,7 +980,8 @@ class MultipactorTest:
             self,
             instrument_ids_x: Sequence[ABCMeta] | Sequence[str] | Sequence[Instrument],
             instrument_ids_y: Sequence[ABCMeta] | Sequence[str] | Sequence[Instrument],
-            measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
+            measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (
+            ),
             instruments_to_ignore: Sequence[Instrument | str] = (),
             tail: int = -1,
             fig_kw: dict | None = None,
