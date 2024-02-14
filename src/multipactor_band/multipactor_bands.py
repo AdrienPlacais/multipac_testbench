@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Keep track of all multipactor bands."""
+"""Keep track of all multipactor bands.
+
+.. todo::
+    Maybe this class should also hold a None or something when multipactor did
+    not appear during a power cycle.
+    If there is multipactor at the start of the test but it is conditioned,
+    this information does not appear!!
+
+"""
 from collections.abc import Callable, Sequence
 from typing import Self
 
@@ -88,12 +96,12 @@ class MultipactorBands(list):
             position = 0.
         self.position = position
 
-        self.power_is_growing: list[bool | float]
+        self._power_is_growing: list[bool | float]
         if power_is_growing is not None:
             self.power_is_growing = power_is_growing
 
         self._n_bands = len(self)
-        self._barriers: tuple[Sequence[int], Sequence[int]]
+        self.barriers: tuple[Sequence[int], Sequence[int]]
 
     def __str__(self) -> str:
         """Give concise information on the bands."""
@@ -142,7 +150,7 @@ class MultipactorBands(list):
 
         list_of_multipactor_band = \
             _multipactor_to_list_of_multipactor_band(multipactor,
-                                                          instrument_name)
+                                                     instrument_name)
 
         multipactor_bands = cls(list_of_multipactor_band,
                                 multipactor,
@@ -212,30 +220,24 @@ class MultipactorBands(list):
         return multipactor_bands
 
     @property
-    def barriers(self) -> tuple[Sequence[int], Sequence[int]]:
-        """Get list of indexes of lower and upper barriers.
+    def power_is_growing(self) -> list[bool | float]:
+        """Access where power is growing."""
+        value = getattr(self, '_power_is_growing', None)
+        if value is None:
+            raise IOError
+        return value
 
-        Returns
-        -------
-        lower_indexes : Sequence[int]
-            Indexes corresponding to a crossing of lower multipactor barrier.
-        upper_indexes : Sequence[int]
-            Indexes corresponding to a crossing of upper multipactor barrier.
+    @power_is_growing.setter
+    def power_is_growing(self, value: list[bool | float]) -> None:
+        """Set the list, compute multipacting barriers."""
+        self._power_is_growing = value
 
-        """
-        assert hasattr(self, 'power_is_growing'), (
-            "You need to set MultipactorBands.power_is_growing to discriminate"
-            "lower threshold from upper threshold.")
-
-        if hasattr(self, '_barriers'):
-            return self._barriers
-
-        barriers = indexes_of_lower_and_upper_multipactor_barriers(
+        self.barriers = indexes_of_lower_and_upper_multipactor_barriers(
             self.multipactor,
             self.power_is_growing)
-        self._barriers = barriers
-        self._tell_multipactor_band_if_it_reached_upper_threshold(barriers[1])
-        return barriers
+
+        self._tell_multipactor_band_if_it_reached_upper_threshold(
+            self.barriers[1])
 
     def _tell_multipactor_band_if_it_reached_upper_threshold(
             self,
