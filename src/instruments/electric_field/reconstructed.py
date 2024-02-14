@@ -32,6 +32,7 @@ class Reconstructed(IElectricField):
                  powers: Powers,
                  freq_mhz: float,
                  position: np.ndarray = np.linspace(0., 1.3, 201),
+                 z_ohm: float = 50.,
                  **kwargs,
                  ) -> None:
         """Just instantiate."""
@@ -47,9 +48,10 @@ class Reconstructed(IElectricField):
         self._pos_for_fit = [probe.position for probe in self._e_field_probes]
         self._beta = c / freq_mhz * 1e-6
 
-        self._sqrt_power_scaler: float
         self._psi_0: float
         self._ydata: np.ndarray | None = None
+        self._z_ohm = z_ohm
+        self._r_squared: float
 
     @classmethod
     def ylabel(cls) -> str:
@@ -63,19 +65,16 @@ class Reconstructed(IElectricField):
         .. note::
             In contrary to most :class:`Instrument` objects, here ``ydata`` is
             2D. Axis are the following: ``ydata[sample_index, position_index]``
-            .
 
         """
         if self._ydata is not None:
             return self._ydata
 
-        mandatory_args = ('_sqrt_power_scaler', '_psi_0')
-        for arg in mandatory_args:
-            assert hasattr(self, arg)
+        assert hasattr(self, '_psi_0')
 
         ydata = []
         for power, gamma in zip(self._powers.ydata[:, 0], self._powers.gamma):
-            v_f = math.sqrt(power) * self._sqrt_power_scaler
+            v_f = _power_to_volt(power, z_ohm=self._z_ohm)
             ydata.append(voltage_vs_position(self.position,
                                              v_f,
                                              gamma,
@@ -87,32 +86,35 @@ class Reconstructed(IElectricField):
     @property
     def fit_info(self) -> str:
         """Print compact info on fit."""
-        out = [f"$k = ${self._sqrt_power_scaler:2.3f}",
-               rf"$\psi_0 = ${self._psi_0:2.3f}",
-               ]
-        return '\n'.join(out)
+        out = rf"$\psi_0 = ${self._psi_0:2.3f}"
+        if not hasattr(self, '_r_squared'):
+            return out
+
+        return '\n'.join([out,
+                          rf"$R^2 = ${self._r_squared:2.3f}"])
 
     @property
     def label(self) -> str:
         """Label used for legends in plots vs position."""
         return self.fit_info
 
-    def fit_voltage(self) -> None:
+    def fit_voltage(self,
+                    full_output: bool = True) -> None:
         r"""Find out the proper voltage parameters.
 
         Idea is the following: for every sample index we know the forward
         (injected) power :math:`P_f`, :math:`\Gamma`, and
-        :math:`V_\mathrm{coax}` at several pick-ups. We try to find :math:`k`
-        and :math:`\psi_0` to verify:
+        :math:`V_\mathrm{coax}` at several pick-ups. We try to find
+        :math:`\psi_0` to verify:
 
         .. math::
-            |V_\mathrm{coax}(z)| = k\sqrt{P_f} \sqrt{1 + |\Gamma|^2 + 2|\Gamma|
-            \cos{(2\beta z + \psi_0)}}
+            |V_\mathrm{coax}(z)| = \sqrt{P_f Z} \sqrt{1 + |\Gamma|^2
+            + 2|\Gamma| \cos{(2\beta z + \psi_0)}}
 
         """
-        x_0 = np.array([0.003, np.pi])
-        bounds = ([0., -2. * np.pi],
-                  [np.inf, 2. * np.pi])
+        x_0 = np.array([np.pi])
+        bounds = ([-2. * np.pi],
+                  [2. * np.pi])
         xdata = []
         ydata = []
         for e_probe in self._e_field_probes:
@@ -122,21 +124,29 @@ class Reconstructed(IElectricField):
                 xdata.append([p_f, gamma, e_probe.position])
                 ydata.append(e_field)
 
-        to_fit = partial(_model, beta=self._beta)
+        to_fit = partial(_model, beta=self._beta, z_ohm=self._z_ohm)
         result = optimize.curve_fit(to_fit,
                                     xdata=xdata,  # [power, pos] combinations
                                     ydata=ydata,  # resulting voltages
                                     p0=x_0,
                                     bounds=bounds,
+                                    full_output=full_output,
                                     )
-        sqrt_power_scaler, psi_0 = result[0]
-        self._sqrt_power_scaler = sqrt_power_scaler
-        self._psi_0 = psi_0
+        self._psi_0 = result[0][0]
+        if full_output:
+            res_squared = result[2]['fvec']**2
+            expected = np.array(ydata)
+
+            ss_err = np.sum(res_squared)
+            ss_tot = np.sum((expected - expected.mean())**2)
+            r_squared = 1. - ss_err / ss_tot
+            self._r_squared = r_squared
+            print(self.fit_info)
+            print('')
 
     def _compute_voltages(self,
-                          sqrt_power_scaler: float,
                           beta: float,
-                          psi_0: float
+                          psi_0: float,
                           ) -> np.ndarray:
         """Give an the actual voltages we get with given parameters.
 
@@ -144,7 +154,7 @@ class Reconstructed(IElectricField):
 
         """
         actual_voltages = []
-        v_f = sqrt_power_scaler * np.sqrt(self._powers.ydata[:, 0])
+        v_f = _power_to_volt(self._powers.ydata[:, 0], z_ohm=self._z_ohm)
         gamma = self._powers.gamma
 
         for sample_index in self._sample_indexes:
@@ -152,7 +162,7 @@ class Reconstructed(IElectricField):
                                            v_f[sample_index - 1],
                                            gamma[sample_index - 1],
                                            beta,
-                                           psi_0)
+                                           psi_0,)
             actual_voltages.append(voltages)
         actual_voltages = np.array(actual_voltages)
         return actual_voltages
@@ -172,9 +182,9 @@ class Reconstructed(IElectricField):
 
 
 def _model(var: np.ndarray,
-           sqrt_power_scaler: float,
            psi_0: float,
-           beta: float
+           beta: float,
+           z_ohm: float = 50.,
            ) -> float:
     r"""Give voltage for given set of parameters, at proper power and position.
 
@@ -190,8 +200,13 @@ def _model(var: np.ndarray,
 
     """
     power, gamma, pos = var[:, 0], var[:, 1], var[:, 2]
-    v_f = sqrt_power_scaler * np.sqrt(power)
+    v_f = _power_to_volt(power, z_ohm=z_ohm)
     return voltage_vs_position(pos, v_f, gamma, beta, psi_0)
+
+
+def _power_to_volt(power: np.ndarray,
+                   z_ohm: float = 50.) -> np.ndarray:
+    return 2. * np.sqrt(power * z_ohm)
 
 
 @overload
