@@ -60,7 +60,7 @@ class MultipactorTest:
                  freq_mhz: float,
                  swr: float,
                  info: str = '',
-                 sep: str = ';',
+                 sep: str = '\t',
                  verbose: bool = False,
                  ) -> None:
         r"""Create all the pick-ups.
@@ -84,6 +84,11 @@ class MultipactorTest:
         self.filepath = filepath
         df_data = pd.read_csv(filepath, sep=sep, index_col="Sample index")
         self._n_points = len(df_data)
+
+        if df_data.index[0] != 0:
+            print("MultipactorTest.__init__ warning! Your Sample index column "
+                  "does not start at 0. I should patch this, but meanwhile "
+                  " expect some index mismatches.")
 
         imeasurement_point_factory = IMeasurementPointFactory()
         imeasurement_points = imeasurement_point_factory.run(config,
@@ -1023,28 +1028,37 @@ class MultipactorTest:
             Proper docstring.
 
         """
-        voltages = self.get_instruments(
+        field_probes = self.get_instruments(
             FieldProbe,
             measurement_points_to_exclude=measurement_points_to_exclude)
-        zipper = match_with_mp_band(voltages,
+        zipper = match_with_mp_band(field_probes,
                                     multipactor_bands,
                                     assert_positions_match=True,
-                                    find_matching_pairs=False,
-                                    )
-        voltages_low = {}
-        for volt, mp_band in zipper:
+                                    find_matching_pairs=False)
+
+        v_thresholds = {}
+        v_thresholds = {}
+        for field_probe, mp_band in zipper:
             if mp_band is None or len(mp_band) == 0:
-                voltages_low[volt.name] = np.NaN
+                v_thresholds[field_probe.name] = np.NaN
+                v_thresholds[field_probe.name] = np.NaN
                 continue
 
-            last_low_idx = mp_band[-1][-1]
-            last_low_voltage = volt.ydata[last_low_idx]
-            voltages_low[volt.name] = last_low_voltage
+            last_multipactor_band = mp_band[-1]
+
+            last_multipac_idx = last_multipactor_band[-1]
+            last_lower_threshold = field_probe.ydata[last_multipac_idx]
+            v_thresholds[field_probe.name + " low"] = last_lower_threshold
+
+            last_higher_threshold = np.max(
+                field_probe.ydata[last_multipactor_band.to_range()])
+            # v_thresholds[field_probe.name + " high"] = \
+                # last_higher_threshold
 
         tmp_str = r"$SWR_{theor.}$"
         name = f"{tmp_str} = {self.swr}"
-        ser = pd.Series(voltages_low, name=name)
-        return ser
+        lower_series = pd.Series(v_thresholds, name=name)
+        return lower_series
 
     def plot_instruments_y_vs_instrument_x(
             self,
