@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3.4] 2024.02.--
+## [1.4.0] 2024.02.--
 
 ### Added
 
@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - You can now create `MultipactorBands` objects from several other `MultipactorBands` objects. Typical use cases:
  - At a pick-up with a `Penning` and a `CurrentProbe`, merge their multipactor bands.
  - Know when multipactor happens somewhere in the testbench, by merging all the detected multipactor bands.
+- `TestCampaign.somersalo_scaling_law`, `TestCampaign.check_perez` to check some scaling laws
 
 ### Modified
 

@@ -994,7 +994,12 @@ class MultipactorTest:
     def data_for_somersalo_scaling_law(self,
                                        multipactor_bands: MultipactorBands
                                        ) -> pd.Series:
-        """Get the data necessary to plot the Somersalo scaling law."""
+        """Get the data necessary to plot the Somersalo scaling law.
+
+        .. todo::
+            Proper docstring.
+
+        """
         powers = self.get_instrument(Powers)
         assert isinstance(powers, Powers)
 
@@ -1006,6 +1011,39 @@ class MultipactorTest:
              r'Lower multipactor threshold $P_{f, low}$': last_forward_power,
              }
         )
+        return ser
+
+    def data_for_perez(self,
+                       multipactor_bands: Sequence[MultipactorBands],
+                       measurement_points_to_exclude: Sequence[str | IMeasurementPoint] = (),
+                       ) -> pd.Series:
+        """Get the data necessary to check if Perez was right.
+
+        .. todo::
+            Proper docstring.
+
+        """
+        voltages = self.get_instruments(
+            FieldProbe,
+            measurement_points_to_exclude=measurement_points_to_exclude)
+        zipper = match_with_mp_band(voltages,
+                                    multipactor_bands,
+                                    assert_positions_match=True,
+                                    find_matching_pairs=False,
+                                    )
+        voltages_low = {}
+        for volt, mp_band in zipper:
+            if mp_band is None or len(mp_band) == 0:
+                voltages_low[volt.name] = np.NaN
+                continue
+
+            last_low_idx = mp_band[-1][-1]
+            last_low_voltage = volt.ydata[last_low_idx]
+            voltages_low[volt.name] = last_low_voltage
+
+        tmp_str = r"$SWR_{theor.}$"
+        name = f"{tmp_str} = {self.swr}"
+        ser = pd.Series(voltages_low, name=name)
         return ser
 
     def plot_instruments_y_vs_instrument_x(

@@ -331,6 +331,49 @@ class TestCampaign(list):
 
         return axe
 
+    def check_perez(self,
+                    multipactor_bands: Sequence[Sequence[MultipactorBands]],
+                    png_path: Path | None = None,
+                    measurement_points_to_exclude: Sequence[str] = (),
+                    exclude_last_swr: bool = False,
+                    **fig_kw,
+                    ) -> tuple[Axes, pd.DataFrame]:
+        r"""Check that :math:`V_\mathrm{low}` independent from SWR.
+
+        This is from Perez et al.
+
+        .. todo::
+            Proper docstring.
+
+        """
+        frequencies = set([test.freq_mhz for test in self])
+        if len(frequencies) != 1:
+            raise NotImplementedError("Plot over several freqs to implement")
+
+        zipper = zip(self, multipactor_bands, strict=True)
+        if exclude_last_swr:
+            zipper = zip(self[:-1], multipactor_bands[:-1], strict=True)
+
+        fig = plt.figure(**fig_kw)
+        axe = fig.add_subplot(111)
+
+        all_data = [test.data_for_perez(
+            mp_band,
+            measurement_points_to_exclude=measurement_points_to_exclude)
+            for test, mp_band in zipper]
+        df_perez = pd.concat(all_data,
+                             axis=1,
+                             ).T
+        df_perez.plot(grid=True,
+                      ax=axe,
+                      ylabel="Lower threshold $V_{low}$ [V]",
+                      marker='+',
+                      ms=15,
+                      )
+        if png_path is not None:
+            fig.savefig(png_path)
+        return axe, df_perez
+
     def susceptibility_chart(self,
                              electric_field_at: str,
                              multipactor_measured_at: str | None = None,
