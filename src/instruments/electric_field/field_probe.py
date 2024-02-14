@@ -51,8 +51,12 @@ class FieldProbe(IElectricField):
         """Label used for plots."""
         return r"Measured voltage [V]"
 
-    def _patch_data(self, g_probe_in_labview: float = 1.) -> None:
-        """Correct  ``raw_data`` when ``g_probe`` in LabVIEWER is wrong."""
+    def _patch_data(self, g_probe_in_labview: float = -1.) -> None:
+        """Correct  ``raw_data`` when ``g_probe`` in LabVIEWER is wrong.
+
+        The default value for ``g_probe_in_labview`` is only a guess.
+
+        """
         assert hasattr(self, '_a_rack')
         assert hasattr(self, '_b_rack')
         assert self._g_probe is not None
