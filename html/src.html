@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>src package &mdash; MULTIPAC test bench 1.3.3 documentation</title>
+  <title>src package &mdash; MULTIPAC test bench 1.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,7 +15,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=28d163b9"></script>
+        <script src="_static/documentation_options.js?v=9172181d"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -38,7 +38,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.3.3
+                1.4.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -179,7 +179,13 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="src.multipactor_band.multipactor_bands.html">src.multipactor_band.multipactor_bands module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.multipactor_band.multipactor_bands.html#src.multipactor_band.multipactor_bands.MULTIPACTOR_BANDS_MERGERS"><code class="docutils literal notranslate"><span class="pre">MULTIPACTOR_BANDS_MERGERS</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.multipactor_band.multipactor_bands.html#src.multipactor_band.multipactor_bands.MultipactorBands"><code class="docutils literal notranslate"><span class="pre">MultipactorBands</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="src.multipactor_band.util.html">src.multipactor_band.util module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.multipactor_band.util.html#src.multipactor_band.util.match_with_mp_band"><code class="docutils literal notranslate"><span class="pre">match_with_mp_band()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.multipactor_band.util.html#src.multipactor_band.util.positions_match"><code class="docutils literal notranslate"><span class="pre">positions_match()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -193,6 +199,7 @@
 <li class="toctree-l4"><a class="reference internal" href="src.theoretical.somersalo.html#src.theoretical.somersalo.webdplotdigitizerpoints_to_data"><code class="docutils literal notranslate"><span class="pre">webdplotdigitizerpoints_to_data()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.theoretical.somersalo.html#src.theoretical.somersalo.plot_somersalo_analytical"><code class="docutils literal notranslate"><span class="pre">plot_somersalo_analytical()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.theoretical.somersalo.html#src.theoretical.somersalo.plot_somersalo_measured"><code class="docutils literal notranslate"><span class="pre">plot_somersalo_measured()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.theoretical.somersalo.html#src.theoretical.somersalo.somersalo_scaling_law"><code class="docutils literal notranslate"><span class="pre">somersalo_scaling_law()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="src.theoretical.susceptibility.html">src.theoretical.susceptibility module</a><ul>
@@ -251,9 +258,13 @@
 <li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.get_instrument"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.get_instrument()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.reconstruct_voltage_along_line"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.reconstruct_voltage_along_line()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.plot_multipactor_limits"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.plot_multipactor_limits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.plot_data_at_multipactor_thresholds"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.plot_data_at_multipactor_thresholds()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.data_for_somersalo"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.data_for_somersalo()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.data_for_susceptibility"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.data_for_susceptibility()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.data_for_somersalo_scaling_law"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.data_for_somersalo_scaling_law()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.data_for_perez"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.data_for_perez()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.plot_instruments_y_vs_instrument_x"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.plot_instruments_y_vs_instrument_x()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.output_filepath"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.output_filepath()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.types"><code class="docutils literal notranslate"><span class="pre">types()</span></code></a></li>
@@ -265,8 +276,19 @@
 <li class="toctree-l3"><a class="reference internal" href="src.test_campaign.html#src.test_campaign.TestCampaign.from_filepaths"><code class="docutils literal notranslate"><span class="pre">TestCampaign.from_filepaths()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.test_campaign.html#src.test_campaign.TestCampaign.add_post_treater"><code class="docutils literal notranslate"><span class="pre">TestCampaign.add_post_treater()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.test_campaign.html#src.test_campaign.TestCampaign.detect_multipactor"><code class="docutils literal notranslate"><span class="pre">TestCampaign.detect_multipactor()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="src.test_campaign.html#src.test_campaign.TestCampaign.somersalo"><code class="docutils literal notranslate"><span class="pre">TestCampaign.somersalo()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="src.test_campaign.html#src.test_campaign.TestCampaign.susceptibility_plot"><code class="docutils literal notranslate"><span class="pre">TestCampaign.susceptibility_plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.test_campaign.html#src.test_campaign.TestCampaign.somersalo_chart"><code class="docutils literal notranslate"><span class="pre">TestCampaign.somersalo_chart()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.test_campaign.html#src.test_campaign.TestCampaign.check_somersalo_scaling_law"><code class="docutils literal notranslate"><span class="pre">TestCampaign.check_somersalo_scaling_law()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.test_campaign.html#src.test_campaign.TestCampaign.check_perez"><code class="docutils literal notranslate"><span class="pre">TestCampaign.check_perez()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.test_campaign.html#src.test_campaign.TestCampaign.susceptibility_chart"><code class="docutils literal notranslate"><span class="pre">TestCampaign.susceptibility_chart()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.test_campaign.html#src.test_campaign.TestCampaign.animate_instruments_vs_position"><code class="docutils literal notranslate"><span class="pre">TestCampaign.animate_instruments_vs_position()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.test_campaign.html#src.test_campaign.TestCampaign.reconstruct_voltage_along_line"><code class="docutils literal notranslate"><span class="pre">TestCampaign.reconstruct_voltage_along_line()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.test_campaign.html#src.test_campaign.TestCampaign.plot_instruments_vs_time"><code class="docutils literal notranslate"><span class="pre">TestCampaign.plot_instruments_vs_time()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.test_campaign.html#src.test_campaign.TestCampaign.scatter_instruments_data"><code class="docutils literal notranslate"><span class="pre">TestCampaign.scatter_instruments_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.test_campaign.html#src.test_campaign.TestCampaign.plot_instruments_y_vs_instrument_x"><code class="docutils literal notranslate"><span class="pre">TestCampaign.plot_instruments_y_vs_instrument_x()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.test_campaign.html#src.test_campaign.TestCampaign.plot_barriers_vs_frequency"><code class="docutils literal notranslate"><span class="pre">TestCampaign.plot_barriers_vs_frequency()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.test_campaign.html#src.test_campaign.TestCampaign.plot_barriers_vs_swr"><code class="docutils literal notranslate"><span class="pre">TestCampaign.plot_barriers_vs_swr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.test_campaign.html#src.test_campaign.TestCampaign.plot_multipactor_limits"><code class="docutils literal notranslate"><span class="pre">TestCampaign.plot_multipactor_limits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.test_campaign.html#src.test_campaign.TestCampaign.plot_data_at_multipactor_thresholds"><code class="docutils literal notranslate"><span class="pre">TestCampaign.plot_data_at_multipactor_thresholds()</span></code></a></li>
 </ul>
 </li>
 </ul>

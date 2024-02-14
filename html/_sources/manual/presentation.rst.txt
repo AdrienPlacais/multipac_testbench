@@ -15,3 +15,6 @@ Check :ref:`examples` for a quick tour of the available commands.
 
 .. todo::
    Ease plotting anything vs anyotherthing. Rely more on pd.DataFrame?
+
+.. todo::
+   LabVIEWER data start at index == 1!!!! Fix this, every index list should always start at 0

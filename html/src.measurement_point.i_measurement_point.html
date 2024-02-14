@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>src.measurement_point.i_measurement_point module &mdash; MULTIPAC test bench 1.3.3 documentation</title>
+  <title>src.measurement_point.i_measurement_point module &mdash; MULTIPAC test bench 1.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,7 +15,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=28d163b9"></script>
+        <script src="_static/documentation_options.js?v=9172181d"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -38,7 +38,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.3.3
+                1.4.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -147,20 +147,20 @@ desired instrument class.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.measurement_point.i_measurement_point.IMeasurementPoint.detect_multipactor">
-<span class="sig-name descname"><span class="pre">detect_multipactor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">multipac_detector:</span> <span class="pre">~typing.Callable[[~numpy.ndarray],</span> <span class="pre">~numpy.ndarray[~numpy.bool_]],</span> <span class="pre">instrument_class:</span> <span class="pre">~abc.ABCMeta</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'multipac_testbench.src.instruments.instrument.Instrument'&gt;</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#src.measurement_point.i_measurement_point.IMeasurementPoint.detect_multipactor" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">detect_multipactor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">multipac_detector:</span> <span class="pre">~typing.Callable[[~numpy.ndarray],</span> <span class="pre">~numpy.ndarray[~numpy.bool_]],</span> <span class="pre">instrument_class:</span> <span class="pre">~abc.ABCMeta</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'multipac_testbench.src.instruments.instrument.Instrument'&gt;</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">MultipactorBands</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#src.measurement_point.i_measurement_point.IMeasurementPoint.detect_multipactor" title="Link to this definition"></a></dt>
 <dd><p>Detect multipactor with <code class="docutils literal notranslate"><span class="pre">multipac_detector</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="src.measurement_point.i_measurement_point.IMeasurementPoint.plot_instrument_vs_time">
-<span class="sig-name descname"><span class="pre">plot_instrument_vs_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instrument_class_axes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">ABCMeta</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Axes</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instruments_to_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ABCMeta</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">subplot_kw</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#src.measurement_point.i_measurement_point.IMeasurementPoint.plot_instrument_vs_time" title="Link to this definition"></a></dt>
-<dd><p>Plot the signal of the <code class="docutils literal notranslate"><span class="pre">instruments_to_plot</span></code> of this object.</p>
+<dt class="sig sig-object py" id="src.measurement_point.i_measurement_point.IMeasurementPoint.plot_instruments_vs_time">
+<span class="sig-name descname"><span class="pre">plot_instruments_vs_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instrument_class_axes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">ABCMeta</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Axes</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instruments_class_to_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">ABCMeta</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">subplot_kw</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#src.measurement_point.i_measurement_point.IMeasurementPoint.plot_instruments_vs_time" title="Link to this definition"></a></dt>
+<dd><p>Plot signal of <code class="docutils literal notranslate"><span class="pre">instruments_class_to_plot</span></code> of this object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>instrument_class_axes</strong> (<em>dict</em><em>[</em><em>ABCMeta</em><em>, </em><em>Axes</em><em>]</em>) – Dictionary linking the class of the instruments to plot with the
 associated axes.</p></li>
-<li><p><strong>instruments_to_plot</strong> (<em>tuple</em><em>[</em><em>ABCMeta</em><em>, </em><em>...</em><em>]</em>) – Class of the instruments to be plotted.</p></li>
+<li><p><strong>instruments_class_to_plot</strong> (<em>Sequence</em><em>[</em><em>ABCMeta</em><em>]</em>) – Class of the instruments to be plotted.</p></li>
 <li><p><strong>raw</strong> (<em>bool</em>) – If the raw of the post-treated signal should be plotted.</p></li>
 <li><p><strong>subplot_kw</strong> – Other keyword arguments passed to the <code class="docutils literal notranslate"><span class="pre">plot_vs_time</span></code> methods.</p></li>
 </ul>
@@ -170,7 +170,7 @@ associated axes.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.measurement_point.i_measurement_point.IMeasurementPoint.scatter_instruments_data">
-<span class="sig-name descname"><span class="pre">scatter_instruments_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instrument_class_axes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">ABCMeta</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Axes</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xdata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#src.measurement_point.i_measurement_point.IMeasurementPoint.scatter_instruments_data" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">scatter_instruments_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instrument_class_axes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">ABCMeta</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Axes</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xdata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multipactor_bands</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultipactorBands</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#src.measurement_point.i_measurement_point.IMeasurementPoint.scatter_instruments_data" title="Link to this definition"></a></dt>
 <dd><p>Scatter data measured by desired instruments.</p>
 </dd></dl>
 

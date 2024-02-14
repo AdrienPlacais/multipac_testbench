@@ -14,3 +14,4 @@ Submodules
 
    src.multipactor_band.multipactor_band
    src.multipactor_band.multipactor_bands
+   src.multipactor_band.util
