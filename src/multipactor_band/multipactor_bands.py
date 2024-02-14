@@ -93,6 +93,7 @@ class MultipactorBands(list):
             self.power_is_growing = power_is_growing
 
         self._n_bands = len(self)
+        self._barriers: tuple[Sequence[int], Sequence[int]]
 
     def __str__(self) -> str:
         """Give concise information on the bands."""
@@ -140,7 +141,7 @@ class MultipactorBands(list):
         multipactor = multipac_detector(instrument_ydata)
 
         list_of_multipactor_band = \
-            _boolean_multipactor_array_to_list_of_mp_band(multipactor,
+            _multipactor_to_list_of_multipactor_band(multipactor,
                                                           instrument_name)
 
         multipactor_bands = cls(list_of_multipactor_band,
@@ -193,7 +194,7 @@ class MultipactorBands(list):
                           for multipactor_band in multiple_multipactor_bands]
         multipactor = MULTIPACTOR_BANDS_MERGERS[union](multipactor_in)
         list_of_multipactor_band = \
-            _boolean_multipactor_array_to_list_of_mp_band(multipactor, name)
+            _multipactor_to_list_of_multipactor_band(multipactor, name)
 
         positions = [mp_band.position
                      for mp_band in multiple_multipactor_bands]
@@ -225,13 +226,33 @@ class MultipactorBands(list):
         assert hasattr(self, 'power_is_growing'), (
             "You need to set MultipactorBands.power_is_growing to discriminate"
             "lower threshold from upper threshold.")
+
+        if hasattr(self, '_barriers'):
+            return self._barriers
+
         barriers = indexes_of_lower_and_upper_multipactor_barriers(
             self.multipactor,
             self.power_is_growing)
+        self._barriers = barriers
+        self._tell_multipactor_band_if_it_reached_upper_threshold(barriers[1])
         return barriers
 
+    def _tell_multipactor_band_if_it_reached_upper_threshold(
+            self,
+            upper_indexes: Sequence[int]
+            ) -> None:
+        """Save in :class:`MultipactorBand` objects if upper was reached."""
+        for multipactor_band in self:
+            if multipactor_band[0] in upper_indexes:
+                multipactor_band.upper_threshold_was_reached = True
+                continue
+            if multipactor_band[-1] in upper_indexes:
+                multipactor_band.upper_threshold_was_reached = True
+                continue
+            multipactor_band.upper_threshold_was_reached = False
 
-def _boolean_multipactor_array_to_list_of_mp_band(
+
+def _multipactor_to_list_of_multipactor_band(
         multipactor: np.ndarray[np.bool_],
         instrument_name: str,
 ) -> list[MultipactorBand]:
@@ -240,8 +261,11 @@ def _boolean_multipactor_array_to_list_of_mp_band(
     starts_ends = start_and_end_of_contiguous_true_zones(multipactor)
 
     list_of_multipactor_band = [
-        MultipactorBand(start, end, instrument_name)
-        for start, end in starts_ends
+        MultipactorBand(start,
+                        end,
+                        instrument_name,
+                        i)
+        for i, (start, end) in enumerate(starts_ends)
     ]
     return list_of_multipactor_band
 

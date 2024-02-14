@@ -19,6 +19,10 @@ class MultipactorBand(list):
 
     Also, holds some methods to ease plotting.
 
+    .. note::
+        If upper threshold was not reached, ``first_index`` and ``last_index``
+        correspond to a lower threshold.
+
     .. todo::
         A .plot method for IMeasurementPoint._add_multipactor_vs_time
 
@@ -27,20 +31,25 @@ class MultipactorBand(list):
     def __init__(self,
                  first_index: int,
                  last_index: int,
-                 detector_instrument_name: str
+                 detector_instrument_name: str,
+                 multipactor_band_index: int,
                  ) -> None:
         """Create the objects with its indexes."""
         indexes = [i for i in range(first_index, last_index + 1)]
         super().__init__(indexes)
 
         self.detector_instrument_name = detector_instrument_name
+        self.multipactor_band_index = multipactor_band_index
 
-        self.multipactor_band_index: int = 0
+        self.upper_threshold_was_reached: bool
 
     def __str__(self) -> str:
         """Give concise information on object."""
         out = f"zone #{self.multipactor_band_index}, "
-        out += f"detected by {self.detector_instrument_name}"
+        out += f"detected by {self.detector_instrument_name},"
+        out += " reached upper threshold: "
+        reached = getattr(self, 'upper_threshold_was_reached', None)
+        out += str(reached)
         return out
 
     def to_range(self) -> range:
