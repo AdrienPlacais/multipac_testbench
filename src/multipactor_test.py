@@ -1021,11 +1021,21 @@ class MultipactorTest:
     def data_for_perez(self,
                        multipactor_bands: Sequence[MultipactorBands],
                        measurement_points_to_exclude: Sequence[str | IMeasurementPoint] = (),
+                       probes_conditioned_during_test: Sequence[str] = (),
                        ) -> pd.Series:
         """Get the data necessary to check if Perez was right.
 
         .. todo::
             Proper docstring.
+
+        .. todo::
+            There are way cleaner ways to do this.
+
+        .. todo::
+            If multipactor happens somewhere and then is conditioned, this
+            information does not appear and we plot the last detected
+            multipactor.
+            Hence the dirty patch probes_conditioned_during_test.
 
         """
         field_probes = self.get_instruments(
@@ -1037,28 +1047,39 @@ class MultipactorTest:
                                     find_matching_pairs=False)
 
         v_thresholds = {}
-        v_thresholds = {}
         for field_probe, mp_band in zipper:
             if mp_band is None or len(mp_band) == 0:
-                v_thresholds[field_probe.name] = np.NaN
-                v_thresholds[field_probe.name] = np.NaN
+                v_thresholds[field_probe.name + " low"] = np.NaN
+                v_thresholds[field_probe.name + " high"] = np.NaN
                 continue
 
             last_multipactor_band = mp_band[-1]
+
+            # Dirty patch
+            if field_probe.name in probes_conditioned_during_test:
+                last_multipactor_band = None
+
+            if last_multipactor_band is None:
+                v_thresholds[field_probe.name + " low"] = np.NaN
+                v_thresholds[field_probe.name + " high"] = np.NaN
+                continue
 
             last_multipac_idx = last_multipactor_band[-1]
             last_lower_threshold = field_probe.ydata[last_multipac_idx]
             v_thresholds[field_probe.name + " low"] = last_lower_threshold
 
-            last_higher_threshold = np.max(
-                field_probe.ydata[last_multipactor_band.to_range()])
-            # v_thresholds[field_probe.name + " high"] = \
-                # last_higher_threshold
+            if not last_multipactor_band.upper_threshold_was_reached:
+                last_higher_threshold = np.NaN
+            else:
+                first_multipac_idx = last_multipactor_band[0]
+                last_higher_threshold = field_probe.ydata[first_multipac_idx]
+
+            v_thresholds[field_probe.name + " high"] = last_higher_threshold
 
         tmp_str = r"$SWR_{theor.}$"
         name = f"{tmp_str} = {self.swr}"
-        lower_series = pd.Series(v_thresholds, name=name)
-        return lower_series
+        df_thresholds = pd.Series(v_thresholds, name=name)
+        return df_thresholds
 
     def plot_instruments_y_vs_instrument_x(
             self,

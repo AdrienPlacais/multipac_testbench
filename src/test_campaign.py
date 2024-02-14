@@ -335,7 +335,8 @@ class TestCampaign(list):
                     multipactor_bands: Sequence[Sequence[MultipactorBands]],
                     png_path: Path | None = None,
                     measurement_points_to_exclude: Sequence[str] = (),
-                    exclude_last_swr: bool = False,
+                    probes_conditioned_during_tests: Sequence[Sequence[str]] = (
+                    ),
                     **fig_kw,
                     ) -> tuple[Axes, pd.DataFrame]:
         r"""Check that :math:`V_\mathrm{low}` independent from SWR.
@@ -345,31 +346,42 @@ class TestCampaign(list):
         .. todo::
             Proper docstring.
 
+        .. todo::
+            Clean the dirty patch probes_conditioned_during_test
+
         """
         frequencies = set([test.freq_mhz for test in self])
         if len(frequencies) != 1:
             raise NotImplementedError("Plot over several freqs to implement")
 
         zipper = zip(self, multipactor_bands, strict=True)
-        if exclude_last_swr:
-            zipper = zip(self[:-1], multipactor_bands[:-1], strict=True)
+
+        if len(probes_conditioned_during_tests) == 0:
+            probes_conditioned_during_tests = [() for _ in self]
 
         fig = plt.figure(**fig_kw)
         axe = fig.add_subplot(111)
 
         all_data = [test.data_for_perez(
             mp_band,
-            measurement_points_to_exclude=measurement_points_to_exclude)
-            for test, mp_band in zipper]
-        df_perez = pd.concat(all_data,
-                             axis=1,
-                             ).T
-        df_perez.plot(grid=True,
-                      ax=axe,
-                      ylabel="Lower threshold $V_{low}$ [V]",
-                      marker='+',
-                      ms=15,
-                      )
+            measurement_points_to_exclude=measurement_points_to_exclude,
+            probes_conditioned_during_test=probes_conditioned_during_tests[i])
+            for i, (test, mp_band) in enumerate(zipper)]
+        df_perez = pd.concat(all_data, axis=1).T
+
+        df_perez.filter(like='low').plot(grid=True,
+                                         ax=axe,
+                                         ylabel="Thresholds $V$ [V]",
+                                         marker='o',
+                                         ms=10,
+                                         )
+        axe.set_prop_cycle(None)
+        df_perez.filter(like='high').plot(grid=True,
+                                          ax=axe,
+                                          ylabel="Thresholds $V$ [V]",
+                                          marker='^',
+                                          ms=10,
+                                          )
         if png_path is not None:
             fig.savefig(png_path)
         return axe, df_perez
