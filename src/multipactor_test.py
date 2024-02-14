@@ -712,7 +712,7 @@ class MultipactorTest:
     def reconstruct_voltage_along_line(
             self,
             name: str,
-            probes_to_ignore: Sequence[str | FieldProbe],
+            probes_to_ignore: Sequence[str | FieldProbe] = (),
     ) -> None:
         """Reconstruct the voltage profile from the e field probes."""
         e_field_probes = self._instruments_by_class(FieldProbe,
