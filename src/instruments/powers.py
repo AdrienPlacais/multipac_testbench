@@ -59,19 +59,19 @@ class Powers(Instrument):
         if n_invalid > 0:
             gamma[invalid_indexes] = np.NaN
             if warn_reflected_higher_than_forward:
-                print(f"Warning! {n_invalid} points where removed in SWR "
-                      "calculation, where reflected power was higher than to "
-                      f"forward power. See instruments.powers for more info.")
+                print(f"Powers._compute_gamma warning! {n_invalid} points were"
+                      " removed in SWR calculation, where reflected power was "
+                      "higher than to forward power.")
 
         invalid_indexes = np.where(np.abs(gamma - 1.) < tol)[0]
         n_invalid = len(invalid_indexes)
         if n_invalid > 0:
             gamma[invalid_indexes] = np.NaN
             if warn_gamma_too_close_to_unity:
-                print(f"Warning! {n_invalid} points where removed in SWR "
-                      "calculation, where reflected power was too close to "
-                      f"forward power. Tolerance over Gamma was: {tol = }. See"
-                      " instruments.powers for more info.")
+                print(f"Powers._compute_gamma warning! {n_invalid} points were"
+                      "removed in SWR calculation, where reflected power was "
+                      "too close to forward power. Tolerance over Gamma was: "
+                      f"{tol = }.")
         return gamma
 
     @property
