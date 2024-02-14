@@ -1,0 +1,143 @@
+# ==================================
+[global]
+[global.instruments_kw]
+[global.instruments_kw.NI9205_both_powers]
+class_name = "Powers"
+column_header = ["NI9205_Power1", "NI9205_Power2"]
+
+# ==================================
+[E1]
+position = 0e0
+
+[E1.instruments_kw]
+[E1.instruments_kw.NI9205_MP1l]
+class_name = "CurrentProbe"
+
+[E1.instruments_kw.NI9205_E1]
+class_name = "ElectricFieldProbe"
+g_probe = -77.3
+patch = true
+calibration_file = "../data/calibration/E1_fit_calibration.csv"
+
+# ==================================
+[V1]
+position = 0.130
+
+[V1.instruments_kw]
+[V1.instruments_kw.NI9205_Penning1]
+class_name = "Penning"
+
+# ==================================
+[E2]
+position = 0.26
+
+[E2.instruments_kw]
+[E2.instruments_kw.NI9205_MP2l]
+class_name = "CurrentProbe"
+
+[E2.instruments_kw.NI9205_E2]
+class_name = "ElectricFieldProbe"
+g_probe = -74.4
+calibration_file = "../data/calibration/E2_fit_calibration.csv"
+patch = true
+
+# ==================================
+[E3]
+position = 0.39
+
+[E3.instruments_kw]
+[E3.instruments_kw.NI9205_MP3l]
+class_name = "CurrentProbe"
+
+[E3.instruments_kw.NI9205_E3]
+class_name = "ElectricFieldProbe"
+g_probe = -73.9
+calibration_file = "../data/calibration/E3_fit_calibration.csv"
+patch = true
+
+# ==================================
+[V2]
+position = 0.611
+
+[V2.instruments_kw]
+[V2.instruments_kw.NI9205_Penning]
+class_name = "Penning"
+
+# ==================================
+[E4]
+position = 0.611
+
+[E4.instruments_kw]
+[E4.instruments_kw.NI9205_MP4l]
+class_name = "CurrentProbe"
+
+[E4.instruments_kw.NI9205_E4]
+class_name = "ElectricFieldProbe"
+g_probe = -74.6
+calibration_file = "../data/calibration/E4_fit_calibration.csv"
+patch = true
+
+# [E8]
+# position = 0.611
+# 
+# [E8.instruments_kw]
+# [E8.instruments_kw.NI9205_MP8l]
+# class_name = "CurrentProbe"
+
+# ==================================
+# [OF]
+# position = 0.656
+# 
+# [OF.instruments_kw]
+# [OF.instruments_kw.NI9205_Arc1]
+# class_name = "OpticalFibre"
+
+# ==================================
+[E5]
+position = 0.832
+
+[E5.instruments_kw]
+[E5.instruments_kw.NI9205_MP5l]
+class_name = "CurrentProbe"
+
+[E5.instruments_kw.NI9205_E5]
+class_name = "ElectricFieldProbe"
+g_probe = -75.5
+calibration_file = "../data/calibration/E5_fit_calibration.csv"
+patch = true
+
+# ==================================
+[E6]
+position = 0.962
+
+[E6.instruments_kw]
+[E6.instruments_kw.NI9205_MP6l]
+class_name = "CurrentProbe"
+
+[E6.instruments_kw.NI9205_E6]
+class_name = "ElectricFieldProbe"
+g_probe = -75.1
+calibration_file = "../data/calibration/E6_fit_calibration.csv"
+patch = true
+
+# ==================================
+[V3]
+position = 1.092
+
+[V3.instruments_kw]
+[V3.instruments_kw.NI9205_Penning2]
+class_name = "Penning"
+
+# ==================================
+[E7]
+position = 1.222
+
+[E7.instruments_kw]
+[E7.instruments_kw.NI9205_MP7l]
+class_name = "CurrentProbe"
+
+[E7.instruments_kw.NI9205_E7]
+class_name = "ElectricFieldProbe"
+g_probe = -74.9
+calibration_file = "../data/calibration/E7_fit_calibration.csv"
+patch = true
