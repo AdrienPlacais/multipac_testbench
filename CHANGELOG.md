@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.4.0] 2024.02.--
+## [1.4.0] 2024-02-14
 
 ### Added
 
@@ -32,18 +32,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
-- The `multipactor_bands` attributes of `Instrument` and `IMeasurementPoint` will be removed. It will be mandatory to explicitely pass this argument to following methods:
- - `plot_multipactor_limits`
- - `somersalo_chart`
- - `susceptibility_chart`
+- The `multipactor_bands` attributes of `Instrument` and `IMeasurementPoint` will be removed. It will be mandatory to explicitely pass this argument when you want to plot multipactor limits.
 
-## [1.3.3] 2024.02.10
+### Fixed
+- The fitting of the electric field over the probes now work correctly.
+
+## [1.3.3] 2024-02-10
 
 ### Added
 
 - FieldProbe data can be reconstructed to avoid wrong G probe. Set `patch = True` and give a `calibration_file` in corresponding `.toml` entry.
 
-## [1.3.2] 2024.02.09
+## [1.3.2] 2024-02-09
 
 ### Added
 
@@ -51,7 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `MultipactorTest.get_instruments` handles more use cases.
 - `MultipactorTest.plot_instruments_y_vs_instrument_x` method.
 
-## [1.3.1] 2024.02.04
+## [1.3.1] 2024-02-04
 
 ### Added
 
@@ -65,7 +65,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `MultipactorTest.set_multipac_detector()`.
 
-## [1.3.0] - 2024.02.03
+## [1.3.0] - 2024-02-03
 
 ### Added
 
