@@ -997,7 +997,8 @@ class MultipactorTest:
         return somersalo_data
 
     def data_for_somersalo_scaling_law(self,
-                                       multipactor_bands: MultipactorBands
+                                       multipactor_bands: MultipactorBands,
+                                       use_theoretical_r: bool = False,
                                        ) -> pd.Series:
         """Get the data necessary to plot the Somersalo scaling law.
 
@@ -1010,6 +1011,11 @@ class MultipactorTest:
 
         last_low_idx = multipactor_bands[-1][-1]
         reflection_coeff = powers.gamma[last_low_idx]
+        if use_theoretical_r:
+            if np.isinf(self.swr):
+                reflection_coeff = 1.
+            else:
+                reflection_coeff = (self.swr - 1.) / (self.swr + 1.)
         last_forward_power = powers.forward[last_low_idx]
         ser = pd.Series(
             {'$R$': reflection_coeff,

@@ -26,9 +26,11 @@ from multipac_testbench.src.multipactor_band.multipactor_bands import \
     MultipactorBands
 from multipac_testbench.src.multipactor_test import MultipactorTest
 from multipac_testbench.src.theoretical.somersalo import (
-    plot_somersalo_analytical, plot_somersalo_measured, somersalo_base_plot, somersalo_scaling_law)
+    plot_somersalo_analytical, plot_somersalo_measured, somersalo_base_plot,
+    somersalo_scaling_law)
 from multipac_testbench.src.theoretical.susceptibility import \
     measured_to_susceptibility_coordinates
+from multipac_testbench.src.util import helper
 from scipy.optimize import curve_fit
 
 
@@ -245,6 +247,8 @@ class TestCampaign(list):
                                     show_fit: bool = True,
                                     png_path: Path | None = None,
                                     remove_last_point_for_fit: bool = False,
+                                    use_theoretical_r: bool = False,
+                                    full_output: bool = True,
                                     **fig_kw,
                                     ) -> Axes:
         r"""Represent evolution of forward power threshold with :math:`R`.
@@ -274,9 +278,14 @@ class TestCampaign(list):
             To perform a fit and plot it.
         png_path : Path | None
             If provided, the resulting figure will be saved at this location.
-        remove_last_point_for_fit : bool
+        remove_last_point_for_fit : bool, optional
             A dirty patch to remove the last point from the fit. Used in a
             study were I wanted to plot this point but exclude it from the fit.
+            The default is False.
+        use_theoretical_r : bool, optional
+            Another patch to allow fitting and plotting using the theoretical
+            reflection coefficient instead of the one calculated from
+            :math:`P_f` and :math:`P_r`. The default is False.
         fig_kw :
             Other keyword arguments passed to Figure.
 
@@ -292,8 +301,11 @@ class TestCampaign(list):
         fig = plt.figure(**fig_kw)
         axe = fig.add_subplot(111)
         zipper = zip(self, multipactor_bands, strict=True)
-        data_for_somersalo = [test.data_for_somersalo_scaling_law(mp_band)
-                              for (test, mp_band) in zipper]
+        data_for_somersalo = [
+            test.data_for_somersalo_scaling_law(
+                mp_band,
+                use_theoretical_r=use_theoretical_r)
+            for (test, mp_band) in zipper]
         df_for_somersalo = pd.concat(data_for_somersalo, axis=1).T
 
         axe = df_for_somersalo.plot(
@@ -313,14 +325,20 @@ class TestCampaign(list):
                 r_fit = r_fit[:-1]
                 p_fit = p_fit[:-1]
 
-            out = curve_fit(f=somersalo_scaling_law,
-                            xdata=r_fit,
-                            ydata=p_fit)
-            popt = out[0]
-            tmp_str = r'$P_{TW}$'
+            result = curve_fit(f=somersalo_scaling_law,
+                               xdata=r_fit,
+                               ydata=p_fit,
+                               full_output=full_output)
+            popt = result[0]
+            tmp_str = r'$P_{TW}$ '
+            if full_output:
+                r_squared = helper.r_squared(result[2]['fvec'], p_fit)
+                tmp_str = f'Fit ({tmp_str} = {popt[0]:3.1f}W, $R^2$ = {r_squared:3.3f})'
+            else:
+                tmp_str = f'Fit ({tmp_str} = {popt[0]:3.1f}W)'
             df_fitted = pd.DataFrame(
                 {'$R$': R,
-                 f'Fit ({tmp_str} = {popt[0]:3.1f}W)': somersalo_scaling_law(R, *popt)
+                 tmp_str: somersalo_scaling_law(R, *popt)
                  })
             df_fitted.plot(ax=axe,
                            x=0,

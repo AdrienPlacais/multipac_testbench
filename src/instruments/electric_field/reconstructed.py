@@ -20,6 +20,7 @@ from multipac_testbench.src.instruments.electric_field.field_probe import \
 from multipac_testbench.src.instruments.electric_field.i_electric_field import \
     IElectricField
 from multipac_testbench.src.instruments.powers import Powers
+from multipac_testbench.src.util.helper import r_squared
 
 
 class Reconstructed(IElectricField):
@@ -108,7 +109,7 @@ class Reconstructed(IElectricField):
         :math:`\psi_0` to verify:
 
         .. math::
-            |V_\mathrm{coax}(z)| = \sqrt{P_f Z} \sqrt{1 + |\Gamma|^2
+            |V_\mathrm{coax}(z)| = 2\sqrt{P_f Z} \sqrt{1 + |\Gamma|^2
             + 2|\Gamma| \cos{(2\beta z + \psi_0)}}
 
         """
@@ -134,13 +135,14 @@ class Reconstructed(IElectricField):
                                     )
         self._psi_0 = result[0][0]
         if full_output:
-            res_squared = result[2]['fvec']**2
-            expected = np.array(ydata)
+            self._r_squared = r_squared(result[2]['fvec'], np.array(ydata))
+            # res_squared = result[2]['fvec']**2
+            # expected = np.array(ydata)
 
-            ss_err = np.sum(res_squared)
-            ss_tot = np.sum((expected - expected.mean())**2)
-            r_squared = 1. - ss_err / ss_tot
-            self._r_squared = r_squared
+            # ss_err = np.sum(res_squared)
+            # ss_tot = np.sum((expected - expected.mean())**2)
+            # r_squared = 1. - ss_err / ss_tot
+            # self._r_squared = r_squared
             print(self.fit_info)
             print('')
 
