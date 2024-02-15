@@ -947,7 +947,7 @@ class MultipactorTest:
             multipactor_bands)
 
         z_ohm = 50.
-        d_mm = .5 * (46.6 - 18.6)
+        d_mm = .5 * (38.78 - 16.87)
         print("MultipactorTest.data_for_somersalo warning! Used default "
               f"{d_mm = }")
         somersalo_data = {
@@ -986,7 +986,7 @@ class MultipactorTest:
         last_fields = electric_field.values_at_barriers_fully_conditioned(
             multipactor_bands)
 
-        d_mm = .5 * (46.6 - 18.6)
+        d_mm = .5 * (38.78 - 16.87)
         print("MultipactorTest.data_for_susceptibility warning! Used default "
               f"{d_mm = }")
         somersalo_data = {
