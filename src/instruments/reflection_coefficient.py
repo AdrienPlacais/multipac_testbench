@@ -1,0 +1,78 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+r"""Define the reflection coefficient virtual probe.
+
+As for now, it is always a real, i.e. it is :math:`R = |\Gamma|`.
+
+"""
+from typing import Self
+
+import numpy as np
+import pandas as pd
+from multipac_testbench.src.instruments.power import (ForwardPower,
+                                                      ReflectedPower)
+from multipac_testbench.src.instruments.virtual_instrument import \
+    VirtualInstrument
+
+
+class ReflectionCoefficient(VirtualInstrument):
+    r"""Store the reflection coefficient.
+
+    We use the definition:
+
+    .. math::
+
+        R = \frac{V_r}{V_f} = \sqrt{\frac{P_r}{P_f}}
+
+    where :math:`P_r` is the reflected power and :math:`P_f` is the forward
+    power.
+
+    """
+
+    @classmethod
+    def from_powers(cls,
+                    forward: ForwardPower,
+                    reflected: ReflectedPower,
+                    name: str = 'Reflection_coefficient',
+                    ) -> Self:
+        """Compute the reflection coefficient from given :class:`.Power`."""
+        data = _compute_reflection_coef(forward.data, reflected.data)
+        ser_data = pd.Series(data, name=name)
+        return cls(name=name, raw_data=ser_data, position=np.NaN)
+
+    @classmethod
+    def ylabel(cls) -> str:
+        """Label used for plots."""
+        return "Reflection coefficient $R$"
+
+
+def _compute_reflection_coef(forward_data: np.ndarray,
+                             reflected_data: np.ndarray,
+                             warn_reflected_higher_than_forward: bool = True,
+                             warn_gamma_too_close_to_unity: bool = True,
+                             tol: float = 5e-2,
+                             ) -> np.ndarray:
+    r"""Compute the reflection coefficient :math:`R`."""
+    reflection_coefficient = np.abs(np.sqrt(reflected_data / forward_data))
+
+    invalid_indexes = np.where(reflection_coefficient > 1.)[0]
+    n_invalid = len(invalid_indexes)
+    if n_invalid > 0:
+        reflection_coefficient[invalid_indexes] = np.NaN
+        if warn_reflected_higher_than_forward:
+            print("ReflectionCoefficient._compute_reflection_coef warning!"
+                  f" {n_invalid} points were removed in R calculation, "
+                  "where reflected power was higher than to forward power."
+                  )
+
+    invalid_indexes = np.where(
+        np.abs(reflection_coefficient - 1.) < tol)[0]
+    n_invalid = len(invalid_indexes)
+    if n_invalid > 0:
+        reflection_coefficient[invalid_indexes] = np.NaN
+        if warn_gamma_too_close_to_unity:
+            print("ReflectionCoefficient._compute_reflection_coef warning!"
+                  f"{n_invalid} points were removed in R calculation, "
+                  "where reflected power was too close to forward power. "
+                  "Tolerance was: {tol = }.")
+    return reflection_coefficient
