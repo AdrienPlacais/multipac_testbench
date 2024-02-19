@@ -48,12 +48,7 @@ MULTIPACTOR_BANDS_MERGERS = {
 
 
 class MultipactorBands(list):
-    """All :class:`MultipactorBand` of a test, at a given localisation.
-
-    .. deprecated:: 1.4.0
-        Same instance is stored in Instrument and IMeasurementPoint.
-
-    """
+    """All :class:`MultipactorBand` of a test, at a given localisation."""
 
     def __init__(self,
                  list_of_multipactor_band: list[MultipactorBand],

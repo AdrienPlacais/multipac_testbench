@@ -415,15 +415,6 @@ class MultipactorTest:
                                     png_path)
         return fig, axes
 
-    def filter_measurement_points(
-            self,
-            to_exclude: Sequence[str | IMeasurementPoint] = (),
-    ) -> Sequence[IMeasurementPoint]:
-        """Get measurement points (Pick-Ups and GlobalDiagnostic)."""
-        print("MultipactorTest.filter_measurement_points is deprecated. "
-              "Use MultipactorTest.get_measurement_points instead.")
-        return self.get_measurement_points(to_exclude=to_exclude)
-
     def _instruments_by_class(
             self,
             instrument_class: ABCMeta,
@@ -734,140 +725,6 @@ class MultipactorTest:
 
         return
 
-    def plot_multipactor_limits(
-            self,
-            instrument_class_to_plot: ABCMeta,
-            measurement_points_to_exclude: Sequence[str
-                                                    | IMeasurementPoint] = (),
-            png_path: Path | None = None,
-            multipactor_measured_at: IMeasurementPoint | str | None = None,
-            multipactor_bands: MultipactorBands | None = None,
-            **fig_kw,
-    ) -> tuple[Figure, list[Axes]]:
-        """Plot lower and upper multipacting limits evolution.
-
-        As for now, only one instrument should be plotted, and only one
-        detector instrument should be defined.
-
-        .. note::
-            In order to discriminate lower multipacting barrier from upper
-            multipacting barrier, we need to determine when the power is
-            growing and when it is decreasing. This can be non-trivial. Check
-            :meth:`.Powers.where_is_growing` and ``power_is_growing_kw``.
-
-        .. todo::
-            Simplify this thing. Lower and upper multipacting barriers should
-            be easier to get. Maybe pandas dataframe is the way to go?
-
-        .. deprecated:: 1.4.0
-            Use MultipactorTest.plot_data_at_multipactor_thresholds instead.
-
-        Parameters
-        ----------
-        instrument_class_to_plot : {Powers, FieldProbe, Reconstructed}
-            The instrument which data will be plotted. As the goal of this
-            method is to plot multipacting limits, it is expected that the
-            instrument class is related to power/electric field/voltage.
-        measurement_points_to_exclude : Sequence[str | IMeasurementPoint]
-            Some measurement points to exclude from plot.
-        png_path : Path | None
-            If provided, will save the Figure. The default is None.
-        multipactor_measured_at: IMeasurementPoint | str | None = None
-            If you want to plot the multipactor bands from an instrument that
-            is not at the same position as the instrument data to plot.
-        fig_kw :
-            Other keyword arguments passed to the ``Figure``.
-
-        Returns
-        -------
-        tuple[Figure, Axes]
-            Created fig and axes.
-
-        """
-        warnings.warn("Use plot_data_at_multipactor_thresholds instead. "
-                      "It is the same method, but it handles plots with "
-                      "several instruments and multipactor detectors.",
-                      DeprecationWarning)
-        if instrument_class_to_plot not in (Powers, FieldProbe, Reconstructed):
-            print("multipactor_test.plot_multipactor_limits warning: you want "
-                  f"to plot the values measured by {instrument_class_to_plot} "
-                  "at entry and exit of multipactor zones. Does it have any "
-                  "sense?")
-
-        fig, instrument_class_axes = plot.create_fig(
-            str(self),
-            (instrument_class_to_plot, ),
-            xlabel='Measurement index',
-            **fig_kw
-        )
-
-        instrument_to_plot = self.get_instrument(instrument_class_to_plot,
-                                                 measurement_points_to_exclude,
-                                                 )
-        assert instrument_to_plot is not None, (
-            f"No {instrument_class_to_plot} instrument was found.")
-
-        multipactor_bands_to_check = self._get_proper_multipactor_bands(
-            multipactor_measured_at, multipactor_bands)
-
-        match (multipactor_bands_to_check):
-            case MultipactorBands():
-                multipactor_bands = multipactor_bands_to_check
-            case list() | tuple() as sequence_of_multipactor_bands:
-                multipactor_bands = sequence_of_multipactor_bands[0]
-                assert isinstance(multipactor_bands, MultipactorBands)
-            case _:
-                raise IOError(f"Undefined behavior. {multipactor_bands = }")
-
-        lower_values, upper_values = instrument_to_plot.values_at_barriers(
-            multipactor_bands
-        )
-
-        axe = instrument_class_axes[instrument_class_to_plot]
-
-        lower_values.plot(ax=axe,
-                          kind='line',
-                          drawstyle='steps-post',
-                          grid=True)
-        upper_values.plot(ax=axe, kind='line', drawstyle='steps-post')
-        plot.finish_fig(fig, instrument_class_axes.values(), png_path)
-        return fig, [axes for axes in instrument_class_axes.values()]
-
-    def _get_proper_multipactor_bands(
-            self,
-            multipactor_measured_at: IMeasurementPoint | str | None = None,
-            multipactor_bands: MultipactorBands | Sequence[MultipactorBands] | None = None,
-            measurement_points_to_exclude: Sequence[str | IMeasurementPoint] = (
-            ),
-    ) -> MultipactorBands | Sequence[MultipactorBands]:
-        """Get the most consistent :class:`.MultipactorBands`.
-
-        .. deprecated:: 1.4.0
-            Once ``multipactor_measured_at`` and
-            ``measurement_points_to_exclude`` are completely removed, this
-            function will always return ``multipactor_bands`` so it can be
-            removed.
-
-
-        """
-        if multipactor_bands is not None:
-            if multipactor_measured_at is not None:
-                warnings.warn("multipactor_measured_at key is now superfluous",
-                              DeprecationWarning)
-                print(f"You gave me {multipactor_measured_at = }")
-            return multipactor_bands
-
-        warnings.warn("In the future, it will be mandatory to pass in "
-                      "the desired MultipactorBands object.",
-                      DeprecationWarning)
-        if not isinstance(multipactor_measured_at, IMeasurementPoint):
-            multipactor_measured_at = self.get_measurement_point(
-                name=multipactor_measured_at,
-                to_exclude=measurement_points_to_exclude)
-
-        multipactor_bands = multipactor_measured_at.multipactor_bands
-        return multipactor_bands
-
     def plot_data_at_multipactor_thresholds(
         self,
         instruments_id_plot: ABCMeta | Sequence[Instrument] | Sequence[str],
@@ -924,8 +781,7 @@ class MultipactorTest:
         return fig, axe
 
     def data_for_somersalo(self,
-                           multipactor_measured_at: IMeasurementPoint | str | None = None,
-                           multipactor_bands: MultipactorBands | None = None,
+                           multipactor_bands: MultipactorBands,
                            ) -> dict[str, float | list[float]]:
         """Get the data required to create the Somersalo plot.
 
@@ -933,14 +789,6 @@ class MultipactorTest:
             Allow representation of several pick-ups.
 
         """
-        # if isinstance(multipactor_measured_at, str):
-        # multipactor_measured_at = self.get_measurement_point(
-        # multipactor_measured_at)
-        # multipactor_bands = multipactor_measured_at.multipactor_bands
-        multipactor_bands = self._get_proper_multipactor_bands(
-            multipactor_measured_at, multipactor_bands)
-        assert isinstance(multipactor_bands, MultipactorBands)
-
         powers = self.get_instrument(Powers)
         assert powers is not None
         last_powers = powers.values_at_barriers_fully_conditioned(
@@ -961,8 +809,7 @@ class MultipactorTest:
     def data_for_susceptibility(
             self,
             electric_field_at: IMeasurementPoint | str,
-            multipactor_measured_at: IMeasurementPoint | str | None = None,
-            multipactor_bands: MultipactorBands | None = None,
+            multipactor_bands: MultipactorBands,
     ) -> dict[str, float | list[float]]:
         """Get the data required to create the susceptibility plot.
 
@@ -970,14 +817,6 @@ class MultipactorTest:
             Allow representation of several pick-ups.
 
         """
-        # if isinstance(multipactor_measured_at, str):
-        # multipactor_measured_at = self.get_measurement_point(
-        # multipactor_measured_at)
-        # multipactor_bands = multipactor_measured_at.multipactor_bands
-        multipactor_bands = self._get_proper_multipactor_bands(
-            multipactor_measured_at, multipactor_bands)
-        assert isinstance(multipactor_bands, MultipactorBands)
-
         if isinstance(electric_field_at, str):
             electric_field_at = self.get_measurement_point(
                 electric_field_at)

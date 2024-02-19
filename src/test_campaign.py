@@ -142,8 +142,7 @@ class TestCampaign(list):
         return nested_multipactor_bands
 
     def somersalo_chart(self,
-                        multipactor_measured_at: str | None = None,
-                        multipactor_bands: Sequence[MultipactorBands] | None = None,
+                        multipactor_bands: Sequence[MultipactorBands],
                         orders_one_point: tuple[int, ...] = (
                             1, 2, 3, 4, 5, 6, 7),
                         orders_two_point: tuple[int, ...] = (1, ),
@@ -156,10 +155,6 @@ class TestCampaign(list):
 
         Parameters
         ----------
-        multipactor_measured_at : str
-            Name of the :class:`.IMeasurementPoint` where the multipactor is
-            detected. It must have a :class:`.MultipactorBands` attribute,
-            which is set by the :meth:`TestCampaign.detect_multipactor` method.
         multipactor_bands : Sequence[MultipactorBands]
             An object holding the multipactor information for every
             :class:`.MultipactorTest` in ``self``.
@@ -204,7 +199,6 @@ class TestCampaign(list):
 
         self._add_somersalo_measured(
             ax1, ax2,
-            multipactor_measured_at=multipactor_measured_at,
             multipactor_bands=multipactor_bands,
         )
 
@@ -213,8 +207,7 @@ class TestCampaign(list):
 
     def _add_somersalo_measured(self,
                                 ax1: Axes, ax2: Axes,
-                                multipactor_measured_at: str | None = None,
-                                multipactor_bands: Sequence[MultipactorBands] | None = None,
+                                multipactor_bands: Sequence[MultipactorBands],
                                 **plot_kw
                                 ) -> None:
         """Put the measured multipacting limits on Somersalo plot.
@@ -226,17 +219,12 @@ class TestCampaign(list):
             cycle, or every power that led to multipacting during whole test.
 
         """
-        if multipactor_bands is None:
-            multipactor_bands = [None for _ in self]
-
         zipper = zip(self, multipactor_bands, strict=True)
         for mp_test, mp_bands in zipper:
             if len(mp_bands) > 1:
                 raise NotImplementedError(f"{mp_bands = }, but only one pair "
                                           "power--mp band is allowed")
-            somersalo_data = mp_test.data_for_somersalo(
-                multipactor_measured_at,
-                mp_bands[0])
+            somersalo_data = mp_test.data_for_somersalo(mp_bands[0])
             plot_somersalo_measured(mp_test_name=str(mp_test),
                                     somersalo_data=somersalo_data,
                                     ax1=ax1, ax2=ax2,
@@ -408,15 +396,12 @@ class TestCampaign(list):
 
     def susceptibility_chart(self,
                              electric_field_at: str,
-                             multipactor_measured_at: str | None = None,
-                             multipactor_bands: Sequence[MultipactorBands] | None = None,
+                             multipactor_bands: Sequence[MultipactorBands],
                              fig_kw: dict | None = None,
                              ax_kw: dict | None = None) -> tuple[Figure, Axes]:
         """Create a susceptiblity chart."""
         fig, ax1 = self._susceptibility_base_plot(fig_kw, ax_kw)
 
-        if multipactor_bands is None:
-            multipactor_bands = [None for _ in self]
         zipper = zip(self, multipactor_bands, strict=True)
 
         for mp_test, mp_bands in zipper:
@@ -425,7 +410,6 @@ class TestCampaign(list):
                                           "field probe--mp band is allowed")
             susceptibility_data = mp_test.data_for_susceptibility(
                 electric_field_at,
-                multipactor_measured_at=multipactor_measured_at,
                 multipactor_bands=mp_bands[0],
             )
             points = measured_to_susceptibility_coordinates(
@@ -550,48 +534,6 @@ class TestCampaign(list):
     def plot_barriers_vs_swr(self) -> None:
         """Plot evolution of mp barriers with SWR."""
         raise NotImplementedError
-
-    def plot_multipactor_limits(
-            self,
-            *args,
-            all_multipactor_bands: list[MultipactorBands] | None = None,
-            out_folder: str | None = None,
-            iternum: int = 300,
-            **kwargs) -> None:
-        """Call :meth:`.MultipactorTest.plot_multipactor_limits`.
-
-        .. deprecated:: 1.4.0
-            Use TestCampaign.plot_data_at_multipactor_thresholds instead.
-
-        """
-        match (all_multipactor_bands):
-            case MultipactorBands() as same_multipactor_bands_for_everyone:
-                multipactor_bands = [same_multipactor_bands_for_everyone
-                                     for _ in self]
-            case list() as one_multipactor_bands_per_simulation:
-                assert len(one_multipactor_bands_per_simulation) == len(self)
-                multipactor_bands = one_multipactor_bands_per_simulation
-            case None:
-                warnings.warn("In the future, it will be mandatory to pass in "
-                              "the desired MultipactorBands object.",
-                              DeprecationWarning)
-                multipactor_bands = [None for _ in self]
-            case _:
-                raise IOError(f"{all_multipactor_bands = } not handled.")
-
-        zipper = zip(self, multipactor_bands, strict=True)
-        for i, (test, mp_band) in enumerate(zipper):
-            png_path = None
-            if out_folder is not None:
-                png_path = test.output_filepath(out_folder, ".png")
-            _ = test.plot_multipactor_limits(
-                *args,
-                multipactor_bands=mp_band,
-                num=iternum + i,
-                png_path=png_path,
-                **kwargs
-            )
-        return
 
     def plot_data_at_multipactor_thresholds(
             self,

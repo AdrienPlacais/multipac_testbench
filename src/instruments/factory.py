@@ -12,7 +12,6 @@ from multipac_testbench.src.instruments.instrument import Instrument
 from multipac_testbench.src.instruments.optical_fibre import OpticalFibre
 from multipac_testbench.src.instruments.penning import Penning
 from multipac_testbench.src.instruments.powers import Powers
-from multipac_testbench.src.instruments.rf_power import RfPower
 
 
 STRING_TO_INSTRUMENT_CLASS = {
@@ -22,7 +21,6 @@ STRING_TO_INSTRUMENT_CLASS = {
     'OpticalFibre': OpticalFibre,
     'Penning': Penning,
     'Powers': Powers,
-    'RfPower': RfPower,
 }  #:
 
 
@@ -46,7 +44,7 @@ class InstrumentFactory:
         df_data : pd.DataFrame
             Content of the multipactor tests results ``.csv`` file.
         class_name : {'CurrentProbe', 'ElectricFieldProbe', 'OpticalFibre',\
-'Penning', 'Power', 'RfPower'}
+'Penning', 'Power'}
             Name of the instrument class, as given in the ``.toml`` file.
         column_header : str | list[str] | None, optional
             Name of the column(s) from which the ydata of the instrument will
