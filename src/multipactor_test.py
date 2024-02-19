@@ -104,7 +104,7 @@ class MultipactorTest:
         """Print info on object."""
         out = [f"{self.freq_mhz}MHz", f"SWR {self.swr}"]
         if len(self.info) > 0:
-            out.append(f"({self.info})")
+            out.append(f"{self.info}")
         return ', '.join(out)
 
     def add_post_treater(self,
