@@ -26,6 +26,4 @@ Submodules
    src.instruments.optical_fibre
    src.instruments.penning
    src.instruments.powers
-   src.instruments.rf_power
-   src.instruments.swr
    src.instruments.virtual_instrument
