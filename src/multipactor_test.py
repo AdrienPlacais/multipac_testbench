@@ -22,7 +22,6 @@
 
 """
 import itertools
-import warnings
 from abc import ABCMeta
 from collections.abc import Callable, Sequence
 from pathlib import Path
@@ -48,6 +47,7 @@ from multipac_testbench.src.multipactor_band.multipactor_bands import \
     MultipactorBands
 from multipac_testbench.src.multipactor_band.util import match_with_mp_band
 from multipac_testbench.src.util import plot
+from multipac_testbench.src.util.animate import get_limits
 from multipac_testbench.src.util.helper import output_filepath
 
 
@@ -79,11 +79,15 @@ class MultipactorTest:
             An additional string to identify this test in plots.
         sep : str
             Delimiter between two columns in ``filepath``.
+        verbise : bool, optional
+            To print information on the structure of the test bench, as it was
+            understood. The default is False.
 
         """
         self.filepath = filepath
         df_data = pd.read_csv(filepath, sep=sep, index_col="Sample index")
         self._n_points = len(df_data)
+        self.df_data = df_data
 
         if df_data.index[0] != 0:
             print("MultipactorTest.__init__ warning! Your Sample index column "
@@ -616,29 +620,6 @@ class MultipactorTest:
                   "instruments found. Returning first one.")
         return instruments[0]
 
-    def _get_limits(
-            self,
-            axes_instruments: dict[Axes, Sequence[Instrument]],
-            instruments_to_ignore_for_limits: Sequence[Instrument | str] = (),
-    ) -> dict[Axes, tuple[float, float]]:
-        """Set limits for the plots."""
-        names_to_ignore = [x if isinstance(x, str) else x.name
-                           for x in instruments_to_ignore_for_limits]
-        limits = {}
-        for axe, instruments in axes_instruments.items():
-            all_ydata = [instrument.ydata for instrument in instruments
-                         if instrument.name not in names_to_ignore]
-
-            lowers = [np.nanmin(ydata) for ydata in all_ydata]
-            lower = min(lowers)
-
-            uppers = [np.nanmax(ydata) for ydata in all_ydata]
-            upper = max(uppers)
-            amplitude = abs(upper - lower)
-
-            limits[axe] = (lower - .1 * amplitude, upper + .1 * amplitude)
-        return limits
-
     def _prepare_animation_fig(
         self,
         instruments_to_plot: Sequence[ABCMeta],
@@ -690,15 +671,39 @@ class MultipactorTest:
             for instrument_class, axe in instrument_class_axes.items()
         }
 
-        y_limits = self._get_limits(
-            axes_instruments,
-            instruments_to_ignore_for_limits=instruments_to_ignore_for_limits)
-
+        y_limits = get_limits(axes_instruments,
+                              instruments_to_ignore_for_limits)
         axe = None
         for axe, y_lim in y_limits.items():
             axe.set_ylim(y_lim)
 
         return fig, axes_instruments
+
+    def _get_limits(
+            self,
+            axes_instruments: dict[Axes, Sequence[Instrument]],
+            instruments_to_ignore_for_limits: Sequence[Instrument | str] = (),
+    ) -> dict[Axes, tuple[float, float]]:
+        """Get limits of demanded instruments.
+
+        .. note::
+            Currently not used, not to be used. ``self.df_data`` is not
+            synchronized with the ``ydata`` from the instruments.
+
+        """
+        names_to_ignore = [x if isinstance(x, str) else x.name
+                           for x in instruments_to_ignore_for_limits]
+        limits = {}
+        for axe, instruments in axes_instruments.items():
+            names = [instrument.name for instrument in instruments
+                     if instrument.name not in names_to_ignore
+                     and not instrument.is_2d]
+            df_data = self.df_data[names]
+            lower = df_data.min(axis=None)
+            upper = df_data.max(axis=None)
+            amplitude = lower - upper
+            limits[axe] = (lower - .1 * amplitude, upper + .1 * amplitude)
+        return limits
 
     def reconstruct_voltage_along_line(
             self,
@@ -865,7 +870,8 @@ class MultipactorTest:
 
     def data_for_perez(self,
                        multipactor_bands: Sequence[MultipactorBands],
-                       measurement_points_to_exclude: Sequence[str | IMeasurementPoint] = (),
+                       measurement_points_to_exclude: Sequence[str | IMeasurementPoint] = (
+                       ),
                        probes_conditioned_during_test: Sequence[str] = (),
                        ) -> pd.Series:
         """Get the data necessary to check if Perez was right.
