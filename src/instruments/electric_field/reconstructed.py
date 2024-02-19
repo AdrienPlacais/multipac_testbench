@@ -92,7 +92,7 @@ class Reconstructed(IElectricField):
             return out
 
         return '\n'.join([out,
-                          rf"$R^2 = ${self._r_squared:2.3f}"])
+                          rf"$r^2 = ${self._r_squared:2.3f}"])
 
     @property
     def label(self) -> str:
