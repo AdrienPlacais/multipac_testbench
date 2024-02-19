@@ -25,8 +25,8 @@ class Instrument(ABC):
 
     def __init__(self,
                  name: str,
-                 raw_data: pd.Series | pd.DataFrame,
-                 position: np.ndarray | float | None = None,
+                 raw_data: pd.Series,
+                 position: np.ndarray | float,
                  is_2d: bool = False,
                  **kwargs,
                  ) -> None:
@@ -53,9 +53,7 @@ class Instrument(ABC):
         self.name = name
         self.raw_data = raw_data
 
-        self.position: np.ndarray | float
-        if position is not None:
-            self.position = position
+        self.position = position
 
         self.is_2d = is_2d
         plotters = self._get_plot_methods(is_2d)

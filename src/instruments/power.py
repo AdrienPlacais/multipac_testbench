@@ -9,10 +9,9 @@ from multipac_testbench.src.instruments.instrument import Instrument
 class Power(Instrument):
     """An instrument to measure power."""
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args, position: float = np.NaN, **kwargs) -> None:
         """Instantiate the instrument, declare other specific attributes."""
-        super().__init__(*args, **kwargs)
-        self.position = np.NaN
+        super().__init__(*args, position=position, **kwargs)
 
     @classmethod
     def ylabel(cls) -> str:
