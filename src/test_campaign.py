@@ -18,7 +18,7 @@ import pandas as pd
 from matplotlib import animation
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from multipac_testbench.src.instruments.powers import Powers
+from multipac_testbench.src.instruments.power import Power
 from multipac_testbench.src.measurement_point.i_measurement_point import \
     IMeasurementPoint
 from multipac_testbench.src.multipactor_band.multipactor_bands import \
@@ -298,7 +298,7 @@ class TestCampaign(list):
         axe = df_for_somersalo.plot(
             x=0,
             y=1,
-            ylabel=Powers.ylabel(),
+            ylabel=Power.ylabel(),
             grid=True,
             ax=axe,
             ms=15,

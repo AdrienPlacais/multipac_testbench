@@ -38,7 +38,7 @@ from multipac_testbench.src.instruments.electric_field.field_probe import \
 from multipac_testbench.src.instruments.electric_field.reconstructed import \
     Reconstructed
 from multipac_testbench.src.instruments.instrument import Instrument
-from multipac_testbench.src.instruments.powers import Powers
+from multipac_testbench.src.instruments.power import ForwardPower
 from multipac_testbench.src.measurement_point.factory import \
     IMeasurementPointFactory
 from multipac_testbench.src.measurement_point.i_measurement_point import \
@@ -49,6 +49,8 @@ from multipac_testbench.src.multipactor_band.util import match_with_mp_band
 from multipac_testbench.src.util import plot
 from multipac_testbench.src.util.animate import get_limits
 from multipac_testbench.src.util.helper import output_filepath
+from multipac_testbench.src.instruments.reflection_coefficient import \
+    ReflectionCoefficient
 
 
 class MultipactorTest:
@@ -155,7 +157,7 @@ class MultipactorTest:
             :class:`.Instrument` of type ``instrument_class``.
 
         """
-        powers = self.get_instrument(Powers)
+        forward_power = self.get_instrument(ForwardPower)
 
         detected_multipactor_bands = []
         measurement_points = self.get_measurement_points(
@@ -168,12 +170,13 @@ class MultipactorTest:
             # if not hasattr(measurement_point, 'multipactor_bands'):
             if multipactor_bands is None:
                 continue
-            if not isinstance(powers, Powers):
+            if not isinstance(forward_power, ForwardPower):
                 continue
 
             if power_is_growing_kw is None:
                 power_is_growing_kw = {}
-            power_is_growing = powers.where_is_growing(**power_is_growing_kw)
+            power_is_growing = forward_power.where_is_growing(
+                **power_is_growing_kw)
             multipactor_bands.power_is_growing = power_is_growing
             detected_multipactor_bands.append(multipactor_bands)
         return detected_multipactor_bands
@@ -715,13 +718,16 @@ class MultipactorTest:
                                                     self.pick_ups,
                                                     probes_to_ignore)
         assert self.global_diagnostics is not None
-        powers = self.get_instrument(Powers)
+
+        forward_power = self.get_instrument(ForwardPower)
+        reflection = self.get_instrument(ReflectionCoefficient)
 
         reconstructed = Reconstructed(
             name=name,
             raw_data=None,
             e_field_probes=e_field_probes,
-            powers=powers,
+            forward_power=forward_power,
+            reflection=reflection,
             freq_mhz=self.freq_mhz,
         )
         reconstructed.fit_voltage()
@@ -794,9 +800,9 @@ class MultipactorTest:
             Allow representation of several pick-ups.
 
         """
-        powers = self.get_instrument(Powers)
-        assert powers is not None
-        last_powers = powers.values_at_barriers_fully_conditioned(
+        forward_power = self.get_instrument(ForwardPower)
+        assert forward_power is not None
+        last_powers = forward_power.values_at_barriers_fully_conditioned(
             multipactor_bands)
 
         z_ohm = 50.
@@ -804,7 +810,7 @@ class MultipactorTest:
         print("MultipactorTest.data_for_somersalo warning! Used default "
               f"{d_mm = }")
         somersalo_data = {
-            'powers_kw': [last_powers[0][0] * 1e-3, last_powers[1][0] * 1e-3],
+            'powers_kw': [last_powers[0] * 1e-3, last_powers[1] * 1e-3],
             'z_ohm': z_ohm,
             'd_mm': d_mm,
             'freq_ghz': self.freq_mhz * 1e-3,
@@ -850,17 +856,22 @@ class MultipactorTest:
             Proper docstring.
 
         """
-        powers = self.get_instrument(Powers)
-        assert isinstance(powers, Powers)
+        forward_power = self.get_instrument(ForwardPower)
+        assert isinstance(forward_power, ForwardPower)
+        reflection = self.get_instrument(ReflectionCoefficient)
+        assert isinstance(reflection, ReflectionCoefficient)
 
         last_low_idx = multipactor_bands[-1][-1]
-        reflection_coeff = powers.gamma[last_low_idx]
+
+        reflection_coeff = reflection.data[last_low_idx]
         if use_theoretical_r:
             if np.isinf(self.swr):
                 reflection_coeff = 1.
             else:
                 reflection_coeff = (self.swr - 1.) / (self.swr + 1.)
-        last_forward_power = powers.forward[last_low_idx]
+
+        last_forward_power = forward_power.data[last_low_idx]
+
         ser = pd.Series(
             {'$R$': reflection_coeff,
              r'Lower multipactor threshold $P_{f, low}$': last_forward_power,

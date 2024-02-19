@@ -6,20 +6,23 @@
     voltage fitting, overload: they work but this not clean, not clean at all
 
 """
+from collections.abc import Sequence
 from functools import partial
 from typing import overload
 
 import numpy as np
 import pandas as pd
-from scipy import optimize
-from scipy.constants import c
 
 from multipac_testbench.src.instruments.electric_field.field_probe import \
     FieldProbe
-from multipac_testbench.src.instruments.electric_field.i_electric_field import \
+from multipac_testbench.src.instruments.electric_field.i_electric_field import\
     IElectricField
-from multipac_testbench.src.instruments.powers import Powers
+from multipac_testbench.src.instruments.power import ForwardPower
+from multipac_testbench.src.instruments.reflection_coefficient import \
+    ReflectionCoefficient
 from multipac_testbench.src.util.helper import r_squared
+from scipy import optimize
+from scipy.constants import c
 
 
 class Reconstructed(IElectricField):
@@ -28,8 +31,9 @@ class Reconstructed(IElectricField):
     def __init__(self,
                  name: str,
                  raw_data: pd.Series | None,
-                 e_field_probes: list[FieldProbe],
-                 powers: Powers,
+                 e_field_probes: Sequence[FieldProbe],
+                 forward_power: ForwardPower,
+                 reflection: ReflectionCoefficient,
                  freq_mhz: float,
                  position: np.ndarray = np.linspace(0., 1.3, 201),
                  z_ohm: float = 50.,
@@ -43,7 +47,8 @@ class Reconstructed(IElectricField):
                          is_2d=True,
                          **kwargs)
         self._e_field_probes = e_field_probes
-        self._powers = powers
+        self._forward_power = forward_power
+        self._reflection = reflection
         self._sample_indexes = self._e_field_probes[0].raw_data.index
         self._pos_for_fit = [probe.position for probe in self._e_field_probes]
         self._beta = c / freq_mhz * 1e-6
@@ -73,11 +78,12 @@ class Reconstructed(IElectricField):
         assert hasattr(self, '_psi_0')
 
         data = []
-        for power, gamma in zip(self._powers.data[:, 0], self._powers.gamma):
+        for power, reflection in zip(self._forward_power.data,
+                                     self._reflection.data):
             v_f = _power_to_volt(power, z_ohm=self._z_ohm)
             data.append(voltage_vs_position(self.position,
                                             v_f,
-                                            gamma,
+                                            reflection,
                                             self._beta,
                                             self._psi_0))
         self._data = np.array(data)
@@ -118,10 +124,10 @@ class Reconstructed(IElectricField):
         xdata = []
         data = []
         for e_probe in self._e_field_probes:
-            for p_f, gamma, e_field in zip(self._powers.data[:, 0],
-                                           self._powers.gamma,
-                                           e_probe.data):
-                xdata.append([p_f, gamma, e_probe.position])
+            for p_f, reflection, e_field in zip(self._forward_power.data,
+                                                self._reflection.data,
+                                                e_probe.data):
+                xdata.append([p_f, reflection, e_probe.position])
                 data.append(e_field)
 
         to_fit = partial(_model, beta=self._beta, z_ohm=self._z_ohm)
@@ -155,13 +161,13 @@ class Reconstructed(IElectricField):
 
         """
         actual_voltages = []
-        v_f = _power_to_volt(self._powers.data[:, 0], z_ohm=self._z_ohm)
-        gamma = self._powers.gamma
+        v_f = _power_to_volt(self._forward_power.data, z_ohm=self._z_ohm)
+        reflection = self._reflection.data
 
         for sample_index in self._sample_indexes:
             voltages = voltage_vs_position(self.position,
                                            v_f[sample_index - 1],
-                                           gamma[sample_index - 1],
+                                           reflection[sample_index - 1],
                                            beta,
                                            psi_0,)
             actual_voltages.append(voltages)
@@ -192,7 +198,7 @@ def _model(var: np.ndarray,
     Parameters
     ----------
     var : np.ndarray
-        Variables, namely :math:`[P_f, \Gamma, z]`.
+        Variables, namely :math:`[P_f, R, z]`.
 
     Returns
     -------
@@ -200,9 +206,9 @@ def _model(var: np.ndarray,
         Voltage at position :math:`z` for forward power :math:`P_f`.
 
     """
-    power, gamma, pos = var[:, 0], var[:, 1], var[:, 2]
+    power, reflection, pos = var[:, 0], var[:, 1], var[:, 2]
     v_f = _power_to_volt(power, z_ohm=z_ohm)
-    return voltage_vs_position(pos, v_f, gamma, beta, psi_0)
+    return voltage_vs_position(pos, v_f, reflection, beta, psi_0)
 
 
 def _power_to_volt(power: np.ndarray,
@@ -213,7 +219,7 @@ def _power_to_volt(power: np.ndarray,
 @overload
 def voltage_vs_position(pos: float,
                         v_f: float,
-                        gamma: float,
+                        reflection: float,
                         beta: float,
                         psi_0: float,
                         ) -> float: ...
@@ -222,7 +228,7 @@ def voltage_vs_position(pos: float,
 @overload
 def voltage_vs_position(pos: np.ndarray,
                         v_f: float,
-                        gamma: float,
+                        reflection: float,
                         beta: float,
                         psi_0: float,
                         ) -> np.ndarray: ...
@@ -230,7 +236,7 @@ def voltage_vs_position(pos: np.ndarray,
 
 def voltage_vs_position(pos: float | np.ndarray,
                         v_f: float,
-                        gamma: float,
+                        reflection: float,
                         beta: float,
                         psi_0: float,
                         ) -> float | np.ndarray:
@@ -267,9 +273,9 @@ def voltage_vs_position(pos: float | np.ndarray,
 
     """
     assert not isinstance(v_f, complex), "not implemented"
-    assert not isinstance(gamma, complex), "not implemented"
+    assert not isinstance(reflection, complex), "not implemented"
 
     voltage = v_f * np.sqrt(
-        1. + gamma**2 + 2. * gamma * np.cos(2. * beta * pos + psi_0)
+        1. + reflection**2 + 2. * reflection * np.cos(2. * beta * pos + psi_0)
     )
     return voltage

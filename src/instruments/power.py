@@ -12,6 +12,7 @@ class Power(Instrument):
     def __init__(self, *args, **kwargs) -> None:
         """Instantiate the instrument, declare other specific attributes."""
         super().__init__(*args, **kwargs)
+        self.position = np.NaN
 
     @classmethod
     def ylabel(cls) -> str:
