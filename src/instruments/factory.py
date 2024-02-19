@@ -18,6 +18,8 @@ from multipac_testbench.src.instruments.powers import Powers
 from multipac_testbench.src.instruments.reflection_coefficient import \
     ReflectionCoefficient
 from multipac_testbench.src.instruments.swr import SWR
+from multipac_testbench.src.instruments.virtual_instrument import \
+    VirtualInstrument
 
 STRING_TO_INSTRUMENT_CLASS = {
     'CurrentProbe': CurrentProbe,
@@ -89,7 +91,7 @@ class InstrumentFactory:
     def run_virtual(self,
                     instruments: Sequence[Instrument],
                     **kwargs
-                    ) -> Sequence[Instrument]:
+                    ) -> Sequence[VirtualInstrument]:
         """Add the implemented :class:`.VirtualInstrument`."""
         virtuals = []
 
@@ -102,7 +104,7 @@ class InstrumentFactory:
     def _power_related(self,
                        instruments: Sequence[Instrument],
                        **kwargs
-                       ) -> Sequence[Instrument]:
+                       ) -> Sequence[VirtualInstrument]:
         """Create :class:`.ReflectionCoefficient` and :class:`.SWR`."""
         forwards = [x for x in instruments if isinstance(x, ForwardPower)]
         reflecteds = [x for x in instruments if isinstance(x, ReflectedPower)]
