@@ -137,7 +137,7 @@ class MultipactorTest:
         Parameters
         ----------
         multipac_detector : Callable[[np.ndarray], np.ndarray[np.bool_]]
-            Function that takes in the ``ydata`` of an :class:`.Instrument` and
+            Function that takes in the ``data`` of an :class:`.Instrument` and
             returns an array, where True means multipactor and False no
             multipactor.
         instrument_class : ABCMeta
@@ -688,7 +688,7 @@ class MultipactorTest:
 
         .. note::
             Currently not used, not to be used. ``self.df_data`` is not
-            synchronized with the ``ydata`` from the instruments.
+            synchronized with the ``data`` from the instruments.
 
         """
         names_to_ignore = [x if isinstance(x, str) else x.name
@@ -916,14 +916,14 @@ class MultipactorTest:
                 continue
 
             last_multipac_idx = last_multipactor_band[-1]
-            last_lower_threshold = field_probe.ydata[last_multipac_idx]
+            last_lower_threshold = field_probe.data[last_multipac_idx]
             v_thresholds[field_probe.name + " low"] = last_lower_threshold
 
             if not last_multipactor_band.upper_threshold_was_reached:
                 last_higher_threshold = np.NaN
             else:
                 first_multipac_idx = last_multipactor_band[0]
-                last_higher_threshold = field_probe.ydata[first_multipac_idx]
+                last_higher_threshold = field_probe.data[first_multipac_idx]
 
             v_thresholds[field_probe.name + " high"] = last_higher_threshold
 
@@ -960,8 +960,8 @@ class MultipactorTest:
 
         axes = None
         for x, y in zipper:
-            dict_to_plot = {x.name: x.ydata_as_pd,
-                            y.name: y.ydata_as_pd}
+            dict_to_plot = {x.name: x.data_as_pd,
+                            y.name: y.data_as_pd}
 
             df_to_plot = pd.DataFrame(dict_to_plot)
 

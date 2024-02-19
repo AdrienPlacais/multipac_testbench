@@ -47,7 +47,7 @@ class InstrumentFactory:
 'Penning', 'Power'}
             Name of the instrument class, as given in the ``.toml`` file.
         column_header : str | list[str] | None, optional
-            Name of the column(s) from which the ydata of the instrument will
+            Name of the column(s) from which the data of the instrument will
             be taken. The default is None, in which case ``column_header`` is
             set to ``name``. In general it is not necessary to provide it. An
             exception is when several ``.csv`` columns should be loaded in the

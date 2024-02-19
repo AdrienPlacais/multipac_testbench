@@ -61,8 +61,8 @@ class Instrument(ABC):
         plotters = self._get_plot_methods(is_2d)
         self.plot_vs_time, self.plot_vs_position, self.scatter_data = plotters
 
-        self._ydata: np.ndarray | None = None
-        self._ydata_as_pd: pd.Series | pd.DataFrame | None = None
+        self._data: np.ndarray | None = None
+        self._data_as_pd: pd.Series | pd.DataFrame | None = None
         self._post_treaters: list[Callable[[np.ndarray], np.ndarray]] = []
         self.multipactor_bands: MultipactorBands
 
@@ -84,7 +84,7 @@ class Instrument(ABC):
     @classmethod
     def from_array(cls,
                    name: str,
-                   ydata: np.ndarray,
+                   data: np.ndarray,
                    xdata: Iterable | None = None,
                    **kwargs) -> Self:
         """Instantiate :class:`Instrument` from a numpy array.
@@ -93,7 +93,7 @@ class Instrument(ABC):
         ----------
         name : str
             Name of the instrument.
-        ydata : np.ndarray
+        data : np.ndarray
             The data measured by the instrument.
         xdata : Iterable | None, optional
             The data representing the measuring points. The default is None, in
@@ -109,10 +109,10 @@ class Instrument(ABC):
 
         """
         if xdata is None:
-            n_points = len(ydata)
+            n_points = len(data)
             xdata = range(1, n_points + 1)
 
-        raw_data = pd.Series(data=ydata,
+        raw_data = pd.Series(data=data,
                              index=xdata,
                              name=name)
         return cls(name, raw_data, **kwargs)
@@ -137,7 +137,7 @@ class Instrument(ABC):
         Returns
         -------
         instrument : Instrument
-            An instrument. Note that its ``ydata`` attribute will be a 2D
+            An instrument. Note that its ``data`` attribute will be a 2D
             array.
 
         """
@@ -150,44 +150,44 @@ class Instrument(ABC):
         return self.__class__.__name__
 
     @property
-    def ydata(self) -> np.ndarray:
+    def data(self) -> np.ndarray:
         """
         Get the treated data.
 
-        Note that in order to save time, ``_ydata`` is not re-calculated
+        Note that in order to save time, ``_data`` is not re-calculated
         from ``raw_data`` every time. Hence, it is primordial to re-set
         ``_y_data`` to ``None`` every time a change is made to
         ``_post_treaters``.
 
         """
-        if self._ydata is None:
-            self._ydata = self._post_treat(self.raw_data.to_numpy())
-        return self._ydata
+        if self._data is None:
+            self._data = self._post_treat(self.raw_data.to_numpy())
+        return self._data
 
     @property
-    def ydata_as_pd(self) -> pd.Series | pd.DataFrame:
+    def data_as_pd(self) -> pd.Series | pd.DataFrame:
         """Get the treated data as a pandas object."""
-        if self._ydata_as_pd is not None:
-            return self._ydata_as_pd
+        if self._data_as_pd is not None:
+            return self._data_as_pd
 
         index = self.raw_data.index
         if self.is_2d:
             assert isinstance(self.raw_data, pd.DataFrame)
             columns = self.raw_data.columns
-            self._ydata_as_pd = pd.DataFrame(self.ydata,
-                                             columns=columns,
-                                             index=index,
-                                             )
+            self._data_as_pd = pd.DataFrame(self.data,
+                                            columns=columns,
+                                            index=index,
+                                            )
         else:
-            self._ydata_as_pd = pd.Series(self.ydata,
-                                          index=index,
-                                          )
-        return self._ydata_as_pd
+            self._data_as_pd = pd.Series(self.data,
+                                         index=index,
+                                         )
+        return self._data_as_pd
 
-    @ydata.setter
-    def ydata(self, value: np.ndarray | None) -> None:
-        self._ydata = value
-        self._ydata_as_pd = None
+    @data.setter
+    def data(self, value: np.ndarray | None) -> None:
+        self._data = value
+        self._data_as_pd = None
 
     def _get_plot_methods(self, is_2d: bool
                           ) -> tuple[Callable, Callable, Callable]:
@@ -218,10 +218,10 @@ class Instrument(ABC):
             Post-treating functions.
 
         """
-        if self.ydata is not None:
+        if self.data is not None:
             # print("Warning! Modifying the post treaters makes "
             #       "previously post-treated data obsolete.")
-            self.ydata = None
+            self.data = None
 
         self._post_treaters = post_treaters
 
@@ -237,10 +237,10 @@ class Instrument(ABC):
 
         """
         self._post_treaters.append(post_treater)
-        if self.ydata is not None:
+        if self.data is not None:
             # print("Warning! Modifying the post treaters makes "
             #       "previously post-treated data obsolete.")
-            self.ydata = None
+            self.data = None
 
     def values_at_barriers(
             self,
@@ -273,25 +273,25 @@ class Instrument(ABC):
                 label = f"{self} according to {name_of_detector}"
 
                 lower_dict = {
-                    f"Lower barrier {label}": self.ydata[lower_barrier_idx]}
+                    f"Lower barrier {label}": self.data[lower_barrier_idx]}
                 lower_values = pd.DataFrame(lower_dict,
                                             index=lower_barrier_idx)
 
                 upper_dict = {
-                    f"Lower barrier {label}": self.ydata[upper_barrier_idx]}
+                    f"Lower barrier {label}": self.data[upper_barrier_idx]}
                 upper_values = pd.DataFrame(upper_dict,
                                             index=upper_barrier_idx)
 
             case pd.DataFrame() as df:
                 label = df.columns + f" according to {name_of_detector}"
                 lower_values = pd.DataFrame(
-                    data=self.ydata[lower_barrier_idx],
+                    data=self.data[lower_barrier_idx],
                     index=lower_barrier_idx,
                     columns="Lower barrier " + label,
                 )
 
                 upper_values = pd.DataFrame(
-                    data=self.ydata[upper_barrier_idx],
+                    data=self.data[upper_barrier_idx],
                     index=upper_barrier_idx,
                     columns="Upper barrier " + label,
                 )
@@ -313,7 +313,7 @@ class Instrument(ABC):
         if isinstance(last_upp, (list, np.ndarray)):
             last_upp = last_upp[0]
 
-        return self.ydata[last_low], self.ydata[last_upp]
+        return self.data[last_low], self.data[last_upp]
 
     def _post_treat(self, data: np.ndarray) -> np.ndarray:
         """Apply all post-treatment functions."""
@@ -332,18 +332,18 @@ class Instrument(ABC):
                              **subplot_kw
                              ) -> Line2D:
         """Plot what the instrument measured."""
-        ydata = self.ydata
+        data = self.data
         label = f"{self.name} (post-treated)"
 
         if raw or len(self.post_treaters) == 0:
-            ydata = self.raw_data
+            data = self.raw_data
             label = f"{self.name} (raw)"
 
         if xdata is None:
             xdata = self.raw_data.index
 
         line1, = axe.plot(xdata,
-                          ydata,
+                          data,
                           color=color,
                           label=label,
                           **subplot_kw)
@@ -357,20 +357,20 @@ class Instrument(ABC):
                              **subplot_kw
                              ) -> Line2D:
         """Plot what the instrument measured."""
-        ydata = self.ydata
+        data = self.data
         label = f"{self.name} (post-treated)"
 
         if raw or len(self.post_treaters) == 0:
-            ydata = self.raw_data.to_numpy()
+            data = self.raw_data.to_numpy()
             label = f"{self.name} (raw)"
         if xdata is None:
             xdata = self.raw_data.index
 
-        n_cols = ydata.shape[1]
+        n_cols = data.shape[1]
         line1 = None
         for i in range(n_cols):
             line1, = axe.plot(xdata,
-                              ydata[:, i],
+                              data[:, i],
                               color=color,
                               label=label + f" (column {i})",
                               **subplot_kw)
@@ -416,20 +416,20 @@ class Instrument(ABC):
         position = getattr(self, 'position', -1.)
         assert isinstance(position, float)
 
-        ydata = self.ydata[sample_index]
+        data = self.data[sample_index]
         if raw or len(self.post_treaters) == 0:
-            ydata = self.raw_data[sample_index]
+            data = self.raw_data[sample_index]
 
         if artist is not None:
-            artist[0].set_ydata(ydata)
+            artist[0].set_ydata(data)
             new_path = np.array([[position, 0.],
-                                 [position, ydata]])
+                                 [position, data]])
             artist[1].set_paths([new_path])
             return artist
 
         assert axe is not None
         artist = axe.stem(position,
-                          ydata,
+                          data,
                           label=self.label,
                           **kwargs)
         return artist
@@ -474,17 +474,17 @@ class Instrument(ABC):
         assert hasattr(self, 'position')
         assert isinstance(self.position, np.ndarray)
 
-        ydata = self.ydata[sample_index, :]
-        assert isinstance(ydata, np.ndarray)
-        assert ydata.shape == self.position.shape
+        data = self.data[sample_index, :]
+        assert isinstance(data, np.ndarray)
+        assert data.shape == self.position.shape
 
         if artist is not None:
-            artist.set_data(self.position, ydata)
+            artist.set_data(self.position, data)
             return artist
 
         assert axe is not None
         artist, = axe.plot(self.position,
-                           ydata,
+                           data,
                            color=color,
                            label=self.label,
                            **kwargs)
@@ -496,7 +496,7 @@ class Instrument(ABC):
                          multipactor: np.ndarray,
                          xdata: float | np.ndarray | None = None,
                          ) -> None:
-        """Plot ``ydata``, discriminating where there is multipactor or not.
+        """Plot ``data``, discriminating where there is multipactor or not.
 
         Parameters
         ----------
@@ -509,12 +509,12 @@ class Instrument(ABC):
             :attr:`self._position`.
 
         """
-        ydata = self.ydata
+        data = self.data
 
         if xdata is None:
             xdata = self.position
         if isinstance(xdata, float):
-            xdata = np.full(len(ydata), xdata)
+            xdata = np.full(len(data), xdata)
         assert isinstance(xdata, np.ndarray)
 
         mp_kwargs = {'c': 'r',
@@ -530,10 +530,10 @@ class Instrument(ABC):
             no_mp_kwargs['label'] = 'No MP'
 
         axes.scatter(xdata[multipactor] - 0.1,
-                     ydata[multipactor],
+                     data[multipactor],
                      **mp_kwargs)
         axes.scatter(xdata[~multipactor] + 0.1,
-                     ydata[~multipactor],
+                     data[~multipactor],
                      **no_mp_kwargs)
         return
 

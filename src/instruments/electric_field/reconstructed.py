@@ -6,7 +6,6 @@
     voltage fitting, overload: they work but this not clean, not clean at all
 
 """
-import math
 from functools import partial
 from typing import overload
 
@@ -50,7 +49,7 @@ class Reconstructed(IElectricField):
         self._beta = c / freq_mhz * 1e-6
 
         self._psi_0: float
-        self._ydata: np.ndarray | None = None
+        self._data: np.ndarray | None = None
         self._z_ohm = z_ohm
         self._r_squared: float
 
@@ -60,29 +59,29 @@ class Reconstructed(IElectricField):
         return r"Reconstructed voltage [V]"
 
     @property
-    def ydata(self) -> np.ndarray:
+    def data(self) -> np.ndarray:
         """Give the calculated voltage at every pos and sample index.
 
         .. note::
-            In contrary to most :class:`Instrument` objects, here ``ydata`` is
-            2D. Axis are the following: ``ydata[sample_index, position_index]``
+            In contrary to most :class:`Instrument` objects, here ``data`` is
+            2D. Axis are the following: ``data[sample_index, position_index]``
 
         """
-        if self._ydata is not None:
-            return self._ydata
+        if self._data is not None:
+            return self._data
 
         assert hasattr(self, '_psi_0')
 
-        ydata = []
-        for power, gamma in zip(self._powers.ydata[:, 0], self._powers.gamma):
+        data = []
+        for power, gamma in zip(self._powers.data[:, 0], self._powers.gamma):
             v_f = _power_to_volt(power, z_ohm=self._z_ohm)
-            ydata.append(voltage_vs_position(self.position,
-                                             v_f,
-                                             gamma,
-                                             self._beta,
-                                             self._psi_0))
-        self._ydata = np.array(ydata)
-        return self._ydata
+            data.append(voltage_vs_position(self.position,
+                                            v_f,
+                                            gamma,
+                                            self._beta,
+                                            self._psi_0))
+        self._data = np.array(data)
+        return self._data
 
     @property
     def fit_info(self) -> str:
@@ -117,27 +116,27 @@ class Reconstructed(IElectricField):
         bounds = ([-2. * np.pi],
                   [2. * np.pi])
         xdata = []
-        ydata = []
+        data = []
         for e_probe in self._e_field_probes:
-            for p_f, gamma, e_field in zip(self._powers.ydata[:, 0],
+            for p_f, gamma, e_field in zip(self._powers.data[:, 0],
                                            self._powers.gamma,
-                                           e_probe.ydata):
+                                           e_probe.data):
                 xdata.append([p_f, gamma, e_probe.position])
-                ydata.append(e_field)
+                data.append(e_field)
 
         to_fit = partial(_model, beta=self._beta, z_ohm=self._z_ohm)
         result = optimize.curve_fit(to_fit,
                                     xdata=xdata,  # [power, pos] combinations
-                                    ydata=ydata,  # resulting voltages
+                                    ydata=data,  # resulting voltages
                                     p0=x_0,
                                     bounds=bounds,
                                     full_output=full_output,
                                     )
         self._psi_0 = result[0][0]
         if full_output:
-            self._r_squared = r_squared(result[2]['fvec'], np.array(ydata))
+            self._r_squared = r_squared(result[2]['fvec'], np.array(data))
             # res_squared = result[2]['fvec']**2
-            # expected = np.array(ydata)
+            # expected = np.array(data)
 
             # ss_err = np.sum(res_squared)
             # ss_tot = np.sum((expected - expected.mean())**2)
@@ -156,7 +155,7 @@ class Reconstructed(IElectricField):
 
         """
         actual_voltages = []
-        v_f = _power_to_volt(self._powers.ydata[:, 0], z_ohm=self._z_ohm)
+        v_f = _power_to_volt(self._powers.data[:, 0], z_ohm=self._z_ohm)
         gamma = self._powers.gamma
 
         for sample_index in self._sample_indexes:
@@ -169,7 +168,7 @@ class Reconstructed(IElectricField):
         actual_voltages = np.array(actual_voltages)
         return actual_voltages
 
-    def ydata_at_position(self, pos: float, tol: float = 1e-5) -> np.ndarray:
+    def data_at_position(self, pos: float, tol: float = 1e-5) -> np.ndarray:
         """Get reconstructed field at position ``pos``."""
         diff = np.abs(self.position - pos)
         delta_z = np.min(diff)
@@ -180,7 +179,7 @@ class Reconstructed(IElectricField):
                              " or increase the number of calculated positions."
                              )
         idx = np.argmin(diff)
-        return self.ydata[:, idx]
+        return self.data[:, idx]
 
 
 def _model(var: np.ndarray,

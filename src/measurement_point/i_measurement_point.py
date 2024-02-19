@@ -94,10 +94,10 @@ class IMeasurementPoint(ABC):
                       f"{kwargs = }.")
 
     def get_data(self, instrument_class: ABCMeta) -> np.ndarray:
-        """Get the ``ydata`` from first ``instrument_class`` instrument."""
+        """Get the ``data`` from first ``instrument_class`` instrument."""
         instrument = self.get_instrument(instrument_class)
         assert instrument is not None
-        return instrument.ydata
+        return instrument.data
 
     def add_post_treater(self,
                          post_treater: Callable[[np.ndarray], np.ndarray],
@@ -121,9 +121,9 @@ class IMeasurementPoint(ABC):
         instrument = self.get_instrument(instrument_class)
         if instrument is None:
             return
-        multipactor_bands = MultipactorBands.from_ydata(
+        multipactor_bands = MultipactorBands.from_data(
             multipac_detector,
-            instrument.ydata,
+            instrument.data,
             instrument.name,
             self.name,
             position=instrument.position,
@@ -182,14 +182,14 @@ class IMeasurementPoint(ABC):
         axe : Axes
             Matplotlib object on which multipacting zones should be added.
         plotted_instrument_class : ABCMeta
-            The nature of the instrument which ``ydata`` is already plotted.
+            The nature of the instrument which ``data`` is already plotted.
 
         """
         plotted_instrument = self.get_instrument(plotted_instrument_class)
         if plotted_instrument is None:
             return
 
-        y_pos_of_multipactor_zone = 1.05 * np.nanmax(plotted_instrument.ydata)
+        y_pos_of_multipactor_zone = 1.05 * np.nanmax(plotted_instrument.data)
         vline_kw = self._typical_vline_keywords()
         arrow_kw = self._typical_arrow_keywords(plotted_instrument)
 
@@ -245,8 +245,8 @@ class IMeasurementPoint(ABC):
     def _typical_arrow_keywords(self,
                                 instrument: Instrument) -> dict[str, Any]:
         """Set consistent plot properties."""
-        typical_width = np.nanmean(instrument.ydata) * 1e-3
-        typical_length = instrument.ydata.shape[0] / 70
+        typical_width = np.nanmean(instrument.data) * 1e-3
+        typical_length = instrument.data.shape[0] / 70
         arrow_kw = {
             'color': self._color,
             'length_includes_head': True,

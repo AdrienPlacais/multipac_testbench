@@ -107,10 +107,10 @@ class MultipactorBands(list):
         return f"{str(self)}: {self._n_bands} bands detected."
 
     @classmethod
-    def from_ydata(
+    def from_data(
             cls,
             multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
-            instrument_ydata: np.ndarray,
+            instrument_data: np.ndarray,
             instrument_name: str,
             measurement_point_name: str,
             position: float,
@@ -120,11 +120,11 @@ class MultipactorBands(list):
         Parameters
         ----------
         multipac_detector : Callable[[np.ndarray], np.ndarray[np.bool_]]
-            Function taking in an :class:`.Instrument` ``ydata``, returning a
+            Function taking in an :class:`.Instrument` ``data``, returning a
             boolean array where True means multipactor and False no
             multipactor.
-        instrument_ydata : np.ndarray
-            The ``ydata`` from the :class:`.Instrument`.
+        instrument_data : np.ndarray
+            The ``data`` from the :class:`.Instrument`.
         instrument_name : str
             Name of the :class:`.Instrument`.
         measurement_point_name : str
@@ -141,7 +141,7 @@ class MultipactorBands(list):
 
         """
         multipactor: np.ndarray[np.bool_]
-        multipactor = multipac_detector(instrument_ydata)
+        multipactor = multipac_detector(instrument_data)
 
         list_of_multipactor_band = \
             _multipactor_to_list_of_multipactor_band(multipactor,
@@ -237,7 +237,7 @@ class MultipactorBands(list):
     def _tell_multipactor_band_if_it_reached_upper_threshold(
             self,
             upper_indexes: Sequence[int]
-            ) -> None:
+    ) -> None:
         """Save in :class:`MultipactorBand` objects if upper was reached."""
         for multipactor_band in self:
             if multipactor_band[0] in upper_indexes:

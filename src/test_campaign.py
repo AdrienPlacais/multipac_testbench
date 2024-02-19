@@ -108,7 +108,7 @@ class TestCampaign(list):
         Parameters
         ----------
         multipac_detector : Callable[[np.ndarray], np.ndarray[np.bool_]]
-            Function that takes in the ``ydata`` of an :class:`.Instrument` and
+            Function that takes in the ``data`` of an :class:`.Instrument` and
             returns an array, where True means multipactor and False no
             multipactor.
         instrument_class : ABCMeta

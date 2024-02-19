@@ -52,7 +52,7 @@ class Powers(Instrument):
         assert self.is_2d, "Forward and Reflected power must be provided to "\
             "compute reflection coefficient."
 
-        gamma = np.abs(np.sqrt(self.ydata[:, 1] / self.ydata[:, 0]))
+        gamma = np.abs(np.sqrt(self.data[:, 1] / self.data[:, 0]))
 
         invalid_indexes = np.where(gamma > 1.)[0]
         n_invalid = len(invalid_indexes)
@@ -89,12 +89,12 @@ class Powers(Instrument):
     @property
     def forward(self) -> np.ndarray:
         """Return forward power only."""
-        return self.ydata[:, 0]
+        return self.data[:, 0]
 
     @property
     def reflected(self) -> np.ndarray:
         """Return reflected power only."""
-        return self.ydata[:, 1]
+        return self.data[:, 1]
 
     def where_is_growing(self, **kwargs) -> list[bool | float]:
         """Determine where power is growing (``True``) and where it is not."""
