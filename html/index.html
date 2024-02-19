@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Welcome to MULTIPAC test bench’s documentation! &mdash; MULTIPAC test bench 1.4.0 documentation</title>
+  <title>Welcome to MULTIPAC test bench’s documentation! &mdash; MULTIPAC test bench 1.4.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,7 +15,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=9172181d"></script>
+        <script src="_static/documentation_options.js?v=350a9c04"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -37,7 +37,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.4.0
+                1.4.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -104,8 +104,6 @@
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.optical_fibre.html">src.instruments.optical_fibre module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.penning.html">src.instruments.penning module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.powers.html">src.instruments.powers module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.instruments.rf_power.html">src.instruments.rf_power module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.instruments.swr.html">src.instruments.swr module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.virtual_instrument.html">src.instruments.virtual_instrument module</a></li>
 </ul>
 </li>
@@ -149,7 +147,7 @@
 <p class="todo-source">(The <a class="reference internal" href="manual/configuration.html#id2"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/docs/source/manual/configuration.rst, line 33.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Add an example for the <a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.plot_multipactor_limits" title="src.multipactor_test.MultipactorTest.plot_multipactor_limits"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MultipactorTest.plot_multipactor_limits()</span></code></a> once it works for several positions.</p>
+<p>Add an example for the <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultipactorTest.plot_multipactor_limits()</span></code> once it works for several positions.</p>
 </div>
 <p class="todo-source">(The <a class="reference internal" href="manual/examples.html#id2"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/docs/source/manual/examples.rst, line 12.)</p>
 <div class="admonition-todo admonition">
@@ -282,40 +280,34 @@ data…</p>
 <p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id9"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.scatter_instruments_data, line 14.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Simplify this thing. Lower and upper multipacting barriers should
-be easier to get. Maybe pandas dataframe is the way to go?</p>
-</div>
-<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id10"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.plot_multipactor_limits, line 12.)</p>
-<div class="admonition-todo admonition">
-<p class="admonition-title">Todo</p>
 <p>Docstring, match_with_mp_band keywords</p>
 </div>
-<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id11"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.plot_data_at_multipactor_thresholds, line 3.)</p>
+<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id10"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.plot_data_at_multipactor_thresholds, line 3.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>Allow representation of several pick-ups.</p>
 </div>
-<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id12"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.data_for_somersalo, line 3.)</p>
+<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id11"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.data_for_somersalo, line 3.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>Allow representation of several pick-ups.</p>
 </div>
-<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id13"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.data_for_susceptibility, line 3.)</p>
+<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id12"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.data_for_susceptibility, line 3.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>Proper docstring.</p>
 </div>
-<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id14"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.data_for_somersalo_scaling_law, line 3.)</p>
+<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id13"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.data_for_somersalo_scaling_law, line 3.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>Proper docstring.</p>
 </div>
-<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id15"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.data_for_perez, line 3.)</p>
+<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id14"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.data_for_perez, line 3.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>There are way cleaner ways to do this.</p>
 </div>
-<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id16"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.data_for_perez, line 6.)</p>
+<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id15"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.data_for_perez, line 6.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>If multipactor happens somewhere and then is conditioned, this
@@ -323,7 +315,7 @@ information does not appear and we plot the last detected
 multipactor.
 Hence the dirty patch probes_conditioned_during_test.</p>
 </div>
-<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id17"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.data_for_perez, line 9.)</p>
+<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id16"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.data_for_perez, line 9.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>Implement the <code class="docutils literal notranslate"><span class="pre">plot_barriers_vs_swr</span></code> and <code class="docutils literal notranslate"><span class="pre">plot_barriers_vs_frequency</span></code>

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>src package &mdash; MULTIPAC test bench 1.4.0 documentation</title>
+  <title>src package &mdash; MULTIPAC test bench 1.4.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,7 +15,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=9172181d"></script>
+        <script src="_static/documentation_options.js?v=350a9c04"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -38,7 +38,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.4.0
+                1.4.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -134,14 +134,6 @@
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.powers.html#src.instruments.powers.Powers"><code class="docutils literal notranslate"><span class="pre">Powers</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="src.instruments.rf_power.html">src.instruments.rf_power module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="src.instruments.rf_power.html#src.instruments.rf_power.RfPower"><code class="docutils literal notranslate"><span class="pre">RfPower</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="src.instruments.swr.html">src.instruments.swr module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="src.instruments.swr.html#src.instruments.swr.SWR"><code class="docutils literal notranslate"><span class="pre">SWR</span></code></a></li>
-</ul>
-</li>
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.virtual_instrument.html">src.instruments.virtual_instrument module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.virtual_instrument.html#src.instruments.virtual_instrument.VirtualInstrument"><code class="docutils literal notranslate"><span class="pre">VirtualInstrument</span></code></a></li>
 </ul>
@@ -214,6 +206,7 @@
 <li class="toctree-l2"><a class="reference internal" href="src.util.html#submodules">Submodules</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="src.util.helper.html">src.util.helper module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="src.util.helper.html#src.util.helper.output_filepath"><code class="docutils literal notranslate"><span class="pre">output_filepath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.util.helper.html#src.util.helper.r_squared"><code class="docutils literal notranslate"><span class="pre">r_squared()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="src.util.multipactor_detectors.html">src.util.multipactor_detectors module</a><ul>
@@ -251,13 +244,11 @@
 <li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.plot_instruments_vs_time"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.plot_instruments_vs_time()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.animate_instruments_vs_position"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.animate_instruments_vs_position()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.scatter_instruments_data"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.scatter_instruments_data()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.filter_measurement_points"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.filter_measurement_points()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.get_measurement_points"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.get_measurement_points()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.get_measurement_point"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.get_measurement_point()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.get_instruments"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.get_instruments()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.get_instrument"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.get_instrument()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.reconstruct_voltage_along_line"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.reconstruct_voltage_along_line()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.plot_multipactor_limits"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.plot_multipactor_limits()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.plot_data_at_multipactor_thresholds"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.plot_data_at_multipactor_thresholds()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.data_for_somersalo"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.data_for_somersalo()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.data_for_susceptibility"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.data_for_susceptibility()</span></code></a></li>
@@ -287,7 +278,6 @@
 <li class="toctree-l3"><a class="reference internal" href="src.test_campaign.html#src.test_campaign.TestCampaign.plot_instruments_y_vs_instrument_x"><code class="docutils literal notranslate"><span class="pre">TestCampaign.plot_instruments_y_vs_instrument_x()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.test_campaign.html#src.test_campaign.TestCampaign.plot_barriers_vs_frequency"><code class="docutils literal notranslate"><span class="pre">TestCampaign.plot_barriers_vs_frequency()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.test_campaign.html#src.test_campaign.TestCampaign.plot_barriers_vs_swr"><code class="docutils literal notranslate"><span class="pre">TestCampaign.plot_barriers_vs_swr()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="src.test_campaign.html#src.test_campaign.TestCampaign.plot_multipactor_limits"><code class="docutils literal notranslate"><span class="pre">TestCampaign.plot_multipactor_limits()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.test_campaign.html#src.test_campaign.TestCampaign.plot_data_at_multipactor_thresholds"><code class="docutils literal notranslate"><span class="pre">TestCampaign.plot_data_at_multipactor_thresholds()</span></code></a></li>
 </ul>
 </li>
