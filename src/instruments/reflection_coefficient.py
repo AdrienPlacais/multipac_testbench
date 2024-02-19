@@ -26,6 +26,9 @@ class ReflectionCoefficient(VirtualInstrument):
 
     where :math:`P_r` is the reflected power and :math:`P_f` is the forward
     power.
+    This object is created by :meth:`InstrumentFactory.run_virtual` when there
+    is one :class:`.ForwardPower` and one :class:`.ReflectedPower` in its
+    ``instruments`` argument.
 
     """
 
@@ -34,6 +37,7 @@ class ReflectionCoefficient(VirtualInstrument):
                     forward: ForwardPower,
                     reflected: ReflectedPower,
                     name: str = 'Reflection_coefficient',
+                    **kwargs
                     ) -> Self:
         """Compute the reflection coefficient from given :class:`.Power`."""
         data = _compute_reflection_coef(forward.data, reflected.data)

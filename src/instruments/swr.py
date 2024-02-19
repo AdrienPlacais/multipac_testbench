@@ -29,6 +29,10 @@ class SWR(VirtualInstrument):
 
     where :math:`R` is the reflection coefficient.
 
+    This object is created by :meth:`InstrumentFactory.run_virtual` when there
+    is one :class:`.ForwardPower` and one :class:`.ReflectedPower` in its
+    ``instruments`` argument.
+
     """
 
     @classmethod
@@ -36,6 +40,7 @@ class SWR(VirtualInstrument):
                     forward: ForwardPower,
                     reflected: ReflectedPower,
                     name: str = 'SWR',
+                    **kwargs
                     ) -> Self:
         """Compute the reflection coefficient from given :class:`.Power`."""
         reflection_coefficient = ReflectionCoefficient(forward, reflected)
@@ -47,6 +52,7 @@ class SWR(VirtualInstrument):
             cls,
             reflection_coefficient: ReflectionCoefficient,
             name: str = 'SWR'
+            **kwargs
     ) -> Self:
         """Compute the SWR from given :class:`.ReflectionCoefficient`."""
         data = _compute_swr(reflection_coefficient.data)

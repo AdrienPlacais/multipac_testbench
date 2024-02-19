@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Define a class to create the proper :class:`.Instrument`."""
+from collections.abc import Sequence
 from typing import Any
 
 import pandas as pd
@@ -14,6 +15,9 @@ from multipac_testbench.src.instruments.penning import Penning
 from multipac_testbench.src.instruments.power import (ForwardPower,
                                                       ReflectedPower)
 from multipac_testbench.src.instruments.powers import Powers
+from multipac_testbench.src.instruments.reflection_coefficient import \
+    ReflectionCoefficient
+from multipac_testbench.src.instruments.swr import SWR
 
 STRING_TO_INSTRUMENT_CLASS = {
     'CurrentProbe': CurrentProbe,
@@ -81,3 +85,36 @@ class InstrumentFactory:
         return instrument_class(name,
                                 raw_data,
                                 **instruments_kw)
+
+    def run_virtual(self,
+                    instruments: Sequence[Instrument],
+                    **kwargs
+                    ) -> Sequence[Instrument]:
+        """Add the implemented :class:`.VirtualInstrument`."""
+        virtuals = []
+
+        power_related = self._power_related(instruments, **kwargs)
+        if len(power_related) > 0:
+            virtuals += power_related
+
+        return virtuals
+
+    def _power_related(self,
+                       instruments: Sequence[Instrument],
+                       **kwargs
+                       ) -> Sequence[Instrument]:
+        """Create :class:`.ReflectionCoefficient` and :class:`.SWR`."""
+        forwards = [x for x in instruments if isinstance(x, ForwardPower)]
+        reflecteds = [x for x in instruments if isinstance(x, ReflectedPower)]
+        if len(forwards) != 1 or len(reflecteds) != 1:
+            return ()
+
+        forward = forwards[0]
+        reflected = reflecteds[0]
+        reflection_coefficient = ReflectionCoefficient.from_powers(
+            forward,
+            reflected,
+            **kwargs)
+        swr = SWR.from_reflection_coefficient(reflection_coefficient,
+                                              **kwargs)
+        return reflection_coefficient, swr
