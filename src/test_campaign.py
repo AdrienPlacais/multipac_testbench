@@ -333,7 +333,7 @@ class TestCampaign(list):
             tmp_str = r'$P_{TW}$ '
             if full_output:
                 r_squared = helper.r_squared(result[2]['fvec'], p_fit)
-                tmp_str = f'Fit ({tmp_str} = {popt[0]:3.1f}W, $R^2$ = {r_squared:3.3f})'
+                tmp_str = f'Fit ({tmp_str} = {popt[0]:3.1f}W, $r^2$ = {r_squared:3.3f})'
             else:
                 tmp_str = f'Fit ({tmp_str} = {popt[0]:3.1f}W)'
             df_fitted = pd.DataFrame(
@@ -393,6 +393,7 @@ class TestCampaign(list):
                                          marker='o',
                                          ms=10,
                                          )
+        print("Low thresholds:", df_perez.filter(like='low').stack().describe())
         axe.set_prop_cycle(None)
         df_perez.filter(like='high').plot(grid=True,
                                           ax=axe,
@@ -400,6 +401,7 @@ class TestCampaign(list):
                                           marker='^',
                                           ms=10,
                                           )
+        print("High thresholds:", df_perez.filter(like='high').stack().describe())
         if png_path is not None:
             fig.savefig(png_path)
         return axe, df_perez
