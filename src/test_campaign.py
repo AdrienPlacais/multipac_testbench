@@ -7,7 +7,6 @@
     methods.
 
 """
-import warnings
 from abc import ABCMeta
 from collections.abc import Callable, Sequence
 from pathlib import Path
