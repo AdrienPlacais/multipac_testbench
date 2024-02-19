@@ -11,16 +11,19 @@ from multipac_testbench.src.instruments.electric_field.field_probe import \
 from multipac_testbench.src.instruments.instrument import Instrument
 from multipac_testbench.src.instruments.optical_fibre import OpticalFibre
 from multipac_testbench.src.instruments.penning import Penning
+from multipac_testbench.src.instruments.power import (ForwardPower,
+                                                      ReflectedPower)
 from multipac_testbench.src.instruments.powers import Powers
-
 
 STRING_TO_INSTRUMENT_CLASS = {
     'CurrentProbe': CurrentProbe,
     'ElectricFieldProbe': FieldProbe,
     'FieldProbe': FieldProbe,
+    'ForwardPower': ForwardPower,
     'OpticalFibre': OpticalFibre,
     'Penning': Penning,
     'Powers': Powers,
+    'ReflectedPower': ReflectedPower,
 }  #:
 
 
