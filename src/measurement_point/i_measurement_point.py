@@ -46,18 +46,22 @@ class IMeasurementPoint(ABC):
             instrument_factory.run(instr_name, df_data, **instr_kw)
             for instr_name, instr_kw in instruments_kw.items()
         ]
+        virtual_instruments = instrument_factory.run_virtual(self.instruments)
+        self.add_instrument(*virtual_instruments)
+
         self._color: tuple[float, float, float] | None = None
         self.multipactor_bands: MultipactorBands
         self.position: float
 
-    def add_instrument(self, instrument: Instrument) -> None:
+    def add_instrument(self, *instruments: Instrument) -> None:
         """Add a new instrument :attr:`.instruments`.
 
         A priori, useful only for :class:`.VirtualInstrument`, when they rely
         on other :class:`.Instrument` objects to be fully initialized.
 
         """
-        self.instruments.append(instrument)
+        for instrument in instruments:
+            self.instruments.append(instrument)
 
     def get_instruments(self,
                         instrument_class: ABCMeta,

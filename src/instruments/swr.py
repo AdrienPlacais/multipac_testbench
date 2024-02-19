@@ -45,19 +45,20 @@ class SWR(VirtualInstrument):
         """Compute the reflection coefficient from given :class:`.Power`."""
         reflection_coefficient = ReflectionCoefficient(forward, reflected)
         return cls.from_reflection_coefficient(reflection_coefficient,
-                                               name=name)
+                                               name=name,
+                                               **kwargs)
 
     @classmethod
     def from_reflection_coefficient(
             cls,
             reflection_coefficient: ReflectionCoefficient,
-            name: str = 'SWR'
+            name: str = 'SWR',
             **kwargs
     ) -> Self:
         """Compute the SWR from given :class:`.ReflectionCoefficient`."""
         data = _compute_swr(reflection_coefficient.data)
         ser_data = pd.Series(data, name=name)
-        return cls(name=name, raw_data=ser_data, position=np.NaN)
+        return cls(name=name, raw_data=ser_data, position=np.NaN, **kwargs)
 
     @classmethod
     def ylabel(cls) -> str:

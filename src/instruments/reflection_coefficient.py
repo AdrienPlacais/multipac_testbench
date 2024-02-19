@@ -42,7 +42,7 @@ class ReflectionCoefficient(VirtualInstrument):
         """Compute the reflection coefficient from given :class:`.Power`."""
         data = _compute_reflection_coef(forward.data, reflected.data)
         ser_data = pd.Series(data, name=name)
-        return cls(name=name, raw_data=ser_data, position=np.NaN)
+        return cls(name=name, raw_data=ser_data, position=np.NaN, **kwargs)
 
     @classmethod
     def ylabel(cls) -> str:
