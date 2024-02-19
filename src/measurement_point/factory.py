@@ -81,10 +81,9 @@ class IMeasurementPointFactory:
                                    measurement_points: list[IMeasurementPoint],
                                    verbose: bool = False,
                                    ) -> GlobalDiagnostics | None:
-        """Ensure that we have only one :class:GlobalDiagnostics` object."""
+        """Ensure that we have only one :class:`GlobalDiagnostics` object."""
         global_diagnostics = [x for x in measurement_points
-                              if isinstance(x, GlobalDiagnostics)
-                              ]
+                              if isinstance(x, GlobalDiagnostics)]
         if len(global_diagnostics) == 0:
             if verbose:
                 print("No global diagnostic defined.")
