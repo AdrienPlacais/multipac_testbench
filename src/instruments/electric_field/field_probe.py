@@ -70,8 +70,8 @@ class FieldProbe(IElectricField):
                        a_rack=self._a_rack,
                        b_rack=self._b_rack,
                        z_0=50.)
-        self.raw_data = fun1(self.raw_data)
-        self.raw_data = fun2(self.raw_data)
+        self._raw_data = fun1(self._raw_data)
+        self._raw_data = fun2(self._raw_data)
 
     def _load_calibration_file(self,
                                calibration_file: Path,

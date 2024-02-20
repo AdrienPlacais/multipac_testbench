@@ -98,7 +98,7 @@ class Powers(Instrument):
 
     def where_is_growing(self, **kwargs) -> list[bool | float]:
         """Determine where power is growing (``True``) and where it is not."""
-        n_points = self.raw_data.index[-1]
+        n_points = self._raw_data.index[-1]
         is_growing = [_array_is_growing(self.forward, i, **kwargs)
                       for i in range(n_points)]
         return is_growing

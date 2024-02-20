@@ -49,7 +49,7 @@ class Reconstructed(IElectricField):
         self._e_field_probes = e_field_probes
         self._forward_power = forward_power
         self._reflection = reflection
-        self._sample_indexes = self._e_field_probes[0].raw_data.index
+        self._sample_indexes = self._e_field_probes[0]._raw_data.index
         self._pos_for_fit = [probe.position for probe in self._e_field_probes]
         self._beta = c / freq_mhz * 1e-6
 

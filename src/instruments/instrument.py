@@ -25,7 +25,7 @@ class Instrument(ABC):
 
     def __init__(self,
                  name: str,
-                 raw_data: pd.Series,
+                 data: pd.Series,
                  position: np.ndarray | float,
                  is_2d: bool = False,
                  **kwargs,
@@ -36,11 +36,11 @@ class Instrument(ABC):
         ----------
         name : str
             Name of the instrument.
-        raw_data : pd.Series
+        data : pd.Series
             ``x`` and ``y`` data as saved in the ``.csv`` produced by LabVIEW.
-        position : np.ndarray | float | None, optional
-            The position of the instrument. The default is None, in which case
-            :attr:`._position` is not set (case of :class:`.GlobalDiagnostic`).
+        position : np.ndarray | float
+            The position of the instrument. If irrelevant (global diagnostic),
+            must be set to np.NaN.
         is_2d : bool, optional
             To make the difference between instruments holding a single array
             of data (e.g. current vs time) and those holding several columns
@@ -51,7 +51,6 @@ class Instrument(ABC):
 
         """
         self.name = name
-        self.raw_data = raw_data
 
         self.position = position
 
@@ -60,7 +59,9 @@ class Instrument(ABC):
         self.plot_vs_time, self.plot_vs_position, self.scatter_data = plotters
 
         self._data: np.ndarray | None = None
-        self._data_as_pd: pd.Series | pd.DataFrame | None = None
+        self._raw_data: pd.Series = data
+        self._data_as_pd: pd.Series
+
         self._post_treaters: list[Callable[[np.ndarray], np.ndarray]] = []
         self.multipactor_bands: MultipactorBands
 
@@ -83,7 +84,7 @@ class Instrument(ABC):
     def from_array(cls,
                    name: str,
                    data: np.ndarray,
-                   xdata: Iterable | None = None,
+                   xdata: Iterable, # | None = None,
                    **kwargs) -> Self:
         """Instantiate :class:`Instrument` from a numpy array.
 
@@ -106,9 +107,9 @@ class Instrument(ABC):
             A regular instrument.
 
         """
-        if xdata is None:
-            n_points = len(data)
-            xdata = range(1, n_points + 1)
+        # if xdata is None:
+            # n_points = len(data)
+            # xdata = range(1, n_points + 1)
 
         raw_data = pd.Series(data=data,
                              index=xdata,
@@ -159,7 +160,7 @@ class Instrument(ABC):
 
         """
         if self._data is None:
-            self._data = self._post_treat(self.raw_data.to_numpy())
+            self._data = self._post_treat(self._raw_data.to_numpy())
         return self._data
 
     @property
@@ -168,10 +169,10 @@ class Instrument(ABC):
         if self._data_as_pd is not None:
             return self._data_as_pd
 
-        index = self.raw_data.index
+        index = self._raw_data.index
         if self.is_2d:
-            assert isinstance(self.raw_data, pd.DataFrame)
-            columns = self.raw_data.columns
+            assert isinstance(self._raw_data, pd.DataFrame)
+            columns = self._raw_data.columns
             self._data_as_pd = pd.DataFrame(self.data,
                                             columns=columns,
                                             index=index,
@@ -266,7 +267,7 @@ class Instrument(ABC):
         assert isinstance(upper_barrier_idx, list)
         name_of_detector = multipactor_bands.instrument_name
 
-        match (self.raw_data):
+        match (self._raw_data):
             case pd.Series():
                 label = f"{self} according to {name_of_detector}"
 
@@ -334,11 +335,11 @@ class Instrument(ABC):
         label = f"{self.name} (post-treated)"
 
         if raw or len(self.post_treaters) == 0:
-            data = self.raw_data
+            data = self._raw_data
             label = f"{self.name} (raw)"
 
         if xdata is None:
-            xdata = self.raw_data.index
+            xdata = self._raw_data.index
 
         line1, = axe.plot(xdata,
                           data,
@@ -359,10 +360,10 @@ class Instrument(ABC):
         label = f"{self.name} (post-treated)"
 
         if raw or len(self.post_treaters) == 0:
-            data = self.raw_data.to_numpy()
+            data = self._raw_data.to_numpy()
             label = f"{self.name} (raw)"
         if xdata is None:
-            xdata = self.raw_data.index
+            xdata = self._raw_data.index
 
         n_cols = data.shape[1]
         line1 = None
@@ -416,7 +417,7 @@ class Instrument(ABC):
 
         data = self.data[sample_index]
         if raw or len(self.post_treaters) == 0:
-            data = self.raw_data[sample_index]
+            data = self._raw_data[sample_index]
 
         if artist is not None:
             artist[0].set_ydata(data)
