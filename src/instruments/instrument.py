@@ -58,8 +58,8 @@ class Instrument(ABC):
         plotters = self._get_plot_methods(is_2d)
         self.plot_vs_time, self.plot_vs_position, self.scatter_data = plotters
 
-        self._data: np.ndarray | None = None
         self._raw_data: pd.Series = data
+        self._data: np.ndarray
         self._data_as_pd: pd.Series
 
         self._post_treaters: list[Callable[[np.ndarray], np.ndarray]] = []
@@ -84,7 +84,7 @@ class Instrument(ABC):
     def from_array(cls,
                    name: str,
                    data: np.ndarray,
-                   xdata: Iterable, # | None = None,
+                   xdata: Iterable,
                    **kwargs) -> Self:
         """Instantiate :class:`Instrument` from a numpy array.
 
@@ -107,10 +107,6 @@ class Instrument(ABC):
             A regular instrument.
 
         """
-        # if xdata is None:
-            # n_points = len(data)
-            # xdata = range(1, n_points + 1)
-
         raw_data = pd.Series(data=data,
                              index=xdata,
                              name=name)
@@ -159,14 +155,14 @@ class Instrument(ABC):
         ``_post_treaters``.
 
         """
-        if self._data is None:
+        if not hasattr(self, '_data'):
             self._data = self._post_treat(self._raw_data.to_numpy())
         return self._data
 
     @property
     def data_as_pd(self) -> pd.Series | pd.DataFrame:
         """Get the treated data as a pandas object."""
-        if self._data_as_pd is not None:
+        if hasattr(self, '_data_as_pd'):
             return self._data_as_pd
 
         index = self._raw_data.index
@@ -175,18 +171,18 @@ class Instrument(ABC):
             columns = self._raw_data.columns
             self._data_as_pd = pd.DataFrame(self.data,
                                             columns=columns,
-                                            index=index,
-                                            )
-        else:
-            self._data_as_pd = pd.Series(self.data,
-                                         index=index,
-                                         )
+                                            index=index)
+            return self._data_as_pd
+
+        self._data_as_pd = pd.Series(self.data, index=index, name=self.name)
         return self._data_as_pd
 
     @data.setter
-    def data(self, value: np.ndarray | None) -> None:
-        self._data = value
-        self._data_as_pd = None
+    def data(self, new_data: np.ndarray) -> None:
+        """Set ``data``, clean previous ``_data_as_pd``."""
+        self._data = new_data
+        if hasattr(self, '_data_as_pd'):
+            delattr(self, '_data_as_pd')
 
     def _get_plot_methods(self, is_2d: bool
                           ) -> tuple[Callable, Callable, Callable]:
@@ -217,11 +213,8 @@ class Instrument(ABC):
             Post-treating functions.
 
         """
-        if self.data is not None:
-            # print("Warning! Modifying the post treaters makes "
-            #       "previously post-treated data obsolete.")
-            self.data = None
-
+        delattr(self, '_data')
+        delattr(self, '_data_as_pd')
         self._post_treaters = post_treaters
 
     def add_post_treater(self, post_treater: Callable[[np.ndarray], np.ndarray]
@@ -235,11 +228,11 @@ class Instrument(ABC):
             return an array with the same size as output.
 
         """
+        if hasattr(self, '_data'):
+            delattr(self, '_data')
+        if hasattr(self, '_data_as_pd'):
+            delattr(self, '_data_as_pd')
         self._post_treaters.append(post_treater)
-        if self.data is not None:
-            # print("Warning! Modifying the post treaters makes "
-            #       "previously post-treated data obsolete.")
-            self.data = None
 
     def values_at_barriers(
             self,
