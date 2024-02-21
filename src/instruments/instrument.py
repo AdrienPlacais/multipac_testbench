@@ -63,7 +63,6 @@ class Instrument(ABC):
         self._data_as_pd: pd.Series
 
         self._post_treaters: list[Callable[[np.ndarray], np.ndarray]] = []
-        self.multipactor_bands: MultipactorBands
 
     def __str__(self) -> str:
         """Give concise information on instrument."""

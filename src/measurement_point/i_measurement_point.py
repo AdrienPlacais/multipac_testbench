@@ -50,7 +50,6 @@ class IMeasurementPoint(ABC):
         self.add_instrument(*virtual_instruments)
 
         self._color: tuple[float, float, float] | None = None
-        self.multipactor_bands: MultipactorBands
         self.position: float
 
     def add_instrument(self, *instruments: Instrument) -> None:
@@ -132,8 +131,6 @@ class IMeasurementPoint(ABC):
             self.name,
             position=instrument.position,
         )
-        self.multipactor_bands = multipactor_bands
-        instrument.multipactor_bands = multipactor_bands
         return multipactor_bands
 
     def plot_instruments_vs_time(
@@ -174,7 +171,7 @@ class IMeasurementPoint(ABC):
             self,
             axe: Axes,
             plotted_instrument_class: ABCMeta,
-            multipactor_bands: MultipactorBands | None = None
+            multipactor_bands: MultipactorBands
     ) -> None:
         """Add arrows to display multipactor.
 
@@ -197,12 +194,6 @@ class IMeasurementPoint(ABC):
         vline_kw = self._typical_vline_keywords()
         arrow_kw = self._typical_arrow_keywords(plotted_instrument)
 
-        if multipactor_bands is None:
-            warnings.warn("In the future, it will be mandatory to pass in "
-                          "the desired MultipactorBands object.",
-                          DeprecationWarning)
-            multipactor_bands = self.multipactor_bands
-
         for multipactor_band in multipactor_bands:
             delta_x = multipactor_band[-1] - multipactor_band[0]
             axe.arrow(multipactor_band[0],
@@ -222,15 +213,9 @@ class IMeasurementPoint(ABC):
             self,
             instrument_class_axes: dict[ABCMeta, Axes],
             xdata: float,
-            multipactor_bands: MultipactorBands | None = None
+            multipactor_bands: MultipactorBands
     ) -> None:
         """Scatter data measured by desired instruments."""
-        if multipactor_bands is None:
-            warnings.warn("In the future, it will be mandatory to pass in "
-                          "the desired MultipactorBands object.",
-                          DeprecationWarning)
-            multipactor_bands = self.multipactor_bands
-
         for instrument_class, axes in instrument_class_axes.items():
             instrument = self.get_instrument(instrument_class)
             if instrument is None:
