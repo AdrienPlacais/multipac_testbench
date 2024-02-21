@@ -23,7 +23,7 @@
 """
 import itertools
 from abc import ABCMeta
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Iterable, Sequence
 from pathlib import Path
 
 import numpy as np
@@ -39,6 +39,8 @@ from multipac_testbench.src.instruments.electric_field.reconstructed import \
     Reconstructed
 from multipac_testbench.src.instruments.instrument import Instrument
 from multipac_testbench.src.instruments.power import ForwardPower
+from multipac_testbench.src.instruments.reflection_coefficient import \
+    ReflectionCoefficient
 from multipac_testbench.src.measurement_point.factory import \
     IMeasurementPointFactory
 from multipac_testbench.src.measurement_point.i_measurement_point import \
@@ -49,8 +51,6 @@ from multipac_testbench.src.multipactor_band.util import match_with_mp_band
 from multipac_testbench.src.util import plot
 from multipac_testbench.src.util.animate import get_limits
 from multipac_testbench.src.util.helper import output_filepath
-from multipac_testbench.src.instruments.reflection_coefficient import \
-    ReflectionCoefficient
 
 
 class MultipactorTest:
@@ -125,6 +125,154 @@ class MultipactorTest:
 
         for pick_up in pick_ups:
             pick_up.add_post_treater(*args, **kwargs)
+
+    def sweet_plot(
+            self,
+            *ydata: ABCMeta,
+            xdata: ABCMeta | None = None,
+            exclude: Sequence[str] = (),
+            tail: int = -1,
+            xlabel: str = '',
+            ylabel: str | Iterable = '',
+            grid: bool = True,
+            title: str | list[str] = '',
+            png_path: Path | None = None,
+            png_kwargs: dict | None = None,
+            csv_path: Path | None = None,
+            csv_kwargs: dict | None = None,
+            **kwargs) -> Axes | np.ndarray[Axes]:
+        """Plot ``ydata`` versus ``xdata``.
+
+        Parameters
+        ----------
+        *ydata : ABCMeta
+            Class of the instruments to plot.
+        xdata : ABCMeta | None, optional
+            Class of instrument to use as x-data. If there is several
+            instruments which have this class, only one ``ydata`` is allowed
+            and number of ``x`` and ``y`` instruments must match. The default
+            is None, in which case data is plotted vs sample index.
+        exclude : Sequence[str], optional
+            Name of the instruments that you do not want to see plotted.
+        tail : int, optional
+            Specify this to only plot the last ``tail`` points. Useful to
+            select only the last power cycle.
+        xlabel : str, optional
+            Label of x axis.
+        ylabel : str | Iterable, optional
+            Label of y axis.
+        grid : bool, optional
+            To show the grid.
+        title : str | list[str], optional
+            Title of the plot or of the subplots.
+        png_path : Path | None, optional
+            If specified, save the figure at ``png_path``.
+        csv_path : Path | None, optional
+            If specified, save the data used to produce the plot in
+            ``csv_path``.
+        **kwargs : dict
+            Other keyword arguments passed to the :meth:`pd.DataFrame.plot`.
+
+        """
+        data_to_plot, x_columns = self._set_x_data(xdata, exclude=exclude)
+        data_to_plot, y_columns = self._set_y_data(data_to_plot,
+                                                   *ydata,
+                                                   exclude=exclude,
+                                                   **kwargs)
+        df_to_plot = plot.create_df_to_plot(data_to_plot, tail=tail, **kwargs)
+
+        if not title:
+            title = str(self)
+
+        x_column, y_column = plot.match_x_and_y_column_names(x_columns,
+                                                             y_columns)
+
+        axes = plot.actual_plot(df_to_plot, x_column, y_column, grid=grid,
+                                title=title, **kwargs)
+
+        plot.set_labels(axes, *ydata, xdata=xdata, xlabel=xlabel,
+                        ylabel=ylabel, **kwargs)
+
+        if png_path is not None:
+            if png_kwargs is None:
+                png_kwargs = {}
+            plot.save_figure(axes, png_path, **png_kwargs)
+        if csv_path is not None:
+            if csv_kwargs is None:
+                csv_kwargs = {}
+            plot.save_dataframe(df_to_plot, csv_path, **csv_kwargs)
+        return axes
+
+    def _set_x_data(self,
+                    xdata: ABCMeta | None,
+                    exclude: Sequence[str] = (),
+                    ) -> tuple[list[pd.Series], list[str] | None]:
+        """Set the data that will be used for x-axis.
+
+        Parameters
+        ----------
+        xdata : ABCMeta | None
+            Class of an instrument, or None (in this case, use default index).
+        exclude : Sequence[str], optional
+            Name of instruments to exclude. The default is an empty tuple.
+
+        Returns
+        -------
+        data_to_plot : list[pd.Series]
+            Contains the data used for x axis.
+        list[str] | None
+            Name of the column(s) used for x axis.
+
+        """
+        if xdata is None:
+            return [], None
+
+        instruments = self.get_instruments(xdata,
+                                           instruments_to_ignore=exclude)
+        x_columns = [instrument.name for instrument in instruments
+                     if instrument.name not in exclude]
+        data_to_plot = [instrument.data_as_pd for instrument in instruments]
+        return data_to_plot, x_columns
+
+    def _set_y_data(self,
+                    data_to_plot: list[pd.Series],
+                    *ydata: ABCMeta,
+                    exclude: Sequence[str] = (),
+                    **kwargs) -> tuple[list[pd.Series], list[list[str]]]:
+        """Set the y-data that will be plotted.
+
+        Parameters
+        ----------
+        data_to_plot : list[pd.Series]
+            List already containing the x-data, or nothing if the index is to
+            be used.
+        *ydata : ABCMeta
+            The class of the instruments to plot.
+        exclude : Sequence[str], optional
+            Name of some instruments to exclude. The default is an empty tuple.
+        kwargs :
+            Other keyword arguments.
+
+        Returns
+        -------
+        data_to_plot : list[pd.Series]
+            List containing all the series that will be plotted.
+        y_columns : list[list[str]]
+            Containts, for every subplot, the name of the columns to plot.
+
+        """
+        instruments = [self.get_instruments(y) for y in ydata]
+        y_columns = []
+        for sublist in instruments:
+            y_columns.append([instrument.name
+                              for instrument in sublist
+                              if instrument.name not in exclude])
+            for instrument in sublist:
+                if instrument.name in exclude:
+                    continue
+                data_to_plot.append(instrument.data_as_pd)
+
+        return data_to_plot, y_columns
 
     def detect_multipactor(
             self,
