@@ -11,6 +11,10 @@ import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
+from multipac_testbench.src.instruments.power import ForwardPower
+from multipac_testbench.src.util.multipactor_detectors import \
+    start_and_end_of_contiguous_true_zones
+
 
 def create_fig(title: str = '',
                instruments_to_plot: Sequence[ABCMeta] = (),
@@ -129,7 +133,7 @@ def create_df_to_plot(data_to_plot: list[pd.Series],
 def match_x_and_y_column_names(
         x_columns: list[str] | None,
         y_columns: list[list[str]],
-        ) -> tuple[list[str] | str | None, list[list[str]] | list[str]]:
+) -> tuple[list[str] | str | None, list[list[str]] | list[str]]:
     """Match name of x columns with y columns, remove duplicate columns.
 
     Parameters
@@ -305,3 +309,83 @@ def save_dataframe(df_to_plot: pd.DataFrame,
 
     """
     df_to_plot.to_csv(csv_path, sep=sep, **csv_kwargs)
+
+
+def add_background_color_according_to_power_growth(
+        axe: Axes,
+        where_is_growing: list[bool | float],
+        grow_kw: dict | None = None,
+        decrease_kw: dict | None = None,
+        legend: bool = True,
+        ) -> None:
+    """Add a background color to indicate where power grows or not.
+
+    Parameters
+    ----------
+    axe : Axes
+        The Axes on which to plot.
+    where_is_growing : list[bool | float]
+        A list containing True where power grows, False where decreases, np.NaN
+        when undetermined. Typical return value from
+        :meth:`.ForwardPower.where_is_growing`.
+    grow_kw : dict | None, optional
+        How zones where power grows are colored. Default is a semi-transparent
+        blue.
+    decrease_kw : dict | None, optional
+        How zones where power decreases are colored. Default is a
+        semi-transparent red.
+    legend : bool, optional
+        If legend should be added. The default is True.
+
+    Returns
+    -------
+    None
+
+    """
+    as_array = np.array(where_is_growing)
+
+    if grow_kw is None:
+        grow_kw = {'color': 'b', 'alpha': 0.2}
+    _add_single_bg_color(as_array, axe, "Power grows", invert_array=False,
+                         **grow_kw)
+
+    if decrease_kw is None:
+        decrease_kw = {'color': 'r', 'alpha': 0.2}
+    _add_single_bg_color(as_array, axe, "Power decreases", invert_array=True,
+                         **decrease_kw)
+
+    if legend:
+        axe.legend()
+
+
+def _add_single_bg_color(where_is_growing: np.ndarray,
+                         axe: Axes,
+                         label: str | None,
+                         invert_array: bool,
+                         **color_kw: dict) -> None:
+    """Add a single background color to the plot.
+
+    Parameters
+    ----------
+    where_is_growing : np.ndarray
+        Array where 1. means power grows, 0. means it decreases, np.NaN is
+        undetermined.
+    axe : Axes
+        Where color should be plotted.
+    label : str | None
+        The label of the background color.
+    invert_array : bool
+        Should be False for grow plot, True for decrease plot. Serve as a
+        filling value for nan.
+    color_kw : dict
+        Keyword arguments given to axvspan.
+
+    """
+    where_is_growing[np.isnan(where_is_growing)] = invert_array
+    data = where_is_growing.astype(np.bool_)
+    if invert_array:
+        data = ~data
+    zones = start_and_end_of_contiguous_true_zones(data)
+    for zone in zones:
+        axe.axvspan(zone[0], zone[1], label=label, **color_kw)
+        label = None
