@@ -92,10 +92,27 @@ class TestCampaign(list):
         for test in self:
             test.add_post_treater(*args, **kwargs)
 
-    def sweet_plot(self, *args, **kwargs
+    def sweet_plot(self,
+                   *args,
+                   png_folder: str | None = None,
+                   csv_folder: str | None = None,
+                   **kwargs
                    ) -> list[Axes] | list[np.ndarray[Axes]]:
         """Recursively call :meth:`.MultipactorTest.sweet_plot`."""
-        axes = [test.sweet_plot(*args, **kwargs) for test in self]
+        axes = []
+        for test in self:
+            png_path = None
+            if png_folder is not None:
+                png_path = test.output_filepath(png_folder, ".png")
+
+            csv_path = None
+            if csv_folder is not None:
+                csv_path = test.output_filepath(csv_folder, ".csv")
+
+            axes.append(test.sweet_plot(*args,
+                                        png_path=png_path,
+                                        csv_path=csv_path,
+                                        **kwargs))
         return axes
 
     def detect_multipactor(
