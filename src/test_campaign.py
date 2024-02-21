@@ -92,6 +92,12 @@ class TestCampaign(list):
         for test in self:
             test.add_post_treater(*args, **kwargs)
 
+    def sweet_plot(self, *args, **kwargs
+                   ) -> list[Axes] | list[np.ndarray[Axes]]:
+        """Recursively call :meth:`.MultipactorTest.sweet_plot`."""
+        axes = [test.sweet_plot(*args, **kwargs) for test in self]
+        return axes
+
     def detect_multipactor(
             self,
             multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
