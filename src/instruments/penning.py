@@ -20,4 +20,4 @@ class Penning(Instrument):
     @classmethod
     def ylabel(cls) -> str:
         """Label used for plots."""
-        return "Pressure [mbar?]"
+        return "Pressure [mbar]"
