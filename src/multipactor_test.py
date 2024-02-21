@@ -341,6 +341,9 @@ class MultipactorTest:
     ) -> tuple[Figure, list[Axes]]:
         """Plot signals measured by ``instruments_to_plot``.
 
+        .. deprecated:: 1.5.0
+            Use :meth:`MultipactorTest.sweet_plot` instead.
+
         .. todo::
             Add a ``instruments_to_exclude`` argument. Could replace
             ``measurement_points_to_exclude``.
@@ -1101,7 +1104,12 @@ class MultipactorTest:
             tail: int = -1,
             fig_kw: dict | None = None,
     ) -> Axes:
-        """Plot data measured by ``instrument_y`` vs ``instrument_x``."""
+        """Plot data measured by ``instrument_y`` vs ``instrument_x``.
+
+        .. deprecated:: 1.5.0
+            Use :meth:`MultipactorTest.sweet_plot` instead.
+
+        """
         instruments_y = self.get_instruments(instrument_ids_y,
                                              measurement_points_to_exclude,
                                              instruments_to_ignore)
