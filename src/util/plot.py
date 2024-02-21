@@ -312,7 +312,7 @@ def save_dataframe(df_to_plot: pd.DataFrame,
 
 
 def add_background_color_according_to_power_growth(
-        axe: Axes,
+        axe: Axes | Sequence[Axes] | np.ndarray[Axes],
         where_is_growing: list[bool | float],
         grow_kw: dict | None = None,
         decrease_kw: dict | None = None,
@@ -322,8 +322,9 @@ def add_background_color_according_to_power_growth(
 
     Parameters
     ----------
-    axe : Axes
-        The Axes on which to plot.
+    axe : Axes | Sequence[Axes] | np.ndarray[Axes]
+        The Axes on which to plot. If several are given, we sequentially call
+        this function.
     where_is_growing : list[bool | float]
         A list containing True where power grows, False where decreases, np.NaN
         when undetermined. Typical return value from
@@ -342,6 +343,11 @@ def add_background_color_according_to_power_growth(
     None
 
     """
+    if isinstance(axe, (Sequence, np.ndarray)):
+        for ax in axe:
+            add_background_color_according_to_power_growth(
+                ax, where_is_growing, grow_kw, decrease_kw, legend)
+        return
     as_array = np.array(where_is_growing)
 
     if grow_kw is None:
