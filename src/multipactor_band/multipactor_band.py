@@ -66,8 +66,13 @@ if __name__ == '__main__':
     my_indexes = [3, 8]
     my_band = MultipactorBand(my_indexes[0],
                               my_indexes[-1],
-                              "doigt mouillé")
+                              "doigt mouillé",
+                              0)
 
     my_instrument_data = np.linspace(0, 10, 11)
     my_mp_data = my_instrument_data[my_band]
     print(my_mp_data)
+
+    import pandas as pd
+    df_mp_data = pd.DataFrame({'Some instrument data': my_instrument_data})
+    print(df_mp_data.iloc[my_band])
