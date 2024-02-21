@@ -338,10 +338,6 @@ def add_background_color_according_to_power_growth(
     legend : bool, optional
         If legend should be added. The default is True.
 
-    Returns
-    -------
-    None
-
     """
     if isinstance(axe, (Sequence, np.ndarray)):
         for ax in axe:
