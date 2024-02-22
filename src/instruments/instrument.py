@@ -269,7 +269,7 @@ class Instrument(ABC):
                                             index=lower_barrier_idx)
 
                 upper_dict = {
-                    f"Lower barrier {label}": self.data[upper_barrier_idx]}
+                    f"Upper barrier {label}": self.data[upper_barrier_idx]}
                 upper_values = pd.DataFrame(upper_dict,
                                             index=upper_barrier_idx)
 
