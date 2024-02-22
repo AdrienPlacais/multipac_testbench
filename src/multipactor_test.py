@@ -894,6 +894,8 @@ class MultipactorTest:
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
         instruments_to_ignore: Sequence[Instrument | str] = (),
         png_path: Path | None = None,
+        csv_path: Path | None = None,
+        csv_kwargs: dict | None = None,
         **fig_kw,
     ) -> tuple[Figure, Axes]:
         """Plot the data measured by some instruments at thresholds.
@@ -928,6 +930,7 @@ class MultipactorTest:
                                     find_matching_pairs=False,
                                     # should already match
                                     )
+        my_df_data = []
         for instrument, mp_bands in zipper:
             lower_values, upper_values = instrument.values_at_barriers(
                 mp_bands)
@@ -938,8 +941,18 @@ class MultipactorTest:
                               drawstyle='steps-post',
                               color=color,
                               ls='--')
+            my_df_data.append(lower_values)
+            my_df_data.append(upper_values)
+
         axe.grid(True)
         plot.finish_fig(fig, instrument_class_axes.values(), png_path)
+
+        if csv_path is not None:
+            if csv_kwargs is None:
+                csv_kwargs = {}
+            df_to_plot = pd.concat(my_df_data, axis=1)
+            plot.save_dataframe(df_to_plot, csv_path, **csv_kwargs)
+
         return fig, axe
 
     def data_for_somersalo(self,

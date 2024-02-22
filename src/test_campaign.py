@@ -588,14 +588,16 @@ class TestCampaign(list):
         """
         zipper = zip(self, seq_multipactor_bands, strict=True)
         for i, (test, multipactor_bands) in enumerate(zipper):
-            png_path = None
+            png_path, csv_path = None, None
             if out_folder is not None:
                 png_path = test.output_filepath(out_folder, ".png")
+                csv_path = test.output_filepath(out_folder, ".csv")
             _ = test.plot_data_at_multipactor_thresholds(
                 *args,
                 multipactor_bands=multipactor_bands,
                 num=iternum + i,
                 png_path=png_path,
+                csv_path=csv_path,
                 **kwargs
             )
         return
