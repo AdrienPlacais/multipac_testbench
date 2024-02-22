@@ -1,4 +1,8 @@
-"""Define useful functions to filter data."""
+"""Define useful functions to filter data.
+
+.. todo:: Merge the two remove_isolated functions
+
+"""
 from typing import overload
 import numpy as np
 
@@ -106,3 +110,74 @@ def array_is_growing(array: np.ndarray,
     if local_diff < 0.:
         return False
     return True
+
+
+def remove_isolated_true(array: np.ndarray[np.bool_],
+                         minimum_number_of_points: int) -> np.ndarray:
+    """
+    Remove 'True' observed on less than ``minimum_number_of_points`` points.
+
+    Basically the same as ``_merge_consecutive``.
+
+    """
+    n_points = array.size
+    window_width = minimum_number_of_points + 2
+    indexer = np.arange(window_width)[None, :] \
+        + np.arange(n_points + 1 - window_width)[:, None]
+
+    window: np.ndarray[np.bool_]
+    for i, window in enumerate(array[indexer]):
+        if window[0]:
+            # True at start of window
+            continue
+
+        if window[-1]:
+            # True at end of window
+            continue
+
+        if not window.any():
+            # Not a single True in the window
+            continue
+
+        # True in isolated points in the window: do something!!
+        array[indexer[i]] = False
+
+    return array
+
+
+def remove_isolated_false(array: np.ndarray,
+                          consecutive_criterion: int) -> np.ndarray:
+    """
+    Merge multipac zones separated by ``consecutive_criterion`` points.
+
+    For the window slicing:
+    https://stackoverflow.com/a/42258242/12188681
+
+    We explore ``array`` with a slicing window of width
+    ``consecutive_criterion + 2``. If there is multipactor at the two
+    extremities of the window, but some of the points inside the window do not
+    have multipacting, we say that multipactor happend here anyway.
+
+    """
+    n_points = array.size
+    window_width = consecutive_criterion + 2
+    indexer = np.arange(window_width)[None, :] \
+        + np.arange(n_points + 1 - window_width)[:, None]
+
+    for i, window in enumerate(array[indexer]):
+        if not window[0]:
+            # no multipactor at start of window
+            continue
+
+        if not window[-1]:
+            # no multipactor at end of window
+            continue
+
+        if window.all():
+            # already multipactor everywhere in the window
+            continue
+
+        # multipactor at the start and end of window, with "holes" between
+        array[indexer[i]] = True
+
+    return array
