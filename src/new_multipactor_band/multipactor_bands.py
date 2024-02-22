@@ -145,6 +145,17 @@ class MultipactorBands(list):
         list_of_multipactor_band = \
             _multipactor_to_list_of_multipactor_band(multipactor,
                                                      instrument_name)
+        if power_is_growing is not None:
+            # import pandas as pd
+            # import matplotlib.pyplot as plt
+            # plt.close('all')
+            # mytest = pd.DataFrame({'current': instrument_data[1:],
+                                   # 'power_grows': power_is_growing,
+                                   # 'multipactor': multipactor[1:]})
+            # mytest.astype(float).plot(grid=True)
+            alternative = new_multipactor_to_list_of_mp_band(multipactor,
+                                                             power_is_growing,
+                                                             )
 
         multipactor_bands = cls(list_of_multipactor_band,
                                 multipactor,
@@ -265,6 +276,68 @@ def _multipactor_to_list_of_multipactor_band(
         for i, (start, end) in enumerate(starts_ends)
     ]
     return list_of_multipactor_band
+
+
+
+def new_multipactor_to_list_of_mp_band(
+        multipactor: np.ndarray[np.bool_],
+        power_is_growing: np.ndarray[float],
+        ) -> list[MultipactorBand | None]:
+
+    delta_multipactor = np.diff(multipactor)
+    delta_power_is_growing = np.diff(power_is_growing)
+    zipper = zip(delta_multipactor, delta_power_is_growing)
+
+    all_bands: list[MultipactorBand | None] = []
+    current_band: None | MultipactorBand = None
+    idx_start: None | int = None
+    idx_end: None | int = None
+    for i, (d_mp, d_grow) in enumerate(zipper):
+        # we attack a new power cycle, or the second half of previous one
+        if d_grow != 0.:
+
+            # specific case: did not go out of the MP band
+            if idx_start is not None and idx_end is None:
+                assert current_band is None
+                reached_second_threshold = False
+                idx_end = i
+                current_band = MultipactorBand(idx_start, idx_end, 'la', -1)
+
+                # reset for next cycle
+                idx_start = i + 1
+            else:
+                idx_start = None
+
+            # we finish with this power cycle
+            all_bands.append(current_band)
+            current_band = None
+            idx_end = None
+            # idx_end is always None
+            # but idx_start is set to current step if we did not manage to exit
+            # the last multipactor band
+            continue
+
+        # we are continuing a power cycle
+        if not d_mp:
+            # we are already multipacting or already not multipacting
+            continue
+
+        # there is entry or exit of a mp zone
+        # entry of a new mp zone
+        if multipactor[i + 1]:
+            idx_start = i + 1
+            continue
+
+        # exit of a mp zone
+        assert idx_start is not None
+        idx_end = i
+        reached_second_threshold = True
+        if current_band is not None:
+            print("MultipactorBands warning: I guess there was two MP bands "
+                  "for this power cycle!! To investigate. Only keeping second "
+                  "one...")
+        current_band = MultipactorBand(idx_start, idx_end, 'lo', -1)
+    return all_bands
 
 
 
