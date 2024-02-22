@@ -4,6 +4,11 @@
 import numpy as np
 
 from multipac_testbench.src.instruments.instrument import Instrument
+from multipac_testbench.src.util.filtering import (
+    array_is_growing,
+    remove_trailing_true,
+    remove_isolated_false,
+)
 
 
 class Power(Instrument):
@@ -18,11 +23,45 @@ class Power(Instrument):
         """Label used for plots."""
         return r"Power [W]"
 
-    def where_is_growing(self, **kwargs) -> list[bool | float]:
-        """Determine where power is growing (``True``) and where it is not."""
+    def where_is_growing(self,
+                         minimum_number_of_points: int = 50,
+                         n_trailing_points_to_check: int = 40,
+                         **kwargs) -> list[bool]:
+        """Determine where power is growing (``True``) and where it is not.
+
+        .. todo::
+            May be necessary to also remove isolated True
+
+        """
         n_points = self._raw_data.index[-1]
-        is_growing = [_array_is_growing(self.data, i, **kwargs)
-                      for i in range(n_points)]
+        is_growing: list[bool] = []
+
+        previous_value = True
+        for i in range(n_points):
+            local_is_growing = array_is_growing(
+                self.data,
+                i,
+                undetermined_value=previous_value,
+                **kwargs)
+
+            is_growing.append(local_is_growing)
+            previous_value = local_is_growing
+
+        arr_growing = np.array(is_growing, dtype=np.bool_)
+
+        # Remove isolated False
+        if minimum_number_of_points > 0:
+            arr_growing = remove_isolated_false(arr_growing,
+                                                minimum_number_of_points)
+
+        # Also ensure that last power growth is False
+        if n_trailing_points_to_check > 0:
+            arr_growing = remove_trailing_true(
+                arr_growing,
+                n_trailing_points_to_check,
+                array_name_for_warning='power growth')
+
+        is_growing = arr_growing.tolist()
         return is_growing
 
 
@@ -42,42 +81,3 @@ class ReflectedPower(Power):
     def ylabel(cls) -> str:
         """Label used for plots."""
         return r"Reflected power $P_r$ [W]"
-
-
-def _array_is_growing(array: np.ndarray,
-                      index: int,
-                      width: int = 10,
-                      tol: float = 1e-5) -> bool | float:
-    """Tell if ``array`` is locally increasing at ``index``.
-
-    Parameters
-    ----------
-    array : np.ndarray
-        Array under study.
-    index : int
-        Where you want to know if we increase.
-    width : int, optional
-        Width of the sample to determine increase. The default is ``10``.
-    tol : float, optional
-        If absolute value of variation between ``array[idx-width/2]`` and
-        ``array[idx+width/2]`` is lower than ``tol``, we return a ``NaN``. The
-        default is ``1e-5``.
-
-    Returns
-    -------
-    bool | float
-        If the array is locally increasing, ``NaN`` if undetermined.
-
-    """
-    semi_width = width // 2
-    if index <= semi_width:
-        return np.NaN
-    if index >= len(array) - semi_width:
-        return np.NaN
-
-    local_diff = array[index + semi_width] - array[index - semi_width]
-    if abs(local_diff) < tol:
-        return np.NaN
-    if local_diff < 0.:
-        return False
-    return True
