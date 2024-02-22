@@ -306,26 +306,33 @@ class MultipactorTest:
 
         """
         forward_power = self.get_instrument(ForwardPower)
-
-        detected_multipactor_bands = []
-        measurement_points = self.get_measurement_points(
-            to_exclude=measurement_points_to_exclude)
-        for measurement_point in measurement_points:
-            multipactor_bands = measurement_point.detect_multipactor(
-                multipac_detector,
-                instrument_class
-            )
-            # if not hasattr(measurement_point, 'multipactor_bands'):
-            if multipactor_bands is None:
-                continue
-            if not isinstance(forward_power, ForwardPower):
-                continue
-
+        power_is_growing = None
+        if isinstance(forward_power, ForwardPower):
             if power_is_growing_kw is None:
                 power_is_growing_kw = {}
             power_is_growing = forward_power.where_is_growing(
                 **power_is_growing_kw)
-            multipactor_bands.power_is_growing = power_is_growing
+
+        detected_multipactor_bands = []
+        measurement_points = self.get_measurement_points(
+            to_exclude=measurement_points_to_exclude)
+
+        for measurement_point in measurement_points:
+            multipactor_bands = measurement_point.detect_multipactor(
+                multipac_detector,
+                instrument_class,
+                power_is_growing
+            )
+            if multipactor_bands is None:
+                continue
+            # if not isinstance(forward_power, ForwardPower):
+                # continue
+
+            # if power_is_growing_kw is None:
+                # power_is_growing_kw = {}
+            # power_is_growing = forward_power.where_is_growing(
+                # **power_is_growing_kw)
+            # multipactor_bands.power_is_growing = power_is_growing
             detected_multipactor_bands.append(multipactor_bands)
         return detected_multipactor_bands
 

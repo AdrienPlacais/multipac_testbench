@@ -119,6 +119,7 @@ class IMeasurementPoint(ABC):
             self,
             multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
             instrument_class: ABCMeta = Instrument,
+            power_is_growing: list[bool | float] | None = None,
     ) -> MultipactorBands | None:
         """Detect multipactor with ``multipac_detector``."""
         instrument = self.get_instrument(instrument_class)
@@ -130,6 +131,7 @@ class IMeasurementPoint(ABC):
             instrument.name,
             self.name,
             position=instrument.position,
+            power_is_growing=power_is_growing,
         )
         return multipactor_bands
 
