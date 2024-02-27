@@ -419,10 +419,27 @@ def add_instrument_multipactor_bands(
         axes = np.array(axes_aslist, dtype=object)
         return axes
 
+    mp_axes = axes
     if twinx:
         assert axes is not None
-        axes = axes.twinx()
+        mp_axes = axes.twinx()
 
-    axes = test_multipactor_bands.plot_as_bool(axes, scale, alpha, legend,
-                                               **kwargs)
-    return axes
+    mp_axes = test_multipactor_bands.plot_as_bool(mp_axes,
+                                                  scale,
+                                                  alpha,
+                                                  legend,
+                                                  **kwargs)
+    if legend:
+        assert axes is not None
+        _merge_legends(axes, mp_axes)
+    return mp_axes
+
+
+def _merge_legends(ax1: Axes, ax2: Axes) -> None:
+    """Move the legend from ``ax1`` to ``ax2``."""
+    handles1, labels1 = ax1.get_legend_handles_labels()
+    handles2, labels2 = ax2.get_legend_handles_labels()
+    handles = handles1 + handles2
+    labels = labels1 + labels2
+    ax1.legend().remove()
+    ax2.legend(handles, labels)
