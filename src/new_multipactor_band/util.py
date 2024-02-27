@@ -8,7 +8,7 @@ from collections.abc import Callable, Sequence
 
 from multipac_testbench.src.measurement_point.i_measurement_point import \
     IMeasurementPoint
-from multipac_testbench.src.multipactor_band.multipactor_bands import \
+from multipac_testbench.src.new_multipactor_band.multipactor_bands import \
     MultipactorBands
 from multipac_testbench.src.instruments.instrument import Instrument
 

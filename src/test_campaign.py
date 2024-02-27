@@ -18,10 +18,11 @@ import pandas as pd
 from matplotlib import animation
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+
 from multipac_testbench.src.instruments.power import Power
 from multipac_testbench.src.measurement_point.i_measurement_point import \
     IMeasurementPoint
-from multipac_testbench.src.multipactor_band.multipactor_bands import \
+from multipac_testbench.src.new_multipactor_band.multipactor_bands import \
     MultipactorBands
 from multipac_testbench.src.multipactor_test import MultipactorTest
 from multipac_testbench.src.theoretical.somersalo import (
@@ -123,6 +124,7 @@ class TestCampaign(list):
             power_is_growing_kw: dict[str, int | float] | None = None,
             measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (
             ),
+            debug: bool = False,
             **kwargs,
     ) -> list[list[MultipactorBands]]:
         """Create the :class:`.MultipactorBands` objects.
@@ -142,6 +144,9 @@ class TestCampaign(list):
         measurement_points_to_exclude : Sequence[IMeasurementPoint | str] = ()
             :class:`.IMeasurementPoint` where you do not want to know if there
             is multipacting.
+        debug : bool, optional
+            To plot the data used for multipactor detection, where power grows,
+            where multipactor is detected. The default is False.
 
         Returns
         -------
@@ -159,6 +164,7 @@ class TestCampaign(list):
                 *args,
                 power_is_growing_kw=power_is_growing_kw,
                 measurement_points_to_exclude=measurement_points_to_exclude,
+                debug=debug,
                 **kwargs)
             for test in self]
         return nested_multipactor_bands

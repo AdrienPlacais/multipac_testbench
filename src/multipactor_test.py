@@ -45,9 +45,9 @@ from multipac_testbench.src.measurement_point.factory import \
     IMeasurementPointFactory
 from multipac_testbench.src.measurement_point.i_measurement_point import \
     IMeasurementPoint
-from multipac_testbench.src.multipactor_band.multipactor_bands import \
+from multipac_testbench.src.new_multipactor_band.multipactor_bands import \
     MultipactorBands
-from multipac_testbench.src.multipactor_band.util import match_with_mp_band
+from multipac_testbench.src.new_multipactor_band.util import match_with_mp_band
 from multipac_testbench.src.util import plot
 from multipac_testbench.src.util.animate import get_limits
 from multipac_testbench.src.util.helper import output_filepath
@@ -136,6 +136,8 @@ class MultipactorTest:
             ylabel: str | Iterable = '',
             grid: bool = True,
             title: str | list[str] = '',
+            seq_multipactor_bands: Sequence[MultipactorBands |
+                                            None] | None = None,
             png_path: Path | None = None,
             png_kwargs: dict | None = None,
             csv_path: Path | None = None,
@@ -193,6 +195,9 @@ class MultipactorTest:
         plot.set_labels(axes, *ydata, xdata=xdata, xlabel=xlabel,
                         ylabel=ylabel, **kwargs)
 
+        if seq_multipactor_bands is not None:
+            plot.add_multipactor_bands(seq_multipactor_bands, axes, twinx=True)
+
         if png_path is not None:
             if png_kwargs is None:
                 png_kwargs = {}
@@ -201,6 +206,40 @@ class MultipactorTest:
             if csv_kwargs is None:
                 csv_kwargs = {}
             plot.save_dataframe(df_to_plot, csv_path, **csv_kwargs)
+        return axes
+
+    def plot_thresholds(
+        self,
+        instruments_id_plot: ABCMeta,
+        multipactor_bands: MultipactorBands | Sequence[MultipactorBands],
+        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
+        instruments_to_ignore: Sequence[Instrument | str] = (),
+        ) -> Axes | np.ndarray[Axes]:
+        """Plot evolution of thresholds."""
+        instruments_to_plot = self.get_instruments(
+            instruments_id_plot,
+            measurement_points_to_exclude,
+            instruments_to_ignore)
+        if isinstance(multipactor_bands, MultipactorBands):
+            multipactor_bands = [multipactor_bands
+                                 for _ in instruments_to_plot]
+        zipper = zip(instruments_to_plot, multipactor_bands, strict=True)
+        thresholds = [instrument.at_thresholds(multipactor_band)
+                      for instrument, multipactor_band in zipper]
+        df_thresholds = pd.concat(thresholds, axis=1)
+        axes = df_thresholds.filter(like='Lower').plot(
+            marker='o',
+            ms=10,
+        )
+        axes.set_prop_cycle(None)
+        axes = df_thresholds.filter(like='Upper').plot(
+            ax=axes,
+            grid=True,
+            marker='^',
+            ms=10,
+            xlabel="Half-power cycle #",
+            ylabel=instruments_id_plot.ylabel()
+        )
         return axes
 
     def _set_x_data(self,
@@ -281,7 +320,8 @@ class MultipactorTest:
             power_is_growing_kw: dict[str, int | float] | None = None,
             measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (
             ),
-    ) -> list[MultipactorBands]:
+            debug: bool = False,
+    ) -> list[MultipactorBands | None]:
         """Create the :class:`.MultipactorBands` objects.
 
         Parameters
@@ -296,22 +336,28 @@ class MultipactorTest:
         power_is_growing_kw : dict[str, int | float] | None, optional
             Keyword arguments passed to the function that determines when power
             is increasing, when it is decreasing. The default is None.
+        measurement_points_to_exclude : Sequence[IMeasurementPoint | str],\
+optional
+            Some measurement points that should not be considered. The default
+            is an empty tuple.
+        debug : bool, optional
+            To plot the data used for multipactor detection, where power grows,
+            where multipactor is detected. The default is False.
 
         Returns
         -------
-        detected_multipactor_bands : list[MultipactorBands]
+        detected_multipactor_bands : list[MultipactorBands | None]
             Objets containing when multipactor happens, according to
             ``multipac_detector``, at every pick-up holding an
             :class:`.Instrument` of type ``instrument_class``.
 
         """
         forward_power = self.get_instrument(ForwardPower)
-        power_is_growing = None
-        if isinstance(forward_power, ForwardPower):
-            if power_is_growing_kw is None:
-                power_is_growing_kw = {}
-            power_is_growing = forward_power.where_is_growing(
-                **power_is_growing_kw)
+        assert isinstance(forward_power, ForwardPower)
+        if power_is_growing_kw is None:
+            power_is_growing_kw = {}
+        power_is_growing = forward_power.where_is_growing(
+            **power_is_growing_kw)
 
         detected_multipactor_bands = []
         measurement_points = self.get_measurement_points(
@@ -321,18 +367,9 @@ class MultipactorTest:
             multipactor_bands = measurement_point.detect_multipactor(
                 multipac_detector,
                 instrument_class,
-                power_is_growing
+                power_is_growing,
+                debug
             )
-            if multipactor_bands is None:
-                continue
-            # if not isinstance(forward_power, ForwardPower):
-                # continue
-
-            # if power_is_growing_kw is None:
-                # power_is_growing_kw = {}
-            # power_is_growing = forward_power.where_is_growing(
-                # **power_is_growing_kw)
-            # multipactor_bands.power_is_growing = power_is_growing
             detected_multipactor_bands.append(multipactor_bands)
         return detected_multipactor_bands
 

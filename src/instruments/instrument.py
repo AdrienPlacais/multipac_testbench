@@ -16,7 +16,7 @@ from matplotlib.axes import Axes
 from matplotlib.container import StemContainer
 from matplotlib.lines import Line2D
 
-from multipac_testbench.src.multipactor_band.multipactor_bands import \
+from multipac_testbench.src.new_multipactor_band.multipactor_bands import \
     MultipactorBands
 
 
@@ -232,6 +232,20 @@ class Instrument(ABC):
         if hasattr(self, '_data_as_pd'):
             delattr(self, '_data_as_pd')
         self._post_treaters.append(post_treater)
+
+    def at_thresholds(self,
+                      multipactor_bands: MultipactorBands
+                      ) -> pd.DataFrame:
+        """Get what was measured by instrument at thresholds."""
+        lower = [self.data[i] if i is not None else np.NaN
+                 for i in multipactor_bands.lower_indexes()]
+        upper = [self.data[i] if i is not None else np.NaN
+                 for i in multipactor_bands.upper_indexes()]
+        label = f" threshold {self} "
+        label += f"according to {multipactor_bands.instrument_name}"
+        df_at_thresholds = pd.DataFrame({'Lower' + label: lower,
+                                         'Upper' + label: upper})
+        return df_at_thresholds
 
     def values_at_barriers(
             self,

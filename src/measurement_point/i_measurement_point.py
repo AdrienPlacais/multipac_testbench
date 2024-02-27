@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Define an object to keep several related measurements."""
-import warnings
 from abc import ABC, ABCMeta
 from typing import Any, Callable, Sequence
 
@@ -10,7 +9,7 @@ import pandas as pd
 from matplotlib.axes import Axes
 from multipac_testbench.src.instruments.factory import InstrumentFactory
 from multipac_testbench.src.instruments.instrument import Instrument
-from multipac_testbench.src.multipactor_band.multipactor_bands import \
+from multipac_testbench.src.new_multipactor_band.multipactor_bands import \
     MultipactorBands
 
 
@@ -118,21 +117,30 @@ class IMeasurementPoint(ABC):
     def detect_multipactor(
             self,
             multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
-            instrument_class: ABCMeta = Instrument,
-            power_is_growing: list[bool | float] | None = None,
+            instrument_class: ABCMeta,
+            power_is_growing: np.ndarray[np.bool_],
+            debug: bool = False,
     ) -> MultipactorBands | None:
         """Detect multipactor with ``multipac_detector``."""
         instrument = self.get_instrument(instrument_class)
         if instrument is None:
             return
-        multipactor_bands = MultipactorBands.from_data(
-            multipac_detector,
-            instrument.data,
-            instrument.name,
-            self.name,
-            position=instrument.position,
-            power_is_growing=power_is_growing,
-        )
+        multipactor = multipac_detector(instrument.data)
+        multipactor_bands = MultipactorBands(multipactor,
+                                             power_is_growing,
+                                             instrument.name,
+                                             self.name,
+                                             instrument.position,
+                                             )
+        if debug:
+            axes = instrument.data_as_pd.plot(grid=True)
+            axes = axes.twinx()
+            df_float = pd.DataFrame(
+                {'Power grows?': power_is_growing,
+                 'Multipactor?': multipactor[1:],
+                 }).astype(float)
+            axes = df_float.plot(ax=axes, grid=True)
+
         return multipactor_bands
 
     def plot_instruments_vs_time(

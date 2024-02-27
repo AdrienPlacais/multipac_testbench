@@ -26,7 +26,7 @@ class Power(Instrument):
     def where_is_growing(self,
                          minimum_number_of_points: int = 50,
                          n_trailing_points_to_check: int = 40,
-                         **kwargs) -> list[bool]:
+                         **kwargs) -> np.ndarray[np.bool_]:
         """Determine where power is growing (``True``) and where it is not.
 
         .. todo::
@@ -61,8 +61,7 @@ class Power(Instrument):
                 n_trailing_points_to_check,
                 array_name_for_warning='power growth')
 
-        is_growing = arr_growing.tolist()
-        return is_growing
+        return arr_growing
 
 
 class ForwardPower(Power):

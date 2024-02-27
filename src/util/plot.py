@@ -11,7 +11,8 @@ import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-from multipac_testbench.src.instruments.power import ForwardPower
+from multipac_testbench.src.new_multipactor_band.multipactor_bands import \
+    MultipactorBands
 from multipac_testbench.src.util.multipactor_detectors import \
     start_and_end_of_contiguous_true_zones
 
@@ -317,7 +318,7 @@ def add_background_color_according_to_power_growth(
         grow_kw: dict | None = None,
         decrease_kw: dict | None = None,
         legend: bool = True,
-        ) -> None:
+) -> None:
     """Add a background color to indicate where power grows or not.
 
     Parameters
@@ -391,3 +392,47 @@ def _add_single_bg_color(where_is_growing: np.ndarray,
     for zone in zones:
         axe.axvspan(zone[0], zone[1], label=label, **color_kw)
         label = None
+
+
+def add_multipactor_bands(
+        seq_multipactor_bands: Sequence[MultipactorBands | None],
+        axes: np.ndarray[Axes] | Axes | None = None,
+        scale: float | None = None,
+        alpha: float = .5,
+        legend: bool = True,
+        twinx: bool = False,
+        **kwargs,
+) -> Axes | np.ndarray[Axes]:
+    """Add the multipactor bands to a pre-existing plot."""
+    if isinstance(axes, np.ndarray):
+        axes_aslist = [add_multipactor_bands(seq_multipactor_bands,
+                                             axe,
+                                             scale=scale,
+                                             alpha=alpha,
+                                             legend=legend,
+                                             twinx=twinx,
+                                             **kwargs)
+                       for axe in axes]
+        axes = np.array(axes_aslist, dtype=object)
+        return axes
+
+    if scale is None:
+        scale = 1.
+    original_scale = scale
+
+    if twinx:
+        assert axes is not None
+        axes = axes.twinx()
+    for multipactor_bands in seq_multipactor_bands:
+        if multipactor_bands is None:
+            axes.plot([], [])
+            continue
+
+        axes = multipactor_bands.plot_as_bool(axes=axes,
+                                              scale=scale,
+                                              alpha=alpha,
+                                              legend=legend,
+                                              **kwargs)
+        scale += original_scale * 1e-2
+    assert axes is not None
+    return axes

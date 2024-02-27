@@ -35,6 +35,7 @@ class MultipactorBand(list):
                  multipactor_band_index: int,
                  ) -> None:
         """Create the objects with its indexes."""
+        raise IOError
         indexes = [i for i in range(first_index, last_index + 1)]
         super().__init__(indexes)
 
