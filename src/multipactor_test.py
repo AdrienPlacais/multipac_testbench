@@ -425,7 +425,7 @@ class MultipactorTest:
                           test_multipactor_bands: TestMultipactorBands,
                           **kwargs
                           ) -> pd.DataFrame:
-        """Give the ``instrument_id`` measurements at last thrshold."""
+        """Give the ``instrument_id`` measurements at last threshold."""
         zipper = self.instruments_and_multipactor_bands(instrument_id,
                                                         test_multipactor_bands,
                                                         **kwargs)
