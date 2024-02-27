@@ -291,6 +291,7 @@ class MultipactorTest:
         multipactor_bands: TestMultipactorBands,
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
         instruments_to_ignore: Sequence[Instrument | str] = (),
+        title: str = '',
         png_path: Path | None = None,
         png_kwargs: dict | None = None,
         csv_path: Path | None = None,
@@ -336,6 +337,8 @@ class MultipactorTest:
             measurement_points_to_exclude=measurement_points_to_exclude,
             instruments_to_ignore=instruments_to_ignore
         )
+        if not title:
+            title = str(self)
 
         thresholds = [instrument.at_thresholds(multipactor_band)
                       for instrument, multipactor_band in zipper]
@@ -343,6 +346,7 @@ class MultipactorTest:
         axes = df_thresholds.filter(like='Lower').plot(
             marker='o',
             ms=10,
+            title=title,
             **kwargs,
         )
         axes.set_prop_cycle(None)
