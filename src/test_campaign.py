@@ -147,6 +147,19 @@ class TestCampaign(list):
                 **kwargs))
         return axes
 
+    def at_last_threshold(
+            self,
+            instrument_id: ABCMeta,
+            campaign_multipactor_bands: CampaignMultipactorBands,
+            *args,
+            **kwargs) -> pd.DataFrame:
+        """Make a resume of data measured at last thresholds."""
+        zipper = zip(self, campaign_multipactor_bands, strict=True)
+        df_thresholds = [
+            test.at_last_threshold(instrument_id, band, *args, **kwargs)
+            for test, band in zipper]
+        return pd.concat(df_thresholds)
+
     def detect_multipactor(
             self,
             multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],

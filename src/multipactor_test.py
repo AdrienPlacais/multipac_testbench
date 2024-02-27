@@ -422,10 +422,17 @@ class MultipactorTest:
 
     def at_last_threshold(self,
                           instrument_id: ABCMeta,
-                          test_multipactor_bands: TestMultipactorBands
+                          test_multipactor_bands: TestMultipactorBands,
+                          **kwargs
                           ) -> pd.DataFrame:
         """Give the ``instrument_id`` measurements at last thrshold."""
-        raise NotImplementedError
+        zipper = self.instruments_and_multipactor_bands(instrument_id,
+                                                        test_multipactor_bands,
+                                                        **kwargs)
+        df_thresholds = pd.concat([instrument.at_thresholds(band).tail(1)
+                                   for instrument, band in zipper], axis=1)
+        df_thresholds.index = [str(self)]
+        return df_thresholds
 
     def detect_multipactor(
             self,
