@@ -1,12 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Define Penning to measure evolution of pressure.
-
-.. todo::
-    Unit of Penning data in csv?
-
-"""
+"""Define Penning to measure evolution of pressure."""
 from multipac_testbench.src.instruments.instrument import Instrument
 
 

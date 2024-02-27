@@ -15,11 +15,6 @@
 .. todo::
     ``to_ignore``, ``to_exclude`` arguments should have more consistent names.
 
-.. todo::
-    Find a way to check consistency between the InstrumentMultipactorBands and
-    corresponding Instruments. First idea would be to check their respective
-    positions.
-
 """
 import itertools
 from abc import ABCMeta

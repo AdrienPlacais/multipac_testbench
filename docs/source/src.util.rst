@@ -12,6 +12,8 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
+   src.util.animate
+   src.util.filtering
    src.util.helper
    src.util.multipactor_detectors
    src.util.plot

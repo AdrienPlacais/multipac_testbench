@@ -1,11 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Define object to keep a single instrument measurements.
-
-.. todo::
-    Ensure that all instruments have a position (float, can be np.NaN)
-
-"""
+"""Define object to keep a single instrument measurements."""
 from abc import ABC
 from collections.abc import Iterable
 from typing import Callable, Literal, Self, overload
