@@ -16,7 +16,7 @@
     ``to_ignore``, ``to_exclude`` arguments should have more consistent names.
 
 .. todo::
-    Find a way to check consistency between the MultipactorBands and
+    Find a way to check consistency between the InstrumentMultipactorBands and
     corresponding Instruments. First idea would be to check their respective
     positions.
 
@@ -46,8 +46,10 @@ from multipac_testbench.src.measurement_point.factory import \
     IMeasurementPointFactory
 from multipac_testbench.src.measurement_point.i_measurement_point import \
     IMeasurementPoint
-from multipac_testbench.src.new_multipactor_band.multipactor_bands import \
-    MultipactorBands
+from multipac_testbench.src.new_multipactor_band.instrument_multipactor_bands \
+    import InstrumentMultipactorBands
+from multipac_testbench.src.new_multipactor_band.test_multipactor_bands \
+    import TestMultipactorBands
 from multipac_testbench.src.new_multipactor_band.util import match_with_mp_band
 from multipac_testbench.src.util import plot
 from multipac_testbench.src.util.animate import get_limits
@@ -137,8 +139,7 @@ class MultipactorTest:
             ylabel: str | Iterable = '',
             grid: bool = True,
             title: str | list[str] = '',
-            seq_multipactor_bands: Sequence[MultipactorBands |
-                                            None] | None = None,
+            test_multipactor_bands: TestMultipactorBands | None = None,
             png_path: Path | None = None,
             png_kwargs: dict | None = None,
             csv_path: Path | None = None,
@@ -168,6 +169,9 @@ class MultipactorTest:
             To show the grid.
         title : str | list[str], optional
             Title of the plot or of the subplots.
+        test_multipactor_bands : TestMultipactorBands | None, optional
+            If provided, information is added to the plot to show where
+            multipactor happens.
         png_path : Path | None, optional
             If specified, save the figure at ``png_path``.
         csv_path : Path | None, optional
@@ -196,8 +200,9 @@ class MultipactorTest:
         plot.set_labels(axes, *ydata, xdata=xdata, xlabel=xlabel,
                         ylabel=ylabel, **kwargs)
 
-        if seq_multipactor_bands is not None:
-            plot.add_multipactor_bands(seq_multipactor_bands, axes, twinx=True)
+        if test_multipactor_bands is not None:
+            plot.add_instrument_multipactor_bands(test_multipactor_bands,
+                                                  axes, twinx=True)
 
         if png_path is not None:
             if png_kwargs is None:
@@ -283,13 +288,14 @@ class MultipactorTest:
     def plot_thresholds(
         self,
         instruments_id_plot: ABCMeta,
-        multipactor_bands: MultipactorBands | Sequence[MultipactorBands],
+        multipactor_bands: TestMultipactorBands,
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
         instruments_to_ignore: Sequence[Instrument | str] = (),
         png_path: Path | None = None,
         png_kwargs: dict | None = None,
         csv_path: Path | None = None,
         csv_kwargs: dict | None = None,
+        **kwargs,
     ) -> Axes | np.ndarray[Axes]:
         """Plot evolution of thresholds.
 
@@ -298,7 +304,8 @@ class MultipactorTest:
         instruments_id_plot : ABCMeta
             Class of instrument to plot. Makes most sense with
             :class:`.ForwardPower` or :class:`FieldProbe`.
-        multipactor_bands : MultipactorBands | Sequence[MultipactorBands]
+        instrument_multipactor_bands : InstrumentMultipactorBands | Sequence[
+            InstrumentMultipactorBands]
             Objects containing the indexes of multipacting. If several are
             given, their number must match the number of instruments of class
             `instruments_id_plot`.
@@ -325,16 +332,23 @@ class MultipactorTest:
             instruments_id_plot,
             measurement_points_to_exclude,
             instruments_to_ignore)
-        if isinstance(multipactor_bands, MultipactorBands):
-            multipactor_bands = [multipactor_bands
-                                 for _ in instruments_to_plot]
-        zipper = zip(instruments_to_plot, multipactor_bands, strict=True)
+
+        matching_mp_bands = [
+            instrument.multipactor_band_at_same_position(
+                multipactor_bands,
+                raise_no_match_error=True,
+                global_diagnostics=True)
+            for instrument in instruments_to_plot]
+
+        zipper = zip(instruments_to_plot, matching_mp_bands, strict=True)
+
         thresholds = [instrument.at_thresholds(multipactor_band)
                       for instrument, multipactor_band in zipper]
         df_thresholds = pd.concat(thresholds, axis=1)
         axes = df_thresholds.filter(like='Lower').plot(
             marker='o',
             ms=10,
+            **kwargs,
         )
         axes.set_prop_cycle(None)
         axes = df_thresholds.filter(like='Upper').plot(
@@ -343,7 +357,8 @@ class MultipactorTest:
             marker='^',
             ms=10,
             xlabel="Half-power cycle #",
-            ylabel=instruments_id_plot.ylabel()
+            ylabel=instruments_id_plot.ylabel(),
+            **kwargs,
         )
         if png_path is not None:
             if png_kwargs is None:
@@ -355,6 +370,13 @@ class MultipactorTest:
             plot.save_dataframe(df_thresholds, csv_path, **csv_kwargs)
         return axes
 
+    def at_last_threshold(self,
+                          instrument_id: ABCMeta,
+                          test_multipactor_bands: TestMultipactorBands
+                          ) -> pd.DataFrame:
+        """Give the ``instrument_id`` measurements at last thrshold."""
+        raise NotImplementedError
+
     def detect_multipactor(
             self,
             multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
@@ -363,8 +385,9 @@ class MultipactorTest:
             measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (
             ),
             debug: bool = False,
-    ) -> list[MultipactorBands | None]:
-        """Create the :class:`.MultipactorBands` objects.
+            **kwargs
+    ) -> TestMultipactorBands:
+        """Create the :class:`.TestMultipactorBands` object.
 
         Parameters
         ----------
@@ -388,7 +411,7 @@ optional
 
         Returns
         -------
-        detected_multipactor_bands : list[MultipactorBands | None]
+        test_multipactor_bands : TestMultipactorBands
             Objets containing when multipactor happens, according to
             ``multipac_detector``, at every pick-up holding an
             :class:`.Instrument` of type ``instrument_class``.
@@ -401,19 +424,20 @@ optional
         power_is_growing = forward_power.where_is_growing(
             **power_is_growing_kw)
 
-        detected_multipactor_bands = []
+        all_bands = []
         measurement_points = self.get_measurement_points(
             to_exclude=measurement_points_to_exclude)
 
         for measurement_point in measurement_points:
-            multipactor_bands = measurement_point.detect_multipactor(
+            instrument_bands = measurement_point.detect_multipactor(
                 multipac_detector,
                 instrument_class,
                 power_is_growing,
                 debug
             )
-            detected_multipactor_bands.append(multipactor_bands)
-        return detected_multipactor_bands
+            all_bands.append(instrument_bands)
+        test_multipactor_bands = TestMultipactorBands(all_bands)
+        return test_multipactor_bands
 
     def plot_instruments_vs_time(
         self,
@@ -422,7 +446,7 @@ optional
         png_path: Path | None = None,
         raw: bool = False,
         plot_multipactor: bool = False,
-        multipactor_bands: Sequence[MultipactorBands] | None = None,
+        instrument_multipactor_bands: Sequence[InstrumentMultipactorBands] | None = None,
         **fig_kw,
     ) -> tuple[Figure, list[Axes]]:
         """Plot signals measured by ``instruments_to_plot``.
@@ -472,17 +496,18 @@ optional
         measurement_points = self.get_measurement_points(
             to_exclude=measurement_points_to_exclude)
 
-        if multipactor_bands is None or not plot_multipactor:
-            multipactor_bands = [None for _ in measurement_points]
-            zipper = zip(measurement_points, multipactor_bands, strict=True)
-            # zipper = zip(measurement_points, multipactor_bands, strict=True)
+        if instrument_multipactor_bands is None or not plot_multipactor:
+            instrument_multipactor_bands = [None for _ in measurement_points]
+            zipper = zip(measurement_points,
+                         instrument_multipactor_bands, strict=True)
+            # zipper = zip(measurement_points, instrument_multipactor_bands, strict=True)
         else:
             zipper = match_with_mp_band(
                 measurement_points,
-                multipactor_bands,
+                instrument_multipactor_bands,
                 assert_positions_match=True,
                 find_matching_pairs=True,
-                assert_every_obj_has_multipactor_bands=False,
+                assert_every_obj_has_instrument_multipactor_bands=False,
             )
 
         for measurement_point, mp_bands in zipper:
@@ -503,7 +528,7 @@ optional
         self,
         measurement_point: IMeasurementPoint,
         instrument_class_axes: dict[ABCMeta, Axes],
-        multipactor_bands: MultipactorBands,
+        instrument_multipactor_bands: InstrumentMultipactorBands,
     ) -> None:
         """Show with arrows when multipactor happens.
 
@@ -516,7 +541,7 @@ optional
             :class:`.PickUp` or :class:`.GlobalDiagnostic` under study.
         instrument_class_axes : dict[ABCMeta, Axes]
             Links instrument class with the axes.
-        multipactor_bands : MultipactorBands
+        instrument_multipactor_bands : InstrumentMultipactorBands
             Should correspond to the :class:`.IMeasurementPoint` under study.
 
         """
@@ -524,7 +549,7 @@ optional
             measurement_point._add_multipactor_vs_time(
                 axe,
                 plotted_instrument_class,
-                multipactor_bands)
+                instrument_multipactor_bands)
 
     def animate_instruments_vs_position(
             self,
@@ -616,7 +641,7 @@ optional
         self,
         instruments_to_plot: Sequence[ABCMeta],
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
-        multipactor_bands: Sequence[MultipactorBands] | None = None,
+        instrument_multipactor_bands: Sequence[InstrumentMultipactorBands] | None = None,
         png_path: Path | None = None,
         **fig_kw,
     ) -> tuple[Figure, list[Axes]]:
@@ -648,9 +673,9 @@ optional
         measurement_points = self.get_measurement_points(
             to_exclude=measurement_points_to_exclude)
 
-        multipactor_bands = self._get_proper_multipactor_bands(
+        instrument_multipactor_bands = self._get_proper_instrument_multipactor_bands(
             multipactor_measured_at=measurement_points,
-            multipactor_bands=multipactor_bands,
+            instrument_multipactor_bands=instrument_multipactor_bands,
             measurement_points_to_exclude=measurement_points_to_exclude)
 
         for i, measurement_point in enumerate(measurement_points):
@@ -980,7 +1005,7 @@ optional
     def plot_data_at_multipactor_thresholds(
         self,
         instruments_id_plot: ABCMeta | Sequence[Instrument] | Sequence[str],
-        multipactor_bands: MultipactorBands | Sequence[MultipactorBands],
+        instrument_multipactor_bands: InstrumentMultipactorBands | Sequence[InstrumentMultipactorBands],
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
         instruments_to_ignore: Sequence[Instrument | str] = (),
         png_path: Path | None = None,
@@ -1003,9 +1028,9 @@ optional
             measurement_points_to_exclude,
             instruments_to_ignore)
 
-        if isinstance(multipactor_bands, MultipactorBands):
-            multipactor_bands = [multipactor_bands
-                                 for _ in instruments_to_plot]
+        if isinstance(instrument_multipactor_bands, InstrumentMultipactorBands):
+            instrument_multipactor_bands = [instrument_multipactor_bands
+                                            for _ in instruments_to_plot]
 
         instrument_types = list(types(instruments_to_plot))
         fig, instrument_class_axes = plot.create_fig(
@@ -1017,7 +1042,7 @@ optional
         axe = [axe for axe in instrument_class_axes.values()][0]
 
         zipper = match_with_mp_band(instruments_to_plot,
-                                    multipactor_bands,
+                                    instrument_multipactor_bands,
                                     assert_positions_match=True,
                                     find_matching_pairs=False,
                                     # should already match
@@ -1048,7 +1073,7 @@ optional
         return fig, axe
 
     def data_for_somersalo(self,
-                           multipactor_bands: MultipactorBands,
+                           instrument_multipactor_bands: InstrumentMultipactorBands,
                            ) -> dict[str, float | list[float]]:
         """Get the data required to create the Somersalo plot.
 
@@ -1059,7 +1084,7 @@ optional
         forward_power = self.get_instrument(ForwardPower)
         assert forward_power is not None
         last_powers = forward_power.values_at_barriers_fully_conditioned(
-            multipactor_bands)
+            instrument_multipactor_bands)
 
         z_ohm = 50.
         d_mm = .5 * (38.78 - 16.87)
@@ -1076,7 +1101,7 @@ optional
     def data_for_susceptibility(
             self,
             electric_field_at: IMeasurementPoint | str,
-            multipactor_bands: MultipactorBands,
+            instrument_multipactor_bands: InstrumentMultipactorBands,
     ) -> dict[str, float | list[float]]:
         """Get the data required to create the susceptibility plot.
 
@@ -1090,7 +1115,7 @@ optional
         electric_field = electric_field_at.get_instrument(FieldProbe)
         assert electric_field is not None
         last_fields = electric_field.values_at_barriers_fully_conditioned(
-            multipactor_bands)
+            instrument_multipactor_bands)
 
         d_mm = .5 * (38.78 - 16.87)
         print("MultipactorTest.data_for_susceptibility warning! Used default "
@@ -1103,7 +1128,7 @@ optional
         return somersalo_data
 
     def data_for_somersalo_scaling_law(self,
-                                       multipactor_bands: MultipactorBands,
+                                       instrument_multipactor_bands: InstrumentMultipactorBands,
                                        use_theoretical_r: bool = False,
                                        ) -> pd.Series:
         """Get the data necessary to plot the Somersalo scaling law.
@@ -1117,7 +1142,7 @@ optional
         reflection = self.get_instrument(ReflectionCoefficient)
         assert isinstance(reflection, ReflectionCoefficient)
 
-        last_low_idx = multipactor_bands[-1][-1]
+        last_low_idx = instrument_multipactor_bands[-1][-1]
 
         reflection_coeff = reflection.data[last_low_idx]
         if use_theoretical_r:
@@ -1136,7 +1161,7 @@ optional
         return ser
 
     def data_for_perez(self,
-                       multipactor_bands: Sequence[MultipactorBands],
+                       instrument_multipactor_bands: Sequence[InstrumentMultipactorBands],
                        measurement_points_to_exclude: Sequence[str | IMeasurementPoint] = (
                        ),
                        probes_conditioned_during_test: Sequence[str] = (),
@@ -1160,7 +1185,7 @@ optional
             FieldProbe,
             measurement_points_to_exclude=measurement_points_to_exclude)
         zipper = match_with_mp_band(field_probes,
-                                    multipactor_bands,
+                                    instrument_multipactor_bands,
                                     assert_positions_match=True,
                                     find_matching_pairs=False)
 

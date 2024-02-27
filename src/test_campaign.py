@@ -22,8 +22,10 @@ from matplotlib.figure import Figure
 from multipac_testbench.src.instruments.power import Power
 from multipac_testbench.src.measurement_point.i_measurement_point import \
     IMeasurementPoint
-from multipac_testbench.src.new_multipactor_band.multipactor_bands import \
-    MultipactorBands
+from multipac_testbench.src.new_multipactor_band.campaign_multipactor_bands \
+    import CampaignMultipactorBands
+from multipac_testbench.src.new_multipactor_band.instrument_multipactor_bands \
+    import InstrumentMultipactorBands
 from multipac_testbench.src.multipactor_test import MultipactorTest
 from multipac_testbench.src.theoretical.somersalo import (
     plot_somersalo_analytical, plot_somersalo_measured, somersalo_base_plot,
@@ -116,6 +118,35 @@ class TestCampaign(list):
                                         **kwargs))
         return axes
 
+    def plot_thresholds(self,
+                        instrument_id_plot: ABCMeta,
+                        campaign_multipactor_bands: CampaignMultipactorBands,
+                        *args,
+                        png_folder: str | None = None,
+                        csv_folder: str | None = None,
+                        **kwargs
+                        ) -> list[Axes] | list[np.ndarray[Axes]]:
+        """Recursively call :meth:`.MultipactorTest.plot_thresholds`."""
+        axes = []
+        zipper = zip(self, campaign_multipactor_bands, strict=True)
+        for test, multipactor_bands in zipper:
+            png_path = None
+            if png_folder is not None:
+                png_path = test.output_filepath(png_folder, ".png")
+
+            csv_path = None
+            if csv_folder is not None:
+                csv_path = test.output_filepath(csv_folder, ".csv")
+
+            axes.append(test.plot_thresholds(
+                instrument_id_plot,
+                multipactor_bands,
+                *args,
+                png_path=png_path,
+                csv_path=csv_path,
+                **kwargs))
+        return axes
+
     def detect_multipactor(
             self,
             multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
@@ -126,8 +157,8 @@ class TestCampaign(list):
             ),
             debug: bool = False,
             **kwargs,
-    ) -> list[list[MultipactorBands]]:
-        """Create the :class:`.MultipactorBands` objects.
+    ) -> CampaignMultipactorBands:
+        """Create the :class:`.InstrumentMultipactorBands` objects.
 
         Parameters
         ----------
@@ -150,14 +181,14 @@ class TestCampaign(list):
 
         Returns
         -------
-        nested_multipactor_bands : list[list[MultipactorBands]]
-            :class:`.MultipactorBands` objects holding when multipactor
+        nested_instrument_multipactor_bands : list[list[InstrumentMultipactorBands]]
+            :class:`.InstrumentMultipactorBands` objects holding when multipactor
             happens. They are sorted first by :class:`.MultipactorTest` (outer
             level), then per :class:`.Instrument` of class ``instrument_class``
             (inner level).
 
         """
-        nested_multipactor_bands = [
+        tests_multipactor_bands = [
             test.detect_multipactor(
                 multipac_detector=multipac_detector,
                 instrument_class=instrument_class,
@@ -167,10 +198,12 @@ class TestCampaign(list):
                 debug=debug,
                 **kwargs)
             for test in self]
-        return nested_multipactor_bands
+        campaign_multipactor_bands = CampaignMultipactorBands(
+            tests_multipactor_bands)
+        return campaign_multipactor_bands
 
     def somersalo_chart(self,
-                        multipactor_bands: Sequence[MultipactorBands],
+                        instrument_multipactor_bands: Sequence[InstrumentMultipactorBands],
                         orders_one_point: tuple[int, ...] = (
                             1, 2, 3, 4, 5, 6, 7),
                         orders_two_point: tuple[int, ...] = (1, ),
@@ -183,7 +216,7 @@ class TestCampaign(list):
 
         Parameters
         ----------
-        multipactor_bands : Sequence[MultipactorBands]
+        instrument_multipactor_bands : Sequence[InstrumentMultipactorBands]
             An object holding the multipactor information for every
             :class:`.MultipactorTest` in ``self``.
         orders_one_point : tuple[int, ...], optional
@@ -227,7 +260,7 @@ class TestCampaign(list):
 
         self._add_somersalo_measured(
             ax1, ax2,
-            multipactor_bands=multipactor_bands,
+            instrument_multipactor_bands=instrument_multipactor_bands,
         )
 
         ax1.grid(True)
@@ -235,7 +268,7 @@ class TestCampaign(list):
 
     def _add_somersalo_measured(self,
                                 ax1: Axes, ax2: Axes,
-                                multipactor_bands: Sequence[MultipactorBands],
+                                instrument_multipactor_bands: Sequence[InstrumentMultipactorBands],
                                 **plot_kw
                                 ) -> None:
         """Put the measured multipacting limits on Somersalo plot.
@@ -247,7 +280,7 @@ class TestCampaign(list):
             cycle, or every power that led to multipacting during whole test.
 
         """
-        zipper = zip(self, multipactor_bands, strict=True)
+        zipper = zip(self, instrument_multipactor_bands, strict=True)
         for mp_test, mp_bands in zipper:
             if len(mp_bands) > 1:
                 raise NotImplementedError(f"{mp_bands = }, but only one pair "
@@ -259,7 +292,7 @@ class TestCampaign(list):
                                     **plot_kw)
 
     def check_somersalo_scaling_law(self,
-                                    multipactor_bands: Sequence[MultipactorBands],
+                                    instrument_multipactor_bands: Sequence[InstrumentMultipactorBands],
                                     show_fit: bool = True,
                                     png_path: Path | None = None,
                                     remove_last_point_for_fit: bool = False,
@@ -278,7 +311,7 @@ class TestCampaign(list):
             P_\mathrm{MW} \approx \frac{1}{(1 + R)^2}P\mathrm{TW}
 
         .. warning::
-            Here, we need one :class:`.MultipactorBands` per
+            Here, we need one :class:`.InstrumentMultipactorBands` per
             :class:`.MultipactorTest`, in contrary to most of the
             :class:`TestCampaign` methods where we need a full list matching a
             list of :class:`.Instrument` or of :class:`.IMeasurementPoint`.
@@ -288,7 +321,7 @@ class TestCampaign(list):
 
         Parameters
         ----------
-        multipactor_bands : Sequence[MultipactorBands]
+        instrument_multipactor_bands : Sequence[InstrumentMultipactorBands]
             Object holding the information on where multipactor happens.
         show_fit : bool
             To perform a fit and plot it.
@@ -316,7 +349,7 @@ class TestCampaign(list):
 
         fig = plt.figure(**fig_kw)
         axe = fig.add_subplot(111)
-        zipper = zip(self, multipactor_bands, strict=True)
+        zipper = zip(self, instrument_multipactor_bands, strict=True)
         data_for_somersalo = [
             test.data_for_somersalo_scaling_law(
                 mp_band,
@@ -366,7 +399,7 @@ class TestCampaign(list):
         return axe
 
     def check_perez(self,
-                    multipactor_bands: Sequence[Sequence[MultipactorBands]],
+                    instrument_multipactor_bands: Sequence[Sequence[InstrumentMultipactorBands]],
                     png_path: Path | None = None,
                     measurement_points_to_exclude: Sequence[str] = (),
                     probes_conditioned_during_tests: Sequence[Sequence[str]] = (
@@ -388,7 +421,7 @@ class TestCampaign(list):
         if len(frequencies) != 1:
             raise NotImplementedError("Plot over several freqs to implement")
 
-        zipper = zip(self, multipactor_bands, strict=True)
+        zipper = zip(self, instrument_multipactor_bands, strict=True)
 
         if len(probes_conditioned_during_tests) == 0:
             probes_conditioned_during_tests = [() for _ in self]
@@ -409,7 +442,8 @@ class TestCampaign(list):
                                          marker='o',
                                          ms=10,
                                          )
-        print("Low thresholds:", df_perez.filter(like='low').stack().describe())
+        print("Low thresholds:", df_perez.filter(
+            like='low').stack().describe())
         axe.set_prop_cycle(None)
         df_perez.filter(like='high').plot(grid=True,
                                           ax=axe,
@@ -417,20 +451,21 @@ class TestCampaign(list):
                                           marker='^',
                                           ms=10,
                                           )
-        print("High thresholds:", df_perez.filter(like='high').stack().describe())
+        print("High thresholds:", df_perez.filter(
+            like='high').stack().describe())
         if png_path is not None:
             fig.savefig(png_path)
         return axe, df_perez
 
     def susceptibility_chart(self,
                              electric_field_at: str,
-                             multipactor_bands: Sequence[MultipactorBands],
+                             instrument_multipactor_bands: Sequence[InstrumentMultipactorBands],
                              fig_kw: dict | None = None,
                              ax_kw: dict | None = None) -> tuple[Figure, Axes]:
         """Create a susceptiblity chart."""
         fig, ax1 = self._susceptibility_base_plot(fig_kw, ax_kw)
 
-        zipper = zip(self, multipactor_bands, strict=True)
+        zipper = zip(self, instrument_multipactor_bands, strict=True)
 
         for mp_test, mp_bands in zipper:
             if len(mp_bands) > 1:
@@ -438,7 +473,7 @@ class TestCampaign(list):
                                           "field probe--mp band is allowed")
             susceptibility_data = mp_test.data_for_susceptibility(
                 electric_field_at,
-                multipactor_bands=mp_bands[0],
+                instrument_multipactor_bands=mp_bands[0],
             )
             points = measured_to_susceptibility_coordinates(
                 **susceptibility_data)
@@ -496,8 +531,8 @@ class TestCampaign(list):
     def plot_instruments_vs_time(
         self,
         *args,
-        seq_multipactor_bands: Sequence[Sequence[MultipactorBands]
-                                        ] | Sequence[MultipactorBands] | None = None,
+        seq_instrument_multipactor_bands: Sequence[Sequence[InstrumentMultipactorBands]
+                                                   ] | Sequence[InstrumentMultipactorBands] | None = None,
         out_folder: str | None = None,
         iternum: int = 300,
         **kwargs
@@ -508,16 +543,16 @@ class TestCampaign(list):
             Use :meth:`TestCampaign.sweet_plot` instead.
 
         """
-        if seq_multipactor_bands is None:
-            seq_multipactor_bands = [None for _ in self]
-        zipper = zip(self, seq_multipactor_bands, strict=True)
-        for i, (test, multipactor_bands) in enumerate(zipper):
+        if seq_instrument_multipactor_bands is None:
+            seq_instrument_multipactor_bands = [None for _ in self]
+        zipper = zip(self, seq_instrument_multipactor_bands, strict=True)
+        for i, (test, instrument_multipactor_bands) in enumerate(zipper):
             png_path = None
             if out_folder is not None:
                 png_path = test.output_filepath(out_folder, ".png")
             _ = test.plot_instruments_vs_time(
                 *args,
-                multipactor_bands=multipactor_bands,
+                instrument_multipactor_bands=instrument_multipactor_bands,
                 num=iternum + i,
                 png_path=png_path,
                 **kwargs
@@ -568,7 +603,7 @@ class TestCampaign(list):
     def plot_data_at_multipactor_thresholds(
             self,
             *args,
-            seq_multipactor_bands: Sequence[Sequence[MultipactorBands]] | Sequence[MultipactorBands],
+            seq_instrument_multipactor_bands: Sequence[Sequence[InstrumentMultipactorBands]] | Sequence[InstrumentMultipactorBands],
             out_folder: str | None = None,
             iternum: int = 350,
             **kwargs) -> None:
@@ -582,9 +617,9 @@ class TestCampaign(list):
         args :
             Arguments passed to
             :meth:`.MultipactorTest.plot_data_at_multipactor_thresholds`.
-        seq_multipactor_bands : Sequence[Sequence[MultipactorBands]] | \
-                Sequence[MultipactorBands]
-            :class:`.MultipactorBands` or lists of :class:`.MultipactorBands`
+        seq_instrument_multipactor_bands : Sequence[Sequence[InstrumentMultipactorBands]] | \
+                Sequence[InstrumentMultipactorBands]
+            :class:`.InstrumentMultipactorBands` or lists of :class:`.InstrumentMultipactorBands`
             for every :class:`.MultipactorTest` in ``self``.
         out_folder : str | None, optional
             Where figures should be saved. The default is None, in which case
@@ -597,15 +632,15 @@ class TestCampaign(list):
             :meth:`MultipactorTest.plot_data_at_multipactor_thresholds`.
 
         """
-        zipper = zip(self, seq_multipactor_bands, strict=True)
-        for i, (test, multipactor_bands) in enumerate(zipper):
+        zipper = zip(self, seq_instrument_multipactor_bands, strict=True)
+        for i, (test, instrument_multipactor_bands) in enumerate(zipper):
             png_path, csv_path = None, None
             if out_folder is not None:
                 png_path = test.output_filepath(out_folder, ".png")
                 csv_path = test.output_filepath(out_folder, ".csv")
             _ = test.plot_data_at_multipactor_thresholds(
                 *args,
-                multipactor_bands=multipactor_bands,
+                instrument_multipactor_bands=instrument_multipactor_bands,
                 num=iternum + i,
                 png_path=png_path,
                 csv_path=csv_path,

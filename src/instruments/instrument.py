@@ -8,7 +8,7 @@
 """
 from abc import ABC
 from collections.abc import Iterable
-from typing import Callable, Self
+from typing import Callable, Literal, Self, overload
 
 import numpy as np
 import pandas as pd
@@ -16,8 +16,10 @@ from matplotlib.axes import Axes
 from matplotlib.container import StemContainer
 from matplotlib.lines import Line2D
 
-from multipac_testbench.src.new_multipactor_band.multipactor_bands import \
-    MultipactorBands
+from multipac_testbench.src.new_multipactor_band.instrument_multipactor_bands \
+    import InstrumentMultipactorBands
+from multipac_testbench.src.new_multipactor_band.test_multipactor_bands \
+    import TestMultipactorBands
 
 
 class Instrument(ABC):
@@ -234,22 +236,99 @@ class Instrument(ABC):
         self._post_treaters.append(post_treater)
 
     def at_thresholds(self,
-                      multipactor_bands: MultipactorBands
+                      instrument_multipactor_bands: InstrumentMultipactorBands
                       ) -> pd.DataFrame:
         """Get what was measured by instrument at thresholds."""
         lower = [self.data[i] if i is not None else np.NaN
-                 for i in multipactor_bands.lower_indexes()]
+                 for i in instrument_multipactor_bands.lower_indexes()]
         upper = [self.data[i] if i is not None else np.NaN
-                 for i in multipactor_bands.upper_indexes()]
+                 for i in instrument_multipactor_bands.upper_indexes()]
         label = f" threshold {self} "
-        label += f"according to {multipactor_bands.instrument_name}"
+        label += f"according to {instrument_multipactor_bands.instrument_name}"
         df_at_thresholds = pd.DataFrame({'Lower' + label: lower,
                                          'Upper' + label: upper})
         return df_at_thresholds
 
+    @overload
+    def multipactor_band_at_same_position(
+        self,
+        multipactor_bands: TestMultipactorBands,
+        raise_no_match_error: Literal[True],
+        global_diagnostics: bool,
+        tol: float,
+        **kwargs
+    ) -> InstrumentMultipactorBands: ...
+
+    @overload
+    def multipactor_band_at_same_position(
+        self,
+        multipactor_bands: TestMultipactorBands,
+        raise_no_match_error: Literal[False],
+        global_diagnostics: bool,
+        tol: float,
+        **kwargs
+    ) -> InstrumentMultipactorBands | None: ...
+
+    def multipactor_band_at_same_position(
+            self,
+            multipactor_bands: TestMultipactorBands,
+            raise_no_match_error: bool = False,
+            global_diagnostics: bool = False,
+            tol: float = 1e-10,
+            **kwargs
+    ) -> InstrumentMultipactorBands | None:
+        """Get the multipactor that was measured at the same position.
+
+        This is useful to easily match the data from a field probe to the
+        multipactor bands measured by the curret probe at the same position.
+
+        Parameters
+        ----------
+        multipactor_bands : TestMultipactorBands
+            List of :class:`.InstrumentMultipactorBands` among which you want
+            to find the match.
+        tol : float, optional
+            Mismatch allowed between positions. The default is ``1e-10``.
+        global_diagnostics : bool, optional
+            If multipactor detected by a global instrument should be returned.
+            The default is False.
+        raise_no_match_error : bool, optional
+            If True, method always return an object. The default is False.
+        kwargs :
+            Other keyword arguments.
+
+        Returns
+        -------
+        InstrumentMultipactorBands
+
+        """
+        assert isinstance(self.position, float)
+        matching_multipactor_bands = [
+            band for band in multipactor_bands
+            if band is not None
+            and (abs(band.position - self.position) < tol
+                 or np.isnan(self.position)
+                 or (global_diagnostics and np.isnan(band.position)))
+        ]
+        n_found = len(matching_multipactor_bands)
+        if n_found == 0:
+            if not raise_no_match_error:
+                return
+
+            raise ValueError(f"No MultipactorBand among {multipactor_bands} "
+                             f"with a position matching {self} was found.")
+
+        if n_found > 1:
+            print("Instrument.multipactor_band_at_same_position warning:"
+                  "There are several multipactor bands that were measured"
+                  f"for the same instrument {self}:"
+                  f"{matching_multipactor_bands}")
+
+        return matching_multipactor_bands[0]
+
     def values_at_barriers(
             self,
-            multipactor_bands: MultipactorBands,
+            instrument_multipactor_bands: InstrumentMultipactorBands,
     ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Get measured data at lower and upper multipactor barriers.
 
@@ -261,7 +340,7 @@ class Instrument(ABC):
 
         Parameters
         ----------
-        multipactor_bands : MultipactorBands
+        instrument_multipactor_bands : InstrumentMultipactorBands
             Object holding the multipacting barriers.
 
         Returns
@@ -270,11 +349,11 @@ class Instrument(ABC):
             Holds measured data at lower and upper multipacting barriers.
 
         """
-        barriers_idx = multipactor_bands.barriers
+        barriers_idx = instrument_multipactor_bands.barriers
         lower_barrier_idx, upper_barrier_idx = barriers_idx
         assert isinstance(lower_barrier_idx, list)
         assert isinstance(upper_barrier_idx, list)
-        name_of_detector = multipactor_bands.instrument_name
+        name_of_detector = instrument_multipactor_bands.instrument_name
 
         match (self._raw_data):
             case pd.Series():
@@ -309,7 +388,7 @@ class Instrument(ABC):
 
     def values_at_barriers_fully_conditioned(
             self,
-            multipactor_bands: MultipactorBands,
+            instrument_multipactor_bands: InstrumentMultipactorBands,
     ) -> tuple[float, float]:
         """Get measured data at last mp limits.
 
@@ -317,7 +396,7 @@ class Instrument(ABC):
             Use :meth:`Instrument.at_thresholds` instead.
 
         """
-        barriers_idx = multipactor_bands.barriers
+        barriers_idx = instrument_multipactor_bands.barriers
         last_low = barriers_idx[0][-1]
         last_upp = barriers_idx[1][-1]
 

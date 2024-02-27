@@ -1,14 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Keep track of all multipactor bands.
-
-.. todo::
-    Maybe this class should also hold a None or something when multipactor did
-    not appear during a power cycle.
-    If there is multipactor at the start of the test but it is conditioned,
-    this information does not appear!!
-
-"""
+"""Keep track of all multipactor bands measured by an :class:`.Instrument`."""
 from collections.abc import Callable
 from typing import Self
 
@@ -45,8 +37,8 @@ MULTIPACTOR_BANDS_MERGERS = {
 }  #:
 
 
-class MultipactorBands(list):
-    """All :class:`MultipactorBand` of a test, at a given localisation."""
+class InstrumentMultipactorBands(list):
+    """All :class:`MultipactorBand` of a test, by a given instrument."""
 
     def __init__(self,
                  multipactor: np.ndarray[np.bool_],
@@ -99,11 +91,11 @@ class MultipactorBands(list):
         return f"{str(self)}: {self._n_bands} bands detected"
 
     @classmethod
-    def from_other_multipactor_bands(cls,
-                                     multiple_multipactor_bands: list[Self],
+    def from_other_instrument_multipactor_bands(cls,
+                                     multiple_instrument_multipactor_bands: list[Self],
                                      union: str,
                                      name: str = '') -> Self:
-        """Merge several :class:`MultipactorBands` objects.
+        """Merge several :class:`InstrumentMultipactorBands` objects.
 
         .. todo::
             Determine how and if transferring the list of
@@ -111,24 +103,24 @@ class MultipactorBands(list):
 
         .. todo::
             Put a flag that will check consistency of position of MP bands.
-            Like: ``assert_multipactor_bands_detected_at_same_position: bool``.
+            Like: ``assert_instrument_multipactor_bands_detected_at_same_position: bool``.
 
         Parameters
         ----------
-        multipactor_bands : list[MultipactorBands]
+        instrument_multipactor_bands : list[InstrumentMultipactorBands]
             Objects to merge.
         union : {'strict', 'relaxed'}
             How the multipactor zones should be merged. It 'strict', all
             instruments must detect multipactor to consider that multipactor
             happened. If 'relaxed', only one instrument suffices.
         name : str, optional
-            Name that will be given to the returned :class:`MultipactorBands`.
+            Name that will be given to the returned :class:`InstrumentMultipactorBands`.
             The default is an empty string, in which case a default meaningful
             name will be given.
 
         Returns
         -------
-        multipactor_bands : MultipactorBands
+        instrument_multipactor_bands : InstrumentMultipactorBands
 
         """
         allowed = list(MULTIPACTOR_BANDS_MERGERS.keys())
@@ -136,28 +128,28 @@ class MultipactorBands(list):
         if union not in allowed:
             raise IOError(f"{union = }, while {allowed = }")
         if not name:
-            name = f"{len(multiple_multipactor_bands)} instruments ({union})"
+            name = f"{len(multiple_instrument_multipactor_bands)} instruments ({union})"
 
         multipactor_in = [multipactor_band.multipactor
-                          for multipactor_band in multiple_multipactor_bands]
+                          for multipactor_band in multiple_instrument_multipactor_bands]
         multipactor = MULTIPACTOR_BANDS_MERGERS[union](multipactor_in)
         list_of_multipactor_band = \
             _multipactor_to_list_of_multipactor_band(multipactor, name)
 
         positions = [mp_band.position
-                     for mp_band in multiple_multipactor_bands]
+                     for mp_band in multiple_instrument_multipactor_bands]
         if len(set(positions)) == 1:
             position = positions[0]
         else:
             position = np.NaN
 
-        multipactor_bands = cls(list_of_multipactor_band,
+        instrument_multipactor_bands = cls(list_of_multipactor_band,
                                 multipactor,
                                 name,
                                 name,
                                 position=position,
                                 )
-        return multipactor_bands
+        return instrument_multipactor_bands
 
     def data_as_pd(self) -> pd.Series:
         """Return the multipactor data as a pandas Series."""
@@ -259,11 +251,14 @@ def multipactor_to_list_of_mp_band(multipactor: np.ndarray[np.bool_],
             continue
 
         # exit of a mp zone
-        assert first_index is not None
+        assert first_index is not None, ("We are exiting a multipacting zone "
+                                         "but I did not detect when it started"
+                                         ". Check what happened around index "
+                                         f"{i}.")
         last_index = i
         reached_second_threshold = True
         if current_band is not None:
-            print("MultipactorBands warning: I guess there was two MP bands "
+            print("InstrumentMultipactorBands warning: I guess there was two MP bands "
                   "for this power cycle!! To investigate. Only keeping second "
                   "one...")
         current_band = MultipactorBand(first_index, last_index,

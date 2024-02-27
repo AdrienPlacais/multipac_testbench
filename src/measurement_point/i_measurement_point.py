@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Define an object to keep several related measurements."""
+import warnings
 from abc import ABC, ABCMeta
 from typing import Any, Callable, Sequence
-import warnings
 
 import numpy as np
 import pandas as pd
 from matplotlib.axes import Axes
+
 from multipac_testbench.src.instruments.factory import InstrumentFactory
 from multipac_testbench.src.instruments.instrument import Instrument
-from multipac_testbench.src.new_multipactor_band.multipactor_bands import \
-    MultipactorBands
+from multipac_testbench.src.new_multipactor_band.instrument_multipactor_bands \
+    import InstrumentMultipactorBands
 
 
 class IMeasurementPoint(ABC):
@@ -121,18 +122,19 @@ class IMeasurementPoint(ABC):
             instrument_class: ABCMeta,
             power_is_growing: np.ndarray[np.bool_],
             debug: bool = False,
-    ) -> MultipactorBands | None:
+    ) -> InstrumentMultipactorBands | None:
         """Detect multipactor with ``multipac_detector``."""
         instrument = self.get_instrument(instrument_class)
         if instrument is None:
             return
         multipactor = multipac_detector(instrument.data)
-        multipactor_bands = MultipactorBands(multipactor,
-                                             power_is_growing,
-                                             instrument.name,
-                                             self.name,
-                                             instrument.position,
-                                             )
+        instrument_multipactor_bands = InstrumentMultipactorBands(
+            multipactor,
+            power_is_growing,
+            instrument.name,
+            self.name,
+            instrument.position,
+        )
         if debug:
             axes = instrument.data_as_pd.plot(grid=True)
             axes = axes.twinx()
@@ -142,7 +144,7 @@ class IMeasurementPoint(ABC):
                  }).astype(float)
             axes = df_float.plot(ax=axes, grid=True)
 
-        return multipactor_bands
+        return instrument_multipactor_bands
 
     def plot_instruments_vs_time(
         self,
@@ -186,7 +188,7 @@ class IMeasurementPoint(ABC):
             self,
             axe: Axes,
             plotted_instrument_class: ABCMeta,
-            multipactor_bands: MultipactorBands
+            instrument_multipactor_bands: InstrumentMultipactorBands
     ) -> None:
         """Add arrows to display multipactor.
 
@@ -213,7 +215,7 @@ class IMeasurementPoint(ABC):
         vline_kw = self._typical_vline_keywords()
         arrow_kw = self._typical_arrow_keywords(plotted_instrument)
 
-        for multipactor_band in multipactor_bands:
+        for multipactor_band in instrument_multipactor_bands:
             delta_x = multipactor_band[-1] - multipactor_band[0]
             axe.arrow(multipactor_band[0],
                       y_pos_of_multipactor_zone,
@@ -232,7 +234,7 @@ class IMeasurementPoint(ABC):
             self,
             instrument_class_axes: dict[ABCMeta, Axes],
             xdata: float,
-            multipactor_bands: MultipactorBands
+            instrument_multipactor_bands: InstrumentMultipactorBands
     ) -> None:
         """Scatter data measured by desired instruments."""
         for instrument_class, axes in instrument_class_axes.items():
@@ -240,7 +242,8 @@ class IMeasurementPoint(ABC):
             if instrument is None:
                 continue
 
-            instrument.scatter_data(axes, multipactor_bands.multipactor, xdata)
+            instrument.scatter_data(
+                axes, instrument_multipactor_bands.multipactor, xdata)
 
     def _typical_vline_keywords(self) -> dict[str, Any]:
         """Set consistent plot properties.
