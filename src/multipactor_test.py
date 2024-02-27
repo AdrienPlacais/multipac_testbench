@@ -1125,7 +1125,7 @@ optional
         return fig, axe
 
     def data_for_somersalo(self,
-                           instrument_multipactor_bands: InstrumentMultipactorBands,
+                           test_multipactor_bands: TestMultipactorBands,
                            ) -> dict[str, float | list[float]]:
         """Get the data required to create the Somersalo plot.
 
@@ -1133,17 +1133,15 @@ optional
             Allow representation of several pick-ups.
 
         """
-        forward_power = self.get_instrument(ForwardPower)
-        assert forward_power is not None
-        last_powers = forward_power.values_at_barriers_fully_conditioned(
-            instrument_multipactor_bands)
-
+        last_powers = self.at_last_threshold(ForwardPower,
+                                             test_multipactor_bands).iloc[0]
         z_ohm = 50.
         d_mm = .5 * (38.78 - 16.87)
         print("MultipactorTest.data_for_somersalo warning! Used default "
               f"{d_mm = }")
         somersalo_data = {
-            'powers_kw': [last_powers[0] * 1e-3, last_powers[1] * 1e-3],
+            'powers_kw': [last_powers.iloc[0] * 1e-3,
+                          last_powers.iloc[1] * 1e-3],
             'z_ohm': z_ohm,
             'd_mm': d_mm,
             'freq_ghz': self.freq_mhz * 1e-3,
@@ -1211,70 +1209,6 @@ optional
              }
         )
         return ser
-
-    def data_for_perez(self,
-                       instrument_multipactor_bands: Sequence[InstrumentMultipactorBands],
-                       measurement_points_to_exclude: Sequence[str | IMeasurementPoint] = (
-                       ),
-                       probes_conditioned_during_test: Sequence[str] = (),
-                       ) -> pd.Series:
-        """Get the data necessary to check if Perez was right.
-
-        .. todo::
-            Proper docstring.
-
-        .. todo::
-            There are way cleaner ways to do this.
-
-        .. todo::
-            If multipactor happens somewhere and then is conditioned, this
-            information does not appear and we plot the last detected
-            multipactor.
-            Hence the dirty patch probes_conditioned_during_test.
-
-        """
-        field_probes = self.get_instruments(
-            FieldProbe,
-            measurement_points_to_exclude=measurement_points_to_exclude)
-        zipper = match_with_mp_band(field_probes,
-                                    instrument_multipactor_bands,
-                                    assert_positions_match=True,
-                                    find_matching_pairs=False)
-
-        v_thresholds = {}
-        for field_probe, mp_band in zipper:
-            if mp_band is None or len(mp_band) == 0:
-                v_thresholds[field_probe.name + " low"] = np.NaN
-                v_thresholds[field_probe.name + " high"] = np.NaN
-                continue
-
-            last_multipactor_band = mp_band[-1]
-
-            # Dirty patch
-            if field_probe.name in probes_conditioned_during_test:
-                last_multipactor_band = None
-
-            if last_multipactor_band is None:
-                v_thresholds[field_probe.name + " low"] = np.NaN
-                v_thresholds[field_probe.name + " high"] = np.NaN
-                continue
-
-            last_multipac_idx = last_multipactor_band[-1]
-            last_lower_threshold = field_probe.data[last_multipac_idx]
-            v_thresholds[field_probe.name + " low"] = last_lower_threshold
-
-            if not last_multipactor_band.upper_threshold_was_reached:
-                last_higher_threshold = np.NaN
-            else:
-                first_multipac_idx = last_multipactor_band[0]
-                last_higher_threshold = field_probe.data[first_multipac_idx]
-
-            v_thresholds[field_probe.name + " high"] = last_higher_threshold
-
-        tmp_str = r"$SWR_{theor.}$"
-        name = f"{tmp_str} = {self.swr}"
-        df_thresholds = pd.Series(v_thresholds, name=name)
-        return df_thresholds
 
     def plot_instruments_y_vs_instrument_x(
             self,

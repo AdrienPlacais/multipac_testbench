@@ -35,6 +35,9 @@ from multipac_testbench.src.theoretical.susceptibility import \
 from multipac_testbench.src.util import helper
 from scipy.optimize import curve_fit
 
+from multipac_testbench.src.instruments.electric_field.field_probe import FieldProbe
+from multipac_testbench.src.util import plot
+
 
 class TestCampaign(list):
     """Hold several multipactor tests together."""
@@ -95,15 +98,20 @@ class TestCampaign(list):
         for test in self:
             test.add_post_treater(*args, **kwargs)
 
-    def sweet_plot(self,
-                   *args,
-                   png_folder: str | None = None,
-                   csv_folder: str | None = None,
-                   **kwargs
-                   ) -> list[Axes] | list[np.ndarray[Axes]]:
+    def sweet_plot(
+        self,
+        *args,
+        campaign_multipactor_bands: CampaignMultipactorBands | list[None] | None = None,
+        png_folder: str | None = None,
+        csv_folder: str | None = None,
+        **kwargs
+    ) -> list[Axes] | list[np.ndarray[Axes]]:
         """Recursively call :meth:`.MultipactorTest.sweet_plot`."""
         axes = []
-        for test in self:
+        if campaign_multipactor_bands is None:
+            campaign_multipactor_bands = [None for _ in self]
+        zipper = zip(self, campaign_multipactor_bands, strict=True)
+        for test, band in zipper:
             png_path = None
             if png_folder is not None:
                 png_path = test.output_filepath(png_folder, ".png")
@@ -114,6 +122,7 @@ class TestCampaign(list):
 
             axes.append(test.sweet_plot(*args,
                                         png_path=png_path,
+                                        test_multipactor_bands=band,
                                         csv_path=csv_path,
                                         **kwargs))
         return axes
@@ -216,7 +225,7 @@ class TestCampaign(list):
         return campaign_multipactor_bands
 
     def somersalo_chart(self,
-                        instrument_multipactor_bands: Sequence[InstrumentMultipactorBands],
+                        multipactor_bands: CampaignMultipactorBands,
                         orders_one_point: tuple[int, ...] = (
                             1, 2, 3, 4, 5, 6, 7),
                         orders_two_point: tuple[int, ...] = (1, ),
@@ -271,17 +280,13 @@ class TestCampaign(list):
         for kwargs in (one_point_kw, two_point_kw):
             plot_somersalo_analytical(log_power=log_power, **kwargs)
 
-        self._add_somersalo_measured(
-            ax1, ax2,
-            instrument_multipactor_bands=instrument_multipactor_bands,
-        )
-
+        self._add_somersalo_measured(ax1, ax2, multipactor_bands)
         ax1.grid(True)
         return fig, ax1, ax2
 
     def _add_somersalo_measured(self,
                                 ax1: Axes, ax2: Axes,
-                                instrument_multipactor_bands: Sequence[InstrumentMultipactorBands],
+                                multipactor_bands: CampaignMultipactorBands,
                                 **plot_kw
                                 ) -> None:
         """Put the measured multipacting limits on Somersalo plot.
@@ -293,13 +298,10 @@ class TestCampaign(list):
             cycle, or every power that led to multipacting during whole test.
 
         """
-        zipper = zip(self, instrument_multipactor_bands, strict=True)
-        for mp_test, mp_bands in zipper:
-            if len(mp_bands) > 1:
-                raise NotImplementedError(f"{mp_bands = }, but only one pair "
-                                          "power--mp band is allowed")
-            somersalo_data = mp_test.data_for_somersalo(mp_bands[0])
-            plot_somersalo_measured(mp_test_name=str(mp_test),
+        zipper = zip(self, multipactor_bands, strict=True)
+        for test, bands in zipper:
+            somersalo_data = test.data_for_somersalo(bands)
+            plot_somersalo_measured(mp_test_name=str(test),
                                     somersalo_data=somersalo_data,
                                     ax1=ax1, ax2=ax2,
                                     **plot_kw)
@@ -412,11 +414,12 @@ class TestCampaign(list):
         return axe
 
     def check_perez(self,
-                    instrument_multipactor_bands: Sequence[Sequence[InstrumentMultipactorBands]],
-                    png_path: Path | None = None,
+                    campaign_multipactor_bands: CampaignMultipactorBands,
                     measurement_points_to_exclude: Sequence[str] = (),
-                    probes_conditioned_during_tests: Sequence[Sequence[str]] = (
-                    ),
+                    png_path: Path | None = None,
+                    png_kwargs: dict | None = None,
+                    csv_path: Path | None = None,
+                    csv_kwargs: dict | None = None,
                     **fig_kw,
                     ) -> tuple[Axes, pd.DataFrame]:
         r"""Check that :math:`V_\mathrm{low}` independent from SWR.
@@ -426,49 +429,37 @@ class TestCampaign(list):
         .. todo::
             Proper docstring.
 
-        .. todo::
-            Clean the dirty patch probes_conditioned_during_test
-
         """
         frequencies = set([test.freq_mhz for test in self])
         if len(frequencies) != 1:
             raise NotImplementedError("Plot over several freqs to implement")
 
-        zipper = zip(self, instrument_multipactor_bands, strict=True)
+        voltages = self.at_last_threshold(
+            FieldProbe,
+            campaign_multipactor_bands,
+            measurement_points_to_exclude=measurement_points_to_exclude)
 
-        if len(probes_conditioned_during_tests) == 0:
-            probes_conditioned_during_tests = [() for _ in self]
-
-        fig = plt.figure(**fig_kw)
-        axe = fig.add_subplot(111)
-
-        all_data = [test.data_for_perez(
-            mp_band,
-            measurement_points_to_exclude=measurement_points_to_exclude,
-            probes_conditioned_during_test=probes_conditioned_during_tests[i])
-            for i, (test, mp_band) in enumerate(zipper)]
-        df_perez = pd.concat(all_data, axis=1).T
-
-        df_perez.filter(like='low').plot(grid=True,
-                                         ax=axe,
-                                         ylabel="Thresholds $V$ [V]",
-                                         marker='o',
-                                         ms=10,
-                                         )
-        print("Low thresholds:", df_perez.filter(
-            like='low').stack().describe())
-        axe.set_prop_cycle(None)
-        df_perez.filter(like='high').plot(grid=True,
-                                          ax=axe,
-                                          ylabel="Thresholds $V$ [V]",
-                                          marker='^',
-                                          ms=10,
-                                          )
-        print("High thresholds:", df_perez.filter(
-            like='high').stack().describe())
+        axes = voltages.filter(like='Lower').plot(grid=True,
+                                                  ylabel="Thresholds $V$ [V]",
+                                                  marker='o',
+                                                  ms=10,
+                                                  )
+        axes.set_prop_cycle(None)
+        axes = voltages.filter(like='Upper').plot(grid=True,
+                                                  ax=axes,
+                                                  ylabel="Thresholds $V$ [V]",
+                                                  marker='^',
+                                                  ms=10,
+                                                  )
         if png_path is not None:
-            fig.savefig(png_path)
-        return axe, df_perez
+            if png_kwargs is None:
+                png_kwargs = {}
+            plot.save_figure(axes, png_path, **png_kwargs)
+        if csv_path is not None:
+            if csv_kwargs is None:
+                csv_kwargs = {}
+            plot.save_dataframe(df_to_plot, csv_path, **csv_kwargs)
+        return axes, voltages
 
     def susceptibility_chart(self,
                              electric_field_at: str,
