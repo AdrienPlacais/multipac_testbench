@@ -22,9 +22,9 @@ from matplotlib.figure import Figure
 from multipac_testbench.src.instruments.power import Power
 from multipac_testbench.src.measurement_point.i_measurement_point import \
     IMeasurementPoint
-from multipac_testbench.src.new_multipactor_band.campaign_multipactor_bands \
+from multipac_testbench.src.multipactor_band.campaign_multipactor_bands \
     import CampaignMultipactorBands
-from multipac_testbench.src.new_multipactor_band.instrument_multipactor_bands \
+from multipac_testbench.src.multipactor_band.instrument_multipactor_bands \
     import InstrumentMultipactorBands
 from multipac_testbench.src.multipactor_test import MultipactorTest
 from multipac_testbench.src.theoretical.somersalo import (

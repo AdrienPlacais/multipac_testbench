@@ -11,12 +11,12 @@ import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-from multipac_testbench.src.new_multipactor_band.instrument_multipactor_bands import \
+from multipac_testbench.src.multipactor_band.instrument_multipactor_bands import \
     InstrumentMultipactorBands
 from multipac_testbench.src.util.multipactor_detectors import \
     start_and_end_of_contiguous_true_zones
 
-from multipac_testbench.src.new_multipactor_band.test_multipactor_bands \
+from multipac_testbench.src.multipactor_band.test_multipactor_bands \
     import TestMultipactorBands
 
 

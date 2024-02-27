@@ -16,9 +16,9 @@ from matplotlib.axes import Axes
 from matplotlib.container import StemContainer
 from matplotlib.lines import Line2D
 
-from multipac_testbench.src.new_multipactor_band.instrument_multipactor_bands \
+from multipac_testbench.src.multipactor_band.instrument_multipactor_bands \
     import InstrumentMultipactorBands
-from multipac_testbench.src.new_multipactor_band.test_multipactor_bands \
+from multipac_testbench.src.multipactor_band.test_multipactor_bands \
     import TestMultipactorBands
 
 

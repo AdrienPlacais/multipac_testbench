@@ -4,7 +4,7 @@
 import numpy as np
 from matplotlib.axes import Axes
 
-from multipac_testbench.src.new_multipactor_band.instrument_multipactor_bands \
+from multipac_testbench.src.multipactor_band.instrument_multipactor_bands \
     import InstrumentMultipactorBands
 
 

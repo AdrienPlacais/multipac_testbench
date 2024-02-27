@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Store all the :class:`.TestMultipactorBands` of several tests."""
-from multipac_testbench.src.new_multipactor_band.test_multipactor_bands \
+from multipac_testbench.src.multipactor_band.test_multipactor_bands \
     import TestMultipactorBands
 
 

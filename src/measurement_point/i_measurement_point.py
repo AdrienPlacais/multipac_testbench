@@ -11,7 +11,7 @@ from matplotlib.axes import Axes
 
 from multipac_testbench.src.instruments.factory import InstrumentFactory
 from multipac_testbench.src.instruments.instrument import Instrument
-from multipac_testbench.src.new_multipactor_band.instrument_multipactor_bands \
+from multipac_testbench.src.multipactor_band.instrument_multipactor_bands \
     import InstrumentMultipactorBands
 
 

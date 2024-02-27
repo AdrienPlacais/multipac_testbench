@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.axes import Axes
 
-from multipac_testbench.src.new_multipactor_band.multipactor_band import \
+from multipac_testbench.src.multipactor_band.multipactor_band import \
     MultipactorBand
 
 
