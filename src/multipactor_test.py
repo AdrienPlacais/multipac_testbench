@@ -25,6 +25,7 @@ import itertools
 from abc import ABCMeta
 from collections.abc import Callable, Iterable, Sequence
 from pathlib import Path
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -208,40 +209,6 @@ class MultipactorTest:
             plot.save_dataframe(df_to_plot, csv_path, **csv_kwargs)
         return axes
 
-    def plot_thresholds(
-        self,
-        instruments_id_plot: ABCMeta,
-        multipactor_bands: MultipactorBands | Sequence[MultipactorBands],
-        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
-        instruments_to_ignore: Sequence[Instrument | str] = (),
-        ) -> Axes | np.ndarray[Axes]:
-        """Plot evolution of thresholds."""
-        instruments_to_plot = self.get_instruments(
-            instruments_id_plot,
-            measurement_points_to_exclude,
-            instruments_to_ignore)
-        if isinstance(multipactor_bands, MultipactorBands):
-            multipactor_bands = [multipactor_bands
-                                 for _ in instruments_to_plot]
-        zipper = zip(instruments_to_plot, multipactor_bands, strict=True)
-        thresholds = [instrument.at_thresholds(multipactor_band)
-                      for instrument, multipactor_band in zipper]
-        df_thresholds = pd.concat(thresholds, axis=1)
-        axes = df_thresholds.filter(like='Lower').plot(
-            marker='o',
-            ms=10,
-        )
-        axes.set_prop_cycle(None)
-        axes = df_thresholds.filter(like='Upper').plot(
-            ax=axes,
-            grid=True,
-            marker='^',
-            ms=10,
-            xlabel="Half-power cycle #",
-            ylabel=instruments_id_plot.ylabel()
-        )
-        return axes
-
     def _set_x_data(self,
                     xdata: ABCMeta | None,
                     exclude: Sequence[str] = (),
@@ -312,6 +279,81 @@ class MultipactorTest:
                 data_to_plot.append(instrument.data_as_pd)
 
         return data_to_plot, y_columns
+
+    def plot_thresholds(
+        self,
+        instruments_id_plot: ABCMeta,
+        multipactor_bands: MultipactorBands | Sequence[MultipactorBands],
+        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
+        instruments_to_ignore: Sequence[Instrument | str] = (),
+        png_path: Path | None = None,
+        png_kwargs: dict | None = None,
+        csv_path: Path | None = None,
+        csv_kwargs: dict | None = None,
+    ) -> Axes | np.ndarray[Axes]:
+        """Plot evolution of thresholds.
+
+        Parameters
+        ----------
+        instruments_id_plot : ABCMeta
+            Class of instrument to plot. Makes most sense with
+            :class:`.ForwardPower` or :class:`FieldProbe`.
+        multipactor_bands : MultipactorBands | Sequence[MultipactorBands]
+            Objects containing the indexes of multipacting. If several are
+            given, their number must match the number of instruments of class
+            `instruments_id_plot`.
+        measurement_points_to_exclude : Sequence[IMeasurementPoint | str]
+            To exclude some pick-ups.
+        instruments_to_ignore : Sequence[Instrument | str]
+            To exclude some instruments.
+        png_path : Path | None
+            If provided, figue will be saved there.
+        png_kwargs : dict | None
+            Keyword arguments for the :meth:`.Figure.savefig` method.
+        csv_path : Path | None
+            If provided, plotted data will be saved there.
+        csv_kwargs : dict | None
+            Keyword arguments for the :meth:`.DataFrame.to_csv` method.
+
+        Returns
+        -------
+        Axes | np.ndarray[Axes]
+            Hold plotted axes.
+
+        """
+        instruments_to_plot = self.get_instruments(
+            instruments_id_plot,
+            measurement_points_to_exclude,
+            instruments_to_ignore)
+        if isinstance(multipactor_bands, MultipactorBands):
+            multipactor_bands = [multipactor_bands
+                                 for _ in instruments_to_plot]
+        zipper = zip(instruments_to_plot, multipactor_bands, strict=True)
+        thresholds = [instrument.at_thresholds(multipactor_band)
+                      for instrument, multipactor_band in zipper]
+        df_thresholds = pd.concat(thresholds, axis=1)
+        axes = df_thresholds.filter(like='Lower').plot(
+            marker='o',
+            ms=10,
+        )
+        axes.set_prop_cycle(None)
+        axes = df_thresholds.filter(like='Upper').plot(
+            ax=axes,
+            grid=True,
+            marker='^',
+            ms=10,
+            xlabel="Half-power cycle #",
+            ylabel=instruments_id_plot.ylabel()
+        )
+        if png_path is not None:
+            if png_kwargs is None:
+                png_kwargs = {}
+            plot.save_figure(axes, png_path, **png_kwargs)
+        if csv_path is not None:
+            if csv_kwargs is None:
+                csv_kwargs = {}
+            plot.save_dataframe(df_thresholds, csv_path, **csv_kwargs)
+        return axes
 
     def detect_multipactor(
             self,
@@ -420,6 +462,7 @@ optional
             The created axes.
 
         """
+        warnings.warn("Prefer the sweet_plot method.", DeprecationWarning)
         fig, instrument_class_axes = plot.create_fig(
             str(self),
             instruments_class_to_plot,
@@ -464,6 +507,9 @@ optional
     ) -> None:
         """Show with arrows when multipactor happens.
 
+        .. deprecated:: 1.5.0
+            Use :meth:`MultipactorTest.sweet_plot` instead.
+
         Parameters
         ----------
         measurement_point : IMeasurementPoint
@@ -471,7 +517,7 @@ optional
         instrument_class_axes : dict[ABCMeta, Axes]
             Links instrument class with the axes.
         multipactor_bands : MultipactorBands
-            Should correspond to the :class:`IMeasurementPoint` under study.
+            Should correspond to the :class:`.IMeasurementPoint` under study.
 
         """
         for plotted_instrument_class, axe in instrument_class_axes.items():
@@ -947,9 +993,11 @@ optional
         .. todo::
             Docstring, match_with_mp_band keywords
 
-        New version of `plot_multipactor_limits`.
+        .. deprecated:: 1.5.0
+            Use :meth:`MultipactorTest.plot_thresholds` instead.
 
         """
+        warnings.warn("Prefer the plot_thresholds method.", DeprecationWarning)
         instruments_to_plot = self.get_instruments(
             instruments_id_plot,
             measurement_points_to_exclude,
@@ -1167,6 +1215,7 @@ optional
             Use :meth:`MultipactorTest.sweet_plot` instead.
 
         """
+        warnings.warn("Prefer the sweet_plot method.", DeprecationWarning)
         instruments_y = self.get_instruments(instrument_ids_y,
                                              measurement_points_to_exclude,
                                              instruments_to_ignore)

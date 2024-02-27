@@ -256,6 +256,9 @@ class Instrument(ABC):
         .. todo::
             Dirty patch to select 1d/2d data
 
+        .. deprecated:: 1.5.0
+            Use :meth:`Instrument.at_thresholds` instead.
+
         Parameters
         ----------
         multipactor_bands : MultipactorBands
@@ -308,7 +311,12 @@ class Instrument(ABC):
             self,
             multipactor_bands: MultipactorBands,
     ) -> tuple[float, float]:
-        """Get measured data at last mp limits."""
+        """Get measured data at last mp limits.
+
+        .. deprecated:: 1.5.0
+            Use :meth:`Instrument.at_thresholds` instead.
+
+        """
         barriers_idx = multipactor_bands.barriers
         last_low = barriers_idx[0][-1]
         last_upp = barriers_idx[1][-1]
@@ -336,7 +344,12 @@ class Instrument(ABC):
                              xdata: np.ndarray | pd.Index | None = None,
                              **subplot_kw
                              ) -> Line2D:
-        """Plot what the instrument measured."""
+        """Plot what the instrument measured.
+
+        .. deprecated:: 1.5.0
+            Use :meth:`MultipactorTest.sweet_plot` instead.
+
+        """
         data = self.data
         label = f"{self.name} (post-treated)"
 
@@ -361,7 +374,12 @@ class Instrument(ABC):
                              xdata: np.ndarray | pd.Index | None = None,
                              **subplot_kw
                              ) -> Line2D:
-        """Plot what the instrument measured."""
+        """Plot what the instrument measured.
+
+        .. deprecated:: 1.5.0
+            Use :meth:`MultipactorTest.sweet_plot` instead.
+
+        """
         data = self.data
         label = f"{self.name} (post-treated)"
 

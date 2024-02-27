@@ -3,6 +3,7 @@
 """Define an object to keep several related measurements."""
 from abc import ABC, ABCMeta
 from typing import Any, Callable, Sequence
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -152,6 +153,9 @@ class IMeasurementPoint(ABC):
     ) -> None:
         """Plot signal of ``instruments_class_to_plot`` of this object.
 
+        .. deprecated:: 1.5.0
+            Use :meth:`MultipactorTest.sweet_plot` instead.
+
         Parameters
         ----------
         instrument_class_axes : dict[ABCMeta, Axes]
@@ -165,6 +169,7 @@ class IMeasurementPoint(ABC):
             Other keyword arguments passed to the ``plot_vs_time`` methods.
 
         """
+        warnings.warn("Prefer the sweet_plot method.", DeprecationWarning)
         for instrument_class in instruments_class_to_plot:
             instruments = self.get_instruments(instrument_class)
             axe = instrument_class_axes[instrument_class]
@@ -188,6 +193,9 @@ class IMeasurementPoint(ABC):
         .. todo::
             To refactor, should rely on MultipactorBand(s) methods
 
+        .. deprecated:: 1.5.0
+            Use :meth:`MultipactorTest.sweet_plot` instead.
+
         Parameters
         ----------
         axe : Axes
@@ -196,6 +204,7 @@ class IMeasurementPoint(ABC):
             The nature of the instrument which ``data`` is already plotted.
 
         """
+        warnings.warn("Prefer the sweet_plot method.", DeprecationWarning)
         plotted_instrument = self.get_instrument(plotted_instrument_class)
         if plotted_instrument is None:
             return
@@ -234,7 +243,12 @@ class IMeasurementPoint(ABC):
             instrument.scatter_data(axes, multipactor_bands.multipactor, xdata)
 
     def _typical_vline_keywords(self) -> dict[str, Any]:
-        """Set consistent plot properties."""
+        """Set consistent plot properties.
+
+        .. deprecated:: 1.5.0
+            Use :meth:`MultipactorTest.sweet_plot` instead.
+
+        """
         vline_kw = {
             'color': self._color,
             'lw': 0.2,
@@ -243,7 +257,12 @@ class IMeasurementPoint(ABC):
 
     def _typical_arrow_keywords(self,
                                 instrument: Instrument) -> dict[str, Any]:
-        """Set consistent plot properties."""
+        """Set consistent plot properties.
+
+        .. deprecated:: 1.5.0
+            Use :meth:`MultipactorTest.sweet_plot` instead.
+
+        """
         typical_width = np.nanmean(instrument.data) * 1e-3
         typical_length = instrument.data.shape[0] / 70
         arrow_kw = {

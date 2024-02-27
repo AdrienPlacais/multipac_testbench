@@ -502,7 +502,12 @@ class TestCampaign(list):
         iternum: int = 300,
         **kwargs
     ) -> None:
-        """Call all :meth:`.MultipactorTest.plot_instruments_vs_time`."""
+        """Call all :meth:`.MultipactorTest.plot_instruments_vs_time`.
+
+        .. deprecated:: 1.5.0
+            Use :meth:`TestCampaign.sweet_plot` instead.
+
+        """
         if seq_multipactor_bands is None:
             seq_multipactor_bands = [None for _ in self]
         zipper = zip(self, seq_multipactor_bands, strict=True)
@@ -542,7 +547,12 @@ class TestCampaign(list):
                                            out_folder: str | None = None,
                                            iternum: int = 250,
                                            **kwargs) -> None:
-        """Call :meth:`.MultipactorTest.plot_instruments_y_vs_instrument_x`."""
+        """Call :meth:`.MultipactorTest.plot_instruments_y_vs_instrument_x`.
+
+        .. deprecated:: 1.5.0
+            Use :meth:`TestCampaign.sweet_plot` instead.
+
+        """
         for i, test in enumerate(self):
             png_path = None
             if out_folder is not None:
@@ -555,14 +565,6 @@ class TestCampaign(list):
             )
         return
 
-    def plot_barriers_vs_frequency(self) -> None:
-        """Plot evolution of mp barriers with frequency."""
-        raise NotImplementedError
-
-    def plot_barriers_vs_swr(self) -> None:
-        """Plot evolution of mp barriers with SWR."""
-        raise NotImplementedError
-
     def plot_data_at_multipactor_thresholds(
             self,
             *args,
@@ -571,6 +573,9 @@ class TestCampaign(list):
             iternum: int = 350,
             **kwargs) -> None:
         """Call :meth:`.MultipactorTest.plot_data_at_multipactor_thresholds`.
+
+        .. deprecated:: 1.5.0
+            Use :meth:`TestCampaign.plot_thresholds` instead.
 
         Parameters
         ----------
