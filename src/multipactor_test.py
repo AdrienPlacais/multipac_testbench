@@ -416,11 +416,17 @@ class MultipactorTest:
         return zipper
 
     def at_last_threshold(self,
-                          instrument_id: ABCMeta,
+                          instrument_id: ABCMeta | Sequence[ABCMeta],
                           test_multipactor_bands: TestMultipactorBands,
                           **kwargs
                           ) -> pd.DataFrame:
         """Give the ``instrument_id`` measurements at last threshold."""
+        if isinstance(instrument_id, Sequence):
+            all_df_thresholds = [self.at_last_threshold(single_instrument_id,
+                                                        test_multipactor_bands,
+                                                        **kwargs)
+                                 for single_instrument_id in instrument_id]
+            return pd.concat(all_df_thresholds, axis=1)
         zipper = self.instruments_and_multipactor_bands(instrument_id,
                                                         test_multipactor_bands,
                                                         **kwargs)
