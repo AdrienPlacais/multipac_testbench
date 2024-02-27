@@ -9,12 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 - Instruments: `ForwardPower`, `ReflectedPower`, `SWR`, `ReflectionCoefficient`
+- `TestMultipactorBands`, `CampaignMultipactorBands` to handle when/where multipactor is detected in a more consistent way. Multipactor conditioned during test properly handled.
+- `sweet_plot`, `plot_thresholds`, `at_last_threshold` methods
+
+## Modified
+
+- `MultipactorBands` is now `InstrumentMultipactorBands`
+
+## Deprecated
+
+- `plot_instruments_vs_time`, `plot_instruments_y_vs_instrument_x` (use `sweet_plot` instead)
+- `plot_data_at_multipactor_thresholds` (use `plot_thresholds` instead)
 
 ## Removed
 
 - `Powers` instrument
  - For consistency, one `Instrument` = one column in the `MultipactorTest.df_data`.
  - Now, use the dedicated instruments: `ForwardPower`, `ReflectedPower` (both are `Power`), `SWR`, `ReflectionCoefficient`
+
 
 ## [1.4.1] 2024-02-19
 
