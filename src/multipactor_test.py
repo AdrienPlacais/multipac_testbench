@@ -328,19 +328,14 @@ class MultipactorTest:
             Hold plotted axes.
 
         """
-        instruments_to_plot = self.get_instruments(
+        zipper = self.instruments_and_multipactor_bands(
             instruments_id_plot,
-            measurement_points_to_exclude,
-            instruments_to_ignore)
-
-        matching_mp_bands = [
-            instrument.multipactor_band_at_same_position(
-                multipactor_bands,
-                raise_no_match_error=True,
-                global_diagnostics=True)
-            for instrument in instruments_to_plot]
-
-        zipper = zip(instruments_to_plot, matching_mp_bands, strict=True)
+            multipactor_bands,
+            raise_no_match_error=True,
+            global_diagnostics=True,
+            measurement_points_to_exclude=measurement_points_to_exclude,
+            instruments_to_ignore=instruments_to_ignore
+        )
 
         thresholds = [instrument.at_thresholds(multipactor_band)
                       for instrument, multipactor_band in zipper]
@@ -369,6 +364,57 @@ class MultipactorTest:
                 csv_kwargs = {}
             plot.save_dataframe(df_thresholds, csv_path, **csv_kwargs)
         return axes
+
+    def instruments_and_multipactor_bands(
+        self,
+        instruments_id: ABCMeta,
+        multipactor_bands: TestMultipactorBands,
+        raise_no_match_error: bool = True,
+        global_diagnostics: bool = True,
+        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
+        instruments_to_ignore: Sequence[Instrument | str] = (),
+    ) -> zip:
+        """Match the instruments with their multipactor bands.
+
+        Parameters
+        ----------
+        instruments_id : ABCMeta
+            Class of instrument under study.
+        multipactor_bands : TestMultipactorBands
+            All multipactor bands, among which we will be looking.
+        raise_no_match_error : bool, optional
+            If an error should be raised when no
+            :class:`.InstrumentMultipactorBands` match an :class:`.Instrument`.
+            The default is True.
+        global_diagnostics : bool, optional
+            If :class:`InstrumentMultipactorBands` that were obtained from a
+            global diagnostic should be matched. The default is True.
+        measurement_points_to_exclude : Sequence[IMeasurementPoint | str]
+            :class:`.Instrument` at this pick-ups are skipped. The default is
+            an empty tuple.
+        instruments_to_ignore : Sequence[Instrument | str], optional
+            :class:`.Instrument` in this sequence are skipped. The default is
+            an empty tuple.
+
+        Returns
+        -------
+        zipper : zip
+            Object matching every :class:`.Instrument` with the appropriate
+            :class:`.InstrumentMultipactorBands`.
+
+        """
+        instruments = self.get_instruments(instruments_id,
+                                           measurement_points_to_exclude,
+                                           instruments_to_ignore)
+
+        matching_mp_bands = [
+            instrument.multipactor_band_at_same_position(
+                multipactor_bands,
+                raise_no_match_error=raise_no_match_error,
+                global_diagnostics=global_diagnostics)
+            for instrument in instruments]
+        zipper = zip(instruments, matching_mp_bands, strict=True)
+        return zipper
 
     def at_last_threshold(self,
                           instrument_id: ABCMeta,

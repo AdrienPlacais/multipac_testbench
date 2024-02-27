@@ -254,8 +254,8 @@ class Instrument(ABC):
         self,
         multipactor_bands: TestMultipactorBands,
         raise_no_match_error: Literal[True],
-        global_diagnostics: bool,
-        tol: float,
+        global_diagnostics: bool = False,
+        tol: float = 1e-10,
         **kwargs
     ) -> InstrumentMultipactorBands: ...
 
@@ -264,8 +264,18 @@ class Instrument(ABC):
         self,
         multipactor_bands: TestMultipactorBands,
         raise_no_match_error: Literal[False],
-        global_diagnostics: bool,
-        tol: float,
+        global_diagnostics: bool = False,
+        tol: float = 1e-10,
+        **kwargs
+    ) -> InstrumentMultipactorBands | None: ...
+
+    @overload
+    def multipactor_band_at_same_position(
+        self,
+        multipactor_bands: TestMultipactorBands,
+        raise_no_match_error: bool,
+        global_diagnostics: bool = False,
+        tol: float = 1e-10,
         **kwargs
     ) -> InstrumentMultipactorBands | None: ...
 
