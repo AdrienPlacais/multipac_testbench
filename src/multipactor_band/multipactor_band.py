@@ -5,11 +5,6 @@
 i.e.: a set of measurement points where multipactor happens. A
 :class:`MultipactorBand` is defined on half a power cycle.
 
-.. todo::
-    Modify the :class:`.Instrument` so that we can call
-    Instrument[MultipactorBand] and get their data at the corresponding
-    indexes.
-
 """
 
 
