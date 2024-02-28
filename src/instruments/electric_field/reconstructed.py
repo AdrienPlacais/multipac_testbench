@@ -8,6 +8,7 @@
 """
 from collections.abc import Sequence
 from functools import partial
+import logging
 from typing import overload
 
 import numpy as np
@@ -148,8 +149,7 @@ class Reconstructed(IElectricField):
             # ss_tot = np.sum((expected - expected.mean())**2)
             # r_squared = 1. - ss_err / ss_tot
             # self._r_squared = r_squared
-            print(self.fit_info)
-            print('')
+            logging.debug(self.fit_info)
 
     def _compute_voltages(self,
                           beta: float,

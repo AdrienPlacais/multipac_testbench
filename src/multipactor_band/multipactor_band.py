@@ -6,6 +6,7 @@ i.e.: a set of measurement points where multipactor happens. A
 :class:`MultipactorBand` is defined on half a power cycle.
 
 """
+import logging
 import numpy as np
 
 
@@ -105,9 +106,9 @@ def multipactor_to_list_of_mp_band(multipactor: np.ndarray[np.bool_],
         last_index = i
         reached_second_threshold = True
         if current_band is not None:
-            print("MultipactorBand warning: I guess there was two MP bands "
-                  "for this power cycle!! To investigate. Only keeping second "
-                  "one...")
+            logging.warning("I guess there was two MP bands for this power "
+                            "cycle!! To investigate. Only keeping second "
+                            "one...")
         current_band = MultipactorBand(first_index, last_index,
                                        reached_second_threshold,
                                        power_is_growing[i])

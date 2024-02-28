@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Define an object to keep several related measurements."""
+import logging
 import warnings
 from abc import ABC, ABCMeta
 from typing import Any, Callable, Sequence
@@ -114,7 +115,7 @@ class IMeasurementPoint(ABC):
             instrument.add_post_treater(post_treater)
 
             if verbose:
-                print(f"A post-treater was added to {str(instrument)}.")
+                logging.info(f"A post-treater was added to {str(instrument)}.")
 
     def detect_multipactor(
             self,

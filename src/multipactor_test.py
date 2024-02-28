@@ -19,6 +19,7 @@
 import itertools
 from abc import ABCMeta
 from collections.abc import Callable, Iterable, Sequence
+import logging
 from pathlib import Path
 import warnings
 
@@ -90,9 +91,9 @@ class MultipactorTest:
         self.df_data = df_data
 
         if df_data.index[0] != 0:
-            print("MultipactorTest.__init__ warning! Your Sample index column "
-                  "does not start at 0. I should patch this, but meanwhile "
-                  " expect some index mismatches.")
+            logging.error("Your Sample index column does not start at 0. I "
+                          "should patch this, but meanwhile expect some "
+                          "index mismatches.")
 
         imeasurement_point_factory = IMeasurementPointFactory()
         imeasurement_points = imeasurement_point_factory.run(config,
@@ -241,9 +242,8 @@ class MultipactorTest:
         data_to_plot = []
         for instrument in instruments:
             if isinstance(instrument.data_as_pd, pd.DataFrame):
-                print("MultipactorTest._set_x_data warning: you want to "
-                      f"plot {instrument}, which data is 2D. Not supported"
-                      ".")
+                logging.error(f"You want to plot {instrument}, which data is "
+                              "2D. Not supported.")
                 continue
             data_to_plot.append(instrument.data_as_pd)
 
@@ -286,9 +286,8 @@ class MultipactorTest:
                 if instrument.name in exclude:
                     continue
                 if isinstance(instrument.data_as_pd, pd.DataFrame):
-                    print("MultipactorTest._set_y_data warning: you want to "
-                          f"plot {instrument}, which data is 2D. Not supported"
-                          ".")
+                    logging.error(f"You want to plot {instrument}, which data "
+                                  "is 2D. Not supported.")
                     continue
                 data_to_plot.append(instrument.data_as_pd)
 
@@ -834,10 +833,9 @@ optional
             if instr.name in instrument_names
         ]
         if len(instrument_names) != len(instruments):
-            print("MultipactorTest._instruments_by_name warning: ",
-                  f"you asked for {instrument_names = }, I give you ",
-                  f"{[instr.name for instr in instruments]} which has a ",
-                  "different length.")
+            logging.warning(f"You asked for {instrument_names = }, I give you "
+                            f"{[instr.name for instr in instruments]} which "
+                            "has a different length.")
         return instruments
 
     def get_measurement_points(
@@ -961,8 +959,7 @@ optional
         if len(instruments) == 0:
             raise IOError("No instrument found.")
         if len(instruments) > 1:
-            print("multipactor_test.get_instrument warning! Several "
-                  "instruments found. Returning first one.")
+            logging.warning("Several instruments found. Returning first one.")
         return instruments[0]
 
     def _prepare_animation_fig(
@@ -1161,8 +1158,7 @@ optional
                                              test_multipactor_bands).iloc[0]
         z_ohm = 50.
         d_mm = .5 * (38.78 - 16.87)
-        print("MultipactorTest.data_for_somersalo warning! Used default "
-              f"{d_mm = }")
+        logging.warning(f"Used default {d_mm = }")
         somersalo_data = {
             'powers_kw': [last_powers.iloc[0] * 1e-3,
                           last_powers.iloc[1] * 1e-3],
@@ -1192,8 +1188,7 @@ optional
             instrument_multipactor_bands)
 
         d_mm = .5 * (38.78 - 16.87)
-        print("MultipactorTest.data_for_susceptibility warning! Used default "
-              f"{d_mm = }")
+        logging.warning(f"Used default {d_mm = }")
         somersalo_data = {
             'voltages_v': [last_fields[0], last_fields[1]],
             'd_cm': d_mm * 1e-1,

@@ -3,6 +3,7 @@
 .. todo:: Merge the two remove_isolated functions
 
 """
+import logging
 from typing import overload
 import numpy as np
 
@@ -35,11 +36,10 @@ def remove_trailing_true(data: np.ndarray[np.bool_],
         return data
 
     if array_name_for_warning:
-        print("util.filtering.remove_trailing_true warning: there was "
-              f"{trailing_true} 'True' points in the last "
-              f"{n_trailing_points_to_check} "
-              f"points of the {array_name_for_warning} array. Setting it to "
-              "False.")
+        logging.warning(f"There was {trailing_true} 'True' points in the last "
+                        f"{n_trailing_points_to_check} "
+                        f"points of the {array_name_for_warning} array. "
+                        "Setting it to False.")
     data[-n_trailing_points_to_check:] = False
     return data
 

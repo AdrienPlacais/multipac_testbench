@@ -5,6 +5,7 @@ r"""Define the reflection coefficient virtual probe.
 As for now, it is always a real, i.e. it is :math:`R = |\Gamma|`.
 
 """
+import logging
 from typing import Self
 
 import numpy as np
@@ -64,10 +65,9 @@ def _compute_reflection_coef(forward_data: np.ndarray,
     if n_invalid > 0:
         reflection_coefficient[invalid_indexes] = np.NaN
         if warn_reflected_higher_than_forward:
-            print("ReflectionCoefficient._compute_reflection_coef warning!"
-                  f" {n_invalid} points were removed in R calculation, "
-                  "where reflected power was higher than to forward power."
-                  )
+            logging.warning(f"{n_invalid} points were removed in R "
+                            "calculation, where reflected power was higher "
+                            "than forward power.")
 
     invalid_indexes = np.where(
         np.abs(reflection_coefficient - 1.) < tol)[0]
@@ -75,8 +75,7 @@ def _compute_reflection_coef(forward_data: np.ndarray,
     if n_invalid > 0:
         reflection_coefficient[invalid_indexes] = np.NaN
         if warn_gamma_too_close_to_unity:
-            print("ReflectionCoefficient._compute_reflection_coef warning!"
-                  f"{n_invalid} points were removed in R calculation, "
-                  "where reflected power was too close to forward power. "
-                  "Tolerance was: {tol = }.")
+            logging.warning(f"{n_invalid} points were removed in R "
+                            "calculation, where reflected power was too close "
+                            f"to forward power. Tolerance was: {tol = }.")
     return reflection_coefficient

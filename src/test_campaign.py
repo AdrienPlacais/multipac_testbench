@@ -38,6 +38,7 @@ from multipac_testbench.src.theoretical.somersalo import (
 from multipac_testbench.src.theoretical.susceptibility import \
     measured_to_susceptibility_coordinates
 from multipac_testbench.src.util import helper, plot
+from multipac_testbench.src.util.log_manager import set_up_logging
 
 
 class TestCampaign(list):
@@ -54,7 +55,8 @@ class TestCampaign(list):
                        swrs: Sequence[float],
                        config: dict,
                        info: Sequence[str] = (),
-                       sep: str = ';') -> Self:
+                       sep: str = ';',
+                       ) -> Self:
         """Instantiate the :class:`.MultipactorTest` and :class:`TestCampaign`.
 
         Parameters
@@ -81,6 +83,9 @@ class TestCampaign(list):
         if len(info) == 0:
             info = ['' for _ in filepaths]
         args = zip(filepaths, frequencies, swrs, info, strict=True)
+
+        logfile = Path(filepaths[0].parent / "multipac_testbench.log")
+        set_up_logging(logfile_file=logfile)
 
         multipactor_tests = [
             MultipactorTest(filepath,

@@ -3,6 +3,7 @@
 """Define object to keep a single instrument measurements."""
 from abc import ABC
 from collections.abc import Iterable
+import logging
 from typing import Callable, Literal, Self, overload
 
 import numpy as np
@@ -338,10 +339,9 @@ class Instrument(ABC):
                              f"with a position matching {self} was found.")
 
         if n_found > 1:
-            print("Instrument.multipactor_band_at_same_position warning:"
-                  "There are several multipactor bands that were measured"
-                  f"for the same instrument {self}:"
-                  f"{matching_multipactor_bands}")
+            logging.warning("There are several multipactor bands that were "
+                            f"measured for the same instrument {self}:"
+                            f"{matching_multipactor_bands}")
 
         return matching_multipactor_bands[0]
 

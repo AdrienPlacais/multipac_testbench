@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Define a class to create the proper :class:`.IMeasurementPoint`."""
 import pandas as pd
+import logging
 
 from multipac_testbench.src.instruments.factory import InstrumentFactory
 from multipac_testbench.src.measurement_point.global_diagnostics import \
@@ -86,12 +87,12 @@ class IMeasurementPointFactory:
                               if isinstance(x, GlobalDiagnostics)]
         if len(global_diagnostics) == 0:
             if verbose:
-                print("No global diagnostic defined.")
+                logging.info("No global diagnostic defined.")
             return
         if len(global_diagnostics) == 1:
             if verbose:
-                print("1 set of global diagnostics defined:\n\t"
-                      f"{global_diagnostics[0]}")
+                logging.info("1 set of global diagnostics defined:\n\t"
+                             f"{global_diagnostics[0]}")
             return global_diagnostics[0]
 
         raise IOError("Several global diagnostics were found! It means that"
@@ -109,8 +110,8 @@ class IMeasurementPointFactory:
             raise IOError("No pick-up was defined.")
 
         if verbose:
-            print(f"{n_pick_ups} pick-ups created:")
+            logging.info(f"{n_pick_ups} pick-ups created:")
             for pick_up in pick_ups:
-                print(f"\t{pick_up}")
+                logging.info(f"\t{pick_up}")
 
         return pick_ups
