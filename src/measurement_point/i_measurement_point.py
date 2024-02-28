@@ -123,6 +123,7 @@ class IMeasurementPoint(ABC):
             instrument_class: ABCMeta,
             power_is_growing: np.ndarray[np.bool_],
             debug: bool = False,
+            info: str = '',
     ) -> InstrumentMultipactorBands | None:
         """Detect multipactor with ``multipac_detector``."""
         instrument = self.get_instrument(instrument_class)
@@ -135,6 +136,7 @@ class IMeasurementPoint(ABC):
             instrument.name,
             self.name,
             instrument.position,
+            info,
         )
         if debug:
             axes = instrument.data_as_pd.plot(grid=True)

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Define an object to store and treat data from pick-ups.
 
@@ -507,7 +507,8 @@ optional
             measurement_point.detect_multipactor(multipac_detector,
                                                  instrument_class,
                                                  power_is_growing,
-                                                 debug)
+                                                 debug,
+                                                 info=f" {self}")
             for measurement_point in measurement_points]
         test_multipactor_bands = TestMultipactorBands(
             instrument_multipactor_bands,

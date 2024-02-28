@@ -18,6 +18,7 @@ class InstrumentMultipactorBands(list):
                  instrument_name: str,
                  measurement_point_name: str,
                  position: float,
+                 info: str = ''
                  ) -> None:
         """Create the object.
 
@@ -44,6 +45,7 @@ class InstrumentMultipactorBands(list):
         list_of_multipactor_band = multipactor_to_list_of_mp_band(
             multipactor,
             power_is_growing,
+            info=info + f" {instrument_name = }",
         )
         super().__init__(list_of_multipactor_band)
         self.multipactor = multipactor

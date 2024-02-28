@@ -35,6 +35,7 @@ class MultipactorBand:
 
 def multipactor_to_list_of_mp_band(multipactor: np.ndarray[np.bool_],
                                    power_is_growing: np.ndarray[np.bool_],
+                                   info: str = '',
                                    ) -> list[MultipactorBand | None]:
     """Create the different :class:`MultipactorBand`.
 
@@ -102,13 +103,13 @@ def multipactor_to_list_of_mp_band(multipactor: np.ndarray[np.bool_],
         assert first_index is not None, ("We are exiting a multipacting zone "
                                          "but I did not detect when it started"
                                          ". Check what happened around index "
-                                         f"{i}.")
+                                         f"{i}. {info}")
         last_index = i
         reached_second_threshold = True
         if current_band is not None:
             logging.warning("I guess there was two MP bands for this power "
                             "cycle!! To investigate. Only keeping second "
-                            "one...")
+                            f"one... {info}")
         current_band = MultipactorBand(first_index, last_index,
                                        reached_second_threshold,
                                        power_is_growing[i])
