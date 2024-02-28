@@ -237,7 +237,16 @@ class MultipactorTest:
                                            instruments_to_ignore=exclude)
         x_columns = [instrument.name for instrument in instruments
                      if instrument.name not in exclude]
-        data_to_plot = [instrument.data_as_pd for instrument in instruments]
+
+        data_to_plot = []
+        for instrument in instruments:
+            if isinstance(instrument.data_as_pd, pd.DataFrame):
+                print("MultipactorTest._set_x_data warning: you want to "
+                      f"plot {instrument}, which data is 2D. Not supported"
+                      ".")
+                continue
+            data_to_plot.append(instrument.data_as_pd)
+
         return data_to_plot, x_columns
 
     def _set_y_data(self,
@@ -275,6 +284,11 @@ class MultipactorTest:
                               if instrument.name not in exclude])
             for instrument in sublist:
                 if instrument.name in exclude:
+                    continue
+                if isinstance(instrument.data_as_pd, pd.DataFrame):
+                    print("MultipactorTest._set_y_data warning: you want to "
+                          f"plot {instrument}, which data is 2D. Not supported"
+                          ".")
                     continue
                 data_to_plot.append(instrument.data_as_pd)
 
