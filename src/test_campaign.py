@@ -18,9 +18,13 @@ import pandas as pd
 from matplotlib import animation
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+from scipy.optimize import curve_fit
+
 from multipac_testbench.src.instruments.electric_field.field_probe import \
     FieldProbe
 from multipac_testbench.src.instruments.power import ForwardPower
+from multipac_testbench.src.instruments.reflection_coefficient import \
+    ReflectionCoefficient
 from multipac_testbench.src.measurement_point.i_measurement_point import \
     IMeasurementPoint
 from multipac_testbench.src.multipactor_band.campaign_multipactor_bands import \
@@ -34,8 +38,7 @@ from multipac_testbench.src.theoretical.somersalo import (
 from multipac_testbench.src.theoretical.susceptibility import \
     measured_to_susceptibility_coordinates
 from multipac_testbench.src.util import helper, plot
-from scipy.optimize import curve_fit
-from multipac_testbench.src.instruments.reflection_coefficient import ReflectionCoefficient
+
 
 class TestCampaign(list):
     """Hold several multipactor tests together."""
