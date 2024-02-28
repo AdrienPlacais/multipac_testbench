@@ -15,6 +15,7 @@ Submodules
    src.util.animate
    src.util.filtering
    src.util.helper
+   src.util.log_manager
    src.util.multipactor_detectors
    src.util.plot
    src.util.post_treaters
