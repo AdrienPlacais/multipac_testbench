@@ -451,7 +451,6 @@ class MultipactorTest:
                                                         **kwargs)
         df_thresholds = pd.concat([instrument.at_thresholds(band).tail(1)
                                    for instrument, band in zipper], axis=1)
-        print(df_thresholds)
         df_thresholds.index = [str(self)]
         return df_thresholds
 

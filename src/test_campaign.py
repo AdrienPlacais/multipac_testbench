@@ -364,7 +364,7 @@ class TestCampaign(list):
             test.data_for_somersalo_scaling_law(band, use_theoretical_r)
             for (test, band) in zipper]
         df_for_somersalo = pd.concat(data_for_somersalo).filter(like='Lower')
-        x_col = df_for_somersalo.filter(like='ReflectionCoefficient').columns.V
+        x_col = df_for_somersalo.filter(like='ReflectionCoefficient').columns
         y_col = df_for_somersalo.filter(like='ForwardPower').columns
 
         axe = df_for_somersalo.plot(
@@ -404,8 +404,8 @@ class TestCampaign(list):
                            x=0,
                            y=1,
                            grid=True)
-        if png_path is not None:
-            fig.savefig(png_path)
+        # if png_path is not None:
+            # fig.savefig(png_path)
 
         return axe
 
