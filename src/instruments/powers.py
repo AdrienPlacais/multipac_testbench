@@ -5,6 +5,10 @@ r"""Define power probe to measure forward and reflected power.
 Also include calculation of reflection coefficient :math:`\Gamma` and (voltage)
 SWR :math:`SWR`.
 
+.. deprecated :: 1.5.0
+    Use :class:`.Power`, :class:`.ForwardPower`, :class:`.ReflectedPower`,
+    :class:`.SWR`, :class:`.ReflectionCoefficient` instead.
+
 """
 import numpy as np
 

@@ -381,7 +381,7 @@ class MultipactorTest:
     def instruments_and_multipactor_bands(
         self,
         instruments_id: ABCMeta,
-        multipactor_bands: TestMultipactorBands,
+        multipactor_bands: TestMultipactorBands | InstrumentMultipactorBands,
         raise_no_match_error: bool = True,
         global_diagnostics: bool = True,
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
@@ -393,8 +393,11 @@ class MultipactorTest:
         ----------
         instruments_id : ABCMeta
             Class of instrument under study.
-        multipactor_bands : TestMultipactorBands
-            All multipactor bands, among which we will be looking.
+        multipactor_bands : TestMultipactorBands | InstrumentMultipactorBands
+            All multipactor bands, among which we will be looking. If only one
+            is given (:class:`.InstrumentMultipactorBands`), then all
+            :class:`.Instrument` will be matched with the same identical
+            :class:`.InstrumentMultipactorBands`.
         raise_no_match_error : bool, optional
             If an error should be raised when no
             :class:`.InstrumentMultipactorBands` match an :class:`.Instrument`.
@@ -429,23 +432,26 @@ class MultipactorTest:
         zipper = zip(instruments, matching_mp_bands, strict=True)
         return zipper
 
-    def at_last_threshold(self,
-                          instrument_id: ABCMeta | Sequence[ABCMeta],
-                          test_multipactor_bands: TestMultipactorBands,
-                          **kwargs
-                          ) -> pd.DataFrame:
+    def at_last_threshold(
+        self,
+        instrument_id: ABCMeta | Sequence[ABCMeta],
+        multipactor_bands: TestMultipactorBands | InstrumentMultipactorBands,
+        **kwargs
+    ) -> pd.DataFrame:
         """Give the ``instrument_id`` measurements at last threshold."""
         if isinstance(instrument_id, Sequence):
             all_df_thresholds = [self.at_last_threshold(single_instrument_id,
-                                                        test_multipactor_bands,
+                                                        multipactor_bands,
                                                         **kwargs)
                                  for single_instrument_id in instrument_id]
             return pd.concat(all_df_thresholds, axis=1)
+
         zipper = self.instruments_and_multipactor_bands(instrument_id,
-                                                        test_multipactor_bands,
+                                                        multipactor_bands,
                                                         **kwargs)
         df_thresholds = pd.concat([instrument.at_thresholds(band).tail(1)
                                    for instrument, band in zipper], axis=1)
+        print(df_thresholds)
         df_thresholds.index = [str(self)]
         return df_thresholds
 
@@ -463,9 +469,9 @@ class MultipactorTest:
 
         Parameters
         ----------
-        multipac_detector : Callable[[np.ndarray], np.ndarray[np.bool_]]
+        multipac_detector : callable[[np.ndarray], np.ndarray[np.bool_]]
             Function that takes in the ``data`` of an :class:`.Instrument` and
-            returns an array, where True means multipactor and False no
+            returns an array, where TRUE MEANS MULTIpactor and False no
             multipactor.
         instrument_class : ABCMeta
             Type of instrument on which ``multipac_detector`` should be
@@ -496,19 +502,18 @@ optional
         power_is_growing = forward_power.where_is_growing(
             **power_is_growing_kw)
 
-        all_bands = []
         measurement_points = self.get_measurement_points(
             to_exclude=measurement_points_to_exclude)
 
-        for measurement_point in measurement_points:
-            instrument_bands = measurement_point.detect_multipactor(
-                multipac_detector,
-                instrument_class,
-                power_is_growing,
-                debug
-            )
-            all_bands.append(instrument_bands)
-        test_multipactor_bands = TestMultipactorBands(all_bands)
+        instrument_multipactor_bands = [
+            measurement_point.detect_multipactor(multipac_detector,
+                                                 instrument_class,
+                                                 power_is_growing,
+                                                 debug)
+            for measurement_point in measurement_points]
+        test_multipactor_bands = TestMultipactorBands(
+            instrument_multipactor_bands,
+            power_is_growing)
         return test_multipactor_bands
 
     def plot_instruments_vs_time(
@@ -1197,38 +1202,32 @@ optional
         }
         return somersalo_data
 
-    def data_for_somersalo_scaling_law(self,
-                                       instrument_multipactor_bands: InstrumentMultipactorBands,
-                                       use_theoretical_r: bool = False,
-                                       ) -> pd.Series:
+    def data_for_somersalo_scaling_law(
+        self,
+        multipactor_bands: TestMultipactorBands | InstrumentMultipactorBands,
+        use_theoretical_r: bool = False,
+    ) -> pd.DataFrame:
         """Get the data necessary to plot the Somersalo scaling law.
 
         .. todo::
             Proper docstring.
 
         """
-        forward_power = self.get_instrument(ForwardPower)
-        assert isinstance(forward_power, ForwardPower)
-        reflection = self.get_instrument(ReflectionCoefficient)
-        assert isinstance(reflection, ReflectionCoefficient)
+        if isinstance(multipactor_bands, TestMultipactorBands):
+            multipactor_bands = multipactor_bands.merge('relaxed')
 
-        last_low_idx = instrument_multipactor_bands[-1][-1]
+        instruments = ForwardPower, ReflectionCoefficient
+        df_somersalo = self.at_last_threshold(instruments, multipactor_bands)
 
-        reflection_coeff = reflection.data[last_low_idx]
         if use_theoretical_r:
             if np.isinf(self.swr):
                 reflection_coeff = 1.
             else:
                 reflection_coeff = (self.swr - 1.) / (self.swr + 1.)
+            cols = df_somersalo.filter(like='ReflectionCoefficient').columns
+            df_somersalo[cols] = reflection_coeff
 
-        last_forward_power = forward_power.data[last_low_idx]
-
-        ser = pd.Series(
-            {'$R$': reflection_coeff,
-             r'Lower multipactor threshold $P_{f, low}$': last_forward_power,
-             }
-        )
-        return ser
+        return df_somersalo
 
     def plot_instruments_y_vs_instrument_x(
             self,

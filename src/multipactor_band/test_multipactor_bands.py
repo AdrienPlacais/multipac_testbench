@@ -13,10 +13,12 @@ class TestMultipactorBands(list):
 
     def __init__(
         self,
-        instruments_multipactor_bands: list[InstrumentMultipactorBands | None]
+        instruments_multipactor_bands: list[InstrumentMultipactorBands | None],
+        power_is_growing: np.ndarray[np.bool_],
     ) -> None:
         """Instantiate the object."""
         super().__init__(instruments_multipactor_bands)
+        self.power_is_growing = power_is_growing
 
     def plot_as_bool(self,
                      axes: Axes | None,
@@ -41,3 +43,97 @@ class TestMultipactorBands(list):
             scale += original_scale * 1e-2
         assert axes is not None
         return axes
+
+    def merge(self,
+              union: str,
+              name: str = '',
+              filter_out_none: bool = True) -> InstrumentMultipactorBands:
+        """Merge the :class:`InstrumentMultipactorBands` in ``self``.
+
+        For that, we merge their ``multipactor`` boolean numpy array and
+        recreate a :class:`.InstrumentMultipactorBands` with its own
+        :class:`.MultipactorBand`.
+
+        .. note ::
+            We could also merge the :class:`.MultipactorBand` directly, as
+            every :class:`.InstrumentMultipactorBands` has the same number of
+            it. Seems however less maintainable. In particular, when I'll want
+            to implement several :class:`.MultipactorBand` (several resonances)
+            in a single half-power cycle.
+
+        .. todo::
+            Put a flag that will check consistency of position of MP bands.
+            Like: ``assert_instrument_multipactor_bands_detected_at_same_posit\
+ion: bool``.
+
+        Parameters
+        ----------
+        union : {'strict', 'relaxed'}
+            How the multipactor zones should be merged. It 'strict', all
+            instruments must detect multipactor to consider that multipactor
+            happened. If 'relaxed', only one instrument suffices.
+        name : str, optional
+            Name that will be given to the returned
+            :class:`InstrumentMultipactorBands`. The default is an empty
+            string, in which case a default meaningful name will be given.
+        filter_out_none : bool, optional
+            To remove the ``None`` in ``self``. The default is True.
+
+        Returns
+        -------
+        instrument_multipactor_bands : InstrumentMultipactorBands
+            Object holding merged multipactor bands.
+
+        """
+        if not filter_out_none:
+            raise NotImplementedError
+        filtered = [band for band in self if band is not None]
+
+        allowed = list(MULTIPACTOR_ARRAY_MERGERS.keys())
+        if union not in allowed:
+            raise IOError(f"{union = }, while {allowed = }")
+        multipactor_in = [band.multipactor for band in filtered]
+        multipactor = MULTIPACTOR_ARRAY_MERGERS[union](multipactor_in)
+
+        if not name:
+            name = f"{len(self)} instruments ({union})"
+
+        positions = [band.position for band in filtered]
+        if len(set(positions)) == 1:
+            position = positions[0]
+        else:
+            position = np.NaN
+
+        instrument_multipactor_bands = InstrumentMultipactorBands(
+            multipactor,
+            self.power_is_growing,
+            name,
+            name,
+            position,
+        )
+        return instrument_multipactor_bands
+
+
+def _and(multipactor_in: list[np.ndarray[np.bool_]]) -> np.ndarray[np.bool_]:
+    """Gather multipactor boolean arrays with the ``and`` operator.
+
+    In other words: "Multipactor happens if all given instruments agree on it."
+
+    """
+    return np.array(multipactor_in).all(axis=0)
+
+
+def _or(multipactor_in: list[np.ndarray[np.bool_]]) -> np.ndarray[np.bool_]:
+    """Gather multipactor boolean arrays with the ``or`` operator.
+
+    In other words: "Multipactor happens if one of the given instruments says
+    that there is multipactor."
+
+    """
+    return np.array(multipactor_in).any(axis=0)
+
+
+MULTIPACTOR_ARRAY_MERGERS = {
+    'strict': _and,
+    'relaxed': _or,
+}  #:

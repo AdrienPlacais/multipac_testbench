@@ -2,15 +2,16 @@
 # -*- coding: utf-8 -*-
 """Ensure that :class:`.InstrumentMultipactorBands` are consistently used."""
 from abc import ABCMeta
-from typing import overload
-import numpy as np
 from collections.abc import Callable, Sequence
+from typing import overload
 
+import numpy as np
+
+from multipac_testbench.src.instruments.instrument import Instrument
 from multipac_testbench.src.measurement_point.i_measurement_point import \
     IMeasurementPoint
-from multipac_testbench.src.multipactor_band.instrument_multipactor_bands import \
-    InstrumentMultipactorBands
-from multipac_testbench.src.instruments.instrument import Instrument
+from multipac_testbench.src.multipactor_band.instrument_multipactor_bands \
+    import InstrumentMultipactorBands
 
 
 @overload

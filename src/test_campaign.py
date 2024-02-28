@@ -18,26 +18,24 @@ import pandas as pd
 from matplotlib import animation
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-
-from multipac_testbench.src.instruments.power import Power
+from multipac_testbench.src.instruments.electric_field.field_probe import \
+    FieldProbe
+from multipac_testbench.src.instruments.power import ForwardPower
 from multipac_testbench.src.measurement_point.i_measurement_point import \
     IMeasurementPoint
-from multipac_testbench.src.multipactor_band.campaign_multipactor_bands \
-    import CampaignMultipactorBands
-from multipac_testbench.src.multipactor_band.instrument_multipactor_bands \
-    import InstrumentMultipactorBands
+from multipac_testbench.src.multipactor_band.campaign_multipactor_bands import \
+    CampaignMultipactorBands
+from multipac_testbench.src.multipactor_band.instrument_multipactor_bands import \
+    InstrumentMultipactorBands
 from multipac_testbench.src.multipactor_test import MultipactorTest
 from multipac_testbench.src.theoretical.somersalo import (
     plot_somersalo_analytical, plot_somersalo_measured, somersalo_base_plot,
     somersalo_scaling_law)
 from multipac_testbench.src.theoretical.susceptibility import \
     measured_to_susceptibility_coordinates
-from multipac_testbench.src.util import helper
+from multipac_testbench.src.util import helper, plot
 from scipy.optimize import curve_fit
-
-from multipac_testbench.src.instruments.electric_field.field_probe import FieldProbe
-from multipac_testbench.src.util import plot
-
+from multipac_testbench.src.instruments.reflection_coefficient import ReflectionCoefficient
 
 class TestCampaign(list):
     """Hold several multipactor tests together."""
@@ -306,15 +304,16 @@ class TestCampaign(list):
                                     ax1=ax1, ax2=ax2,
                                     **plot_kw)
 
-    def check_somersalo_scaling_law(self,
-                                    instrument_multipactor_bands: Sequence[InstrumentMultipactorBands],
-                                    show_fit: bool = True,
-                                    png_path: Path | None = None,
-                                    remove_last_point_for_fit: bool = False,
-                                    use_theoretical_r: bool = False,
-                                    full_output: bool = True,
-                                    **fig_kw,
-                                    ) -> Axes:
+    def check_somersalo_scaling_law(
+        self,
+        multipactor_bands: CampaignMultipactorBands | Sequence[InstrumentMultipactorBands],
+        show_fit: bool = True,
+        png_path: Path | None = None,
+        remove_last_point_for_fit: bool = False,
+        use_theoretical_r: bool = False,
+        full_output: bool = True,
+        **fig_kw,
+    ) -> Axes:
         r"""Represent evolution of forward power threshold with :math:`R`.
 
         Somersalo links the mixed wave (:math:`MW`) forward power with the
@@ -325,23 +324,18 @@ class TestCampaign(list):
 
             P_\mathrm{MW} \approx \frac{1}{(1 + R)^2}P\mathrm{TW}
 
-        .. warning::
-            Here, we need one :class:`.InstrumentMultipactorBands` per
-            :class:`.MultipactorTest`, in contrary to most of the
-            :class:`TestCampaign` methods where we need a full list matching a
-            list of :class:`.Instrument` or of :class:`.IMeasurementPoint`.
-
         .. todo::
             Clean this anti-patternic method.
 
         Parameters
         ----------
-        instrument_multipactor_bands : Sequence[InstrumentMultipactorBands]
+        campaign_multipactor_bands : CampaignMultipactorBands
             Object holding the information on where multipactor happens.
-        show_fit : bool
-            To perform a fit and plot it.
-        png_path : Path | None
+        show_fit : bool, optional
+            To perform a fit and plot it. The default is True.
+        png_path : Path | None, optional
             If provided, the resulting figure will be saved at this location.
+            The default is None.
         remove_last_point_for_fit : bool, optional
             A dirty patch to remove the last point from the fit. Used in a
             study were I wanted to plot this point but exclude it from the fit.
@@ -362,26 +356,25 @@ class TestCampaign(list):
         if len(frequencies) != 1:
             raise NotImplementedError("Plot over several freqs to implement")
 
-        fig = plt.figure(**fig_kw)
-        axe = fig.add_subplot(111)
-        zipper = zip(self, instrument_multipactor_bands, strict=True)
+        zipper = zip(self, multipactor_bands, strict=True)
         data_for_somersalo = [
-            test.data_for_somersalo_scaling_law(
-                mp_band,
-                use_theoretical_r=use_theoretical_r)
-            for (test, mp_band) in zipper]
-        df_for_somersalo = pd.concat(data_for_somersalo, axis=1).T
+            test.data_for_somersalo_scaling_law(band, use_theoretical_r)
+            for (test, band) in zipper]
+        df_for_somersalo = pd.concat(data_for_somersalo).filter(like='Lower')
+        x_col = df_for_somersalo.filter(like='ReflectionCoefficient').columns.V
+        y_col = df_for_somersalo.filter(like='ForwardPower').columns
 
         axe = df_for_somersalo.plot(
-            x=0,
-            y=1,
-            ylabel=Power.ylabel(),
+            x=x_col.values[0],
+            y=y_col,
+            xlabel=ReflectionCoefficient.ylabel(),
+            ylabel=ForwardPower.ylabel(),
             grid=True,
-            ax=axe,
             ms=15,
             marker='+')
 
         if show_fit:
+            raise NotImplementedError
             R = np.linspace(0, 1, 101)
             r_fit = df_for_somersalo[df_for_somersalo.columns[0]]
             p_fit = df_for_somersalo[df_for_somersalo.columns[1]]
@@ -461,6 +454,7 @@ class TestCampaign(list):
             plot.save_dataframe(df_to_plot, csv_path, **csv_kwargs)
         return axes, voltages
 
+    # to redo
     def susceptibility_chart(self,
                              electric_field_at: str,
                              instrument_multipactor_bands: Sequence[InstrumentMultipactorBands],

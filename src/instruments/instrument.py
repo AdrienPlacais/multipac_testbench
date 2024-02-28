@@ -274,13 +274,23 @@ class Instrument(ABC):
         **kwargs
     ) -> InstrumentMultipactorBands | None: ...
 
+    @overload
     def multipactor_band_at_same_position(
-            self,
-            multipactor_bands: TestMultipactorBands,
-            raise_no_match_error: bool = False,
-            global_diagnostics: bool = False,
-            tol: float = 1e-10,
-            **kwargs
+        self,
+        multipactor_bands: InstrumentMultipactorBands,
+        raise_no_match_error: bool,
+        global_diagnostics: bool = False,
+        tol: float = 1e-10,
+        **kwargs
+    ) -> InstrumentMultipactorBands: ...
+
+    def multipactor_band_at_same_position(
+        self,
+        multipactor_bands: TestMultipactorBands | InstrumentMultipactorBands,
+        raise_no_match_error: bool = False,
+        global_diagnostics: bool = False,
+        tol: float = 1e-10,
+        **kwargs
     ) -> InstrumentMultipactorBands | None:
         """Get the multipactor that was measured at the same position.
 
@@ -289,9 +299,10 @@ class Instrument(ABC):
 
         Parameters
         ----------
-        multipactor_bands : TestMultipactorBands
+        multipactor_bands : TestMultipactorBands | InstrumentMultipactorBands
             List of :class:`.InstrumentMultipactorBands` among which you want
-            to find the match.
+            to find the match. If a :class:`.InstrumentMultipactorBands` is
+            given, return it back without further checking.
         tol : float, optional
             Mismatch allowed between positions. The default is ``1e-10``.
         global_diagnostics : bool, optional
@@ -307,6 +318,9 @@ class Instrument(ABC):
         InstrumentMultipactorBands
 
         """
+        if isinstance(multipactor_bands, InstrumentMultipactorBands):
+            return multipactor_bands
+
         assert isinstance(self.position, float)
         matching_multipactor_bands = [
             band for band in multipactor_bands
