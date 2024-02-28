@@ -6,30 +6,16 @@ from typing import Any
 
 import pandas as pd
 
-from multipac_testbench.src.instruments.current_probe import CurrentProbe
-from multipac_testbench.src.instruments.electric_field.field_probe import \
-    FieldProbe
-from multipac_testbench.src.instruments.instrument import Instrument
-from multipac_testbench.src.instruments.optical_fibre import OpticalFibre
-from multipac_testbench.src.instruments.penning import Penning
-from multipac_testbench.src.instruments.power import (ForwardPower,
-                                                      ReflectedPower)
-from multipac_testbench.src.instruments.powers import Powers
-from multipac_testbench.src.instruments.reflection_coefficient import \
-    ReflectionCoefficient
-from multipac_testbench.src.instruments.swr import SWR
-from multipac_testbench.src.instruments.virtual_instrument import \
-    VirtualInstrument
+import multipac_testbench.src.instruments as ins
 
 STRING_TO_INSTRUMENT_CLASS = {
-    'CurrentProbe': CurrentProbe,
-    'ElectricFieldProbe': FieldProbe,
-    'FieldProbe': FieldProbe,
-    'ForwardPower': ForwardPower,
-    'OpticalFibre': OpticalFibre,
-    'Penning': Penning,
-    'Powers': Powers,
-    'ReflectedPower': ReflectedPower,
+    'CurrentProbe': ins.CurrentProbe,
+    'ElectricFieldProbe': ins.FieldProbe,
+    'FieldProbe': ins.FieldProbe,
+    'ForwardPower': ins.ForwardPower,
+    'OpticalFibre': ins.OpticalFibre,
+    'Penning': ins.Penning,
+    'ReflectedPower': ins.ReflectedPower,
 }  #:
 
 
@@ -42,7 +28,7 @@ class InstrumentFactory:
             class_name: str,
             column_header: str | list[str] | None = None,
             **instruments_kw: Any,
-            ) -> Instrument:
+            ) -> ins.Instrument:
         """Take the proper subclass, instantiate it and return it.
 
         Parameters
@@ -89,9 +75,9 @@ class InstrumentFactory:
                                 **instruments_kw)
 
     def run_virtual(self,
-                    instruments: Sequence[Instrument],
+                    instruments: Sequence[ins.Instrument],
                     **kwargs
-                    ) -> Sequence[VirtualInstrument]:
+                    ) -> Sequence[ins.VirtualInstrument]:
         """Add the implemented :class:`.VirtualInstrument`."""
         virtuals = []
 
@@ -102,21 +88,22 @@ class InstrumentFactory:
         return virtuals
 
     def _power_related(self,
-                       instruments: Sequence[Instrument],
+                       instruments: Sequence[ins.Instrument],
                        **kwargs
-                       ) -> Sequence[VirtualInstrument]:
+                       ) -> Sequence[ins.VirtualInstrument]:
         """Create :class:`.ReflectionCoefficient` and :class:`.SWR`."""
-        forwards = [x for x in instruments if isinstance(x, ForwardPower)]
-        reflecteds = [x for x in instruments if isinstance(x, ReflectedPower)]
+        forwards = [x for x in instruments if isinstance(x, ins.ForwardPower)]
+        reflecteds = [x for x in instruments
+                      if isinstance(x, ins.ReflectedPower)]
         if len(forwards) != 1 or len(reflecteds) != 1:
             return ()
 
         forward = forwards[0]
         reflected = reflecteds[0]
-        reflection_coefficient = ReflectionCoefficient.from_powers(
+        reflection_coefficient = ins.ReflectionCoefficient.from_powers(
             forward,
             reflected,
             **kwargs)
-        swr = SWR.from_reflection_coefficient(reflection_coefficient,
-                                              **kwargs)
+        swr = ins.SWR.from_reflection_coefficient(reflection_coefficient,
+                                                  **kwargs)
         return reflection_coefficient, swr

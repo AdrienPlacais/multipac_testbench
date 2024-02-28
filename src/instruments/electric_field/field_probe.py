@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Define field probe to measure electric field."""
-import numpy as np
-from pathlib import Path
 from functools import partial
+from pathlib import Path
+
+import numpy as np
 import pandas as pd
-from multipac_testbench.src.instruments.electric_field.i_electric_field import\
+
+from multipac_testbench.src.instruments.electric_field.i_electric_field import \
     IElectricField
 from multipac_testbench.src.util.post_treaters import (v_acquisition_to_v_coax,
                                                        v_coax_to_v_acquisition)
