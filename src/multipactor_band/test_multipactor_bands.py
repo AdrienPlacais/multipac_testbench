@@ -47,7 +47,8 @@ class TestMultipactorBands(list):
     def merge(self,
               union: str,
               name: str = '',
-              filter_out_none: bool = True) -> InstrumentMultipactorBands:
+              filter_out_none: bool = True,
+              info_test: str = '') -> InstrumentMultipactorBands:
         """Merge the :class:`InstrumentMultipactorBands` in ``self``.
 
         For that, we merge their ``multipactor`` boolean numpy array and
@@ -78,6 +79,9 @@ ion: bool``.
             string, in which case a default meaningful name will be given.
         filter_out_none : bool, optional
             To remove the ``None`` in ``self``. The default is True.
+        info_test : str, optional
+            To give more explicit output when there is a problem in the merging
+            process. The default is an empty string.
 
         Returns
         -------
@@ -107,9 +111,10 @@ ion: bool``.
         instrument_multipactor_bands = InstrumentMultipactorBands(
             multipactor,
             self.power_is_growing,
-            name,
-            name,
-            position,
+            instrument_name=name,
+            measurement_point_name=name,
+            position=position,
+            info_test=info_test,
         )
         return instrument_multipactor_bands
 
