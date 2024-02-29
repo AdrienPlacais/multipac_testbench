@@ -7,7 +7,8 @@ Presentation of the library
    :maxdepth: 2
 
 This library offers simple methods to post-treat data from the MULTIPAC testbench.
-Check :ref:`examples` for a quick tour of the available commands.
+Check :ref:`tutorials` for a quick tour of the available commands.
+Go to :ref:`gallery` for a quick overview of the available plots.
 
 .. todo::
    LabVIEWER data start at index == 1!!!! Fix this, every index list should always start at 0

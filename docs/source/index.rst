@@ -14,7 +14,8 @@ Welcome to MULTIPAC test bench's documentation!
 
    manual/presentation
    manual/configuration
-   manual/examples
+   manual/gallery
+   manual/tutorials
    API Reference <modules>
 
 .. todolist::

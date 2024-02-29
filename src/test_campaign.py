@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Self
 
 import matplotlib.pyplot as plt
+import multipac_testbench.src.instruments as ins
 import numpy as np
 import pandas as pd
 from matplotlib import animation
@@ -20,25 +21,20 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from scipy.optimize import curve_fit
 
-from multipac_testbench.src.instruments.electric_field.field_probe import \
-    FieldProbe
 from multipac_testbench.src.instruments.power import ForwardPower
-from multipac_testbench.src.instruments.reflection_coefficient import \
-    ReflectionCoefficient
 from multipac_testbench.src.measurement_point.i_measurement_point import \
     IMeasurementPoint
-from multipac_testbench.src.multipactor_band.campaign_multipactor_bands import \
-    CampaignMultipactorBands
-from multipac_testbench.src.multipactor_band.instrument_multipactor_bands import \
-    InstrumentMultipactorBands
+from multipac_testbench.src.multipactor_band.campaign_multipactor_bands \
+    import CampaignMultipactorBands
+from multipac_testbench.src.multipactor_band.instrument_multipactor_bands \
+    import InstrumentMultipactorBands
 from multipac_testbench.src.multipactor_test import MultipactorTest
 from multipac_testbench.src.theoretical.somersalo import (
     plot_somersalo_analytical, plot_somersalo_measured, somersalo_base_plot,
     somersalo_scaling_law)
 from multipac_testbench.src.theoretical.susceptibility import \
     measured_to_susceptibility_coordinates
-from multipac_testbench.src.util import helper, plot
-from multipac_testbench.src.util.log_manager import set_up_logging
+from multipac_testbench.src.util import helper, log_manager, plot
 
 
 class TestCampaign(list):
@@ -56,6 +52,7 @@ class TestCampaign(list):
                        config: dict,
                        info: Sequence[str] = (),
                        sep: str = ';',
+                       **kwargs,
                        ) -> Self:
         """Instantiate the :class:`.MultipactorTest` and :class:`TestCampaign`.
 
@@ -85,7 +82,7 @@ class TestCampaign(list):
         args = zip(filepaths, frequencies, swrs, info, strict=True)
 
         logfile = Path(filepaths[0].parent / "multipac_testbench.log")
-        set_up_logging(logfile_file=logfile)
+        log_manager.set_up_logging(logfile_file=logfile)
 
         multipactor_tests = [
             MultipactorTest(filepath,
@@ -94,7 +91,8 @@ class TestCampaign(list):
                             swr,
                             info,
                             sep=sep,
-                            verbose=i == 0,)
+                            verbose=i == 0,
+                            **kwargs)
             for i, (filepath, freq_mhz, swr, info) in enumerate(args)
         ]
         return cls(multipactor_tests)
@@ -191,7 +189,7 @@ class TestCampaign(list):
         Parameters
         ----------
         multipac_detector : Callable[[np.ndarray], np.ndarray[np.bool_]]
-            Function that takes in the ``data`` of an :class:`.Instrument` and
+            Function that takes in the ``data`` of an :class:`ins.Instrument` and
             returns an array, where True means multipactor and False no
             multipactor.
         instrument_class : ABCMeta
@@ -212,7 +210,7 @@ class TestCampaign(list):
         nested_instrument_multipactor_bands : list[list[InstrumentMultipactorBands]]
             :class:`.InstrumentMultipactorBands` objects holding when multipactor
             happens. They are sorted first by :class:`.MultipactorTest` (outer
-            level), then per :class:`.Instrument` of class ``instrument_class``
+            level), then per :class:`ins.Instrument` of class ``instrument_class``
             (inner level).
 
         """
@@ -316,29 +314,43 @@ class TestCampaign(list):
         self,
         multipactor_bands: CampaignMultipactorBands | Sequence[InstrumentMultipactorBands],
         show_fit: bool = True,
-        png_path: Path | None = None,
         remove_last_point_for_fit: bool = False,
         use_theoretical_r: bool = False,
         full_output: bool = True,
+        png_path: Path | None = None,
         **fig_kw,
     ) -> Axes:
         r"""Represent evolution of forward power threshold with :math:`R`.
 
-        Somersalo links the mixed wave (:math:`MW`) forward power with the
-        traveling wave (:math:`TW`) forward power through reflection
+        Somersalo et al. [1]_ link the mixed wave (:math:`MW`) forward power
+        with the traveling wave (:math:`TW`) forward power through reflection
         coefficient :math:`R`.
 
         .. math::
 
-            P_\mathrm{MW} \approx \frac{1}{(1 + R)^2}P\mathrm{TW}
+            P_\mathrm{MW} \sim \frac{1}{(1 + R)^2}P_\mathrm{TW}
+
+        .. note::
+            Multipactor is detected on a global level, i.e. multipactor
+            threshold is reached when multipactor is detected anywhere in the
+            system.
 
         .. todo::
             Clean this anti-patternic method.
 
+        .. [1] Erkki Somersalo, Pasi Yla-Oijala, Dieter Proch et Jukka \
+               Sarvas. «Computational methods for analyzing electron \
+               multipacting in RF structures». In : Part. Accel. 59 (1998), p.\
+               107-141. url : http://cds.cern.ch/record/1120302/files/p107.pdf.
+
         Parameters
         ----------
-        campaign_multipactor_bands : CampaignMultipactorBands
-            Object holding the information on where multipactor happens.
+        campaign_multipactor_bands : CampaignMultipactorBands | Sequence[InstrumentMultipactorBands]
+            Object holding the information on where multipactor happens. If a
+            :class:`.CampaignMultipactorBands` object is given, take every
+            :class:`.TestMultipactorBands` in it and merge it. You can also
+            provide one :class:`.InstrumentMultipactorBands` per multipactor
+            test.
         show_fit : bool, optional
             To perform a fit and plot it. The default is True.
         png_path : Path | None, optional
@@ -375,11 +387,12 @@ class TestCampaign(list):
         axe = df_for_somersalo.plot(
             x=x_col.values[0],
             y=y_col,
-            xlabel=ReflectionCoefficient.ylabel(),
+            xlabel=ins.ReflectionCoefficient.ylabel(),
             ylabel=ForwardPower.ylabel(),
             grid=True,
             ms=15,
-            marker='+')
+            marker='+',
+            **fig_kw)
 
         if show_fit:
             raise NotImplementedError
@@ -414,21 +427,38 @@ class TestCampaign(list):
 
         return axe
 
-    def check_perez(self,
-                    campaign_multipactor_bands: CampaignMultipactorBands,
-                    measurement_points_to_exclude: Sequence[str] = (),
-                    png_path: Path | None = None,
-                    png_kwargs: dict | None = None,
-                    csv_path: Path | None = None,
-                    csv_kwargs: dict | None = None,
-                    **fig_kw,
-                    ) -> tuple[Axes, pd.DataFrame]:
-        r"""Check that :math:`V_\mathrm{low}` independent from SWR.
+    def voltage_thresholds(
+            self,
+            campaign_multipactor_bands: CampaignMultipactorBands,
+            measurement_points_to_exclude: Sequence[str] = (),
+            png_path: Path | None = None,
+            png_kwargs: dict | None = None,
+            csv_path: Path | None = None,
+            csv_kwargs: dict | None = None,
+            **kwargs,
+    ) -> tuple[Axes, pd.DataFrame]:
+        """Plot the lower and upper thresholds as voltage.
 
-        This is from Perez et al.
+        Parameters
+        ----------
+        campaign_multipactor_bands : CampaignMultipactorBands
+            campaign_multipactor_bands
+        measurement_points_to_exclude : Sequence[str]
+            measurement_points_to_exclude
+        png_path : Path | None
+            png_path
+        png_kwargs : dict | None
+            png_kwargs
+        csv_path : Path | None
+            csv_path
+        csv_kwargs : dict | None
+            csv_kwargs
+        kwargs :
+            kwargs
 
-        .. todo::
-            Proper docstring.
+        Returns
+        -------
+        tuple[Axes, pd.DataFrame]
 
         """
         frequencies = set([test.freq_mhz for test in self])
@@ -436,7 +466,7 @@ class TestCampaign(list):
             raise NotImplementedError("Plot over several freqs to implement")
 
         voltages = self.at_last_threshold(
-            FieldProbe,
+            ins.FieldProbe,
             campaign_multipactor_bands,
             measurement_points_to_exclude=measurement_points_to_exclude)
 
@@ -444,6 +474,7 @@ class TestCampaign(list):
                                                   ylabel="Thresholds $V$ [V]",
                                                   marker='o',
                                                   ms=10,
+                                                  **kwargs,
                                                   )
         axes.set_prop_cycle(None)
         axes = voltages.filter(like='Upper').plot(grid=True,
@@ -451,6 +482,7 @@ class TestCampaign(list):
                                                   ylabel="Thresholds $V$ [V]",
                                                   marker='^',
                                                   ms=10,
+                                                  **kwargs,
                                                   )
         if png_path is not None:
             if png_kwargs is None:

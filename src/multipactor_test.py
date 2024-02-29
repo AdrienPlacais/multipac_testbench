@@ -63,6 +63,7 @@ class MultipactorTest:
                  info: str = '',
                  sep: str = '\t',
                  verbose: bool = False,
+                 **kwargs,
                  ) -> None:
         r"""Create all the pick-ups.
 
@@ -86,7 +87,8 @@ class MultipactorTest:
 
         """
         self.filepath = filepath
-        df_data = pd.read_csv(filepath, sep=sep, index_col="Sample index")
+        df_data = pd.read_csv(filepath, sep=sep, index_col="Sample index",
+                              **kwargs)
         self._n_points = len(df_data)
         self.df_data = df_data
 

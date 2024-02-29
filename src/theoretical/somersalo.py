@@ -10,7 +10,7 @@ In : Part. Accel. 59 (1998), p. 107-141. \
 url : http://cds.cern.ch/record/1120302/files/p107.pdf.
 
 """
-from collections.abc import Callable, Sequence
+from collections.abc import Sequence
 
 import matplotlib.pyplot as plt
 import numpy as np
