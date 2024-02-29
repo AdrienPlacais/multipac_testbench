@@ -4,24 +4,23 @@
 from collections.abc import Sequence
 
 import numpy as np
-import pandas as pd
 from matplotlib.axes import Axes
 
-from multipac_testbench.src.instruments.instrument import Instrument
+import multipac_testbench.src.instruments as ins
 
 
 def get_limits(
-        axes_instruments: dict[Axes, Sequence[Instrument]],
-        instruments_to_ignore_for_limits: Sequence[Instrument | str] = (),
+        axes_instruments: dict[Axes, Sequence[ins.Instrument]],
+        instruments_to_ignore_for_limits: Sequence[ins.Instrument | str] = (),
 ) -> dict[Axes, tuple[float, float]]:
     """Define constant limits for the animations.
 
     Parameters
     ----------
-    axes_instruments : dict[Axes, Sequence[Instrument]]
-        Dictionary linking all the :class:`.Instrument` to the Axe they should
-        be plotted onto.
-    instruments_to_ignore_for_limits : Sequence[Instrument | str]
+    axes_instruments : dict[Axes, Sequence[ins.Instrument]]
+        Dictionary linking all the :class:`ins.Instrument` to the Axe they
+        should be plotted onto.
+    instruments_to_ignore_for_limits : Sequence[ins.Instrument | str]
         Instruments that should not modify the limits.
 
     Returns
