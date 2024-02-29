@@ -48,19 +48,14 @@ class TestMultipactorBands(list):
               union: str,
               name: str = '',
               filter_out_none: bool = True,
-              info_test: str = '') -> InstrumentMultipactorBands:
+              info_test: str = '',
+              several_bands_politics: str = 'merge',
+              ) -> InstrumentMultipactorBands:
         """Merge the :class:`InstrumentMultipactorBands` in ``self``.
 
         For that, we merge their ``multipactor`` boolean numpy array and
         recreate a :class:`.InstrumentMultipactorBands` with its own
         :class:`.MultipactorBand`.
-
-        .. note ::
-            We could also merge the :class:`.MultipactorBand` directly, as
-            every :class:`.InstrumentMultipactorBands` has the same number of
-            it. Seems however less maintainable. In particular, when I'll want
-            to implement several :class:`.MultipactorBand` (several resonances)
-            in a single half-power cycle.
 
         .. todo::
             Put a flag that will check consistency of position of MP bands.
@@ -82,6 +77,17 @@ ion: bool``.
         info_test : str, optional
             To give more explicit output when there is a problem in the merging
             process. The default is an empty string.
+        several_bands_politics : {'keep_first', 'keep_last', 'keep_all', \
+                'merge'}
+            What to to when several multipactor bands are found in the same
+            half-power cycle:
+                - ``'keep_first'``: we keep first :class:`.MultipactorBand`
+                - ``'keep_last'``: we keep last :class:`.MultipactorBand`
+                - ``'keep_all'``: we keep all :class:`.MultipactorBand`
+                (currently not implemented)
+                - ``'merge'``: the final :class:`.MultipactorBand` spans from
+                start of first :class:`.MultipactorBand` to end of last.
+
 
         Returns
         -------
@@ -115,6 +121,7 @@ ion: bool``.
             measurement_point_name=name,
             position=position,
             info_test=info_test,
+            several_bands_politics=several_bands_politics,
         )
         return instrument_multipactor_bands
 

@@ -1211,8 +1211,10 @@ optional
 
         """
         if isinstance(multipactor_bands, TestMultipactorBands):
-            multipactor_bands = multipactor_bands.merge('relaxed',
-                                                        info_test=str(self))
+            multipactor_bands = multipactor_bands.merge(
+                'relaxed',
+                info_test=str(self),
+                several_bands_politics='keep_first')
 
         instruments = ForwardPower, ReflectionCoefficient
         df_somersalo = self.at_last_threshold(instruments, multipactor_bands)

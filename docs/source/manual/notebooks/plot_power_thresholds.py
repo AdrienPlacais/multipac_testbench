@@ -3,7 +3,7 @@
 
 # # Plot power thresholds
 
-# 
+#
 
 # Generic libraries:
 
@@ -113,13 +113,9 @@ current_multipactor_bands = test_campaign.detect_multipactor(
 
 axe = test_campaign.check_somersalo_scaling_law(
     current_multipactor_bands,
-    measurement_points_to_exclude=ignored_pick_ups,
+    # measurement_points_to_exclude=ignored_pick_ups,
     figsize=figsize,
 )
 
 
 # In[ ]:
-
-
-
-

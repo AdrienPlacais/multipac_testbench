@@ -18,7 +18,8 @@ class InstrumentMultipactorBands(list):
                  instrument_name: str,
                  measurement_point_name: str,
                  position: float,
-                 info_test: str = ''
+                 info_test: str = '',
+                 several_bands_politics: str = 'merge',
                  ) -> None:
         """Create the object.
 
@@ -40,12 +41,23 @@ class InstrumentMultipactorBands(list):
             True where the power is growing, False where the power is
             decreasing, NaN where undetermined. The default is None, in which
             case it is not used.
+        several_bands_politics : {'keep_first', 'keep_last', 'keep_all', \
+                'merge'}
+            What to to when several multipactor bands are found in the same
+            half-power cycle:
+                - ``'keep_first'``: we keep first :class:`.MultipactorBand`
+                - ``'keep_last'``: we keep last :class:`.MultipactorBand`
+                - ``'keep_all'``: we keep all :class:`.MultipactorBand`
+                (currently not implemented)
+                - ``'merge'``: the final :class:`.MultipactorBand` spans from
+                start of first :class:`.MultipactorBand` to end of last.
 
         """
         list_of_multipactor_band = multipactor_to_list_of_mp_band(
             multipactor,
             power_is_growing,
             info=info_test + f" {instrument_name}",
+            several_bands_politics=several_bands_politics,
         )
         super().__init__(list_of_multipactor_band)
         self.multipactor = multipactor

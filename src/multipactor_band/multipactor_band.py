@@ -87,26 +87,69 @@ def _enter_a_mp_zone(last_index: int | None,
 
 
 def _exit_a_mp_zone(first_index: int | None,
-                    index: int,
+                    last_index: int,
                     current_band: MultipactorBand | None,
                     power_grows: bool,
                     info: str,
+                    several_bands_politics: str,
                     ) -> tuple[int, MultipactorBand]:
-    """Exit a multipactor zone."""
+    """Exit a multipactor zone.
+
+    Parameters
+    ----------
+    first_index : int | None
+        Index of entry in the zone. If it is None, an error is raised.
+    last_index : int
+        Current index, which is the the index of exit.
+    current_band : MultipactorBand | None
+        Previous :class:`MultipactorBand` in the same half-power cycle. If it
+        is not None, it means that several zones were detected. Its handling is
+        determined by ``several_bands_politics``.
+    power_grows : bool
+        If the power grows.
+    info : str
+        To give more meaning to the error messages.
+    several_bands_politics : {'keep_first', 'keep_last', 'keep_all', 'merge'}
+        What to to when several multipactor bands are found in the same
+        half-power cycle:
+            - ``'keep_first'``: we keep first :class:`MultipactorBand`
+            - ``'keep_last'``: we keep last :class:`MultipactorBand`
+            - ``'keep_all'``: we keep all :class:`MultipactorBand` (currently
+              not implemented)
+            - ``'merge'``: the final :class:`MultipactorBand` spans from start
+              of first :class:`MultipactorBand` to end of last.
+
+    Returns
+    -------
+    tuple[int, MultipactorBand]
+
+    """
     assert first_index is not None, (
         f"{info}: we are exiting a multipacting zone but I did not detect "
-        f"when it started. Check what happened around {index = }.")
-
-    last_index = index
+        f"when it started. Check what happened around {last_index = }.")
 
     if current_band is not None:
-        logging.warning(
+        logging.info(
             f"{info}: detected two multipactor bands in the same half-"
             "power cycle. First one spanned from index "
             f"{current_band.first_index} to {current_band.last_index}. "
-            f"Second one from {first_index} to {last_index}. I will merge "
-            "them.")
-        first_index = current_band.first_index
+            f"Second one from {first_index} to {last_index}. I will "
+            f"{several_bands_politics}.")
+
+        match (several_bands_politics):
+            case 'keep_first':
+                first_index = current_band.first_index
+                last_index = current_band.last_index
+            case 'keep_last':
+                pass
+            case 'merge':
+                first_index = current_band.first_index
+            case 'keep_all':
+                raise NotImplementedError('Several multipactor bands per'
+                                          'power cycle not implemeneted.')
+            case _:
+                raise IOError(f"{several_bands_politics = } which is not "
+                              "handled.")
 
     current_band = MultipactorBand(first_index,
                                    last_index,
@@ -118,6 +161,7 @@ def _exit_a_mp_zone(first_index: int | None,
 def multipactor_to_list_of_mp_band(multipactor: np.ndarray[np.bool_],
                                    power_is_growing: np.ndarray[np.bool_],
                                    info: str = '',
+                                   several_bands_politics: str = 'merge',
                                    ) -> list[MultipactorBand | None]:
     """Create the different :class:`MultipactorBand`.
 
@@ -127,6 +171,17 @@ def multipactor_to_list_of_mp_band(multipactor: np.ndarray[np.bool_],
         True means multipactor, False no multipactor.
     power_is_growing : np.ndarray[float]
         True means power is growing, False it is decreasing.
+    info : str
+        To give more meaning to the error messages.
+    several_bands_politics : {'keep_first', 'keep_last', 'keep_all', 'merge'}
+        What to to when several multipactor bands are found in the same
+        half-power cycle:
+            - ``'keep_first'``: we keep first :class:`MultipactorBand`
+            - ``'keep_last'``: we keep last :class:`MultipactorBand`
+            - ``'keep_all'``: we keep all :class:`MultipactorBand` (currently
+              not implemented)
+            - ``'merge'``: the final :class:`MultipactorBand` spans from start
+              of first :class:`MultipactorBand` to end of last.
 
     Returns
     -------
@@ -167,9 +222,12 @@ def multipactor_to_list_of_mp_band(multipactor: np.ndarray[np.bool_],
                                            info)
             continue
 
-        last_index, current_band = _exit_a_mp_zone(first_index,
-                                                   i,
-                                                   current_band,
-                                                   bool(power_is_growing[i]),
-                                                   info)
+        last_index, current_band = _exit_a_mp_zone(
+            first_index,
+            last_index=i,
+            current_band=current_band,
+            power_grows=bool(power_is_growing[i]),
+            info=info,
+            several_bands_politics=several_bands_politics,
+            )
     return all_bands
