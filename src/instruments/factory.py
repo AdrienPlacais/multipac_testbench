@@ -22,6 +22,10 @@ STRING_TO_INSTRUMENT_CLASS = {
 class InstrumentFactory:
     """Class to create instruments."""
 
+    def __init__(self, freq_mhz: float | None = None) -> None:
+        """Set user-defined constants to create correspondig instrument."""
+        self.freq_mhz = freq_mhz
+
     def run(self,
             name: str,
             df_data: pd.DataFrame,
@@ -85,6 +89,11 @@ class InstrumentFactory:
         if len(power_related) > 0:
             virtuals += power_related
 
+        n_points = len(instruments[0].data_as_pd)
+        constants = self._constant_values_defined_by_user(n_points)
+        if len(constants) > 0:
+            virtuals += constants
+
         return virtuals
 
     def _power_related(self,
@@ -107,3 +116,13 @@ class InstrumentFactory:
         swr = ins.SWR.from_reflection_coefficient(reflection_coefficient,
                                                   **kwargs)
         return reflection_coefficient, swr
+
+    def _constant_values_defined_by_user(self,
+                                         n_points: int,
+                                         ) -> Sequence[ins.VirtualInstrument]:
+        """Define a fake frequency probe. Maybe a fake SWR, fake R later."""
+        constants = []
+        if self.freq_mhz is not None:
+            constants.append(ins.Frequency.from_user_defined_frequency(
+                self.freq_mhz, n_points))
+        return constants

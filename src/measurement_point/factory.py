@@ -21,9 +21,17 @@ class IMeasurementPointFactory:
 
     """
 
-    def __init__(self) -> None:
-        """Instantiate the class with its :class:`InstrumentFactory`."""
-        self.instrument_factory = InstrumentFactory()
+    def __init__(self, **kwargs) -> None:
+        """Instantiate the class with its :class:`.InstrumentFactory`.
+
+        Parameters
+        ----------
+        kwargs :
+            Keyword arguments that are directly passed down to the
+            :class:`.InstrumentFactory`.
+
+        """
+        self.instrument_factory = InstrumentFactory(**kwargs)
 
     def run_single(self,
                    config_key: str,

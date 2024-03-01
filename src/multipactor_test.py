@@ -90,10 +90,12 @@ class MultipactorTest:
                           "should patch this, but meanwhile expect some "
                           "index mismatches.")
 
-        imeasurement_point_factory = IMeasurementPointFactory()
+        imeasurement_point_factory = IMeasurementPointFactory(
+            freq_mhz=freq_mhz)
         imeasurement_points = imeasurement_point_factory.run(config,
                                                              df_data,
-                                                             verbose)
+                                                             verbose,
+                                                             )
         self.global_diagnostics, self.pick_ups = imeasurement_points
 
         self.freq_mhz = freq_mhz
