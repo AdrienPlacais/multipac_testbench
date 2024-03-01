@@ -629,8 +629,9 @@ optional
             fps: int = 50,
             keep_one_frame_over: int = 1,
             interval: int | None = None,
+            only_first_frame: bool = False,
             **fig_kw,
-    ) -> animation.FuncAnimation:
+    ) -> animation.FuncAnimation | list[Axes]:
         """Represent measured signals with probe position."""
         fig, axes_instruments = self._prepare_animation_fig(
             instruments_to_plot,
@@ -644,6 +645,8 @@ optional
             axes_instruments=axes_instruments,
             artists=None,
         )
+        if only_first_frame:
+            return list(axes_instruments.keys())
 
         def update(step_idx: int) -> Sequence[Artist]:
             """Update the ``artists`` defined in outer scope.
@@ -681,6 +684,65 @@ optional
             writergif = animation.PillowWriter(fps=fps)
             ani.save(gif_path, writer=writergif)
         return ani
+
+    def _prepare_animation_fig(
+        self,
+        to_plot: Sequence[ABCMeta],
+        measurement_points_to_exclude: tuple[str, ...] = (),
+        instruments_to_ignore_for_limits: tuple[str, ...] = (),
+        instruments_to_ignore: Sequence[ins.Instrument | str] = (),
+        **fig_kw,
+    ) -> tuple[Figure, dict[Axes, list[ins.Instrument]]]:
+        """Create the figure and axes for the animation.
+
+        Parameters
+        ----------
+        to_plot : Sequence[ABCMeta]
+            Classes of instruments you want to see.
+        measurement_points_to_exclude : tuple[str, ...]
+            Measurement points that should not appear.
+        instruments_to_ignore_for_limits : tuple[str, ...]
+            Instruments to plot, but that can go off limits.
+        instruments_to_ignore : Sequence[ins.Instrument | str]
+            Instruments that will not even be plotted.
+        fig_kw :
+            Other keyword arguments for Figure.
+
+        Returns
+        -------
+        fig : Figure
+         Figure holding the axes.
+        axes_instruments : dict[Axes, list[ins.Instrument]]
+            Links the instruments to plot with the Axes they should be plotted
+            on.
+
+        """
+        fig, instrument_class_axes = plot.create_fig(str(self),
+                                                     to_plot,
+                                                     xlabel='Position [m]',
+                                                     **fig_kw)
+
+        for instrument_class, axe in instrument_class_axes.items():
+            axe.set_ylabel(instrument_class.ylabel())
+
+        measurement_points = self.get_measurement_points(
+            to_exclude=measurement_points_to_exclude)
+
+        axes_instruments = {
+            axe: self._instruments_by_class(
+                instrument_class,
+                measurement_points,
+                instruments_to_ignore=instruments_to_ignore)
+            for instrument_class, axe in instrument_class_axes.items()
+        }
+
+        y_limits = get_limits(axes_instruments,
+                              instruments_to_ignore_for_limits)
+        axe = None
+        for axe, y_lim in y_limits.items():
+            axe.set_ylim(y_lim)
+
+        return fig, axes_instruments
 
     def _plot_instruments_single_time_step(
             self,
@@ -957,92 +1019,6 @@ optional
         if len(instruments) > 1:
             logging.warning("Several instruments found. Returning first one.")
         return instruments[0]
-
-    def _prepare_animation_fig(
-        self,
-        instruments_to_plot: Sequence[ABCMeta],
-        measurement_points_to_exclude: tuple[str, ...] = (),
-        instruments_to_ignore_for_limits: tuple[str, ...] = (),
-        instruments_to_ignore: Sequence[ins.Instrument | str] = (),
-        **fig_kw,
-    ) -> tuple[Figure, dict[Axes, list[ins.Instrument]]]:
-        """Prepare the figure and axes for the animation.
-
-        Parameters
-        ----------
-        instruments_to_plot : tuple[ABCMeta, ...]
-            Classes of instruments you want to see.
-        measurement_points_to_exclude : tuple[str, ...]
-            Measurement points that should not appear.
-        instruments_to_ignore_for_limits : tuple[str, ...]
-            Instruments to plot, but that can go off limits.
-        instruments_to_ignore : Sequence[ins.Instrument | str]
-            Instruments that will not even be plotted.
-        fig_kw :
-            Other keyword arguments for Figure.
-
-        Returns
-        -------
-        fig : Figure
-         Figure holding the axes.
-        axes_instruments : dict[Axes, list[ins.Instrument]]
-            Links the instruments to plot with the Axes they should be plotted
-            on.
-
-        """
-        fig, instrument_class_axes = plot.create_fig(str(self),
-                                                     instruments_to_plot,
-                                                     xlabel='Position [m]',
-                                                     **fig_kw)
-
-        for instrument_class, axe in instrument_class_axes.items():
-            axe.set_ylabel(instrument_class.ylabel())
-
-        measurement_points = self.get_measurement_points(
-            to_exclude=measurement_points_to_exclude)
-
-        axes_instruments = {
-            axe: self._instruments_by_class(
-                instrument_class,
-                measurement_points,
-                instruments_to_ignore=instruments_to_ignore)
-            for instrument_class, axe in instrument_class_axes.items()
-        }
-
-        y_limits = get_limits(axes_instruments,
-                              instruments_to_ignore_for_limits)
-        axe = None
-        for axe, y_lim in y_limits.items():
-            axe.set_ylim(y_lim)
-
-        return fig, axes_instruments
-
-    def _get_limits(
-            self,
-            axes_instruments: dict[Axes, Sequence[ins.Instrument]],
-            instruments_to_ignore_for_limits: Sequence[ins.Instrument | str] = (
-            ),
-    ) -> dict[Axes, tuple[float, float]]:
-        """Get limits of demanded instruments.
-
-        .. note::
-            Currently not used, not to be used. ``self.df_data`` is not
-            synchronized with the ``data`` from the instruments.
-
-        """
-        names_to_ignore = [x if isinstance(x, str) else x.name
-                           for x in instruments_to_ignore_for_limits]
-        limits = {}
-        for axe, instruments in axes_instruments.items():
-            names = [instrument.name for instrument in instruments
-                     if instrument.name not in names_to_ignore
-                     and not instrument.is_2d]
-            df_data = self.df_data[names]
-            lower = df_data.min(axis=None)
-            upper = df_data.max(axis=None)
-            amplitude = lower - upper
-            limits[axe] = (lower - .1 * amplitude, upper + .1 * amplitude)
-        return limits
 
     def reconstruct_voltage_along_line(
             self,
