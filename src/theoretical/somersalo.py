@@ -17,6 +17,9 @@ import numpy as np
 import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+from scipy.optimize import curve_fit
+
+from multipac_testbench.src.util import helper
 
 
 SOMERSALO_ANALYTICAL_PARAMETERS_ONE = {
@@ -228,11 +231,88 @@ def plot_somersalo_measured(mp_test_name: str,
 
 def somersalo_scaling_law(reflected: np.ndarray,
                           p_tw: float) -> np.ndarray:
-    """Somersalo scaling law.
+    r"""Compute :math:`P_{MW} = f(P_{TW}, R)`.
 
-    .. todo::
-        Docstring.
+    Somersalo et al. [1]_ link the mixed wave (:math:`MW`) forward power
+    with the traveling wave (:math:`TW`) forward power through reflection
+    coefficient :math:`R`.
+
+    .. math::
+
+        P_\mathrm{MW} \sim \frac{1}{(1 + R)^2}P_\mathrm{TW}
+
+    .. [1] Erkki Somersalo, Pasi Yla-Oijala, Dieter Proch et Jukka \
+           Sarvas. «Computational methods for analyzing electron \
+           multipacting in RF structures». In : Part. Accel. 59 (1998), p.\
+           107-141. url : http://cds.cern.ch/record/1120302/files/p107.pdf.
+
+    Parameters
+    ----------
+    reflected : np.ndarray
+        Reflection coefficient.
+    p_tw : float
+        Traveling Wave lower threshold (power).
+
+    Returns
+    -------
+    p_mw : np.ndarray
+        Mixed Wave lower threshold.
 
     """
     p_mw = p_tw / (1. + reflected)**2
     return p_mw
+
+
+def fit_somersalo_scaling(df_somersalo: pd.DataFrame,
+                          full_output: bool,
+                          plot: bool,
+                          axes: Axes | None = None,
+                          ls: str = '--',
+                          **fit_plot_kw,
+                          ) -> pd.DataFrame:
+    """Fit the Somersalo scaling law over measurements.
+
+    Parameters
+    ----------
+    df_somersalo : pd.DataFrame
+        DataFrame holding reflection coefficient and forward power. We take the
+        proper columns by looking for ``'ReflectionCoefficient'`` and
+        ``'ForwardPower'`` column names.
+    full_output : bool
+        To ask for more detailed information on the fit process.
+    plot : bool
+        To plot the fitted scaling law or not.
+    axes : Axes | None, optional
+        Axes on which scaling law will be drawn. If not provided, a new Axe
+        will be created.
+
+    Returns
+    -------
+    pd.DataFrame
+        Holds the fitted Somersalo scaling law.
+
+    """
+    R = np.linspace(0, 1, 101)
+    r_fit = df_somersalo.filter(like='ReflectionCoefficient').values.ravel()
+    p_fit = df_somersalo.filter(like='ForwardPower').values.ravel()
+
+    result = curve_fit(f=somersalo_scaling_law,
+                       xdata=r_fit,
+                       ydata=p_fit,
+                       full_output=full_output)
+    popt = result[0]
+    somer_index = r'$P_{TW}$ '
+
+    if full_output:
+        r_squared = helper.r_squared(result[2]['fvec'], p_fit)
+        somer_index = f'Fit ({somer_index} = {popt[0]:3.1f}W,' \
+            + f' $r^2$ = {r_squared:3.3f})'
+
+    else:
+        somer_index = f'Fit ({somer_index} = {popt[0]:3.1f}W)'
+
+    df_fitted = pd.DataFrame({'$R$': R,
+                              somer_index: somersalo_scaling_law(R, *popt)})
+    if plot:
+        df_fitted.plot(ax=axes, x=0, y=1, grid=True, ls=ls, **fit_plot_kw)
+    return df_fitted

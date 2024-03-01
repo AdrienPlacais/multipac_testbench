@@ -10,7 +10,7 @@ import sys
 import re
 
 sys.path.insert(0, os.path.abspath(
-    "/home/placais/Documents/Simulation/python/multipac_testbench/"))
+    "/home/placais/Documents/Simulation/python/multipac_testbench"))
 
 project = 'MULTIPAC test bench'
 copyright = '2023, A. Plaçais'
@@ -54,9 +54,14 @@ html_theme_options = {
 }
 html_static_path = ['_static']
 
-
 # -- Options for LaTeX output ------------------------------------------------
 # https://stackoverflow.com/questions/28454217/how-to-avoid-the-too-deeply-nested-error-when-creating-pdfs-with-sphinx
 latex_elements = {
     'preamble': r'\usepackage{enumitem}\setlistdepth{99}'
 }
+
+# List of zero or more Sphinx-specific warning categories to be squelched (i.e.,
+# suppressed, ignored).
+suppress_warnings = [
+    'ref.python',
+]

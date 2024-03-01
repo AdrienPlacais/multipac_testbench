@@ -1,40 +1,32 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Define an object to store data from several :class:`.MultipactorTest`.
-
-.. todo::
-    Implement the `plot_barriers_vs_swr` and `plot_barriers_vs_frequency`
-    methods.
-
-"""
+"""Define an object to store data from several :class:`.MultipactorTest`."""
 from abc import ABCMeta
 from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Self
 
 import matplotlib.pyplot as plt
-import multipac_testbench.src.instruments as ins
 import numpy as np
 import pandas as pd
 from matplotlib import animation
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from scipy.optimize import curve_fit
 
-from multipac_testbench.src.instruments.power import ForwardPower
+import multipac_testbench.src.instruments as ins
 from multipac_testbench.src.measurement_point.i_measurement_point import \
     IMeasurementPoint
-from multipac_testbench.src.multipactor_band.campaign_multipactor_bands \
-    import CampaignMultipactorBands
-from multipac_testbench.src.multipactor_band.instrument_multipactor_bands \
-    import InstrumentMultipactorBands
+from multipac_testbench.src.multipactor_band.campaign_multipactor_bands import \
+    CampaignMultipactorBands
+from multipac_testbench.src.multipactor_band.instrument_multipactor_bands import \
+    InstrumentMultipactorBands
 from multipac_testbench.src.multipactor_test import MultipactorTest
 from multipac_testbench.src.theoretical.somersalo import (
-    plot_somersalo_analytical, plot_somersalo_measured, somersalo_base_plot,
-    somersalo_scaling_law)
+    fit_somersalo_scaling, plot_somersalo_analytical, plot_somersalo_measured,
+    somersalo_base_plot)
 from multipac_testbench.src.theoretical.susceptibility import \
     measured_to_susceptibility_coordinates
-from multipac_testbench.src.util import helper, log_manager, plot
+from multipac_testbench.src.util import log_manager, plot
 
 
 class TestCampaign(list):
@@ -189,7 +181,7 @@ class TestCampaign(list):
         Parameters
         ----------
         multipac_detector : Callable[[np.ndarray], np.ndarray[np.bool_]]
-            Function that takes in the ``data`` of an :class:`ins.Instrument` and
+            Function that takes in the ``data`` of an :class:`.Instrument` and
             returns an array, where True means multipactor and False no
             multipactor.
         instrument_class : ABCMeta
@@ -210,7 +202,7 @@ class TestCampaign(list):
         nested_instrument_multipactor_bands : list[list[InstrumentMultipactorBands]]
             :class:`.InstrumentMultipactorBands` objects holding when multipactor
             happens. They are sorted first by :class:`.MultipactorTest` (outer
-            level), then per :class:`ins.Instrument` of class ``instrument_class``
+            level), then per :class:`.Instrument` of class ``instrument_class``
             (inner level).
 
         """
@@ -312,12 +304,16 @@ class TestCampaign(list):
 
     def check_somersalo_scaling_law(
         self,
-        multipactor_bands: CampaignMultipactorBands | Sequence[InstrumentMultipactorBands],
+        multipactor_bands: CampaignMultipactorBands
+        | Sequence[InstrumentMultipactorBands],
         show_fit: bool = True,
-        remove_last_point_for_fit: bool = False,
         use_theoretical_r: bool = False,
         full_output: bool = True,
+        drop_idx: list[int] | None = None,
         png_path: Path | None = None,
+        png_kwargs: dict | None = None,
+        csv_path: Path | None = None,
+        csv_kwargs: dict | None = None,
         **fig_kw,
     ) -> Axes:
         r"""Represent evolution of forward power threshold with :math:`R`.
@@ -333,7 +329,8 @@ class TestCampaign(list):
         .. note::
             Multipactor is detected on a global level, i.e. multipactor
             threshold is reached when multipactor is detected anywhere in the
-            system.
+            system. Also, we represent the thresholds that were measured during
+            the last half-power cycle.
 
         .. todo::
             Clean this anti-patternic method.
@@ -345,7 +342,8 @@ class TestCampaign(list):
 
         Parameters
         ----------
-        campaign_multipactor_bands : CampaignMultipactorBands | Sequence[InstrumentMultipactorBands]
+        campaign_multipactor_bands : CampaignMultipactorBands \
+                | Sequence[InstrumentMultipactorBands]
             Object holding the information on where multipactor happens. If a
             :class:`.CampaignMultipactorBands` object is given, take every
             :class:`.TestMultipactorBands` in it and merge it. You can also
@@ -380,52 +378,41 @@ class TestCampaign(list):
         data_for_somersalo = [
             test.data_for_somersalo_scaling_law(band, use_theoretical_r)
             for (test, band) in zipper]
-        df_for_somersalo = pd.concat(data_for_somersalo).filter(like='Lower')
-        x_col = df_for_somersalo.filter(like='ReflectionCoefficient').columns
-        y_col = df_for_somersalo.filter(like='ForwardPower').columns
+        df_somersalo = pd.concat(data_for_somersalo).filter(like='Lower')
 
-        axe = df_for_somersalo.plot(
+        x_col = df_somersalo.filter(like='ReflectionCoefficient').columns
+        y_col = df_somersalo.filter(like='ForwardPower').columns
+        axes = df_somersalo.plot(
             x=x_col.values[0],
             y=y_col,
             xlabel=ins.ReflectionCoefficient.ylabel(),
-            ylabel=ForwardPower.ylabel(),
+            ylabel=ins.ForwardPower.ylabel(),
             grid=True,
             ms=15,
             marker='+',
             **fig_kw)
 
+        if drop_idx is not None:
+            df_somersalo.drop(
+                df_somersalo.index[drop_idx], inplace=True)
+
         if show_fit:
-            raise NotImplementedError
-            R = np.linspace(0, 1, 101)
-            r_fit = df_for_somersalo[df_for_somersalo.columns[0]]
-            p_fit = df_for_somersalo[df_for_somersalo.columns[1]]
-            if remove_last_point_for_fit:
-                r_fit = r_fit[:-1]
-                p_fit = p_fit[:-1]
+            df_fit = fit_somersalo_scaling(df_somersalo,
+                                           full_output=full_output,
+                                           plot=True,
+                                           axes=axes)
+            df_somersalo = pd.concat([df_somersalo, df_fit], axis=1)
 
-            result = curve_fit(f=somersalo_scaling_law,
-                               xdata=r_fit,
-                               ydata=p_fit,
-                               full_output=full_output)
-            popt = result[0]
-            tmp_str = r'$P_{TW}$ '
-            if full_output:
-                r_squared = helper.r_squared(result[2]['fvec'], p_fit)
-                tmp_str = f'Fit ({tmp_str} = {popt[0]:3.1f}W, $r^2$ = {r_squared:3.3f})'
-            else:
-                tmp_str = f'Fit ({tmp_str} = {popt[0]:3.1f}W)'
-            df_fitted = pd.DataFrame(
-                {'$R$': R,
-                 tmp_str: somersalo_scaling_law(R, *popt)
-                 })
-            df_fitted.plot(ax=axe,
-                           x=0,
-                           y=1,
-                           grid=True)
-        # if png_path is not None:
-            # fig.savefig(png_path)
+        if png_path is not None:
+            if png_kwargs is None:
+                png_kwargs = {}
+            plot.save_figure(axes, png_path, **png_kwargs)
+        if csv_path is not None:
+            if csv_kwargs is None:
+                csv_kwargs = {}
+            plot.save_dataframe(df_somersalo, csv_path, **csv_kwargs)
 
-        return axe
+        return axes
 
     def voltage_thresholds(
             self,

@@ -115,6 +115,8 @@ axe = test_campaign.check_somersalo_scaling_law(
     current_multipactor_bands,
     # measurement_points_to_exclude=ignored_pick_ups,
     figsize=figsize,
+    drop_idx=[-1],
+    use_theoretical_r=False,
 )
 
 

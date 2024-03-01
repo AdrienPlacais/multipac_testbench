@@ -30,14 +30,7 @@ from matplotlib.artist import Artist
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-from multipac_testbench.src.instruments.electric_field.field_probe import \
-    FieldProbe
-from multipac_testbench.src.instruments.electric_field.reconstructed import \
-    Reconstructed
-from multipac_testbench.src.instruments.instrument import Instrument
-from multipac_testbench.src.instruments.power import ForwardPower
-from multipac_testbench.src.instruments.reflection_coefficient import \
-    ReflectionCoefficient
+import multipac_testbench.src.instruments as ins
 from multipac_testbench.src.measurement_point.factory import \
     IMeasurementPointFactory
 from multipac_testbench.src.measurement_point.i_measurement_point import \
@@ -300,7 +293,7 @@ class MultipactorTest:
         instruments_id_plot: ABCMeta,
         multipactor_bands: TestMultipactorBands,
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
-        instruments_to_ignore: Sequence[Instrument | str] = (),
+        instruments_to_ignore: Sequence[ins.Instrument | str] = (),
         title: str = '',
         png_path: Path | None = None,
         png_kwargs: dict | None = None,
@@ -314,7 +307,7 @@ class MultipactorTest:
         ----------
         instruments_id_plot : ABCMeta
             Class of instrument to plot. Makes most sense with
-            :class:`.ForwardPower` or :class:`FieldProbe`.
+            :class:`ins.ForwardPower` or :class:`ins.FieldProbe`.
         instrument_multipactor_bands : InstrumentMultipactorBands | Sequence[
             InstrumentMultipactorBands]
             Objects containing the indexes of multipacting. If several are
@@ -322,7 +315,7 @@ class MultipactorTest:
             `instruments_id_plot`.
         measurement_points_to_exclude : Sequence[IMeasurementPoint | str]
             To exclude some pick-ups.
-        instruments_to_ignore : Sequence[Instrument | str]
+        instruments_to_ignore : Sequence[ins.Instrument | str]
             To exclude some instruments.
         png_path : Path | None
             If provided, figue will be saved there.
@@ -386,7 +379,7 @@ class MultipactorTest:
         raise_no_match_error: bool = True,
         global_diagnostics: bool = True,
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
-        instruments_to_ignore: Sequence[Instrument | str] = (),
+        instruments_to_ignore: Sequence[ins.Instrument | str] = (),
     ) -> zip:
         """Match the instruments with their multipactor bands.
 
@@ -397,26 +390,26 @@ class MultipactorTest:
         multipactor_bands : TestMultipactorBands | InstrumentMultipactorBands
             All multipactor bands, among which we will be looking. If only one
             is given (:class:`.InstrumentMultipactorBands`), then all
-            :class:`.Instrument` will be matched with the same identical
+            :class:`ins.Instrument` will be matched with the same identical
             :class:`.InstrumentMultipactorBands`.
         raise_no_match_error : bool, optional
             If an error should be raised when no
-            :class:`.InstrumentMultipactorBands` match an :class:`.Instrument`.
+            :class:`.InstrumentMultipactorBands` match an :class:`ins.Instrument`.
             The default is True.
         global_diagnostics : bool, optional
             If :class:`InstrumentMultipactorBands` that were obtained from a
             global diagnostic should be matched. The default is True.
         measurement_points_to_exclude : Sequence[IMeasurementPoint | str]
-            :class:`.Instrument` at this pick-ups are skipped. The default is
+            :class:`ins.Instrument` at this pick-ups are skipped. The default is
             an empty tuple.
-        instruments_to_ignore : Sequence[Instrument | str], optional
-            :class:`.Instrument` in this sequence are skipped. The default is
+        instruments_to_ignore : Sequence[ins.Instrument | str], optional
+            :class:`ins.Instrument` in this sequence are skipped. The default is
             an empty tuple.
 
         Returns
         -------
         zipper : zip
-            Object matching every :class:`.Instrument` with the appropriate
+            Object matching every :class:`ins.Instrument` with the appropriate
             :class:`.InstrumentMultipactorBands`.
 
         """
@@ -456,22 +449,22 @@ class MultipactorTest:
         return df_thresholds
 
     def detect_multipactor(
-            self,
-            multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
-            instrument_class: ABCMeta,
-            power_is_growing_kw: dict[str, int | float] | None = None,
-            measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (
-            ),
-            debug: bool = False,
-            **kwargs
+        self,
+        multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
+        instrument_class: ABCMeta,
+        power_is_growing_kw: dict[str, int | float] | None = None,
+        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (
+        ),
+        debug: bool = False,
+        **kwargs
     ) -> TestMultipactorBands:
         """Create the :class:`.TestMultipactorBands` object.
 
         Parameters
         ----------
         multipac_detector : callable[[np.ndarray], np.ndarray[np.bool_]]
-            Function that takes in the ``data`` of an :class:`.Instrument` and
-            returns an array, where TRUE MEANS MULTIpactor and False no
+            Function that takes in the ``data`` of an :class:`Instrument`
+            and returns an array, where True means multipactor and False no
             multipactor.
         instrument_class : ABCMeta
             Type of instrument on which ``multipac_detector`` should be
@@ -483,7 +476,7 @@ class MultipactorTest:
 optional
             Some measurement points that should not be considered. The default
             is an empty tuple.
-        debug : bool, optional
+        debug : bool | ins.Instrument, optional
             To plot the data used for multipactor detection, where power grows,
             where multipactor is detected. The default is False.
 
@@ -492,11 +485,11 @@ optional
         test_multipactor_bands : TestMultipactorBands
             Objets containing when multipactor happens, according to
             ``multipac_detector``, at every pick-up holding an
-            :class:`.Instrument` of type ``instrument_class``.
+            :class:`ins.Instrument` of type ``instrument_class``.
 
         """
-        forward_power = self.get_instrument(ForwardPower)
-        assert isinstance(forward_power, ForwardPower)
+        forward_power = self.get_instrument(ins.ForwardPower)
+        assert isinstance(forward_power, ins.ForwardPower)
         if power_is_growing_kw is None:
             power_is_growing_kw = {}
         power_is_growing = forward_power.where_is_growing(
@@ -539,7 +532,7 @@ optional
         Parameters
         ----------
         instruments_to_plot : tuple[ABCMeta, ...]
-            Subclass of the :class:`.Instrument` to plot.
+            Subclass of the :class:`ins.Instrument` to plot.
         measurement_points_to_exclude : tuple[str, ...], optional
             Name of the measurement points that should not be plotted. The
             default is an empty tuple.
@@ -549,7 +542,7 @@ optional
         raw : bool, optional
             If the data that should be plotted is the raw data before
             post-treatment. The default is False. Note that when the
-            :attr:`.Instrument.post_treaters` list is empty, raw data is
+            :attr:`ins.Instrument.post_treaters` list is empty, raw data is
             plotted even if ``raw==True``.
         multipactor_plots : bool, optional
             To add arrows to detect multipactor. The default is False.
@@ -693,7 +686,7 @@ optional
             self,
             step_idx: int,
             keep_one_frame_over: int,
-            axes_instruments: dict[Axes, list[Instrument]],
+            axes_instruments: dict[Axes, list[ins.Instrument]],
             artists: Sequence[Artist] | None = None,
     ) -> Sequence[Artist] | None:
         """Plot all instruments signal at proper axe and time step."""
@@ -770,8 +763,8 @@ optional
             self,
             instrument_class: ABCMeta,
             measurement_points: Sequence[IMeasurementPoint] | None = None,
-            instruments_to_ignore: Sequence[Instrument | str] = (),
-    ) -> list[Instrument]:
+            instruments_to_ignore: Sequence[ins.Instrument | str] = (),
+    ) -> list[ins.Instrument]:
         """Get all instruments of desired class from ``measurement_points``.
 
         But remove the instruments to ignore.
@@ -784,13 +777,13 @@ optional
             The measurement points from which you want the instruments. The
             default is None, in which case we look into every
             :class:`IMeasurementPoint` attribute of self.
-        instruments_to_ignore : Sequence[Instrument | str], optional
-            The :class:`.Instrument` or instrument names you do not want. The
+        instruments_to_ignore : Sequence[ins.Instrument | str], optional
+            The :class:`ins.Instrument` or instrument names you do not want. The
             default is an empty tuple, in which case no instrument is ignored.
 
         Returns
         -------
-        instruments : list[Instrument]
+        instruments : list[ins.Instrument]
             All the instruments matching the required conditions.
 
         """
@@ -812,7 +805,7 @@ optional
     def _instruments_by_name(
             self,
             instrument_names: Sequence[str],
-    ) -> list[Instrument]:
+    ) -> list[ins.Instrument]:
         """Get all instruments of desired name from ``measurement_points``.
 
         But remove the instruments to ignore.
@@ -824,7 +817,7 @@ optional
 
         Returns
         -------
-        instruments : list[Instrument]
+        instruments : list[ins.Instrument]
             All the instruments matching the required conditions.
 
         """
@@ -904,15 +897,15 @@ optional
 
     def get_instruments(
             self,
-            instruments_id: ABCMeta | Sequence[ABCMeta] | Sequence[str] | Sequence[Instrument],
+            instruments_id: ABCMeta | Sequence[ABCMeta] | Sequence[str] | Sequence[ins.Instrument],
             measurement_points_to_exclude: Sequence[IMeasurementPoint
                                                     | str] = (),
-            instruments_to_ignore: Sequence[Instrument | str] = (),
-    ) -> list[Instrument]:
+            instruments_to_ignore: Sequence[ins.Instrument | str] = (),
+    ) -> list[ins.Instrument]:
         """Get all instruments matching ``instrument_id``."""
         match (instruments_id):
             case list() | tuple() as instruments if types_match(instruments,
-                                                                Instrument):
+                                                                ins.Instrument):
                 return instruments
 
             case list() | tuple() as names if types_match(names, str):
@@ -942,14 +935,14 @@ optional
 
     def get_instrument(
             self,
-            instrument_id: ABCMeta | str | Instrument,
+            instrument_id: ABCMeta | str | ins.Instrument,
             measurement_points_to_exclude: Sequence[IMeasurementPoint
                                                     | str] = (),
-            instruments_to_ignore: Sequence[Instrument | str] = (),
-    ) -> Instrument | None:
+            instruments_to_ignore: Sequence[ins.Instrument | str] = (),
+    ) -> ins.Instrument | None:
         """Get a single instrument matching ``instrument_id``."""
         match (instrument_id):
-            case Instrument():
+            case ins.Instrument():
                 return instrument_id
             case str() as instrument_name:
                 instruments = self.get_instruments((instrument_name, ))
@@ -970,9 +963,9 @@ optional
         instruments_to_plot: Sequence[ABCMeta],
         measurement_points_to_exclude: tuple[str, ...] = (),
         instruments_to_ignore_for_limits: tuple[str, ...] = (),
-        instruments_to_ignore: Sequence[Instrument | str] = (),
+        instruments_to_ignore: Sequence[ins.Instrument | str] = (),
         **fig_kw,
-    ) -> tuple[Figure, dict[Axes, list[Instrument]]]:
+    ) -> tuple[Figure, dict[Axes, list[ins.Instrument]]]:
         """Prepare the figure and axes for the animation.
 
         Parameters
@@ -983,7 +976,7 @@ optional
             Measurement points that should not appear.
         instruments_to_ignore_for_limits : tuple[str, ...]
             Instruments to plot, but that can go off limits.
-        instruments_to_ignore : Sequence[Instrument | str]
+        instruments_to_ignore : Sequence[ins.Instrument | str]
             Instruments that will not even be plotted.
         fig_kw :
             Other keyword arguments for Figure.
@@ -992,7 +985,7 @@ optional
         -------
         fig : Figure
          Figure holding the axes.
-        axes_instruments : dict[Axes, list[Instrument]]
+        axes_instruments : dict[Axes, list[ins.Instrument]]
             Links the instruments to plot with the Axes they should be plotted
             on.
 
@@ -1026,8 +1019,9 @@ optional
 
     def _get_limits(
             self,
-            axes_instruments: dict[Axes, Sequence[Instrument]],
-            instruments_to_ignore_for_limits: Sequence[Instrument | str] = (),
+            axes_instruments: dict[Axes, Sequence[ins.Instrument]],
+            instruments_to_ignore_for_limits: Sequence[ins.Instrument | str] = (
+            ),
     ) -> dict[Axes, tuple[float, float]]:
         """Get limits of demanded instruments.
 
@@ -1053,18 +1047,18 @@ optional
     def reconstruct_voltage_along_line(
             self,
             name: str,
-            probes_to_ignore: Sequence[str | FieldProbe] = (),
+            probes_to_ignore: Sequence[str | ins.FieldProbe] = (),
     ) -> None:
         """Reconstruct the voltage profile from the e field probes."""
-        e_field_probes = self._instruments_by_class(FieldProbe,
+        e_field_probes = self._instruments_by_class(ins.FieldProbe,
                                                     self.pick_ups,
                                                     probes_to_ignore)
         assert self.global_diagnostics is not None
 
-        forward_power = self.get_instrument(ForwardPower)
-        reflection = self.get_instrument(ReflectionCoefficient)
+        forward_power = self.get_instrument(ins.ForwardPower)
+        reflection = self.get_instrument(ins.ReflectionCoefficient)
 
-        reconstructed = Reconstructed(
+        reconstructed = ins.Reconstructed(
             name=name,
             raw_data=None,
             e_field_probes=e_field_probes,
@@ -1080,10 +1074,10 @@ optional
 
     def plot_data_at_multipactor_thresholds(
         self,
-        instruments_id_plot: ABCMeta | Sequence[Instrument] | Sequence[str],
+        instruments_id_plot: ABCMeta | Sequence[ins.Instrument] | Sequence[str],
         instrument_multipactor_bands: InstrumentMultipactorBands | Sequence[InstrumentMultipactorBands],
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
-        instruments_to_ignore: Sequence[Instrument | str] = (),
+        instruments_to_ignore: Sequence[ins.Instrument | str] = (),
         png_path: Path | None = None,
         csv_path: Path | None = None,
         csv_kwargs: dict | None = None,
@@ -1157,7 +1151,7 @@ optional
             Allow representation of several pick-ups.
 
         """
-        last_powers = self.at_last_threshold(ForwardPower,
+        last_powers = self.at_last_threshold(ins.ForwardPower,
                                              test_multipactor_bands).iloc[0]
         z_ohm = 50.
         d_mm = .5 * (38.78 - 16.87)
@@ -1185,7 +1179,7 @@ optional
         if isinstance(electric_field_at, str):
             electric_field_at = self.get_measurement_point(
                 electric_field_at)
-        electric_field = electric_field_at.get_instrument(FieldProbe)
+        electric_field = electric_field_at.get_instrument(ins.FieldProbe)
         assert electric_field is not None
         last_fields = electric_field.values_at_barriers_fully_conditioned(
             instrument_multipactor_bands)
@@ -1203,39 +1197,67 @@ optional
         self,
         multipactor_bands: TestMultipactorBands | InstrumentMultipactorBands,
         use_theoretical_r: bool = False,
+        **kwargs,
     ) -> pd.DataFrame:
         """Get the data necessary to plot the Somersalo scaling law.
 
-        .. todo::
-            Proper docstring.
+        In particular, the power thresholds measured during the last half power
+        cycle, and the reflection coefficient :math:`R` at the corresponding
+        time steps. Lower and upper thresholds are returned, even if Somersalo
+        scaling law does not concern the upper threshold.
+
+        Parameters
+        ----------
+        multipactor_bands : TestMultipactorBands | InstrumentMultipactorBands
+            Object telling where multipactor happens. If it is a
+            :class:`.TestMultipactorBands`, we merge all the
+            :class:`.InstrumentMultipactorBands` in it, to know where the first
+            (``several_bands_politics='keep_first'``) multipactor happened,
+            anywhere in the testbench (``union='relaxed'``). You can also
+            provide directly an :class:`.InstrumentMultipactorBands`; we will
+            take its last :class:`.MultipactorBand`.
+        use_theoretical_r : bool, optional
+            If set to True, we return the :math:`R` corresponding to the
+            user-defined :math:`SWR`. The default is False.
+        kwargs :
+            Other keyword arguments passed to :meth:`.at_last_threshold`.
+
+        Returns
+        -------
+        pd.DataFrame
+            Holds the lower and upper :math:`P_f` during last half power cycle,
+            as well as reflection coefficient :math:`R` at same time steps.
 
         """
         if isinstance(multipactor_bands, TestMultipactorBands):
             multipactor_bands = multipactor_bands.merge(
-                'relaxed',
+                union='relaxed',
                 info_test=str(self),
                 several_bands_politics='keep_first')
 
-        instruments = ForwardPower, ReflectionCoefficient
-        df_somersalo = self.at_last_threshold(instruments, multipactor_bands)
+        instruments = ins.ForwardPower, ins.ReflectionCoefficient
+        df_somersalo = self.at_last_threshold(instruments,
+                                              multipactor_bands,
+                                              **kwargs)
 
         if use_theoretical_r:
             if np.isinf(self.swr):
                 reflection_coeff = 1.
             else:
                 reflection_coeff = (self.swr - 1.) / (self.swr + 1.)
-            cols = df_somersalo.filter(like='ReflectionCoefficient').columns
+            cols = df_somersalo.filter(
+                like='ReflectionCoefficient').columns
             df_somersalo[cols] = reflection_coeff
 
         return df_somersalo
 
     def plot_instruments_y_vs_instrument_x(
             self,
-            instrument_ids_x: Sequence[ABCMeta] | Sequence[str] | Sequence[Instrument],
-            instrument_ids_y: Sequence[ABCMeta] | Sequence[str] | Sequence[Instrument],
+            instrument_ids_x: Sequence[ABCMeta] | Sequence[str] | Sequence[ins.Instrument],
+            instrument_ids_y: Sequence[ABCMeta] | Sequence[str] | Sequence[ins.Instrument],
             measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (
             ),
-            instruments_to_ignore: Sequence[Instrument | str] = (),
+            instruments_to_ignore: Sequence[ins.Instrument | str] = (),
             tail: int = -1,
             fig_kw: dict | None = None,
     ) -> Axes:
