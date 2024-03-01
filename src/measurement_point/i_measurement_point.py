@@ -28,6 +28,7 @@ class IMeasurementPoint(ABC):
                  df_data: pd.DataFrame,
                  instrument_factory: InstrumentFactory,
                  instruments_kw: dict[str, dict[str, Any]],
+                 position: float,
                  ) -> None:
         """Create the all the global instruments.
 
@@ -44,15 +45,18 @@ class IMeasurementPoint(ABC):
 
         """
         self.name = name
+        self.position = position
         self.instruments = [
             instrument_factory.run(instr_name, df_data, **instr_kw)
             for instr_name, instr_kw in instruments_kw.items()
         ]
-        virtual_instruments = instrument_factory.run_virtual(self.instruments)
+        virtual_instruments = instrument_factory.run_virtual(
+            self.instruments,
+            is_global=np.isnan(position),
+            )
         self.add_instrument(*virtual_instruments)
 
         self._color: tuple[float, float, float] | None = None
-        self.position: float
 
     def add_instrument(self, *instruments: Instrument) -> None:
         """Add a new instrument :attr:`.instruments`.

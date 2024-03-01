@@ -3,6 +3,7 @@
 """Define an object to keep measurements at a pick-up."""
 from typing import Any
 
+import numpy as np
 import pandas as pd
 
 from multipac_testbench.src.instruments.factory import InstrumentFactory
@@ -17,8 +18,8 @@ class PickUp(IMeasurementPoint):
                  name: str,
                  df_data: pd.DataFrame,
                  instrument_factory: InstrumentFactory,
-                 position: float,
                  instruments_kw: dict[str, dict[str, Any]],
+                 position: float,
                  ) -> None:
         """Create the pick-up with all its instruments.
 
@@ -39,11 +40,14 @@ class PickUp(IMeasurementPoint):
 
         """
         self._add_key_val_to_dictionaries('position', position, instruments_kw)
+        assert not np.isnan(position), ("position = np.NaN is reserved to "
+                                        "global diagnostics.")
         super().__init__(name,
                          df_data,
                          instrument_factory,
-                         instruments_kw)
-        self.position = position
+                         instruments_kw,
+                         position=position,
+                         )
 
     def _add_key_val_to_dictionaries(self,
                                      key: str,

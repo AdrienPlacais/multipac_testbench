@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Define a class to create the proper :class:`.Instrument`."""
 from collections.abc import Sequence
+import logging
 from typing import Any
 
 import pandas as pd
@@ -80,17 +81,43 @@ class InstrumentFactory:
 
     def run_virtual(self,
                     instruments: Sequence[ins.Instrument],
+                    is_global: bool = False,
                     **kwargs
                     ) -> Sequence[ins.VirtualInstrument]:
-        """Add the implemented :class:`.VirtualInstrument`."""
+        """Add the implemented :class:`.VirtualInstrument`.
+
+        Parameters
+        ----------
+        instruments : Sequence[ins.Instrument]
+            The :class:`.Instrument` that were already created. They are used
+            to compute derived quantities, in particular :math:`SWR` and
+            :math:`R`.
+        is_global : bool, optional
+            Tells if the :class:`.IMeasurementPoint` from which this method is
+            called is global. It allows to forbid creation of one
+            :class:`.Frequency` or one :class:`.SWR` instrument per
+            :class:`.IMeasurementPoint`. The default is False.
+        kwargs :
+            Other keyword arguments passed to :meth:`._power_related`.
+
+        Returns
+        -------
+        Sequence[ins.VirtualInstrument]
+            The created virtual instruments.
+
+        """
         virtuals = []
 
-        power_related = self._power_related(instruments, **kwargs)
+        power_related = []
+        if is_global:
+            power_related = self._power_related(instruments, **kwargs)
         if len(power_related) > 0:
             virtuals += power_related
 
         n_points = len(instruments[0].data_as_pd)
-        constants = self._constant_values_defined_by_user(n_points)
+        constants = []
+        if is_global:
+            constants = self._constant_values_defined_by_user(n_points)
         if len(constants) > 0:
             virtuals += constants
 
@@ -105,6 +132,9 @@ class InstrumentFactory:
         reflecteds = [x for x in instruments
                       if isinstance(x, ins.ReflectedPower)]
         if len(forwards) != 1 or len(reflecteds) != 1:
+            logging.error("Should have exactly one ForwardPower and one "
+                          "ReflectedPower instruments. Skipping SWR and R, "
+                          "this may create problems in the future.")
             return ()
 
         forward = forwards[0]

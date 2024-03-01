@@ -35,8 +35,8 @@ class GlobalDiagnostics(IMeasurementPoint):
         super().__init__(name,
                          df_data,
                          instrument_factory,
-                         instruments_kw)
-        self.position = np.NaN
+                         instruments_kw,
+                         position=np.NaN)
 
     def __str__(self) -> str:
         """Give concise info on global diagnostics."""
