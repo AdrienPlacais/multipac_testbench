@@ -53,7 +53,7 @@ class IMeasurementPoint(ABC):
         virtual_instruments = instrument_factory.run_virtual(
             self.instruments,
             is_global=np.isnan(position),
-            )
+        )
         self.add_instrument(*virtual_instruments)
 
         self._color: tuple[float, float, float] | None = None
