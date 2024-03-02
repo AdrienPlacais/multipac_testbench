@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `values_at_barriers_fully_conditioned`
   - `plot_vs_time`
 - `Powers`
+- `src.susceptibility` module
 
 
 ## [1.5.0] 2024-03-02
