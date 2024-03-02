@@ -51,7 +51,6 @@ class Reconstructed(IElectricField):
         self._forward_power = forward_power
         self._reflection = reflection
         self._sample_indexes = self._e_field_probes[0]._raw_data.index
-        self._pos_for_fit = [probe.position for probe in self._e_field_probes]
         self._beta = c / freq_mhz * 1e-6
 
         self._psi_0: float
@@ -150,42 +149,6 @@ class Reconstructed(IElectricField):
             # r_squared = 1. - ss_err / ss_tot
             # self._r_squared = r_squared
             logging.debug(self.fit_info)
-
-    def _compute_voltages(self,
-                          beta: float,
-                          psi_0: float,
-                          ) -> np.ndarray:
-        """Give an the actual voltages we get with given parameters.
-
-        Structure of data is the same as in :attr:`_objective_voltages`.
-
-        """
-        actual_voltages = []
-        v_f = _power_to_volt(self._forward_power.data, z_ohm=self._z_ohm)
-        reflection = self._reflection.data
-
-        for sample_index in self._sample_indexes:
-            voltages = voltage_vs_position(self.position,
-                                           v_f[sample_index - 1],
-                                           reflection[sample_index - 1],
-                                           beta,
-                                           psi_0,)
-            actual_voltages.append(voltages)
-        actual_voltages = np.array(actual_voltages)
-        return actual_voltages
-
-    def data_at_position(self, pos: float, tol: float = 1e-5) -> np.ndarray:
-        """Get reconstructed field at position ``pos``."""
-        diff = np.abs(self.position - pos)
-        delta_z = np.min(diff)
-        if delta_z > tol:
-            raise ValueError("You asked for the reconstructed field at "
-                             f"position {pos}, but the closest calculated "
-                             f"points in {delta_z}m away for it. Check units,"
-                             " or increase the number of calculated positions."
-                             )
-        idx = np.argmin(diff)
-        return self.data[:, idx]
 
 
 def _model(var: np.ndarray,

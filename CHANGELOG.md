@@ -26,8 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `values_at_barriers`
   - `values_at_barriers_fully_conditioned`
   - `plot_vs_time`
+  - `from_array`
 - `Powers`
 - `src.susceptibility` module
+- `Reconstructed.data_at_position`
 
 
 ## [1.5.0] 2024-03-02

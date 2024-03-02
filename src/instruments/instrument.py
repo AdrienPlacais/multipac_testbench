@@ -61,7 +61,6 @@ class Instrument(ABC):
         self._data_as_pd: pd.Series
 
         self._post_treaters: list[Callable[[np.ndarray], np.ndarray]] = []
-        self.__module__ = "instrument"
 
     def __str__(self) -> str:
         """Give concise information on instrument."""
@@ -77,38 +76,6 @@ class Instrument(ABC):
     def label(self) -> str | None:
         """Label used for legends in plots vs position."""
         return
-
-    @classmethod
-    def from_array(cls,
-                   name: str,
-                   data: np.ndarray,
-                   xdata: Iterable,
-                   **kwargs) -> Self:
-        """Instantiate :class:`Instrument` from a numpy array.
-
-        Parameters
-        ----------
-        name : str
-            Name of the instrument.
-        data : np.ndarray
-            The data measured by the instrument.
-        xdata : Iterable | None, optional
-            The data representing the measuring points. The default is None, in
-            which case it is a list of integers starting from 1, which is the
-            same as all data from the ``.csv``.
-        kwargs :
-            Other keyword arguments passed to the :class:`.Instrument`.
-
-        Returns
-        -------
-        instrument : Instrument
-            A regular instrument.
-
-        """
-        raw_data = pd.Series(data=data,
-                             index=xdata,
-                             name=name)
-        return cls(name, raw_data, **kwargs)
 
     @classmethod
     def from_pd_dataframe(cls,

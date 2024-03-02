@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """Define an object to keep several related measurements."""
 import logging
-import warnings
 from abc import ABC, ABCMeta
 from typing import Any, Callable, Sequence
 
@@ -55,8 +54,6 @@ class IMeasurementPoint(ABC):
             is_global=np.isnan(position),
         )
         self.add_instrument(*virtual_instruments)
-
-        self._color: tuple[float, float, float] | None = None
 
     def add_instrument(self, *instruments: Instrument) -> None:
         """Add a new instrument :attr:`.instruments`.
