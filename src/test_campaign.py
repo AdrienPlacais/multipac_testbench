@@ -569,6 +569,7 @@ class TestCampaign(list):
         axes.set_prop_cycle(None)
         axes = df_susceptibility.filter(like='Upper').plot(
             ax=axes,
+            ylabel='Measured voltage [V]',
             marker='^',
             lw=0.,
             grid=True,
