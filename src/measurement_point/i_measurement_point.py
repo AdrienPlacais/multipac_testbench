@@ -102,12 +102,6 @@ class IMeasurementPoint(ABC):
         raise IOError(f"More than one instrument found with {args = } and "
                       f"{kwargs = }.")
 
-    def get_data(self, instrument_class: ABCMeta) -> np.ndarray:
-        """Get the ``data`` from first ``instrument_class`` instrument."""
-        instrument = self.get_instrument(instrument_class)
-        assert instrument is not None
-        return instrument.data
-
     def add_post_treater(self,
                          post_treater: Callable[[np.ndarray], np.ndarray],
                          instrument_class: ABCMeta = Instrument,
@@ -153,90 +147,6 @@ class IMeasurementPoint(ABC):
 
         return instrument_multipactor_bands
 
-    def plot_instruments_vs_time(
-        self,
-        instrument_class_axes: dict[ABCMeta, Axes],
-        instruments_class_to_plot: Sequence[ABCMeta] = (),
-        raw: bool = False,
-        **subplot_kw,
-    ) -> None:
-        """Plot signal of ``instruments_class_to_plot`` of this object.
-
-        .. deprecated:: 1.5.0
-            Use :meth:`MultipactorTest.sweet_plot` instead.
-
-        Parameters
-        ----------
-        instrument_class_axes : dict[ABCMeta, Axes]
-            Dictionary linking the class of the instruments to plot with the
-            associated axes.
-        instruments_class_to_plot : Sequence[ABCMeta]
-            Class of the instruments to be plotted.
-        raw : bool
-            If the raw of the post-treated signal should be plotted.
-        subplot_kw :
-            Other keyword arguments passed to the ``plot_vs_time`` methods.
-
-        """
-        warnings.warn("Prefer the sweet_plot method.", DeprecationWarning)
-        for instrument_class in instruments_class_to_plot:
-            instruments = self.get_instruments(instrument_class)
-            axe = instrument_class_axes[instrument_class]
-
-            for instrument in instruments:
-                line1 = instrument.plot_vs_time(axe,
-                                                raw,
-                                                color=self._color,
-                                                **subplot_kw)
-                if self._color is None:
-                    self._color = line1.get_color()
-
-    def _add_multipactor_vs_time(
-            self,
-            axe: Axes,
-            plotted_instrument_class: ABCMeta,
-            instrument_multipactor_bands: InstrumentMultipactorBands
-    ) -> None:
-        """Add arrows to display multipactor.
-
-        .. todo::
-            To refactor, should rely on MultipactorBand(s) methods
-
-        .. deprecated:: 1.5.0
-            Use :meth:`MultipactorTest.sweet_plot` instead.
-
-        Parameters
-        ----------
-        axe : Axes
-            Matplotlib object on which multipacting zones should be added.
-        plotted_instrument_class : ABCMeta
-            The nature of the instrument which ``data`` is already plotted.
-
-        """
-        warnings.warn("Prefer the sweet_plot method.", DeprecationWarning)
-        plotted_instrument = self.get_instrument(plotted_instrument_class)
-        if plotted_instrument is None:
-            return
-
-        y_pos_of_multipactor_zone = 1.05 * np.nanmax(plotted_instrument.data)
-        vline_kw = self._typical_vline_keywords()
-        arrow_kw = self._typical_arrow_keywords(plotted_instrument)
-
-        for multipactor_band in instrument_multipactor_bands:
-            delta_x = multipactor_band[-1] - multipactor_band[0]
-            axe.arrow(multipactor_band[0],
-                      y_pos_of_multipactor_zone,
-                      delta_x,
-                      0.,
-                      **arrow_kw)
-            axe.arrow(multipactor_band[-1],
-                      y_pos_of_multipactor_zone,
-                      -delta_x,
-                      0.,
-                      **arrow_kw)
-            axe.axvline(multipactor_band[0], **vline_kw)
-            axe.axvline(multipactor_band[-1], **vline_kw)
-
     def scatter_instruments_data(
             self,
             instrument_class_axes: dict[ABCMeta, Axes],
@@ -251,35 +161,3 @@ class IMeasurementPoint(ABC):
 
             instrument.scatter_data(
                 axes, instrument_multipactor_bands.multipactor, xdata)
-
-    def _typical_vline_keywords(self) -> dict[str, Any]:
-        """Set consistent plot properties.
-
-        .. deprecated:: 1.5.0
-            Use :meth:`MultipactorTest.sweet_plot` instead.
-
-        """
-        vline_kw = {
-            'color': self._color,
-            'lw': 0.2,
-        }
-        return vline_kw
-
-    def _typical_arrow_keywords(self,
-                                instrument: Instrument) -> dict[str, Any]:
-        """Set consistent plot properties.
-
-        .. deprecated:: 1.5.0
-            Use :meth:`MultipactorTest.sweet_plot` instead.
-
-        """
-        typical_width = np.nanmean(instrument.data) * 1e-3
-        typical_length = instrument.data.shape[0] / 70
-        arrow_kw = {
-            'color': self._color,
-            'length_includes_head': True,
-            'width': typical_width,
-            'head_length': 0.2,  # typical_length,
-            'head_width': 0.1,  # typical_width * 100.,
-        }
-        return arrow_kw

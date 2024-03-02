@@ -5,24 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] 2024-03-02
+
+### Removed
+
+- `IMeasurementPoint` methods:
+  - `plot_instruments_vs_time`
+  - `get_data`
+
+
 ## [1.5.0] 2024-03-02
 
-## Added
+### Added
 - Instruments: `ForwardPower`, `ReflectedPower`, `SWR`, `ReflectionCoefficient`, `Frequency`
 - `TestMultipactorBands`, `CampaignMultipactorBands` to handle when/where multipactor is detected in a more consistent way. Multipactor conditioned during test properly handled.
 - `sweet_plot`, `plot_thresholds`, `at_last_threshold`, `susceptiblity` methods
 
-## Modified
+### Modified
 
 - `MultipactorBands` is now `InstrumentMultipactorBands`
 
-## Deprecated
+### Deprecated
 
 - `plot_instruments_vs_time`, `plot_instruments_y_vs_instrument_x` (use `sweet_plot` instead)
 - `plot_data_at_multipactor_thresholds` (use `plot_thresholds` instead)
 - `susceptiblity_chart` (use `susceptiblity` instead)
 
-## Removed
+### Removed
 
 - `Powers` instrument
  - For consistency, one `Instrument` = one column in the `MultipactorTest.df_data`.
