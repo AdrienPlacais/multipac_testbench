@@ -7,7 +7,6 @@ import logging
 from pathlib import Path
 from typing import Self
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib import animation
@@ -25,8 +24,6 @@ from multipac_testbench.src.multipactor_test import MultipactorTest
 from multipac_testbench.src.theoretical.somersalo import (
     fit_somersalo_scaling, plot_somersalo_analytical, plot_somersalo_measured,
     somersalo_base_plot)
-from multipac_testbench.src.theoretical.susceptibility import \
-    measured_to_susceptibility_coordinates
 from multipac_testbench.src.util import log_manager, plot
 
 
@@ -587,62 +584,6 @@ class TestCampaign(list):
             plot.save_dataframe(df_susceptibility, csv_path, **csv_kwargs)
         return axes, df_susceptibility
 
-    def susceptibility_chart(self,
-                             electric_field_at: str,
-                             instrument_multipactor_bands: Sequence[InstrumentMultipactorBands],
-                             fig_kw: dict | None = None,
-                             ax_kw: dict | None = None) -> tuple[Figure, Axes]:
-        """Create a susceptiblity chart.
-
-        .. deprecated:: 1.5.0
-            Use :meth:`susceptiblity` instead.
-
-        """
-        fig, ax1 = self._susceptibility_base_plot(fig_kw, ax_kw)
-
-        zipper = zip(self, instrument_multipactor_bands, strict=True)
-
-        for mp_test, mp_bands in zipper:
-            if len(mp_bands) > 1:
-                raise NotImplementedError(f"{mp_bands = }, but only one pair "
-                                          "field probe--mp band is allowed")
-            susceptibility_data = mp_test.data_for_susceptibility(
-                electric_field_at,
-                instrument_multipactor_bands=mp_bands[0],
-            )
-            points = measured_to_susceptibility_coordinates(
-                **susceptibility_data)
-            ax1.scatter(points[:, 0], points[:, 1], label=str(mp_test))
-        ax1.legend()
-        return fig, ax1
-
-    def _susceptibility_base_plot(self,
-                                  fig_kw: dict | None = None,
-                                  ax_kw: dict | None = None,
-                                  ) -> tuple[Figure, Axes]:
-        """Create the base figure.
-
-        .. deprecated:: 1.5.0
-            Use :meth:`susceptiblity` instead.
-
-        """
-        if fig_kw is None:
-            fig_kw = {}
-        fig = plt.figure(**fig_kw)
-
-        if ax_kw is None:
-            ax_kw = {}
-        ax1 = fig.add_subplot(
-            111,
-            xlabel=r"$f \times d~[\mathrm{MHz~cm}]$",
-            ylabel=r"Threshold $V~[\mathrm{V}]$",
-            **ax_kw,
-        )
-        ax1.set_xscale('log', base=10)
-        ax1.set_yscale('log', base=10)
-        ax1.grid(True)
-        return fig, ax1
-
     def animate_instruments_vs_position(
             self,
             *args,
@@ -668,37 +609,6 @@ class TestCampaign(list):
         for test in self:
             test.reconstruct_voltage_along_line(*args, **kwargs)
 
-    def plot_instruments_vs_time(
-        self,
-        *args,
-        seq_instrument_multipactor_bands: Sequence[Sequence[InstrumentMultipactorBands]
-                                                   ] | Sequence[InstrumentMultipactorBands] | None = None,
-        out_folder: str | None = None,
-        iternum: int = 300,
-        **kwargs
-    ) -> None:
-        """Call all :meth:`.MultipactorTest.plot_instruments_vs_time`.
-
-        .. deprecated:: 1.5.0
-            Use :meth:`TestCampaign.sweet_plot` instead.
-
-        """
-        if seq_instrument_multipactor_bands is None:
-            seq_instrument_multipactor_bands = [None for _ in self]
-        zipper = zip(self, seq_instrument_multipactor_bands, strict=True)
-        for i, (test, instrument_multipactor_bands) in enumerate(zipper):
-            png_path = None
-            if out_folder is not None:
-                png_path = test.output_filepath(out_folder, ".png")
-            _ = test.plot_instruments_vs_time(
-                *args,
-                instrument_multipactor_bands=instrument_multipactor_bands,
-                num=iternum + i,
-                png_path=png_path,
-                **kwargs
-            )
-        return
-
     def scatter_instruments_data(self,
                                  *args,
                                  out_folder: str | None = None,
@@ -713,77 +623,6 @@ class TestCampaign(list):
                 *args,
                 num=iternum + i,
                 png_path=png_path,
-                **kwargs
-            )
-        return
-
-    def plot_instruments_y_vs_instrument_x(self,
-                                           *args,
-                                           out_folder: str | None = None,
-                                           iternum: int = 250,
-                                           **kwargs) -> None:
-        """Call :meth:`.MultipactorTest.plot_instruments_y_vs_instrument_x`.
-
-        .. deprecated:: 1.5.0
-            Use :meth:`TestCampaign.sweet_plot` instead.
-
-        """
-        for i, test in enumerate(self):
-            png_path = None
-            if out_folder is not None:
-                png_path = test.output_filepath(out_folder, ".png")
-            _ = test.plot_instruments_y_vs_instrument_x(
-                *args,
-                num=iternum + i,
-                png_path=png_path,
-                **kwargs
-            )
-        return
-
-    def plot_data_at_multipactor_thresholds(
-            self,
-            *args,
-            seq_instrument_multipactor_bands: Sequence[Sequence[InstrumentMultipactorBands]] | Sequence[InstrumentMultipactorBands],
-            out_folder: str | None = None,
-            iternum: int = 350,
-            **kwargs) -> None:
-        """Call :meth:`.MultipactorTest.plot_data_at_multipactor_thresholds`.
-
-        .. deprecated:: 1.5.0
-            Use :meth:`TestCampaign.plot_thresholds` instead.
-
-        Parameters
-        ----------
-        args :
-            Arguments passed to
-            :meth:`.MultipactorTest.plot_data_at_multipactor_thresholds`.
-        seq_instrument_multipactor_bands : Sequence[Sequence[InstrumentMultipactorBands]] | \
-                Sequence[InstrumentMultipactorBands]
-            :class:`.InstrumentMultipactorBands` or lists of :class:`.InstrumentMultipactorBands`
-            for every :class:`.MultipactorTest` in ``self``.
-        out_folder : str | None, optional
-            Where figures should be saved. The default is None, in which case
-            figures are not saved.
-        iternum : int, optional
-            First figure number. Iterated for every figure. The default is
-            ``350``.
-        kwargs :
-            Keyword arguments passed to
-            :meth:`MultipactorTest.plot_data_at_multipactor_thresholds`.
-
-        """
-        zipper = zip(self, seq_instrument_multipactor_bands, strict=True)
-        for i, (test, instrument_multipactor_bands) in enumerate(zipper):
-            png_path, csv_path = None, None
-            if out_folder is not None:
-                png_path = test.output_filepath(out_folder, ".png")
-                csv_path = test.output_filepath(out_folder, ".csv")
-            _ = test.plot_data_at_multipactor_thresholds(
-                *args,
-                instrument_multipactor_bands=instrument_multipactor_bands,
-                num=iternum + i,
-                png_path=png_path,
-                csv_path=csv_path,
                 **kwargs
             )
         return

@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `IMeasurementPoint` methods:
   - `plot_instruments_vs_time`
   - `get_data`
+- `TestCampaign` methods:
+  - `susceptiblity_chart`
+  - `plot_instruments_vs_time`
+  - `plot_instruments_y_vs_instrument_x`
+  - `plot_data_at_multipactor_thresholds`
 
 
 ## [1.5.0] 2024-03-02
