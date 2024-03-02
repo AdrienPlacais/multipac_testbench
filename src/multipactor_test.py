@@ -290,8 +290,8 @@ class MultipactorTest:
 
     def plot_thresholds(
         self,
-        instruments_id_plot: ABCMeta,
-        multipactor_bands: TestMultipactorBands,
+        instrument_id: ABCMeta,
+        multipactor_bands: TestMultipactorBands | InstrumentMultipactorBands,
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
         instruments_to_ignore: Sequence[ins.Instrument | str] = (),
         title: str = '',
@@ -301,24 +301,31 @@ class MultipactorTest:
         csv_kwargs: dict | None = None,
         **kwargs,
     ) -> Axes | np.ndarray[Axes]:
-        """Plot evolution of thresholds.
+        """Plot instrument ``to_plot`` at every multipactor threshold.
+
+        When ``to_plot`` is :class:`ins.ForwardPower` or
+        :class:`ins.FieldProbe`, the output is the threshold. But this method
+        works with any instrument type.
+
+        .. todo::
+            Add a way to fit exponential (?) law on the thresholds. Will need
+            to change the x-axis.
 
         Parameters
         ----------
-        instruments_id_plot : ABCMeta
+        instrument_id : ABCMeta
             Class of instrument to plot. Makes most sense with
             :class:`ins.ForwardPower` or :class:`ins.FieldProbe`.
-        instrument_multipactor_bands : InstrumentMultipactorBands | Sequence[
-            InstrumentMultipactorBands]
-            Objects containing the indexes of multipacting. If several are
-            given, their number must match the number of instruments of class
-            `instruments_id_plot`.
+        multipactor_bands : TestMultipactorBands | InstrumentMultipactorBands
+            Object containing the indexes of multipacting. If only a
+            :class:`.InstrumentMultipactorBands` is given, all plotted
+            instruments will use it.
         measurement_points_to_exclude : Sequence[IMeasurementPoint | str]
             To exclude some pick-ups.
         instruments_to_ignore : Sequence[ins.Instrument | str]
             To exclude some instruments.
         png_path : Path | None
-            If provided, figue will be saved there.
+            If provided, figure will be saved there.
         png_kwargs : dict | None
             Keyword arguments for the :meth:`.Figure.savefig` method.
         csv_path : Path | None
@@ -333,7 +340,7 @@ class MultipactorTest:
 
         """
         zipper = self.instruments_and_multipactor_bands(
-            instruments_id_plot,
+            instrument_id,
             multipactor_bands,
             raise_no_match_error=True,
             global_diagnostics=True,
@@ -359,7 +366,7 @@ class MultipactorTest:
             marker='^',
             ms=10,
             xlabel="Half-power cycle #",
-            ylabel=instruments_id_plot.ylabel(),
+            ylabel=instrument_id.ylabel(),
             **kwargs,
         )
         if png_path is not None:
