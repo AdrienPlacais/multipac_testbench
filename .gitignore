@@ -63,4 +63,5 @@ docs/source/manual/data/test/*.csv
 docs/source/manual/data/campaign/*.csv
 docs/source/manual/data/campaign_one_probe/*.csv
 docs/source/manual/notebooks/.ipynb_checkpoints/*
+docs/source/manual/.ipynb_checkpoints/*
 src/experimental/*
