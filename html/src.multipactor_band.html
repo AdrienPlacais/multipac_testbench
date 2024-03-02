@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>src.multipactor_band package &mdash; MULTIPAC test bench 1.4.1 documentation</title>
+  <title>src.multipactor_band package &mdash; MULTIPAC test bench 1.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,14 +15,14 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=350a9c04"></script>
+        <script src="_static/documentation_options.js?v=e0a75244"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="src.multipactor_band.multipactor_band module" href="src.multipactor_band.multipactor_band.html" />
+    <link rel="next" title="src.multipactor_band.campaign_multipactor_bands module" href="src.multipactor_band.campaign_multipactor_bands.html" />
     <link rel="prev" title="src.measurement_point.pick_up module" href="src.measurement_point.pick_up.html" /> 
 </head>
 
@@ -38,7 +38,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.4.1
+                1.5.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -52,14 +52,17 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="manual/presentation.html">Presentation of the library</a></li>
 <li class="toctree-l1"><a class="reference internal" href="manual/configuration.html">Configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="manual/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="manual/gallery.html">Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="manual/tutorials.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="src.html">src package</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.html">src.instruments package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.measurement_point.html">src.measurement_point package</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">src.multipactor_band package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.multipactor_band.campaign_multipactor_bands.html">src.multipactor_band.campaign_multipactor_bands module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.multipactor_band.instrument_multipactor_bands.html">src.multipactor_band.instrument_multipactor_bands module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.multipactor_band.multipactor_band.html">src.multipactor_band.multipactor_band module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.multipactor_band.multipactor_bands.html">src.multipactor_band.multipactor_bands module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.multipactor_band.test_multipactor_bands.html">src.multipactor_band.test_multipactor_bands module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.multipactor_band.util.html">src.multipactor_band.util module</a></li>
 </ul>
 </li>
@@ -106,21 +109,34 @@
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="src.multipactor_band.campaign_multipactor_bands.html">src.multipactor_band.campaign_multipactor_bands module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src.multipactor_band.campaign_multipactor_bands.html#src.multipactor_band.campaign_multipactor_bands.CampaignMultipactorBands"><code class="docutils literal notranslate"><span class="pre">CampaignMultipactorBands</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src.multipactor_band.instrument_multipactor_bands.html">src.multipactor_band.instrument_multipactor_bands module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src.multipactor_band.instrument_multipactor_bands.html#src.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands"><code class="docutils literal notranslate"><span class="pre">InstrumentMultipactorBands</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.multipactor_band.instrument_multipactor_bands.html#src.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands.data_as_pd"><code class="docutils literal notranslate"><span class="pre">InstrumentMultipactorBands.data_as_pd()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.multipactor_band.instrument_multipactor_bands.html#src.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands.plot_as_bool"><code class="docutils literal notranslate"><span class="pre">InstrumentMultipactorBands.plot_as_bool()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.multipactor_band.instrument_multipactor_bands.html#src.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands.lower_indexes"><code class="docutils literal notranslate"><span class="pre">InstrumentMultipactorBands.lower_indexes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.multipactor_band.instrument_multipactor_bands.html#src.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands.upper_indexes"><code class="docutils literal notranslate"><span class="pre">InstrumentMultipactorBands.upper_indexes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.multipactor_band.instrument_multipactor_bands.html#src.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands.first_indexes"><code class="docutils literal notranslate"><span class="pre">InstrumentMultipactorBands.first_indexes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.multipactor_band.instrument_multipactor_bands.html#src.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands.last_indexes"><code class="docutils literal notranslate"><span class="pre">InstrumentMultipactorBands.last_indexes()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="src.multipactor_band.multipactor_band.html">src.multipactor_band.multipactor_band module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="src.multipactor_band.multipactor_band.html#src.multipactor_band.multipactor_band.MultipactorBand"><code class="docutils literal notranslate"><span class="pre">MultipactorBand</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="src.multipactor_band.multipactor_band.html#src.multipactor_band.multipactor_band.MultipactorBand.to_range"><code class="docutils literal notranslate"><span class="pre">MultipactorBand.to_range()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.multipactor_band.multipactor_band.html#src.multipactor_band.multipactor_band.MultipactorBand"><code class="docutils literal notranslate"><span class="pre">MultipactorBand</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.multipactor_band.multipactor_band.html#src.multipactor_band.multipactor_band.multipactor_to_list_of_mp_band"><code class="docutils literal notranslate"><span class="pre">multipactor_to_list_of_mp_band()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="src.multipactor_band.test_multipactor_bands.html">src.multipactor_band.test_multipactor_bands module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src.multipactor_band.test_multipactor_bands.html#src.multipactor_band.test_multipactor_bands.TestMultipactorBands"><code class="docutils literal notranslate"><span class="pre">TestMultipactorBands</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.multipactor_band.test_multipactor_bands.html#src.multipactor_band.test_multipactor_bands.TestMultipactorBands.plot_as_bool"><code class="docutils literal notranslate"><span class="pre">TestMultipactorBands.plot_as_bool()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.multipactor_band.test_multipactor_bands.html#src.multipactor_band.test_multipactor_bands.TestMultipactorBands.merge"><code class="docutils literal notranslate"><span class="pre">TestMultipactorBands.merge()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="src.multipactor_band.multipactor_bands.html">src.multipactor_band.multipactor_bands module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="src.multipactor_band.multipactor_bands.html#src.multipactor_band.multipactor_bands.MULTIPACTOR_BANDS_MERGERS"><code class="docutils literal notranslate"><span class="pre">MULTIPACTOR_BANDS_MERGERS</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.multipactor_band.multipactor_bands.html#src.multipactor_band.multipactor_bands.MultipactorBands"><code class="docutils literal notranslate"><span class="pre">MultipactorBands</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="src.multipactor_band.multipactor_bands.html#src.multipactor_band.multipactor_bands.MultipactorBands.from_ydata"><code class="docutils literal notranslate"><span class="pre">MultipactorBands.from_ydata()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="src.multipactor_band.multipactor_bands.html#src.multipactor_band.multipactor_bands.MultipactorBands.from_other_multipactor_bands"><code class="docutils literal notranslate"><span class="pre">MultipactorBands.from_other_multipactor_bands()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="src.multipactor_band.multipactor_bands.html#src.multipactor_band.multipactor_bands.MultipactorBands.power_is_growing"><code class="docutils literal notranslate"><span class="pre">MultipactorBands.power_is_growing</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="src.multipactor_band.test_multipactor_bands.html#src.multipactor_band.test_multipactor_bands.MULTIPACTOR_ARRAY_MERGERS"><code class="docutils literal notranslate"><span class="pre">MULTIPACTOR_ARRAY_MERGERS</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="src.multipactor_band.util.html">src.multipactor_band.util module</a><ul>
@@ -138,7 +154,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="src.measurement_point.pick_up.html" class="btn btn-neutral float-left" title="src.measurement_point.pick_up module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="src.multipactor_band.multipactor_band.html" class="btn btn-neutral float-right" title="src.multipactor_band.multipactor_band module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="src.multipactor_band.campaign_multipactor_bands.html" class="btn btn-neutral float-right" title="src.multipactor_band.campaign_multipactor_bands module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

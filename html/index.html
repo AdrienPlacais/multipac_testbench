@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Welcome to MULTIPAC test bench’s documentation! &mdash; MULTIPAC test bench 1.4.1 documentation</title>
+  <title>Welcome to MULTIPAC test bench’s documentation! &mdash; MULTIPAC test bench 1.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,7 +15,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=350a9c04"></script>
+        <script src="_static/documentation_options.js?v=e0a75244"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -37,7 +37,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.4.1
+                1.5.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -51,7 +51,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="manual/presentation.html">Presentation of the library</a></li>
 <li class="toctree-l1"><a class="reference internal" href="manual/configuration.html">Configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="manual/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="manual/gallery.html">Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="manual/tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">API Reference</a></li>
 </ul>
 
@@ -90,8 +91,17 @@
 <li class="toctree-l1"><a class="reference internal" href="manual/configuration.html">Configuration</a><ul class="simple">
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="manual/examples.html">Examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="manual/notebooks/basics.html">MULTIPAC test bench example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="manual/gallery.html">Gallery</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="manual/notebooks/plot_signals_measured_by_instruments.html">Plot signal measured by instruments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="manual/notebooks/animate_multipactor_test.html">Animate the test</a></li>
+<li class="toctree-l2"><a class="reference internal" href="manual/notebooks/reconstruct_voltage.html">Reconstruct electric field at every position</a></li>
+<li class="toctree-l2"><a class="reference internal" href="manual/notebooks/plot_power_thresholds.html">Plot power thresholds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="manual/notebooks/plot_voltage_thresholds.html">Plot voltage thresholds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="manual/notebooks/plot_susceptibility.html">Make a susceptiblity chart</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="manual/tutorials.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="manual/notebooks/basics.html">Treat a single file</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">API Reference</a><ul>
@@ -100,10 +110,14 @@
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.electric_field.html">src.instruments.electric_field package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.current_probe.html">src.instruments.current_probe module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.factory.html">src.instruments.factory module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.instruments.frequency.html">src.instruments.frequency module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.instrument.html">src.instruments.instrument module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.optical_fibre.html">src.instruments.optical_fibre module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.penning.html">src.instruments.penning module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.instruments.power.html">src.instruments.power module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.powers.html">src.instruments.powers module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.instruments.reflection_coefficient.html">src.instruments.reflection_coefficient module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.instruments.swr.html">src.instruments.swr module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.virtual_instrument.html">src.instruments.virtual_instrument module</a></li>
 </ul>
 </li>
@@ -115,8 +129,10 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="src.multipactor_band.html">src.multipactor_band package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.multipactor_band.campaign_multipactor_bands.html">src.multipactor_band.campaign_multipactor_bands module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.multipactor_band.instrument_multipactor_bands.html">src.multipactor_band.instrument_multipactor_bands module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.multipactor_band.multipactor_band.html">src.multipactor_band.multipactor_band module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.multipactor_band.multipactor_bands.html">src.multipactor_band.multipactor_bands module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.multipactor_band.test_multipactor_bands.html">src.multipactor_band.test_multipactor_bands module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.multipactor_band.util.html">src.multipactor_band.util module</a></li>
 </ul>
 </li>
@@ -126,7 +142,10 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="src.util.html">src.util package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.util.animate.html">src.util.animate module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.util.filtering.html">src.util.filtering module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.util.helper.html">src.util.helper module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.util.log_manager.html">src.util.log_manager module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.util.multipactor_detectors.html">src.util.multipactor_detectors module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.util.plot.html">src.util.plot module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.util.post_treaters.html">src.util.post_treaters module</a></li>
@@ -144,27 +163,22 @@
 <p class="admonition-title">Todo</p>
 <p>Proper documentation for the configuration.</p>
 </div>
-<p class="todo-source">(The <a class="reference internal" href="manual/configuration.html#id2"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/docs/source/manual/configuration.rst, line 33.)</p>
-<div class="admonition-todo admonition">
-<p class="admonition-title">Todo</p>
-<p>Add an example for the <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultipactorTest.plot_multipactor_limits()</span></code> once it works for several positions.</p>
-</div>
-<p class="todo-source">(The <a class="reference internal" href="manual/examples.html#id2"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/docs/source/manual/examples.rst, line 12.)</p>
-<div class="admonition-todo admonition">
-<p class="admonition-title">Todo</p>
-<p>Ease selection of last/first n measurement points. Rely more on pd.DataFrame?</p>
-</div>
-<p class="todo-source">(The <a class="reference internal" href="manual/presentation.html#id1"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/docs/source/manual/presentation.rst, line 13.)</p>
-<div class="admonition-todo admonition">
-<p class="admonition-title">Todo</p>
-<p>Ease plotting anything vs anyotherthing. Rely more on pd.DataFrame?</p>
-</div>
-<p class="todo-source">(The <a class="reference internal" href="manual/presentation.html#id2"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/docs/source/manual/presentation.rst, line 16.)</p>
+<p class="todo-source">(The <a class="reference internal" href="manual/configuration.html#id2"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/docs/source/manual/configuration.rst, line 35.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>LabVIEWER data start at index == 1!!!! Fix this, every index list should always start at 0</p>
 </div>
-<p class="todo-source">(The <a class="reference internal" href="manual/presentation.html#id3"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/docs/source/manual/presentation.rst, line 19.)</p>
+<p class="todo-source">(The <a class="reference internal" href="manual/presentation.html#id1"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/docs/source/manual/presentation.rst, line 13.)</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Dirty patch to select 1d/2d data</p>
+</div>
+<p class="todo-source">(The <a class="reference internal" href="src.instruments.html#id1"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/instruments/instrument.py:docstring of multipac_testbench.src.instruments.instrument.Instrument.values_at_barriers, line 3.)</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>May be necessary to also remove isolated True</p>
+</div>
+<p class="todo-source">(The <a class="reference internal" href="src.instruments.html#id2"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/instruments/power.py:docstring of multipac_testbench.src.instruments.power.Power.where_is_growing, line 3.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>voltage fitting, overload: they work but this not clean, not clean at all</p>
@@ -172,14 +186,9 @@
 <p class="todo-source">(The <a class="reference internal" href="src.instruments.electric_field.reconstructed.html#id1"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/instruments/electric_field/reconstructed.py:docstring of src.instruments.electric_field.reconstructed, line 3.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Ensure that all instruments have a position (float, can be np.NaN)</p>
-</div>
-<p class="todo-source">(The <a class="reference internal" href="src.instruments.instrument.html#id1"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/instruments/instrument.py:docstring of src.instruments.instrument, line 3.)</p>
-<div class="admonition-todo admonition">
-<p class="admonition-title">Todo</p>
 <p>Dirty patch to select 1d/2d data</p>
 </div>
-<p class="todo-source">(The <a class="reference internal" href="src.instruments.instrument.html#id2"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/instruments/instrument.py:docstring of src.instruments.instrument.Instrument.values_at_barriers, line 3.)</p>
+<p class="todo-source">(The <a class="reference internal" href="src.instruments.instrument.html#id1"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/instruments/instrument.py:docstring of src.instruments.instrument.Instrument.values_at_barriers, line 3.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>Find out the units for optical fibre.</p>
@@ -187,46 +196,15 @@
 <p class="todo-source">(The <a class="reference internal" href="src.instruments.optical_fibre.html#id1"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/instruments/optical_fibre.py:docstring of src.instruments.optical_fibre, line 3.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Unit of Penning data in csv?</p>
+<p>May be necessary to also remove isolated True</p>
 </div>
-<p class="todo-source">(The <a class="reference internal" href="src.instruments.penning.html#id1"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/instruments/penning.py:docstring of src.instruments.penning, line 3.)</p>
-<div class="admonition-todo admonition">
-<p class="admonition-title">Todo</p>
-<p>Modify the <a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument" title="src.instruments.instrument.Instrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code></a> so that we can call
-Instrument[MultipactorBand] and get their data at the corresponding
-indexes.</p>
-</div>
-<p class="todo-source">(The <a class="reference internal" href="src.multipactor_band.multipactor_band.html#id1"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_band/multipactor_band.py:docstring of src.multipactor_band.multipactor_band, line 5.)</p>
-<div class="admonition-todo admonition">
-<p class="admonition-title">Todo</p>
-<p>A .plot method for IMeasurementPoint._add_multipactor_vs_time</p>
-</div>
-<p class="todo-source">(The <a class="reference internal" href="src.multipactor_band.multipactor_band.html#id2"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_band/multipactor_band.py:docstring of src.multipactor_band.multipactor_band.MultipactorBand, line 9.)</p>
-<div class="admonition-todo admonition">
-<p class="admonition-title">Todo</p>
-<p>Delete this if not used.</p>
-</div>
-<p class="todo-source">(The <a class="reference internal" href="src.multipactor_band.multipactor_band.html#id3"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_band/multipactor_band.py:docstring of src.multipactor_band.multipactor_band.MultipactorBand.to_range, line 3.)</p>
-<div class="admonition-todo admonition">
-<p class="admonition-title">Todo</p>
-<p>Maybe this class should also hold a None or something when multipactor did
-not appear during a power cycle.
-If there is multipactor at the start of the test but it is conditioned,
-this information does not appear!!</p>
-</div>
-<p class="todo-source">(The <a class="reference internal" href="src.multipactor_band.multipactor_bands.html#id1"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_band/multipactor_bands.py:docstring of src.multipactor_band.multipactor_bands, line 3.)</p>
-<div class="admonition-todo admonition">
-<p class="admonition-title">Todo</p>
-<p>Determine how and if transferring the list of
-<a class="reference internal" href="src.multipactor_band.multipactor_band.html#src.multipactor_band.multipactor_band.MultipactorBand" title="src.multipactor_band.multipactor_band.MultipactorBand"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipactorBand</span></code></a> is useful.</p>
-</div>
-<p class="todo-source">(The <a class="reference internal" href="src.multipactor_band.multipactor_bands.html#id2"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_band/multipactor_bands.py:docstring of src.multipactor_band.multipactor_bands.MultipactorBands.from_other_multipactor_bands, line 3.)</p>
+<p class="todo-source">(The <a class="reference internal" href="src.instruments.power.html#id1"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/instruments/power.py:docstring of src.instruments.power.Power.where_is_growing, line 3.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>Put a flag that will check consistency of position of MP bands.
-Like: <code class="docutils literal notranslate"><span class="pre">assert_multipactor_bands_detected_at_same_position:</span> <span class="pre">bool</span></code>.</p>
+Like: <code class="docutils literal notranslate"><span class="pre">assert_instrument_multipactor_bands_detected_at_same_position:</span> <span class="pre">bool</span></code>.</p>
 </div>
-<p class="todo-source">(The <a class="reference internal" href="src.multipactor_band.multipactor_bands.html#id3"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_band/multipactor_bands.py:docstring of src.multipactor_band.multipactor_bands.MultipactorBands.from_other_multipactor_bands, line 7.)</p>
+<p class="todo-source">(The <a class="reference internal" href="src.multipactor_band.test_multipactor_bands.html#id1"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_band/test_multipactor_bands.py:docstring of src.multipactor_band.test_multipactor_bands.TestMultipactorBands.merge, line 7.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>Allow to trim data (remove noisy useless data at end of exp)</p>
@@ -250,104 +228,58 @@ determine the 3sigma multipactor limits?</p>
 <p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id4"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test, line 13.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Find a way to check consistency between the MultipactorBands and
-corresponding Instruments. First idea would be to check their respective
-positions.</p>
-</div>
-<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id5"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test, line 16.)</p>
-<div class="admonition-todo admonition">
-<p class="admonition-title">Todo</p>
 <p>Add a <code class="docutils literal notranslate"><span class="pre">instruments_to_exclude</span></code> argument. Could replace
 <code class="docutils literal notranslate"><span class="pre">measurement_points_to_exclude</span></code>.</p>
 </div>
-<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id6"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.plot_instruments_vs_time, line 3.)</p>
+<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id5"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.plot_instruments_vs_time, line 6.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>Also show from global diagnostic</p>
 </div>
-<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id7"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.scatter_instruments_data, line 7.)</p>
+<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id6"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.scatter_instruments_data, line 7.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>User should be able to select: reconstructed or measured electric
 field.</p>
 </div>
-<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id8"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.scatter_instruments_data, line 10.)</p>
+<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id7"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.scatter_instruments_data, line 10.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>Fix this. Or not? This is not the most explicit way to display
 data…</p>
 </div>
-<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id9"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.scatter_instruments_data, line 14.)</p>
+<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id8"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.scatter_instruments_data, line 14.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>Docstring, match_with_mp_band keywords</p>
 </div>
-<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id10"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.plot_data_at_multipactor_thresholds, line 3.)</p>
+<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id9"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.plot_data_at_multipactor_thresholds, line 3.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>Allow representation of several pick-ups.</p>
 </div>
-<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id11"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.data_for_somersalo, line 3.)</p>
+<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id10"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.data_for_somersalo, line 3.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>Allow representation of several pick-ups.</p>
 </div>
-<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id12"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.data_for_susceptibility, line 3.)</p>
-<div class="admonition-todo admonition">
-<p class="admonition-title">Todo</p>
-<p>Proper docstring.</p>
-</div>
-<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id13"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.data_for_somersalo_scaling_law, line 3.)</p>
-<div class="admonition-todo admonition">
-<p class="admonition-title">Todo</p>
-<p>Proper docstring.</p>
-</div>
-<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id14"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.data_for_perez, line 3.)</p>
-<div class="admonition-todo admonition">
-<p class="admonition-title">Todo</p>
-<p>There are way cleaner ways to do this.</p>
-</div>
-<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id15"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.data_for_perez, line 6.)</p>
-<div class="admonition-todo admonition">
-<p class="admonition-title">Todo</p>
-<p>If multipactor happens somewhere and then is conditioned, this
-information does not appear and we plot the last detected
-multipactor.
-Hence the dirty patch probes_conditioned_during_test.</p>
-</div>
-<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id16"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.data_for_perez, line 9.)</p>
-<div class="admonition-todo admonition">
-<p class="admonition-title">Todo</p>
-<p>Implement the <code class="docutils literal notranslate"><span class="pre">plot_barriers_vs_swr</span></code> and <code class="docutils literal notranslate"><span class="pre">plot_barriers_vs_frequency</span></code>
-methods.</p>
-</div>
-<p class="todo-source">(The <a class="reference internal" href="src.test_campaign.html#id1"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/test_campaign.py:docstring of src.test_campaign, line 3.)</p>
+<p class="todo-source">(The <a class="reference internal" href="src.multipactor_test.html#id11"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/multipactor_test.py:docstring of src.multipactor_test.MultipactorTest.data_for_susceptibility, line 3.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>For some reason, two point is plotted on the one point ax instead
 of the two point…</p>
 </div>
-<p class="todo-source">(The <a class="reference internal" href="src.test_campaign.html#id2"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/test_campaign.py:docstring of src.test_campaign.TestCampaign.somersalo_chart, line 3.)</p>
+<p class="todo-source">(The <a class="reference internal" href="src.test_campaign.html#id1"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/test_campaign.py:docstring of src.test_campaign.TestCampaign.somersalo_chart, line 3.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Clean this anti-patternic method.</p>
+<p>Merge the two remove_isolated functions</p>
 </div>
-<p class="todo-source">(The <a class="reference internal" href="src.test_campaign.html#id3"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/test_campaign.py:docstring of src.test_campaign.TestCampaign.check_somersalo_scaling_law, line 17.)</p>
+<p class="todo-source">(The <a class="reference internal" href="src.util.filtering.html#id1"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/util/filtering.py:docstring of src.util.filtering, line 3.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Proper docstring.</p>
+<p>Modernize this, with type hint etc.</p>
 </div>
-<p class="todo-source">(The <a class="reference internal" href="src.test_campaign.html#id4"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/test_campaign.py:docstring of src.test_campaign.TestCampaign.check_perez, line 5.)</p>
-<div class="admonition-todo admonition">
-<p class="admonition-title">Todo</p>
-<p>Clean the dirty patch probes_conditioned_during_test</p>
-</div>
-<p class="todo-source">(The <a class="reference internal" href="src.test_campaign.html#id5"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/test_campaign.py:docstring of src.test_campaign.TestCampaign.check_perez, line 8.)</p>
-<div class="admonition-todo admonition">
-<p class="admonition-title">Todo</p>
-<p>Docstring.</p>
-</div>
-<p class="todo-source">(The <a class="reference internal" href="src.theoretical.somersalo.html#id2"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/theoretical/somersalo.py:docstring of src.theoretical.somersalo.somersalo_scaling_law, line 3.)</p>
+<p class="todo-source">(The <a class="reference internal" href="src.util.log_manager.html#id1"><em>original entry</em></a> is located in /home/placais/Documents/Simulation/python/multipac_testbench/src/util/log_manager.py:docstring of src.util.log_manager, line 13.)</p>
 </section>
 <section id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h1>

@@ -12,6 +12,8 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
+   src.multipactor_band.campaign_multipactor_bands
+   src.multipactor_band.instrument_multipactor_bands
    src.multipactor_band.multipactor_band
-   src.multipactor_band.multipactor_bands
+   src.multipactor_band.test_multipactor_bands
    src.multipactor_band.util

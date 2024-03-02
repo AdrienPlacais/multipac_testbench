@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>src.instruments package &mdash; MULTIPAC test bench 1.4.1 documentation</title>
+  <title>src.instruments package &mdash; MULTIPAC test bench 1.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,10 +15,12 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=350a9c04"></script>
+        <script src="_static/documentation_options.js?v=e0a75244"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -38,7 +40,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.4.1
+                1.5.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -52,17 +54,22 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="manual/presentation.html">Presentation of the library</a></li>
 <li class="toctree-l1"><a class="reference internal" href="manual/configuration.html">Configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="manual/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="manual/gallery.html">Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="manual/tutorials.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="src.html">src package</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">src.instruments package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.electric_field.html">src.instruments.electric_field package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.current_probe.html">src.instruments.current_probe module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.factory.html">src.instruments.factory module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.instruments.frequency.html">src.instruments.frequency module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.instrument.html">src.instruments.instrument module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.optical_fibre.html">src.instruments.optical_fibre module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.penning.html">src.instruments.penning module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.instruments.power.html">src.instruments.power module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.powers.html">src.instruments.powers module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.instruments.reflection_coefficient.html">src.instruments.reflection_coefficient module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.instruments.swr.html">src.instruments.swr module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.virtual_instrument.html">src.instruments.virtual_instrument module</a></li>
 </ul>
 </li>
@@ -107,6 +114,452 @@
   <section id="module-src.instruments">
 <span id="src-instruments-package"></span><h1>src.instruments package<a class="headerlink" href="#module-src.instruments" title="Link to this heading"></a></h1>
 <p>This subpackage holds instrument (current, voltage, etc).</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.instruments.CurrentProbe">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CurrentProbe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.instruments.CurrentProbe" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.instruments.Instrument" title="multipac_testbench.src.instruments.instrument.Instrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code></a></p>
+<p>A probe to measure multipacting current.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.CurrentProbe.ylabel">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ylabel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#src.instruments.CurrentProbe.ylabel" title="Link to this definition"></a></dt>
+<dd><p>Label used for plots.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.instruments.IElectricField">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IElectricField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Series</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.instruments.IElectricField" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.instruments.Instrument" title="multipac_testbench.src.instruments.instrument.Instrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code></a></p>
+<p>A generic instrument for electric fields.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.IElectricField.ylabel">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ylabel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#src.instruments.IElectricField.ylabel" title="Link to this definition"></a></dt>
+<dd><p>Label used for plots.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.instruments.FieldProbe">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FieldProbe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g_probe</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.instruments.FieldProbe" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.instruments.IElectricField" title="multipac_testbench.src.instruments.electric_field.i_electric_field.IElectricField"><code class="xref py py-class docutils literal notranslate"><span class="pre">IElectricField</span></code></a></p>
+<p>A probe to measure electric field.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.FieldProbe.ylabel">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ylabel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#src.instruments.FieldProbe.ylabel" title="Link to this definition"></a></dt>
+<dd><p>Label used for plots.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.instruments.ForwardPower">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ForwardPower</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">nan</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.instruments.ForwardPower" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.instruments.Power" title="multipac_testbench.src.instruments.power.Power"><code class="xref py py-class docutils literal notranslate"><span class="pre">Power</span></code></a></p>
+<p>Store the forward power.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.ForwardPower.ylabel">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ylabel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#src.instruments.ForwardPower.ylabel" title="Link to this definition"></a></dt>
+<dd><p>Label used for plots.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.instruments.Frequency">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Frequency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Series</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.instruments.Frequency" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.instruments.VirtualInstrument" title="multipac_testbench.src.instruments.virtual_instrument.VirtualInstrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">VirtualInstrument</span></code></a></p>
+<p>Store a frequency.</p>
+<p>By default, the frequency is in <span class="math notranslate nohighlight">\(\mathrm{MHz}\)</span>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.Frequency.from_user_defined_frequency">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_user_defined_frequency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq_mhz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Reference</span> <span class="pre">frequency'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#src.instruments.Frequency.from_user_defined_frequency" title="Link to this definition"></a></dt>
+<dd><p>Instantiate the object with a constant frequency.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>freq_mhz</strong> (<em>float</em>) – Frequency in <span class="math notranslate nohighlight">\(\mathrm{MHz}\)</span>.</p></li>
+<li><p><strong>n_points</strong> (<em>int</em>) – Number of points to fill.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – Name of the series and of the instrument.</p></li>
+<li><p><strong>kwargs</strong> – Other keyword arguments passed to pd.Series and constructor.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Self</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.Frequency.ylabel">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ylabel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#src.instruments.Frequency.ylabel" title="Link to this definition"></a></dt>
+<dd><p>Label used for plots.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.instruments.Instrument">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Instrument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_2d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.instruments.Instrument" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Hold measurements of a single instrument.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.Instrument.ylabel">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ylabel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#src.instruments.Instrument.ylabel" title="Link to this definition"></a></dt>
+<dd><p>Label used for plots.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.instruments.Instrument.label">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">label</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#src.instruments.Instrument.label" title="Link to this definition"></a></dt>
+<dd><p>Label used for legends in plots vs position.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.Instrument.from_array">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xdata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#src.instruments.Instrument.from_array" title="Link to this definition"></a></dt>
+<dd><p>Instantiate <a class="reference internal" href="#src.instruments.Instrument" title="src.instruments.Instrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code></a> from a numpy array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Name of the instrument.</p></li>
+<li><p><strong>data</strong> (<em>np.ndarray</em>) – The data measured by the instrument.</p></li>
+<li><p><strong>xdata</strong> (<em>Iterable</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – The data representing the measuring points. The default is None, in
+which case it is a list of integers starting from 1, which is the
+same as all data from the <code class="docutils literal notranslate"><span class="pre">.csv</span></code>.</p></li>
+<li><p><strong>kwargs</strong> – Other keyword arguments passed to the <a class="reference internal" href="#src.instruments.Instrument" title="src.instruments.Instrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>instrument</strong> – A regular instrument.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#src.instruments.Instrument" title="src.instruments.Instrument">Instrument</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.Instrument.from_pd_dataframe">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_pd_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#src.instruments.Instrument.from_pd_dataframe" title="Link to this definition"></a></dt>
+<dd><p>Instantiate the object from several <code class="docutils literal notranslate"><span class="pre">.csv</span></code> file columns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Name of the instrument.</p></li>
+<li><p><strong>raw_data</strong> (<em>pd.DataFrame</em>) – Object holding several columns of the <code class="docutils literal notranslate"><span class="pre">.csv</span></code>.</p></li>
+<li><p><strong>kwargs</strong> – Other keyword arguments passed to the <a class="reference internal" href="#src.instruments.Instrument" title="src.instruments.Instrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>instrument</strong> – An instrument. Note that its <code class="docutils literal notranslate"><span class="pre">data</span></code> attribute will be a 2D
+array.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#src.instruments.Instrument" title="src.instruments.Instrument">Instrument</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.instruments.Instrument.class_name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">class_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#src.instruments.Instrument.class_name" title="Link to this definition"></a></dt>
+<dd><p>Shortcut to the name of the instrument class.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.instruments.Instrument.data_as_pd">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data_as_pd</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Series</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">DataFrame</span></em><a class="headerlink" href="#src.instruments.Instrument.data_as_pd" title="Link to this definition"></a></dt>
+<dd><p>Get the treated data as a pandas object.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.instruments.Instrument.data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#src.instruments.Instrument.data" title="Link to this definition"></a></dt>
+<dd><p>Get the treated data.</p>
+<p>Note that in order to save time, <code class="docutils literal notranslate"><span class="pre">_data</span></code> is not re-calculated
+from <code class="docutils literal notranslate"><span class="pre">raw_data</span></code> every time. Hence, it is primordial to re-set
+<code class="docutils literal notranslate"><span class="pre">_y_data</span></code> to <code class="docutils literal notranslate"><span class="pre">None</span></code> every time a change is made to
+<code class="docutils literal notranslate"><span class="pre">_post_treaters</span></code>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.instruments.Instrument.post_treaters">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">post_treaters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#src.instruments.Instrument.post_treaters" title="Link to this definition"></a></dt>
+<dd><p>Get the list of the post-treating functions.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.Instrument.add_post_treater">
+<span class="sig-name descname"><span class="pre">add_post_treater</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">post_treater</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#src.instruments.Instrument.add_post_treater" title="Link to this definition"></a></dt>
+<dd><p>Append a single post-treating function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>post_treater</strong> (<em>Callable</em><em>[</em><em>[</em><em>np.ndarray</em><em>]</em><em>, </em><em>np.ndarray</em><em>]</em>) – Post-treating function to add. It must take an array as input, and
+return an array with the same size as output.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.Instrument.at_thresholds">
+<span class="sig-name descname"><span class="pre">at_thresholds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instrument_multipactor_bands</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">InstrumentMultipactorBands</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#src.instruments.Instrument.at_thresholds" title="Link to this definition"></a></dt>
+<dd><p>Get what was measured by instrument at thresholds.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.Instrument.multipactor_band_at_same_position">
+<span class="sig-name descname"><span class="pre">multipactor_band_at_same_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">multipactor_bands</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TestMultipactorBands</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raise_no_match_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">True</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_diagnostics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">InstrumentMultipactorBands</span></span></span><a class="headerlink" href="#src.instruments.Instrument.multipactor_band_at_same_position" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">multipactor_band_at_same_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">multipactor_bands</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TestMultipactorBands</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raise_no_match_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">False</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_diagnostics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">InstrumentMultipactorBands</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">multipactor_band_at_same_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">multipactor_bands</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TestMultipactorBands</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raise_no_match_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_diagnostics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">InstrumentMultipactorBands</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">multipactor_band_at_same_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">multipactor_bands</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">InstrumentMultipactorBands</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raise_no_match_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_diagnostics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">InstrumentMultipactorBands</span></span></span></dt>
+<dd><p>Get the multipactor that was measured at the same position.</p>
+<p>This is useful to easily match the data from a field probe to the
+multipactor bands measured by the curret probe at the same position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>multipactor_bands</strong> (<a class="reference internal" href="src.multipactor_band.test_multipactor_bands.html#src.multipactor_band.test_multipactor_bands.TestMultipactorBands" title="src.multipactor_band.test_multipactor_bands.TestMultipactorBands"><em>TestMultipactorBands</em></a><em> | </em><a class="reference internal" href="src.multipactor_band.instrument_multipactor_bands.html#src.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands" title="src.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands"><em>InstrumentMultipactorBands</em></a>) – List of <a class="reference internal" href="src.multipactor_band.instrument_multipactor_bands.html#src.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands" title="src.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstrumentMultipactorBands</span></code></a> among which you want
+to find the match. If a <a class="reference internal" href="src.multipactor_band.instrument_multipactor_bands.html#src.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands" title="src.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstrumentMultipactorBands</span></code></a> is
+given, return it back without further checking.</p></li>
+<li><p><strong>tol</strong> (<em>float</em><em>, </em><em>optional</em>) – Mismatch allowed between positions. The default is <code class="docutils literal notranslate"><span class="pre">1e-10</span></code>.</p></li>
+<li><p><strong>global_diagnostics</strong> (<em>bool</em><em>, </em><em>optional</em>) – If multipactor detected by a global instrument should be returned.
+The default is False.</p></li>
+<li><p><strong>raise_no_match_error</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, method always return an object. The default is False.</p></li>
+<li><p><strong>kwargs</strong> – Other keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="src.multipactor_band.instrument_multipactor_bands.html#src.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands" title="src.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands">InstrumentMultipactorBands</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.Instrument.values_at_barriers">
+<span class="sig-name descname"><span class="pre">values_at_barriers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instrument_multipactor_bands</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">InstrumentMultipactorBands</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataFrame</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#src.instruments.Instrument.values_at_barriers" title="Link to this definition"></a></dt>
+<dd><p>Get measured data at lower and upper multipactor barriers.</p>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>Dirty patch to select 1d/2d data</p>
+</div>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version 1.5.0: </span>Use <a class="reference internal" href="#src.instruments.Instrument.at_thresholds" title="src.instruments.Instrument.at_thresholds"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Instrument.at_thresholds()</span></code></a> instead.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>instrument_multipactor_bands</strong> (<a class="reference internal" href="src.multipactor_band.instrument_multipactor_bands.html#src.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands" title="src.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands"><em>InstrumentMultipactorBands</em></a>) – Object holding the multipacting barriers.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Holds measured data at lower and upper multipacting barriers.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[pd.DataFrame, pd.DataFrame]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.Instrument.values_at_barriers_fully_conditioned">
+<span class="sig-name descname"><span class="pre">values_at_barriers_fully_conditioned</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instrument_multipactor_bands</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">InstrumentMultipactorBands</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#src.instruments.Instrument.values_at_barriers_fully_conditioned" title="Link to this definition"></a></dt>
+<dd><p>Get measured data at last mp limits.</p>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version 1.5.0: </span>Use <a class="reference internal" href="#src.instruments.Instrument.at_thresholds" title="src.instruments.Instrument.at_thresholds"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Instrument.at_thresholds()</span></code></a> instead.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.instruments.OpticalFibre">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OpticalFibre</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.instruments.OpticalFibre" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.instruments.Instrument" title="multipac_testbench.src.instruments.instrument.Instrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code></a></p>
+<p>An optical fibre detecting multipacting light.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.OpticalFibre.ylabel">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ylabel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#src.instruments.OpticalFibre.ylabel" title="Link to this definition"></a></dt>
+<dd><p>Label used for plots.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.instruments.Penning">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Penning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.instruments.Penning" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.instruments.Instrument" title="multipac_testbench.src.instruments.instrument.Instrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code></a></p>
+<p>A probe to measure pressure.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.Penning.ylabel">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ylabel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#src.instruments.Penning.ylabel" title="Link to this definition"></a></dt>
+<dd><p>Label used for plots.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.instruments.Power">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">nan</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.instruments.Power" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.instruments.Instrument" title="multipac_testbench.src.instruments.instrument.Instrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code></a></p>
+<p>An instrument to measure power.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.Power.ylabel">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ylabel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#src.instruments.Power.ylabel" title="Link to this definition"></a></dt>
+<dd><p>Label used for plots.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.Power.where_is_growing">
+<span class="sig-name descname"><span class="pre">where_is_growing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">minimum_number_of_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_trailing_points_to_check</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">40</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">bool_</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#src.instruments.Power.where_is_growing" title="Link to this definition"></a></dt>
+<dd><p>Determine where power is growing (<code class="docutils literal notranslate"><span class="pre">True</span></code>) and where it is not.</p>
+<div class="admonition-todo admonition" id="id2">
+<p class="admonition-title">Todo</p>
+<p>May be necessary to also remove isolated True</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.instruments.Reconstructed">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Reconstructed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Series</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_field_probes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#src.instruments.FieldProbe" title="multipac_testbench.src.instruments.electric_field.field_probe.FieldProbe"><span class="pre">FieldProbe</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forward_power</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.instruments.ForwardPower" title="multipac_testbench.src.instruments.power.ForwardPower"><span class="pre">ForwardPower</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">reflection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.instruments.ReflectionCoefficient" title="multipac_testbench.src.instruments.reflection_coefficient.ReflectionCoefficient"><span class="pre">ReflectionCoefficient</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq_mhz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">array([0.,</span> <span class="pre">0.0065,</span> <span class="pre">0.013,</span> <span class="pre">0.0195,</span> <span class="pre">0.026,</span> <span class="pre">0.0325,</span> <span class="pre">0.039,</span> <span class="pre">0.0455,</span> <span class="pre">0.052,</span> <span class="pre">0.0585,</span> <span class="pre">0.065,</span> <span class="pre">0.0715,</span> <span class="pre">0.078,</span> <span class="pre">0.0845,</span> <span class="pre">0.091,</span> <span class="pre">0.0975,</span> <span class="pre">0.104,</span> <span class="pre">0.1105,</span> <span class="pre">0.117,</span> <span class="pre">0.1235,</span> <span class="pre">0.13,</span> <span class="pre">0.1365,</span> <span class="pre">0.143,</span> <span class="pre">0.1495,</span> <span class="pre">0.156,</span> <span class="pre">0.1625,</span> <span class="pre">0.169,</span> <span class="pre">0.1755,</span> <span class="pre">0.182,</span> <span class="pre">0.1885,</span> <span class="pre">0.195,</span> <span class="pre">0.2015,</span> <span class="pre">0.208,</span> <span class="pre">0.2145,</span> <span class="pre">0.221,</span> <span class="pre">0.2275,</span> <span class="pre">0.234,</span> <span class="pre">0.2405,</span> <span class="pre">0.247,</span> <span class="pre">0.2535,</span> <span class="pre">0.26,</span> <span class="pre">0.2665,</span> <span class="pre">0.273,</span> <span class="pre">0.2795,</span> <span class="pre">0.286,</span> <span class="pre">0.2925,</span> <span class="pre">0.299,</span> <span class="pre">0.3055,</span> <span class="pre">0.312,</span> <span class="pre">0.3185,</span> <span class="pre">0.325,</span> <span class="pre">0.3315,</span> <span class="pre">0.338,</span> <span class="pre">0.3445,</span> <span class="pre">0.351,</span> <span class="pre">0.3575,</span> <span class="pre">0.364,</span> <span class="pre">0.3705,</span> <span class="pre">0.377,</span> <span class="pre">0.3835,</span> <span class="pre">0.39,</span> <span class="pre">0.3965,</span> <span class="pre">0.403,</span> <span class="pre">0.4095,</span> <span class="pre">0.416,</span> <span class="pre">0.4225,</span> <span class="pre">0.429,</span> <span class="pre">0.4355,</span> <span class="pre">0.442,</span> <span class="pre">0.4485,</span> <span class="pre">0.455,</span> <span class="pre">0.4615,</span> <span class="pre">0.468,</span> <span class="pre">0.4745,</span> <span class="pre">0.481,</span> <span class="pre">0.4875,</span> <span class="pre">0.494,</span> <span class="pre">0.5005,</span> <span class="pre">0.507,</span> <span class="pre">0.5135,</span> <span class="pre">0.52,</span> <span class="pre">0.5265,</span> <span class="pre">0.533,</span> <span class="pre">0.5395,</span> <span class="pre">0.546,</span> <span class="pre">0.5525,</span> <span class="pre">0.559,</span> <span class="pre">0.5655,</span> <span class="pre">0.572,</span> <span class="pre">0.5785,</span> <span class="pre">0.585,</span> <span class="pre">0.5915,</span> <span class="pre">0.598,</span> <span class="pre">0.6045,</span> <span class="pre">0.611,</span> <span class="pre">0.6175,</span> <span class="pre">0.624,</span> <span class="pre">0.6305,</span> <span class="pre">0.637,</span> <span class="pre">0.6435,</span> <span class="pre">0.65,</span> <span class="pre">0.6565,</span> <span class="pre">0.663,</span> <span class="pre">0.6695,</span> <span class="pre">0.676,</span> <span class="pre">0.6825,</span> <span class="pre">0.689,</span> <span class="pre">0.6955,</span> <span class="pre">0.702,</span> <span class="pre">0.7085,</span> <span class="pre">0.715,</span> <span class="pre">0.7215,</span> <span class="pre">0.728,</span> <span class="pre">0.7345,</span> <span class="pre">0.741,</span> <span class="pre">0.7475,</span> <span class="pre">0.754,</span> <span class="pre">0.7605,</span> <span class="pre">0.767,</span> <span class="pre">0.7735,</span> <span class="pre">0.78,</span> <span class="pre">0.7865,</span> <span class="pre">0.793,</span> <span class="pre">0.7995,</span> <span class="pre">0.806,</span> <span class="pre">0.8125,</span> <span class="pre">0.819,</span> <span class="pre">0.8255,</span> <span class="pre">0.832,</span> <span class="pre">0.8385,</span> <span class="pre">0.845,</span> <span class="pre">0.8515,</span> <span class="pre">0.858,</span> <span class="pre">0.8645,</span> <span class="pre">0.871,</span> <span class="pre">0.8775,</span> <span class="pre">0.884,</span> <span class="pre">0.8905,</span> <span class="pre">0.897,</span> <span class="pre">0.9035,</span> <span class="pre">0.91,</span> <span class="pre">0.9165,</span> <span class="pre">0.923,</span> <span class="pre">0.9295,</span> <span class="pre">0.936,</span> <span class="pre">0.9425,</span> <span class="pre">0.949,</span> <span class="pre">0.9555,</span> <span class="pre">0.962,</span> <span class="pre">0.9685,</span> <span class="pre">0.975,</span> <span class="pre">0.9815,</span> <span class="pre">0.988,</span> <span class="pre">0.9945,</span> <span class="pre">1.001,</span> <span class="pre">1.0075,</span> <span class="pre">1.014,</span> <span class="pre">1.0205,</span> <span class="pre">1.027,</span> <span class="pre">1.0335,</span> <span class="pre">1.04,</span> <span class="pre">1.0465,</span> <span class="pre">1.053,</span> <span class="pre">1.0595,</span> <span class="pre">1.066,</span> <span class="pre">1.0725,</span> <span class="pre">1.079,</span> <span class="pre">1.0855,</span> <span class="pre">1.092,</span> <span class="pre">1.0985,</span> <span class="pre">1.105,</span> <span class="pre">1.1115,</span> <span class="pre">1.118,</span> <span class="pre">1.1245,</span> <span class="pre">1.131,</span> <span class="pre">1.1375,</span> <span class="pre">1.144,</span> <span class="pre">1.1505,</span> <span class="pre">1.157,</span> <span class="pre">1.1635,</span> <span class="pre">1.17,</span> <span class="pre">1.1765,</span> <span class="pre">1.183,</span> <span class="pre">1.1895,</span> <span class="pre">1.196,</span> <span class="pre">1.2025,</span> <span class="pre">1.209,</span> <span class="pre">1.2155,</span> <span class="pre">1.222,</span> <span class="pre">1.2285,</span> <span class="pre">1.235,</span> <span class="pre">1.2415,</span> <span class="pre">1.248,</span> <span class="pre">1.2545,</span> <span class="pre">1.261,</span> <span class="pre">1.2675,</span> <span class="pre">1.274,</span> <span class="pre">1.2805,</span> <span class="pre">1.287,</span> <span class="pre">1.2935,</span> <span class="pre">1.3])</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_ohm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.instruments.Reconstructed" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.instruments.IElectricField" title="multipac_testbench.src.instruments.electric_field.i_electric_field.IElectricField"><code class="xref py py-class docutils literal notranslate"><span class="pre">IElectricField</span></code></a></p>
+<p>Voltage in the coaxial waveguide, fitted with e field probes.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.Reconstructed.ylabel">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ylabel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#src.instruments.Reconstructed.ylabel" title="Link to this definition"></a></dt>
+<dd><p>Label used for plots.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.instruments.Reconstructed.data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#src.instruments.Reconstructed.data" title="Link to this definition"></a></dt>
+<dd><p>Give the calculated voltage at every pos and sample index.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In contrary to most <a class="reference internal" href="#src.instruments.Instrument" title="src.instruments.Instrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code></a> objects, here <code class="docutils literal notranslate"><span class="pre">data</span></code> is
+2D. Axis are the following: <code class="docutils literal notranslate"><span class="pre">data[sample_index,</span> <span class="pre">position_index]</span></code></p>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.instruments.Reconstructed.fit_info">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fit_info</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#src.instruments.Reconstructed.fit_info" title="Link to this definition"></a></dt>
+<dd><p>Print compact info on fit.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.instruments.Reconstructed.label">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">label</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#src.instruments.Reconstructed.label" title="Link to this definition"></a></dt>
+<dd><p>Label used for legends in plots vs position.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.Reconstructed.fit_voltage">
+<span class="sig-name descname"><span class="pre">fit_voltage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">full_output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#src.instruments.Reconstructed.fit_voltage" title="Link to this definition"></a></dt>
+<dd><p>Find out the proper voltage parameters.</p>
+<p>Idea is the following: for every sample index we know the forward
+(injected) power <span class="math notranslate nohighlight">\(P_f\)</span>, <span class="math notranslate nohighlight">\(\Gamma\)</span>, and
+<span class="math notranslate nohighlight">\(V_\mathrm{coax}\)</span> at several pick-ups. We try to find
+<span class="math notranslate nohighlight">\(\psi_0\)</span> to verify:</p>
+<div class="math notranslate nohighlight">
+\[|V_\mathrm{coax}(z)| = 2\sqrt{P_f Z} \sqrt{1 + |\Gamma|^2
++ 2|\Gamma| \cos{(2\beta z + \psi_0)}}\]</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.Reconstructed.data_at_position">
+<span class="sig-name descname"><span class="pre">data_at_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#src.instruments.Reconstructed.data_at_position" title="Link to this definition"></a></dt>
+<dd><p>Get reconstructed field at position <code class="docutils literal notranslate"><span class="pre">pos</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.instruments.ReflectedPower">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ReflectedPower</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">nan</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.instruments.ReflectedPower" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.instruments.Power" title="multipac_testbench.src.instruments.power.Power"><code class="xref py py-class docutils literal notranslate"><span class="pre">Power</span></code></a></p>
+<p>Store the reflected power.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.ReflectedPower.ylabel">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ylabel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#src.instruments.ReflectedPower.ylabel" title="Link to this definition"></a></dt>
+<dd><p>Label used for plots.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.instruments.ReflectionCoefficient">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ReflectionCoefficient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Series</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.instruments.ReflectionCoefficient" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.instruments.VirtualInstrument" title="multipac_testbench.src.instruments.virtual_instrument.VirtualInstrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">VirtualInstrument</span></code></a></p>
+<p>Store the reflection coefficient.</p>
+<p>We use the definition:</p>
+<div class="math notranslate nohighlight">
+\[R = \frac{V_r}{V_f} = \sqrt{\frac{P_r}{P_f}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(P_r\)</span> is the reflected power and <span class="math notranslate nohighlight">\(P_f\)</span> is the forward
+power.
+This object is created by <code class="xref py py-meth docutils literal notranslate"><span class="pre">InstrumentFactory.run_virtual()</span></code> when there
+is one <a class="reference internal" href="#src.instruments.ForwardPower" title="src.instruments.ForwardPower"><code class="xref py py-class docutils literal notranslate"><span class="pre">ForwardPower</span></code></a> and one <a class="reference internal" href="#src.instruments.ReflectedPower" title="src.instruments.ReflectedPower"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReflectedPower</span></code></a> in its
+<code class="docutils literal notranslate"><span class="pre">instruments</span></code> argument.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.ReflectionCoefficient.from_powers">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_powers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">forward</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.instruments.ForwardPower" title="multipac_testbench.src.instruments.power.ForwardPower"><span class="pre">ForwardPower</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">reflected</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.instruments.ReflectedPower" title="multipac_testbench.src.instruments.power.ReflectedPower"><span class="pre">ReflectedPower</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Reflection_coefficient'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#src.instruments.ReflectionCoefficient.from_powers" title="Link to this definition"></a></dt>
+<dd><p>Compute the reflection coefficient from given <a class="reference internal" href="#src.instruments.Power" title="src.instruments.Power"><code class="xref py py-class docutils literal notranslate"><span class="pre">Power</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.ReflectionCoefficient.ylabel">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ylabel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#src.instruments.ReflectionCoefficient.ylabel" title="Link to this definition"></a></dt>
+<dd><p>Label used for plots.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.instruments.SWR">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SWR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Series</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.instruments.SWR" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.instruments.VirtualInstrument" title="multipac_testbench.src.instruments.virtual_instrument.VirtualInstrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">VirtualInstrument</span></code></a></p>
+<p>Store the Standing Wave Ratio.</p>
+<p>We use the definition:</p>
+<div class="math notranslate nohighlight">
+\[SWR = \frac{1 + R}{1 - R}\]</div>
+<p>where <span class="math notranslate nohighlight">\(R\)</span> is the reflection coefficient.</p>
+<p>This object is created by <code class="xref py py-meth docutils literal notranslate"><span class="pre">InstrumentFactory.run_virtual()</span></code> when there
+is one <a class="reference internal" href="#src.instruments.ForwardPower" title="src.instruments.ForwardPower"><code class="xref py py-class docutils literal notranslate"><span class="pre">ForwardPower</span></code></a> and one <a class="reference internal" href="#src.instruments.ReflectedPower" title="src.instruments.ReflectedPower"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReflectedPower</span></code></a> in its
+<code class="docutils literal notranslate"><span class="pre">instruments</span></code> argument.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.SWR.from_powers">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_powers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">forward</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.instruments.ForwardPower" title="multipac_testbench.src.instruments.power.ForwardPower"><span class="pre">ForwardPower</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">reflected</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.instruments.ReflectedPower" title="multipac_testbench.src.instruments.power.ReflectedPower"><span class="pre">ReflectedPower</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'SWR'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#src.instruments.SWR.from_powers" title="Link to this definition"></a></dt>
+<dd><p>Compute the reflection coefficient from given <a class="reference internal" href="#src.instruments.Power" title="src.instruments.Power"><code class="xref py py-class docutils literal notranslate"><span class="pre">Power</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.SWR.from_reflection_coefficient">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_reflection_coefficient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reflection_coefficient</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.instruments.ReflectionCoefficient" title="multipac_testbench.src.instruments.reflection_coefficient.ReflectionCoefficient"><span class="pre">ReflectionCoefficient</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'SWR'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#src.instruments.SWR.from_reflection_coefficient" title="Link to this definition"></a></dt>
+<dd><p>Compute the SWR from given <a class="reference internal" href="#src.instruments.ReflectionCoefficient" title="src.instruments.ReflectionCoefficient"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReflectionCoefficient</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.instruments.SWR.ylabel">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ylabel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#src.instruments.SWR.ylabel" title="Link to this definition"></a></dt>
+<dd><p>Label used for plots.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.instruments.VirtualInstrument">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VirtualInstrument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Series</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.instruments.VirtualInstrument" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.instruments.Instrument" title="multipac_testbench.src.instruments.instrument.Instrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code></a></p>
+<p>An object that works like an <a class="reference internal" href="#src.instruments.Instrument" title="src.instruments.Instrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code></a>.</p>
+<p>Allows to avoid confusion when the object under study should have same
+methods than a classic instrument, but is user-defined with analytical data
+or data calculated from other instruments.</p>
+</dd></dl>
+
 <section id="subpackages">
 <h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
@@ -148,6 +601,15 @@
 <li class="toctree-l2"><a class="reference internal" href="src.instruments.factory.html#src.instruments.factory.STRING_TO_INSTRUMENT_CLASS"><code class="docutils literal notranslate"><span class="pre">STRING_TO_INSTRUMENT_CLASS</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="src.instruments.factory.html#src.instruments.factory.InstrumentFactory"><code class="docutils literal notranslate"><span class="pre">InstrumentFactory</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.factory.html#src.instruments.factory.InstrumentFactory.run"><code class="docutils literal notranslate"><span class="pre">InstrumentFactory.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.instruments.factory.html#src.instruments.factory.InstrumentFactory.run_virtual"><code class="docutils literal notranslate"><span class="pre">InstrumentFactory.run_virtual()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src.instruments.frequency.html">src.instruments.frequency module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src.instruments.frequency.html#src.instruments.frequency.Frequency"><code class="docutils literal notranslate"><span class="pre">Frequency</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.instruments.frequency.html#src.instruments.frequency.Frequency.from_user_defined_frequency"><code class="docutils literal notranslate"><span class="pre">Frequency.from_user_defined_frequency()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.instruments.frequency.html#src.instruments.frequency.Frequency.ylabel"><code class="docutils literal notranslate"><span class="pre">Frequency.ylabel()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -159,10 +621,12 @@
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.from_array"><code class="docutils literal notranslate"><span class="pre">Instrument.from_array()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.from_pd_dataframe"><code class="docutils literal notranslate"><span class="pre">Instrument.from_pd_dataframe()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.class_name"><code class="docutils literal notranslate"><span class="pre">Instrument.class_name</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.ydata_as_pd"><code class="docutils literal notranslate"><span class="pre">Instrument.ydata_as_pd</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.ydata"><code class="docutils literal notranslate"><span class="pre">Instrument.ydata</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.data_as_pd"><code class="docutils literal notranslate"><span class="pre">Instrument.data_as_pd</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.data"><code class="docutils literal notranslate"><span class="pre">Instrument.data</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.post_treaters"><code class="docutils literal notranslate"><span class="pre">Instrument.post_treaters</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.add_post_treater"><code class="docutils literal notranslate"><span class="pre">Instrument.add_post_treater()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.at_thresholds"><code class="docutils literal notranslate"><span class="pre">Instrument.at_thresholds()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.multipactor_band_at_same_position"><code class="docutils literal notranslate"><span class="pre">Instrument.multipactor_band_at_same_position()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.values_at_barriers"><code class="docutils literal notranslate"><span class="pre">Instrument.values_at_barriers()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.values_at_barriers_fully_conditioned"><code class="docutils literal notranslate"><span class="pre">Instrument.values_at_barriers_fully_conditioned()</span></code></a></li>
 </ul>
@@ -183,6 +647,22 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="src.instruments.power.html">src.instruments.power module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src.instruments.power.html#src.instruments.power.Power"><code class="docutils literal notranslate"><span class="pre">Power</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.instruments.power.html#src.instruments.power.Power.ylabel"><code class="docutils literal notranslate"><span class="pre">Power.ylabel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.instruments.power.html#src.instruments.power.Power.where_is_growing"><code class="docutils literal notranslate"><span class="pre">Power.where_is_growing()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.instruments.power.html#src.instruments.power.ForwardPower"><code class="docutils literal notranslate"><span class="pre">ForwardPower</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.instruments.power.html#src.instruments.power.ForwardPower.ylabel"><code class="docutils literal notranslate"><span class="pre">ForwardPower.ylabel()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.instruments.power.html#src.instruments.power.ReflectedPower"><code class="docutils literal notranslate"><span class="pre">ReflectedPower</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.instruments.power.html#src.instruments.power.ReflectedPower.ylabel"><code class="docutils literal notranslate"><span class="pre">ReflectedPower.ylabel()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="src.instruments.powers.html">src.instruments.powers module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="src.instruments.powers.html#src.instruments.powers.Powers"><code class="docutils literal notranslate"><span class="pre">Powers</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.powers.html#src.instruments.powers.Powers.ylabel"><code class="docutils literal notranslate"><span class="pre">Powers.ylabel()</span></code></a></li>
@@ -191,6 +671,23 @@
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.powers.html#src.instruments.powers.Powers.forward"><code class="docutils literal notranslate"><span class="pre">Powers.forward</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.powers.html#src.instruments.powers.Powers.reflected"><code class="docutils literal notranslate"><span class="pre">Powers.reflected</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.powers.html#src.instruments.powers.Powers.where_is_growing"><code class="docutils literal notranslate"><span class="pre">Powers.where_is_growing()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src.instruments.reflection_coefficient.html">src.instruments.reflection_coefficient module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src.instruments.reflection_coefficient.html#src.instruments.reflection_coefficient.ReflectionCoefficient"><code class="docutils literal notranslate"><span class="pre">ReflectionCoefficient</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.instruments.reflection_coefficient.html#src.instruments.reflection_coefficient.ReflectionCoefficient.from_powers"><code class="docutils literal notranslate"><span class="pre">ReflectionCoefficient.from_powers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.instruments.reflection_coefficient.html#src.instruments.reflection_coefficient.ReflectionCoefficient.ylabel"><code class="docutils literal notranslate"><span class="pre">ReflectionCoefficient.ylabel()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src.instruments.swr.html">src.instruments.swr module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src.instruments.swr.html#src.instruments.swr.SWR"><code class="docutils literal notranslate"><span class="pre">SWR</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.instruments.swr.html#src.instruments.swr.SWR.from_powers"><code class="docutils literal notranslate"><span class="pre">SWR.from_powers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.instruments.swr.html#src.instruments.swr.SWR.from_reflection_coefficient"><code class="docutils literal notranslate"><span class="pre">SWR.from_reflection_coefficient()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.instruments.swr.html#src.instruments.swr.SWR.ylabel"><code class="docutils literal notranslate"><span class="pre">SWR.ylabel()</span></code></a></li>
 </ul>
 </li>
 </ul>

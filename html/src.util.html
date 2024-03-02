@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>src.util package &mdash; MULTIPAC test bench 1.4.1 documentation</title>
+  <title>src.util package &mdash; MULTIPAC test bench 1.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,14 +15,14 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=350a9c04"></script>
+        <script src="_static/documentation_options.js?v=e0a75244"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="src.util.helper module" href="src.util.helper.html" />
+    <link rel="next" title="src.util.animate module" href="src.util.animate.html" />
     <link rel="prev" title="src.theoretical.susceptibility module" href="src.theoretical.susceptibility.html" /> 
 </head>
 
@@ -38,7 +38,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.4.1
+                1.5.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -52,7 +52,8 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="manual/presentation.html">Presentation of the library</a></li>
 <li class="toctree-l1"><a class="reference internal" href="manual/configuration.html">Configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="manual/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="manual/gallery.html">Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="manual/tutorials.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="src.html">src package</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.html">src.instruments package</a></li>
@@ -60,7 +61,10 @@
 <li class="toctree-l3"><a class="reference internal" href="src.multipactor_band.html">src.multipactor_band package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.theoretical.html">src.theoretical package</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">src.util package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.util.animate.html">src.util.animate module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.util.filtering.html">src.util.filtering module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.util.helper.html">src.util.helper module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.util.log_manager.html">src.util.log_manager module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.util.multipactor_detectors.html">src.util.multipactor_detectors module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.util.plot.html">src.util.plot module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.util.post_treaters.html">src.util.post_treaters module</a></li>
@@ -107,9 +111,31 @@
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="src.util.animate.html">src.util.animate module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src.util.animate.html#src.util.animate.get_limits"><code class="docutils literal notranslate"><span class="pre">get_limits()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src.util.filtering.html">src.util.filtering module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src.util.filtering.html#src.util.filtering.remove_trailing_true"><code class="docutils literal notranslate"><span class="pre">remove_trailing_true()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.util.filtering.html#src.util.filtering.array_is_growing"><code class="docutils literal notranslate"><span class="pre">array_is_growing()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.util.filtering.html#src.util.filtering.remove_isolated_true"><code class="docutils literal notranslate"><span class="pre">remove_isolated_true()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.util.filtering.html#src.util.filtering.remove_isolated_false"><code class="docutils literal notranslate"><span class="pre">remove_isolated_false()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="src.util.helper.html">src.util.helper module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="src.util.helper.html#src.util.helper.output_filepath"><code class="docutils literal notranslate"><span class="pre">output_filepath()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="src.util.helper.html#src.util.helper.r_squared"><code class="docutils literal notranslate"><span class="pre">r_squared()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src.util.log_manager.html">src.util.log_manager module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src.util.log_manager.html#src.util.log_manager.LogFormatter"><code class="docutils literal notranslate"><span class="pre">LogFormatter</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.util.log_manager.html#src.util.log_manager.LogFormatter.COLOR_CODES"><code class="docutils literal notranslate"><span class="pre">LogFormatter.COLOR_CODES</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.util.log_manager.html#src.util.log_manager.LogFormatter.RESET_CODE"><code class="docutils literal notranslate"><span class="pre">LogFormatter.RESET_CODE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.util.log_manager.html#src.util.log_manager.LogFormatter.format"><code class="docutils literal notranslate"><span class="pre">LogFormatter.format()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.util.log_manager.html#src.util.log_manager.set_up_logging"><code class="docutils literal notranslate"><span class="pre">set_up_logging()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.util.log_manager.html#src.util.log_manager.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="src.util.multipactor_detectors.html">src.util.multipactor_detectors module</a><ul>
@@ -121,6 +147,14 @@
 <li class="toctree-l1"><a class="reference internal" href="src.util.plot.html">src.util.plot module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="src.util.plot.html#src.util.plot.create_fig"><code class="docutils literal notranslate"><span class="pre">create_fig()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="src.util.plot.html#src.util.plot.finish_fig"><code class="docutils literal notranslate"><span class="pre">finish_fig()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.util.plot.html#src.util.plot.create_df_to_plot"><code class="docutils literal notranslate"><span class="pre">create_df_to_plot()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.util.plot.html#src.util.plot.match_x_and_y_column_names"><code class="docutils literal notranslate"><span class="pre">match_x_and_y_column_names()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.util.plot.html#src.util.plot.actual_plot"><code class="docutils literal notranslate"><span class="pre">actual_plot()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.util.plot.html#src.util.plot.set_labels"><code class="docutils literal notranslate"><span class="pre">set_labels()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.util.plot.html#src.util.plot.save_figure"><code class="docutils literal notranslate"><span class="pre">save_figure()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.util.plot.html#src.util.plot.save_dataframe"><code class="docutils literal notranslate"><span class="pre">save_dataframe()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.util.plot.html#src.util.plot.add_background_color_according_to_power_growth"><code class="docutils literal notranslate"><span class="pre">add_background_color_according_to_power_growth()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.util.plot.html#src.util.plot.add_instrument_multipactor_bands"><code class="docutils literal notranslate"><span class="pre">add_instrument_multipactor_bands()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="src.util.post_treaters.html">src.util.post_treaters module</a><ul>
@@ -139,7 +173,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="src.theoretical.susceptibility.html" class="btn btn-neutral float-left" title="src.theoretical.susceptibility module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="src.util.helper.html" class="btn btn-neutral float-right" title="src.util.helper module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="src.util.animate.html" class="btn btn-neutral float-right" title="src.util.animate module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
