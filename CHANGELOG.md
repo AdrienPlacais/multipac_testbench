@@ -17,6 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `plot_instruments_vs_time`
   - `plot_instruments_y_vs_instrument_x`
   - `plot_data_at_multipactor_thresholds`
+- `MultipactorTest` methods:
+  - `plot_instruments_vs_time`
+  - `plot_data_at_multipactor_thresholds`
+  - `data_for_susceptibility`
+  - `plot_instruments_y_vs_instrument_x`
 
 
 ## [1.5.0] 2024-03-02
