@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>src.instruments package &mdash; MULTIPAC test bench 1.5.0 documentation</title>
+  <title>src.instruments package &mdash; MULTIPAC test bench 1.5.0-9-g4d67c55 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,7 +15,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=e0a75244"></script>
+        <script src="_static/documentation_options.js?v=40ae1ef5"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -40,7 +40,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.5.0
+                1.5.0-9-g4d67c55
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -67,7 +67,6 @@
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.optical_fibre.html">src.instruments.optical_fibre module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.penning.html">src.instruments.penning module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.power.html">src.instruments.power module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.instruments.powers.html">src.instruments.powers module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.reflection_coefficient.html">src.instruments.reflection_coefficient module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.swr.html">src.instruments.swr module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.instruments.virtual_instrument.html">src.instruments.virtual_instrument module</a></li>
@@ -217,30 +216,6 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="src.instruments.Instrument.from_array">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xdata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#src.instruments.Instrument.from_array" title="Link to this definition"></a></dt>
-<dd><p>Instantiate <a class="reference internal" href="#src.instruments.Instrument" title="src.instruments.Instrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code></a> from a numpy array.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<em>str</em>) – Name of the instrument.</p></li>
-<li><p><strong>data</strong> (<em>np.ndarray</em>) – The data measured by the instrument.</p></li>
-<li><p><strong>xdata</strong> (<em>Iterable</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – The data representing the measuring points. The default is None, in
-which case it is a list of integers starting from 1, which is the
-same as all data from the <code class="docutils literal notranslate"><span class="pre">.csv</span></code>.</p></li>
-<li><p><strong>kwargs</strong> – Other keyword arguments passed to the <a class="reference internal" href="#src.instruments.Instrument" title="src.instruments.Instrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code></a>.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>instrument</strong> – A regular instrument.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#src.instruments.Instrument" title="src.instruments.Instrument">Instrument</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="src.instruments.Instrument.from_pd_dataframe">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_pd_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#src.instruments.Instrument.from_pd_dataframe" title="Link to this definition"></a></dt>
 <dd><p>Instantiate the object from several <code class="docutils literal notranslate"><span class="pre">.csv</span></code> file columns.</p>
@@ -339,39 +314,6 @@ The default is False.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="src.instruments.Instrument.values_at_barriers">
-<span class="sig-name descname"><span class="pre">values_at_barriers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instrument_multipactor_bands</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">InstrumentMultipactorBands</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataFrame</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#src.instruments.Instrument.values_at_barriers" title="Link to this definition"></a></dt>
-<dd><p>Get measured data at lower and upper multipactor barriers.</p>
-<div class="admonition-todo admonition" id="id1">
-<p class="admonition-title">Todo</p>
-<p>Dirty patch to select 1d/2d data</p>
-</div>
-<div class="deprecated">
-<p><span class="versionmodified deprecated">Deprecated since version 1.5.0: </span>Use <a class="reference internal" href="#src.instruments.Instrument.at_thresholds" title="src.instruments.Instrument.at_thresholds"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Instrument.at_thresholds()</span></code></a> instead.</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>instrument_multipactor_bands</strong> (<a class="reference internal" href="src.multipactor_band.instrument_multipactor_bands.html#src.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands" title="src.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands"><em>InstrumentMultipactorBands</em></a>) – Object holding the multipacting barriers.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Holds measured data at lower and upper multipacting barriers.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>tuple[pd.DataFrame, pd.DataFrame]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="src.instruments.Instrument.values_at_barriers_fully_conditioned">
-<span class="sig-name descname"><span class="pre">values_at_barriers_fully_conditioned</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instrument_multipactor_bands</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">InstrumentMultipactorBands</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#src.instruments.Instrument.values_at_barriers_fully_conditioned" title="Link to this definition"></a></dt>
-<dd><p>Get measured data at last mp limits.</p>
-<div class="deprecated">
-<p><span class="versionmodified deprecated">Deprecated since version 1.5.0: </span>Use <a class="reference internal" href="#src.instruments.Instrument.at_thresholds" title="src.instruments.Instrument.at_thresholds"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Instrument.at_thresholds()</span></code></a> instead.</p>
-</div>
-</dd></dl>
-
 </dd></dl>
 
 <dl class="py class">
@@ -415,7 +357,7 @@ The default is False.</p></li>
 <dt class="sig sig-object py" id="src.instruments.Power.where_is_growing">
 <span class="sig-name descname"><span class="pre">where_is_growing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">minimum_number_of_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_trailing_points_to_check</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">40</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">bool_</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#src.instruments.Power.where_is_growing" title="Link to this definition"></a></dt>
 <dd><p>Determine where power is growing (<code class="docutils literal notranslate"><span class="pre">True</span></code>) and where it is not.</p>
-<div class="admonition-todo admonition" id="id2">
+<div class="admonition-todo admonition" id="id1">
 <p class="admonition-title">Todo</p>
 <p>May be necessary to also remove isolated True</p>
 </div>
@@ -468,12 +410,6 @@ The default is False.</p></li>
 <div class="math notranslate nohighlight">
 \[|V_\mathrm{coax}(z)| = 2\sqrt{P_f Z} \sqrt{1 + |\Gamma|^2
 + 2|\Gamma| \cos{(2\beta z + \psi_0)}}\]</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="src.instruments.Reconstructed.data_at_position">
-<span class="sig-name descname"><span class="pre">data_at_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#src.instruments.Reconstructed.data_at_position" title="Link to this definition"></a></dt>
-<dd><p>Get reconstructed field at position <code class="docutils literal notranslate"><span class="pre">pos</span></code>.</p>
 </dd></dl>
 
 </dd></dl>
@@ -618,7 +554,6 @@ or data calculated from other instruments.</p>
 <li class="toctree-l2"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument"><code class="docutils literal notranslate"><span class="pre">Instrument</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.ylabel"><code class="docutils literal notranslate"><span class="pre">Instrument.ylabel()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.label"><code class="docutils literal notranslate"><span class="pre">Instrument.label</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.from_array"><code class="docutils literal notranslate"><span class="pre">Instrument.from_array()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.from_pd_dataframe"><code class="docutils literal notranslate"><span class="pre">Instrument.from_pd_dataframe()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.class_name"><code class="docutils literal notranslate"><span class="pre">Instrument.class_name</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.data_as_pd"><code class="docutils literal notranslate"><span class="pre">Instrument.data_as_pd</span></code></a></li>
@@ -627,8 +562,6 @@ or data calculated from other instruments.</p>
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.add_post_treater"><code class="docutils literal notranslate"><span class="pre">Instrument.add_post_treater()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.at_thresholds"><code class="docutils literal notranslate"><span class="pre">Instrument.at_thresholds()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.multipactor_band_at_same_position"><code class="docutils literal notranslate"><span class="pre">Instrument.multipactor_band_at_same_position()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.values_at_barriers"><code class="docutils literal notranslate"><span class="pre">Instrument.values_at_barriers()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="src.instruments.instrument.html#src.instruments.instrument.Instrument.values_at_barriers_fully_conditioned"><code class="docutils literal notranslate"><span class="pre">Instrument.values_at_barriers_fully_conditioned()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -659,18 +592,6 @@ or data calculated from other instruments.</p>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="src.instruments.power.html#src.instruments.power.ReflectedPower"><code class="docutils literal notranslate"><span class="pre">ReflectedPower</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="src.instruments.power.html#src.instruments.power.ReflectedPower.ylabel"><code class="docutils literal notranslate"><span class="pre">ReflectedPower.ylabel()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="src.instruments.powers.html">src.instruments.powers module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="src.instruments.powers.html#src.instruments.powers.Powers"><code class="docutils literal notranslate"><span class="pre">Powers</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="src.instruments.powers.html#src.instruments.powers.Powers.ylabel"><code class="docutils literal notranslate"><span class="pre">Powers.ylabel()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="src.instruments.powers.html#src.instruments.powers.Powers.gamma"><code class="docutils literal notranslate"><span class="pre">Powers.gamma</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="src.instruments.powers.html#src.instruments.powers.Powers.swr"><code class="docutils literal notranslate"><span class="pre">Powers.swr</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="src.instruments.powers.html#src.instruments.powers.Powers.forward"><code class="docutils literal notranslate"><span class="pre">Powers.forward</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="src.instruments.powers.html#src.instruments.powers.Powers.reflected"><code class="docutils literal notranslate"><span class="pre">Powers.reflected</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="src.instruments.powers.html#src.instruments.powers.Powers.where_is_growing"><code class="docutils literal notranslate"><span class="pre">Powers.where_is_growing()</span></code></a></li>
 </ul>
 </li>
 </ul>

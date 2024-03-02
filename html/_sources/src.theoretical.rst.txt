@@ -13,4 +13,3 @@ Submodules
    :maxdepth: 4
 
    src.theoretical.somersalo
-   src.theoretical.susceptibility

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>src.multipactor_test module &mdash; MULTIPAC test bench 1.5.0 documentation</title>
+  <title>src.multipactor_test module &mdash; MULTIPAC test bench 1.5.0-9-g4d67c55 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,7 +15,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=e0a75244"></script>
+        <script src="_static/documentation_options.js?v=40ae1ef5"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -40,7 +40,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.5.0
+                1.5.0-9-g4d67c55
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -234,7 +234,7 @@ an empty tuple.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>multipac_detector</strong> (callable[[np.ndarray], np.ndarray[<a href="#id12"><span class="problematic" id="id13">np.bool_</span></a>]]) – Function that takes in the <code class="docutils literal notranslate"><span class="pre">data</span></code> of an <code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code>
+<li><p><strong>multipac_detector</strong> (callable[[np.ndarray], np.ndarray[<a href="#id9"><span class="problematic" id="id10">np.bool_</span></a>]]) – Function that takes in the <code class="docutils literal notranslate"><span class="pre">data</span></code> of an <code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code>
 and returns an array, where True means multipactor and False no
 multipactor.</p></li>
 <li><p><strong>instrument_class</strong> (<em>ABCMeta</em>) – Type of instrument on which <code class="docutils literal notranslate"><span class="pre">multipac_detector</span></code> should be
@@ -259,44 +259,6 @@ where multipactor is detected. The default is False.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="src.multipactor_test.MultipactorTest.plot_instruments_vs_time">
-<span class="sig-name descname"><span class="pre">plot_instruments_vs_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instruments_class_to_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">ABCMeta</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_points_to_exclude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">IMeasurementPoint</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">png_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_multipactor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument_multipactor_bands</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">InstrumentMultipactorBands</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">fig_kw</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Figure</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Axes</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#src.multipactor_test.MultipactorTest.plot_instruments_vs_time" title="Link to this definition"></a></dt>
-<dd><p>Plot signals measured by <code class="docutils literal notranslate"><span class="pre">instruments_to_plot</span></code>.</p>
-<div class="deprecated">
-<p><span class="versionmodified deprecated">Deprecated since version 1.5.0: </span>Use <a class="reference internal" href="#src.multipactor_test.MultipactorTest.sweet_plot" title="src.multipactor_test.MultipactorTest.sweet_plot"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MultipactorTest.sweet_plot()</span></code></a> instead.</p>
-</div>
-<div class="admonition-todo admonition" id="id5">
-<p class="admonition-title">Todo</p>
-<p>Add a <code class="docutils literal notranslate"><span class="pre">instruments_to_exclude</span></code> argument. Could replace
-<code class="docutils literal notranslate"><span class="pre">measurement_points_to_exclude</span></code>.</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>instruments_to_plot</strong> (<em>tuple</em><em>[</em><em>ABCMeta</em><em>, </em><em>...</em><em>]</em>) – Subclass of the <code class="xref py py-class docutils literal notranslate"><span class="pre">ins.Instrument</span></code> to plot.</p></li>
-<li><p><strong>measurement_points_to_exclude</strong> (<em>tuple</em><em>[</em><em>str</em><em>, </em><em>...</em><em>]</em><em>, </em><em>optional</em>) – Name of the measurement points that should not be plotted. The
-default is an empty tuple.</p></li>
-<li><p><strong>png_path</strong> (<em>Path</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – If provided, the resulting figure is saved at this path. The
-default is None.</p></li>
-<li><p><strong>raw</strong> (<em>bool</em><em>, </em><em>optional</em>) – If the data that should be plotted is the raw data before
-post-treatment. The default is False. Note that when the
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">ins.Instrument.post_treaters</span></code> list is empty, raw data is
-plotted even if <code class="docutils literal notranslate"><span class="pre">raw==True</span></code>.</p></li>
-<li><p><strong>multipactor_plots</strong> (<em>bool</em><em>, </em><em>optional</em>) – To add arrows to detect multipactor. The default is False.</p></li>
-<li><p><strong>fig_kw</strong> – Keyword arguments passed to the <code class="docutils literal notranslate"><span class="pre">Figure</span></code>.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>fig</strong> (<em>Figure</em>) – The created figure.</p></li>
-<li><p><strong>axes</strong> (<em>Axes</em>) – The created axes.</p></li>
-</ul>
-</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="src.multipactor_test.MultipactorTest.animate_instruments_vs_position">
 <span class="sig-name descname"><span class="pre">animate_instruments_vs_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instruments_to_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">ABCMeta</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gif_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_one_frame_over</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_first_frame</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">fig_kw</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FuncAnimation</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Axes</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#src.multipactor_test.MultipactorTest.animate_instruments_vs_position" title="Link to this definition"></a></dt>
 <dd><p>Represent measured signals with probe position.</p>
@@ -309,16 +271,16 @@ plotted even if <code class="docutils literal notranslate"><span class="pre">raw
 <p>This plot results in important amount of points. It becomes interesting
 when setting different colors for multipactor/no multipactor points and
 can help see trends.</p>
-<div class="admonition-todo admonition" id="id6">
+<div class="admonition-todo admonition" id="id5">
 <p class="admonition-title">Todo</p>
 <p>Also show from global diagnostic</p>
 </div>
-<div class="admonition-todo admonition" id="id7">
+<div class="admonition-todo admonition" id="id6">
 <p class="admonition-title">Todo</p>
 <p>User should be able to select: reconstructed or measured electric
 field.</p>
 </div>
-<div class="admonition-todo admonition" id="id8">
+<div class="admonition-todo admonition" id="id7">
 <p class="admonition-title">Todo</p>
 <p>Fix this. Or not? This is not the most explicit way to display
 data…</p>
@@ -386,38 +348,12 @@ data…</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="src.multipactor_test.MultipactorTest.plot_data_at_multipactor_thresholds">
-<span class="sig-name descname"><span class="pre">plot_data_at_multipactor_thresholds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instruments_id_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ABCMeta</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="src.instruments.html#src.instruments.Instrument" title="multipac_testbench.src.instruments.instrument.Instrument"><span class="pre">Instrument</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument_multipactor_bands</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">InstrumentMultipactorBands</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">InstrumentMultipactorBands</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_points_to_exclude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">IMeasurementPoint</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instruments_to_ignore</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="src.instruments.html#src.instruments.Instrument" title="multipac_testbench.src.instruments.instrument.Instrument"><span class="pre">Instrument</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">png_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csv_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csv_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">fig_kw</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Figure</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Axes</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#src.multipactor_test.MultipactorTest.plot_data_at_multipactor_thresholds" title="Link to this definition"></a></dt>
-<dd><p>Plot the data measured by some instruments at thresholds.</p>
-<div class="admonition-todo admonition" id="id9">
-<p class="admonition-title">Todo</p>
-<p>Docstring, match_with_mp_band keywords</p>
-</div>
-<div class="deprecated">
-<p><span class="versionmodified deprecated">Deprecated since version 1.5.0: </span>Use <a class="reference internal" href="#src.multipactor_test.MultipactorTest.plot_thresholds" title="src.multipactor_test.MultipactorTest.plot_thresholds"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MultipactorTest.plot_thresholds()</span></code></a> instead.</p>
-</div>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="src.multipactor_test.MultipactorTest.data_for_somersalo">
 <span class="sig-name descname"><span class="pre">data_for_somersalo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_multipactor_bands</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TestMultipactorBands</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#src.multipactor_test.MultipactorTest.data_for_somersalo" title="Link to this definition"></a></dt>
 <dd><p>Get the data required to create the Somersalo plot.</p>
-<div class="admonition-todo admonition" id="id10">
+<div class="admonition-todo admonition" id="id8">
 <p class="admonition-title">Todo</p>
 <p>Allow representation of several pick-ups.</p>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="src.multipactor_test.MultipactorTest.data_for_susceptibility">
-<span class="sig-name descname"><span class="pre">data_for_susceptibility</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">electric_field_at</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">IMeasurementPoint</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument_multipactor_bands</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">InstrumentMultipactorBands</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#src.multipactor_test.MultipactorTest.data_for_susceptibility" title="Link to this definition"></a></dt>
-<dd><p>Get the data required to create the susceptibility plot.</p>
-<div class="admonition-todo admonition" id="id11">
-<p class="admonition-title">Todo</p>
-<p>Allow representation of several pick-ups.</p>
-</div>
-<div class="deprecated">
-<p><span class="versionmodified deprecated">Deprecated since version 1.5.0: </span>Not used by the new <code class="xref py py-meth docutils literal notranslate"><span class="pre">TestCampaign.susceptiblity_chart()</span></code>.</p>
 </div>
 </dd></dl>
 
@@ -452,15 +388,6 @@ as well as reflection coefficient <span class="math notranslate nohighlight">\(R
 <dd class="field-odd"><p>pd.DataFrame</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="src.multipactor_test.MultipactorTest.plot_instruments_y_vs_instrument_x">
-<span class="sig-name descname"><span class="pre">plot_instruments_y_vs_instrument_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instrument_ids_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">ABCMeta</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="src.instruments.html#src.instruments.Instrument" title="multipac_testbench.src.instruments.instrument.Instrument"><span class="pre">Instrument</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument_ids_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">ABCMeta</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="src.instruments.html#src.instruments.Instrument" title="multipac_testbench.src.instruments.instrument.Instrument"><span class="pre">Instrument</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_points_to_exclude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">IMeasurementPoint</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instruments_to_ignore</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="src.instruments.html#src.instruments.Instrument" title="multipac_testbench.src.instruments.instrument.Instrument"><span class="pre">Instrument</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tail</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_kw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Axes</span></span></span><a class="headerlink" href="#src.multipactor_test.MultipactorTest.plot_instruments_y_vs_instrument_x" title="Link to this definition"></a></dt>
-<dd><p>Plot data measured by <code class="docutils literal notranslate"><span class="pre">instrument_y</span></code> vs <code class="docutils literal notranslate"><span class="pre">instrument_x</span></code>.</p>
-<div class="deprecated">
-<p><span class="versionmodified deprecated">Deprecated since version 1.5.0: </span>Use <a class="reference internal" href="#src.multipactor_test.MultipactorTest.sweet_plot" title="src.multipactor_test.MultipactorTest.sweet_plot"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MultipactorTest.sweet_plot()</span></code></a> instead.</p>
-</div>
 </dd></dl>
 
 <dl class="py method">
