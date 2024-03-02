@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Configuration &mdash; MULTIPAC test bench 1.5.1 documentation</title>
+  <title>Configuration &mdash; MULTIPAC test bench 1.5.1-6-g3b13279 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
 
@@ -15,7 +15,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=44dfd65d"></script>
+        <script src="../_static/documentation_options.js?v=caab4484"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -23,7 +23,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Gallery" href="gallery.html" />
-    <link rel="prev" title="Presentation of the library" href="presentation.html" /> 
+    <link rel="prev" title="Introduction" href="presentation.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -38,7 +38,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.5.1
+                1.5.1-6-g3b13279
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -50,7 +50,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="presentation.html">Presentation of the library</a></li>
+<li class="toctree-l1"><a class="reference internal" href="presentation.html">Introduction</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Configuration</a><ul class="simple">
 </ul>
 </li>
@@ -87,16 +87,30 @@
 <span id="id1"></span><h1>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h1>
 <div class="toctree-wrapper compound">
 </div>
+<section id="basics">
+<h2>Basics<a class="headerlink" href="#basics" title="Link to this heading"></a></h2>
 <p>The test bench setup is defined in a <code class="docutils literal notranslate"><span class="pre">.toml</span></code> file.
 Here is a short example:</p>
-<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[global]</span>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define all the global instruments, that are not defined at a specific pick-up:</span>
+<span class="k">[global]</span>
 <span class="k">[global.instruments_kw]</span>
+<span class="c1"># You must link a file column name to an instrument, like this:</span>
 <span class="k">[global.instruments_kw.NI9205_Power1]</span>
-<span class="n">class_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;ForwardPower&quot;</span>
+<span class="n">class_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;ForwardPower&quot;</span><span class="w">    </span><span class="c1"># &lt;- this instrument is mandatory</span>
 
 <span class="k">[global.instruments_kw.NI9205_Power2]</span>
-<span class="n">class_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;ReflectedPower&quot;</span>
+<span class="n">class_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;ReflectedPower&quot;</span><span class="w">  </span><span class="c1"># &lt;- second mandatory instrument</span>
 
+<span class="c1"># Define a pick-up; it needs a position</span>
+<span class="k">[V1]</span>
+<span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.130</span>
+
+<span class="c1"># Define the instruments of the V1 pick-up</span>
+<span class="k">[V1.instruments_kw]</span>
+<span class="k">[V1.instruments_kw.NI9205_Penning1]</span>
+<span class="n">class_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Penning&quot;</span>
+
+<span class="c1"># You can have several instruments at the same pick-up:</span>
 <span class="k">[E3]</span>
 <span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.39</span>
 
@@ -109,17 +123,45 @@ Here is a short example:</p>
 </pre></div>
 </div>
 <p>You can check <a class="reference internal" href="../src.instruments.factory.html#src.instruments.factory.STRING_TO_INSTRUMENT_CLASS" title="src.instruments.factory.STRING_TO_INSTRUMENT_CLASS"><code class="xref py py-data docutils literal notranslate"><span class="pre">STRING_TO_INSTRUMENT_CLASS</span></code></a> for the allowed names of instruments.</p>
-<div class="admonition-todo admonition" id="id2">
-<p class="admonition-title">Todo</p>
-<p>Proper documentation for the configuration.</p>
+</section>
+<section id="field-probes-patch">
+<h2>Field probes patch<a class="headerlink" href="#field-probes-patch" title="Link to this heading"></a></h2>
+<p>In some of the first test, the field probes signal was converted from the acquisition voltage to the actual voltage with a transfer function that was wrong.
+To correct it, add to every field probe following keywords:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">patch=True</span></code> to activate patch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">calibration_file</span></code> (see also: <a class="reference external" href="https://github.com/AdrienPlacais/multipac_testbench_calibrate_racks">MULTIPAC testbench calibrate racks</a>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">g_probe</span></code> gain of the probe</p></li>
+</ul>
+</div></blockquote>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[E1]</span>
+<span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0e0</span>
+
+<span class="k">[E1.instruments_kw]</span>
+<span class="k">[E1.instruments_kw.NI9205_MP1l]</span>
+<span class="n">class_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;CurrentProbe&quot;</span>
+
+<span class="c1"># Some instruments accept other arguments:</span>
+<span class="k">[E1.instruments_kw.NI9205_E1]</span>
+<span class="n">class_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;FieldProbe&quot;</span>
+<span class="n">g_probe</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">-77.3</span>
+<span class="n">patch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">calibration_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;../data/calibration/E1_fit_calibration.csv&quot;</span>
+</pre></div>
 </div>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h2>
+<p>Some example configurations are in the repository in <code class="docutils literal notranslate"><span class="pre">docs/source/manual/data/</span></code>.</p>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="presentation.html" class="btn btn-neutral float-left" title="Presentation of the library" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="presentation.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="gallery.html" class="btn btn-neutral float-right" title="Gallery" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

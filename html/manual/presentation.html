@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Presentation of the library &mdash; MULTIPAC test bench 1.5.1 documentation</title>
+  <title>Introduction &mdash; MULTIPAC test bench 1.5.1-6-g3b13279 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
 
@@ -15,7 +15,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=44dfd65d"></script>
+        <script src="../_static/documentation_options.js?v=caab4484"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -38,7 +38,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.5.1
+                1.5.1-6-g3b13279
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -50,7 +50,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Presentation of the library</a><ul class="simple">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul class="simple">
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
@@ -73,7 +73,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Presentation of the library</li>
+      <li class="breadcrumb-item active">Introduction</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/manual/presentation.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -83,17 +83,34 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="presentation-of-the-library">
-<span id="presentation"></span><h1>Presentation of the library<a class="headerlink" href="#presentation-of-the-library" title="Link to this heading"></a></h1>
+  <section id="introduction">
+<span id="presentation"></span><h1>Introduction<a class="headerlink" href="#introduction" title="Link to this heading"></a></h1>
 <div class="toctree-wrapper compound">
 </div>
 <p>This library offers simple methods to post-treat data from the MULTIPAC testbench.
 Check <a class="reference internal" href="tutorials.html#tutorials"><span class="std std-ref">Tutorials</span></a> for a quick tour of the available commands.
 Go to <a class="reference internal" href="gallery.html"><span class="doc">Gallery</span></a> for a quick overview of the available plots.</p>
+<section id="files">
+<h2>Files<a class="headerlink" href="#files" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>A few operations are mandatory in order to read the files produced by LabVIEWER.</dt><dd><ul class="simple">
+<li><p>Mandatory: decimal should be changed from <code class="docutils literal notranslate"><span class="pre">,</span></code> to <code class="docutils literal notranslate"><span class="pre">.</span></code>.</p></li>
+<li><p>Recommended: measurement index should start at <code class="docutils literal notranslate"><span class="pre">i=0</span></code>.</p></li>
+<li><p>Recommended: comments in the right-most columns should be deleted.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Note that you can use the column separator that you want with the <code class="docutils literal notranslate"><span class="pre">sep</span></code> argument from the <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultipactorTest.__init__()</span></code> or <a class="reference internal" href="../src.test_campaign.html#src.test_campaign.TestCampaign.from_filepaths" title="src.test_campaign.TestCampaign.from_filepaths"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TestCampaign.from_filepaths()</span></code></a> methods.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Some text editors such as Windows Notepad are not adapted to big files such as the measurement files.
+Prefer Notepad++ or a spreadsheet editor.</p>
+</div>
 <div class="admonition-todo admonition" id="id1">
 <p class="admonition-title">Todo</p>
-<p>LabVIEWER data start at index == 1!!!! Fix this, every index list should always start at 0</p>
+<p>LabVIEWER data starts at index == 1! Fix this, every index list should always start at 0.</p>
 </div>
+</section>
 </section>
 
 
