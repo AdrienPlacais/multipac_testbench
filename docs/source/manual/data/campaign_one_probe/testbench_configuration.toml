@@ -1,0 +1,27 @@
+# ==================================
+[global]
+[global.instruments_kw]
+[global.instruments_kw.NI9205_Power1]
+class_name = "ForwardPower"
+
+[global.instruments_kw.NI9205_Power2]
+class_name = "ReflectedPower"
+
+# ==================================
+[V2]
+position = 0.566
+
+[V2.instruments_kw]
+[V2.instruments_kw.NI9205_Penning1]
+class_name = "Penning"
+
+# ==================================
+[E1]
+position = 0.611
+
+[E1.instruments_kw]
+[E1.instruments_kw.NI9205_MP1l]
+class_name = "CurrentProbe"
+
+[E1.instruments_kw.NI9205_E1]
+class_name = "ElectricFieldProbe"
