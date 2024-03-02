@@ -28,8 +28,6 @@ class MultipactorBand:
 
         if not reached_second_threshold:
             self.upper_index = None
-        self.indexes = [i for i in range(self.first_index,
-                                         self.last_index + 1)]
         self.reached_second_threshold = reached_second_threshold
 
     def __repr__(self) -> str:

@@ -100,11 +100,3 @@ class InstrumentMultipactorBands(list):
     def upper_indexes(self) -> list[int | None]:
         """Get the indexes of all upper thresholds."""
         return [x.upper_index if x is not None else None for x in self]
-
-    def first_indexes(self) -> list[int | None]:
-        """Get the indexes of entry of every zone."""
-        return [x.first_index if x is not None else None for x in self]
-
-    def last_indexes(self) -> list[int | None]:
-        """Get the indexes of exit of every zone."""
-        return [x.last_index if x is not None else None for x in self]

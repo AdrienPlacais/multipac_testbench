@@ -9,9 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- `IMeasurementPoint` methods:
-  - `plot_instruments_vs_time`
-  - `get_data`
 - `TestCampaign` methods:
   - `susceptiblity_chart`
   - `plot_instruments_vs_time`
@@ -22,14 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `plot_data_at_multipactor_thresholds`
   - `data_for_susceptibility`
   - `plot_instruments_y_vs_instrument_x`
-- `Instrument` methods:
-  - `values_at_barriers`
-  - `values_at_barriers_fully_conditioned`
-  - `plot_vs_time`
-  - `from_array`
 - `Powers`
-- `src.susceptibility` module
-- `Reconstructed.data_at_position`
 
 
 ## [1.5.0] 2024-03-02

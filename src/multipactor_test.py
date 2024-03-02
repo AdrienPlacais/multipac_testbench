@@ -21,7 +21,6 @@ from abc import ABCMeta
 from collections.abc import Callable, Iterable, Sequence
 import logging
 from pathlib import Path
-import warnings
 
 import numpy as np
 import pandas as pd
@@ -39,7 +38,6 @@ from multipac_testbench.src.multipactor_band.instrument_multipactor_bands \
     import InstrumentMultipactorBands
 from multipac_testbench.src.multipactor_band.test_multipactor_bands \
     import TestMultipactorBands
-from multipac_testbench.src.multipactor_band.util import match_with_mp_band
 from multipac_testbench.src.util import plot
 from multipac_testbench.src.util.animate import get_limits
 from multipac_testbench.src.util.helper import output_filepath
