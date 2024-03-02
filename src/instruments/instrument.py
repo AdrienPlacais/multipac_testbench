@@ -54,7 +54,7 @@ class Instrument(ABC):
 
         self.is_2d = is_2d
         plotters = self._get_plot_methods(is_2d)
-        self.plot_vs_time, self.plot_vs_position, self.scatter_data = plotters
+        self.plot_vs_position, self.scatter_data = plotters
 
         self._raw_data: pd.Series = data
         self._data: np.ndarray
@@ -183,14 +183,12 @@ class Instrument(ABC):
             delattr(self, '_data_as_pd')
 
     def _get_plot_methods(self, is_2d: bool
-                          ) -> tuple[Callable, Callable, Callable]:
+                          ) -> tuple[Callable, Callable]:
         """Give the proper plotting functions according to ``is_2d``."""
-        plotters = (self._plot_vs_time_for_1d,
-                    self._plot_vs_position_for_1d,
+        plotters = (self._plot_vs_position_for_1d,
                     self._scatter_data_1d)
         if is_2d:
-            plotters = (self._plot_vs_time_for_2d,
-                        self._plot_vs_position_for_2d,
+            plotters = (self._plot_vs_position_for_2d,
                         self._scatter_data_2d)
         return plotters
 
@@ -346,87 +344,6 @@ class Instrument(ABC):
 
         return matching_multipactor_bands[0]
 
-    def values_at_barriers(
-            self,
-            instrument_multipactor_bands: InstrumentMultipactorBands,
-    ) -> tuple[pd.DataFrame, pd.DataFrame]:
-        """Get measured data at lower and upper multipactor barriers.
-
-        .. todo::
-            Dirty patch to select 1d/2d data
-
-        .. deprecated:: 1.5.0
-            Use :meth:`Instrument.at_thresholds` instead.
-
-        Parameters
-        ----------
-        instrument_multipactor_bands : InstrumentMultipactorBands
-            Object holding the multipacting barriers.
-
-        Returns
-        -------
-        tuple[pd.DataFrame, pd.DataFrame]
-            Holds measured data at lower and upper multipacting barriers.
-
-        """
-        barriers_idx = instrument_multipactor_bands.barriers
-        lower_barrier_idx, upper_barrier_idx = barriers_idx
-        assert isinstance(lower_barrier_idx, list)
-        assert isinstance(upper_barrier_idx, list)
-        name_of_detector = instrument_multipactor_bands.instrument_name
-
-        match (self._raw_data):
-            case pd.Series():
-                label = f"{self} according to {name_of_detector}"
-
-                lower_dict = {
-                    f"Lower barrier {label}": self.data[lower_barrier_idx]}
-                lower_values = pd.DataFrame(lower_dict,
-                                            index=lower_barrier_idx)
-
-                upper_dict = {
-                    f"Upper barrier {label}": self.data[upper_barrier_idx]}
-                upper_values = pd.DataFrame(upper_dict,
-                                            index=upper_barrier_idx)
-
-            case pd.DataFrame() as df:
-                label = df.columns + f" according to {name_of_detector}"
-                lower_values = pd.DataFrame(
-                    data=self.data[lower_barrier_idx],
-                    index=lower_barrier_idx,
-                    columns="Lower barrier " + label,
-                )
-
-                upper_values = pd.DataFrame(
-                    data=self.data[upper_barrier_idx],
-                    index=upper_barrier_idx,
-                    columns="Upper barrier " + label,
-                )
-            case _:
-                raise TypeError
-        return lower_values, upper_values
-
-    def values_at_barriers_fully_conditioned(
-            self,
-            instrument_multipactor_bands: InstrumentMultipactorBands,
-    ) -> tuple[float, float]:
-        """Get measured data at last mp limits.
-
-        .. deprecated:: 1.5.0
-            Use :meth:`Instrument.at_thresholds` instead.
-
-        """
-        barriers_idx = instrument_multipactor_bands.barriers
-        last_low = barriers_idx[0][-1]
-        last_upp = barriers_idx[1][-1]
-
-        if isinstance(last_low, (list, np.ndarray)):
-            last_low = last_low[0]
-        if isinstance(last_upp, (list, np.ndarray)):
-            last_upp = last_upp[0]
-
-        return self.data[last_low], self.data[last_upp]
-
     def _post_treat(self, data: np.ndarray) -> np.ndarray:
         """Apply all post-treatment functions."""
         original_data_shape = data.shape
@@ -435,69 +352,6 @@ class Instrument(ABC):
             assert original_data_shape == data.shape, "The post treater "\
                 f"{post_treater} modified the shape of the array."
         return data
-
-    def _plot_vs_time_for_1d(self,
-                             axe: Axes,
-                             raw: bool = False,
-                             color: tuple[float, float, float] | None = None,
-                             xdata: np.ndarray | pd.Index | None = None,
-                             **subplot_kw
-                             ) -> Line2D:
-        """Plot what the instrument measured.
-
-        .. deprecated:: 1.5.0
-            Use :meth:`MultipactorTest.sweet_plot` instead.
-
-        """
-        data = self.data
-        label = f"{self.name} (post-treated)"
-
-        if raw or len(self.post_treaters) == 0:
-            data = self._raw_data
-            label = f"{self.name} (raw)"
-
-        if xdata is None:
-            xdata = self._raw_data.index
-
-        line1, = axe.plot(xdata,
-                          data,
-                          color=color,
-                          label=label,
-                          **subplot_kw)
-        return line1
-
-    def _plot_vs_time_for_2d(self,
-                             axe: Axes,
-                             raw: bool = False,
-                             color: tuple[float, float, float] | None = None,
-                             xdata: np.ndarray | pd.Index | None = None,
-                             **subplot_kw
-                             ) -> Line2D:
-        """Plot what the instrument measured.
-
-        .. deprecated:: 1.5.0
-            Use :meth:`MultipactorTest.sweet_plot` instead.
-
-        """
-        data = self.data
-        label = f"{self.name} (post-treated)"
-
-        if raw or len(self.post_treaters) == 0:
-            data = self._raw_data.to_numpy()
-            label = f"{self.name} (raw)"
-        if xdata is None:
-            xdata = self._raw_data.index
-
-        n_cols = data.shape[1]
-        line1 = None
-        for i in range(n_cols):
-            line1, = axe.plot(xdata,
-                              data[:, i],
-                              color=color,
-                              label=label + f" (column {i})",
-                              **subplot_kw)
-        assert line1 is not None
-        return line1
 
     def _plot_vs_position_for_1d(self,
                                  sample_index: int,
