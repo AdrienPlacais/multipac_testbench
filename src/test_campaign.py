@@ -3,6 +3,7 @@
 """Define an object to store data from several :class:`.MultipactorTest`."""
 from abc import ABCMeta
 from collections.abc import Callable, Sequence
+import logging
 from pathlib import Path
 from typing import Self
 
@@ -154,7 +155,7 @@ class TestCampaign(list):
 
     def at_last_threshold(
             self,
-            instrument_id: ABCMeta,
+            instrument_id: ABCMeta | Sequence[ABCMeta],
             campaign_multipactor_bands: CampaignMultipactorBands,
             *args,
             **kwargs) -> pd.DataFrame:
@@ -332,9 +333,6 @@ class TestCampaign(list):
             system. Also, we represent the thresholds that were measured during
             the last half-power cycle.
 
-        .. todo::
-            Clean this anti-patternic method.
-
         .. [1] Erkki Somersalo, Pasi Yla-Oijala, Dieter Proch et Jukka \
                Sarvas. «Computational methods for analyzing electron \
                multipacting in RF structures». In : Part. Accel. 59 (1998), p.\
@@ -351,17 +349,22 @@ class TestCampaign(list):
             test.
         show_fit : bool, optional
             To perform a fit and plot it. The default is True.
-        png_path : Path | None, optional
-            If provided, the resulting figure will be saved at this location.
-            The default is None.
-        remove_last_point_for_fit : bool, optional
-            A dirty patch to remove the last point from the fit. Used in a
-            study were I wanted to plot this point but exclude it from the fit.
-            The default is False.
         use_theoretical_r : bool, optional
             Another patch to allow fitting and plotting using the theoretical
             reflection coefficient instead of the one calculated from
             :math:`P_f` and :math:`P_r`. The default is False.
+        png_path : Path | None, optional
+            If provided, the resulting figure will be saved at this location.
+            The default is None.
+        png_kwargs : dict | None, optional
+            Other keyword arguments passed to the :func:`plot.save_figure`
+            function. The default is None.
+        csv_path : Path | None, optional
+            If provided, the data to produce the figure will be saved in this
+            location. The default is None.
+        csv_kwargs : dict | None, optional
+            Other keyword arguments passed to the :func:`plot.save_dataframe`
+            function.
         fig_kw :
             Other keyword arguments passed to Figure.
 
@@ -422,26 +425,31 @@ class TestCampaign(list):
             png_kwargs: dict | None = None,
             csv_path: Path | None = None,
             csv_kwargs: dict | None = None,
-            **kwargs,
+            **fig_kw,
     ) -> tuple[Axes, pd.DataFrame]:
         """Plot the lower and upper thresholds as voltage.
 
         Parameters
         ----------
         campaign_multipactor_bands : CampaignMultipactorBands
-            campaign_multipactor_bands
-        measurement_points_to_exclude : Sequence[str]
-            measurement_points_to_exclude
-        png_path : Path | None
-            png_path
-        png_kwargs : dict | None
-            png_kwargs
-        csv_path : Path | None
-            csv_path
-        csv_kwargs : dict | None
-            csv_kwargs
-        kwargs :
-            kwargs
+            Object holding where multipactor happens for every test.
+        measurement_points_to_exclude : Sequence[str], optional
+            Some measurement points to exclude. The default is an empty tuple.
+        png_path : Path | None, optional
+            If provided, the resulting figure will be saved at this location.
+            The default is None.
+        png_kwargs : dict | None, optional
+            Other keyword arguments passed to the :func:`plot.save_figure`
+            function. The default is None.
+        csv_path : Path | None, optional
+            If provided, the data to produce the figure will be saved in this
+            location. The default is None.
+        csv_kwargs : dict | None, optional
+            Other keyword arguments passed to the :func:`plot.save_dataframe`
+            function.
+        fig_kw :
+            Other keyword arguments passed to the :meth:`pd.DataFrame.plot`
+            method.
 
         Returns
         -------
@@ -461,7 +469,7 @@ class TestCampaign(list):
                                                   ylabel="Thresholds $V$ [V]",
                                                   marker='o',
                                                   ms=10,
-                                                  **kwargs,
+                                                  **fig_kw,
                                                   )
         axes.set_prop_cycle(None)
         axes = voltages.filter(like='Upper').plot(grid=True,
@@ -469,7 +477,7 @@ class TestCampaign(list):
                                                   ylabel="Thresholds $V$ [V]",
                                                   marker='^',
                                                   ms=10,
-                                                  **kwargs,
+                                                  **fig_kw,
                                                   )
         if png_path is not None:
             if png_kwargs is None:
@@ -481,13 +489,114 @@ class TestCampaign(list):
             plot.save_dataframe(df_to_plot, csv_path, **csv_kwargs)
         return axes, voltages
 
-    # to redo
+    def susceptibility(self,
+                       campaign_multipactor_bands: CampaignMultipactorBands,
+                       measurement_points_to_exclude: Sequence[str] = (),
+                       keep_only_travelling: bool = True,
+                       tol: float = 1e-6,
+                       gap_in_cm: float | None = None,
+                       xlabel: str = r'$f\times d~[\mathrm{MHz\cdot cm}]$',
+                       png_path: Path | None = None,
+                       png_kwargs: dict | None = None,
+                       csv_path: Path | None = None,
+                       csv_kwargs: dict | None = None,
+                       **fig_kw,
+                       ) -> tuple[Axes, pd.DataFrame]:
+        """Create a susceptiblity chart.
+
+        Parameters
+        ----------
+        campaign_multipactor_bands : CampaignMultipactorBands
+            Object holding where multipactor happens for every test.
+        measurement_points_to_exclude : Sequence[str], optional
+            Some measurement points to exclude. The default is an empty tuple.
+        keep_only_travelling: bool, optional
+            To remove points where :math:`SWR` is not unity. This is the
+            default.
+        tol : float, optional
+            Tolerance over the :math:`SWR` when performing the
+            ``keep_only_travelling`` check. The default is ``1e-6``.
+        gap_in_cm : float | None, optional
+            Gap of the system. If not provided, we take the value of MULTIPAC
+            test bench.
+        xlabel : str, optional
+            The xlabel for the plot. The default is good enough.
+        png_path : Path | None, optional
+            If provided, the resulting figure will be saved at this location.
+            The default is None.
+        png_kwargs : dict | None, optional
+            Other keyword arguments passed to the :func:`plot.save_figure`
+            function. The default is None.
+        csv_path : Path | None, optional
+            If provided, the data to produce the figure will be saved in this
+            location. The default is None.
+        csv_kwargs : dict | None, optional
+            Other keyword arguments passed to the :func:`plot.save_dataframe`
+            function.
+        fig_kw :
+            Other keyword arguments passed to the :meth:`pd.DataFrame.plot`
+            method.
+
+        Returns
+        -------
+        tuple[Axes, pd.DataFrame]
+
+
+        """
+        df_susceptibility = self.at_last_threshold(
+            ins.FieldProbe,
+            campaign_multipactor_bands,
+            measurement_points_to_exclude=measurement_points_to_exclude)
+
+        frequencies = np.array([test.freq_mhz for test in self])
+        if gap_in_cm is None:
+            gap_in_cm = .5 * (3.878 - 1.687)
+            logging.info(f"Used default {gap_in_cm = }")
+
+        df_susceptibility[xlabel] = frequencies * gap_in_cm
+        df_susceptibility.set_index(xlabel, inplace=True)
+
+        if keep_only_travelling:
+            swr = [test.swr for test in self]
+            is_travelling = [abs(x - 1.0) < tol for x in swr]
+            df_susceptibility = df_susceptibility[is_travelling]
+
+        axes = df_susceptibility.filter(like='Lower').plot(
+            marker='o',
+            lw=0.,
+            **fig_kw
+        )
+        axes.set_prop_cycle(None)
+        axes = df_susceptibility.filter(like='Upper').plot(
+            ax=axes,
+            marker='^',
+            lw=0.,
+            grid=True,
+            logx=True,
+            logy=True,
+            **fig_kw
+        )
+        if png_path is not None:
+            if png_kwargs is None:
+                png_kwargs = {}
+            plot.save_figure(axes, png_path, **png_kwargs)
+        if csv_path is not None:
+            if csv_kwargs is None:
+                csv_kwargs = {}
+            plot.save_dataframe(df_susceptibility, csv_path, **csv_kwargs)
+        return axes, df_susceptibility
+
     def susceptibility_chart(self,
                              electric_field_at: str,
                              instrument_multipactor_bands: Sequence[InstrumentMultipactorBands],
                              fig_kw: dict | None = None,
                              ax_kw: dict | None = None) -> tuple[Figure, Axes]:
-        """Create a susceptiblity chart."""
+        """Create a susceptiblity chart.
+
+        .. deprecated:: 1.5.0
+            Use :meth:`susceptiblity` instead.
+
+        """
         fig, ax1 = self._susceptibility_base_plot(fig_kw, ax_kw)
 
         zipper = zip(self, instrument_multipactor_bands, strict=True)
@@ -510,7 +619,12 @@ class TestCampaign(list):
                                   fig_kw: dict | None = None,
                                   ax_kw: dict | None = None,
                                   ) -> tuple[Figure, Axes]:
-        """Create the base figure."""
+        """Create the base figure.
+
+        .. deprecated:: 1.5.0
+            Use :meth:`susceptiblity` instead.
+
+        """
         if fig_kw is None:
             fig_kw = {}
         fig = plt.figure(**fig_kw)

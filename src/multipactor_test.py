@@ -1153,6 +1153,9 @@ optional
         .. todo::
             Allow representation of several pick-ups.
 
+        .. deprecated :: 1.5.0
+            Not used by the new :meth:`.TestCampaign.susceptiblity_chart`.
+
         """
         if isinstance(electric_field_at, str):
             electric_field_at = self.get_measurement_point(
