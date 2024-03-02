@@ -22,6 +22,7 @@ Submodules
 
    src.instruments.current_probe
    src.instruments.factory
+   src.instruments.frequency
    src.instruments.instrument
    src.instruments.optical_fibre
    src.instruments.penning
