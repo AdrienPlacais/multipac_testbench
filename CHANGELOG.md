@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `values_at_barriers`
   - `values_at_barriers_fully_conditioned`
   - `plot_vs_time`
+- `Powers`
 
 
 ## [1.5.0] 2024-03-02
@@ -44,10 +45,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `plot_instruments_vs_time`, `plot_instruments_y_vs_instrument_x` (use `sweet_plot` instead)
 - `plot_data_at_multipactor_thresholds` (use `plot_thresholds` instead)
 - `susceptiblity_chart` (use `susceptiblity` instead)
+- `Powers` instrument
 
 ### Removed
 
-- `Powers` instrument
  - For consistency, one `Instrument` = one column in the `MultipactorTest.df_data`.
  - Now, use the dedicated instruments: `ForwardPower`, `ReflectedPower` (both are `Power`), `SWR`, `ReflectionCoefficient`
 
