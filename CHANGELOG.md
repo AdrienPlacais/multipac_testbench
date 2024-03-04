@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `TestCampaign.sweet_plot` now accepts the `all_on_same_plot: bool` kwarg. Associated example in Gallery.
 
+### Modified
+
+- `sweet_plot` and `plot_thresholds` now return the plotted Axes as well as the pd.DataFrame to produce it.
+
 ## [1.5.1] 2024-03-02
 
 ### Removed

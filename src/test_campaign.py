@@ -102,7 +102,8 @@ class TestCampaign(list):
         csv_folder: str | None = None,
         all_on_same_plot: bool = False,
         **kwargs
-    ) -> list[Axes] | list[np.ndarray[Axes]] | Axes | np.ndarray[Axes]:
+    ) -> tuple[list[Axes] | list[np.ndarray[Axes]] | Axes | np.ndarray[Axes],
+               list[pd.DataFrame] | pd.DataFrame]:
         """Recursively call :meth:`.MultipactorTest.sweet_plot`.
 
         Parameters
@@ -129,10 +130,14 @@ class TestCampaign(list):
 
         Returns
         -------
-        list[Axes] | list[np.ndarray[Axes]]
+        list[Axes] | list[np.ndarray[Axes]] | Axes | np.ndarray[Axes]
+            Holds plotted fig.
+        list[pd.DataFrame] | pd.DataFrame
+            Holds data used to create the plot.
 
         """
-        axes = []
+        all_axes = []
+        all_df = []
         if campaign_multipactor_bands is None:
             campaign_multipactor_bands = [None for _ in self]
         zipper = zip(self, campaign_multipactor_bands, strict=True)
@@ -151,12 +156,14 @@ class TestCampaign(list):
             if csv_folder is not None:
                 csv_path = test.output_filepath(csv_folder, ".csv")
 
-            axes.append(test.sweet_plot(*args,
+            axes, df_plot = test.sweet_plot(*args,
                                         png_path=png_path,
                                         test_multipactor_bands=band,
                                         csv_path=csv_path,
-                                        **kwargs))
-        return axes
+                                        **kwargs)
+            all_axes.append(axes)
+            all_df.append(df_plot)
+        return all_axes, all_df
 
     def _sweet_plot_same_plot(self,
                               zipper: zip,
@@ -166,7 +173,8 @@ class TestCampaign(list):
                               csv_path: Path | None = None,
                               csv_kwargs: dict | None = None,
                               **kwargs
-                              ) -> Axes | np.ndarray[Axes]:
+                              ) -> tuple[Axes | np.ndarray[Axes],
+                                         pd.DataFrame]:
         """Plot the various signals on the same Axes."""
         if len(args) > 1:
             logging.warning("I am not sure how the interaction of "
@@ -196,7 +204,7 @@ class TestCampaign(list):
                 csv_kwargs = {}
             plot.save_dataframe(df_to_plot, csv_path, **csv_kwargs)
 
-        return axes
+        return axes, df_to_plot
 
     def plot_thresholds(self,
                         instrument_id_plot: ABCMeta,
@@ -205,9 +213,11 @@ class TestCampaign(list):
                         png_folder: str | None = None,
                         csv_folder: str | None = None,
                         **kwargs
-                        ) -> list[Axes] | list[np.ndarray[Axes]]:
+                        ) -> tuple[list[Axes] | list[np.ndarray[Axes]],
+                                   list[pd.DataFrame]]:
         """Recursively call :meth:`.MultipactorTest.plot_thresholds`."""
-        axes = []
+        all_axes = []
+        all_df = []
         zipper = zip(self, campaign_multipactor_bands, strict=True)
         for test, multipactor_bands in zipper:
             png_path = None
@@ -218,14 +228,16 @@ class TestCampaign(list):
             if csv_folder is not None:
                 csv_path = test.output_filepath(csv_folder, ".csv")
 
-            axes.append(test.plot_thresholds(
+            axes, df_plot = test.plot_thresholds(
                 instrument_id_plot,
                 multipactor_bands,
                 *args,
                 png_path=png_path,
                 csv_path=csv_path,
-                **kwargs))
-        return axes
+                **kwargs)
+            all_axes.append(axes)
+            all_df.append(df_plot)
+        return all_axes, all_df
 
     def at_last_threshold(
             self,
@@ -390,7 +402,7 @@ class TestCampaign(list):
         csv_path: Path | None = None,
         csv_kwargs: dict | None = None,
         **fig_kw,
-    ) -> Axes:
+    ) -> tuple[Axes, pd.DataFrame]:
         r"""Represent evolution of forward power threshold with :math:`R`.
 
         Somersalo et al. [1]_ link the mixed wave (:math:`MW`) forward power
@@ -445,6 +457,9 @@ class TestCampaign(list):
         Returns
         -------
         Axes
+            Holds the plot.
+        pd.DataFrame
+            Holds the data that was plotted.
 
         """
         frequencies = set([test.freq_mhz for test in self])
@@ -489,7 +504,7 @@ class TestCampaign(list):
                 csv_kwargs = {}
             plot.save_dataframe(df_somersalo, csv_path, **csv_kwargs)
 
-        return axes
+        return axes, df_somersalo
 
     def voltage_thresholds(
             self,

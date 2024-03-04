@@ -342,7 +342,7 @@ class MultipactorTest:
         csv_path: Path | None = None,
         csv_kwargs: dict | None = None,
         **kwargs,
-    ) -> Axes | np.ndarray[Axes]:
+    ) -> tuple[Axes | np.ndarray[Axes], pd.DataFrame]:
         """Plot instrument ``to_plot`` at every multipactor threshold.
 
         When ``to_plot`` is :class:`ins.ForwardPower` or
@@ -379,6 +379,8 @@ class MultipactorTest:
         -------
         Axes | np.ndarray[Axes]
             Hold plotted axes.
+        pd.DataFrame
+            The data used to produce the plot.
 
         """
         zipper = self.instruments_and_multipactor_bands(
@@ -419,7 +421,7 @@ class MultipactorTest:
             if csv_kwargs is None:
                 csv_kwargs = {}
             plot.save_dataframe(df_thresholds, csv_path, **csv_kwargs)
-        return axes
+        return axes, df_thresholds
 
     def instruments_and_multipactor_bands(
         self,
