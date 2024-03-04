@@ -20,7 +20,7 @@ class_name = "CurrentProbe"
 class_name = "ElectricFieldProbe"
 g_probe = -77.3
 patch = true
-calibration_file = "/home/placais/Documents/Projects/Multipac/2023.11.07_Campaign_with_CEA/2024.01.09_reworked_data/calibration/E1_fit_calibration.csv"
+calibration_file = "../data/calibration/E1_fit_calibration.csv"
 
 # ==================================
 [V1]
@@ -41,7 +41,7 @@ class_name = "CurrentProbe"
 [E2.instruments_kw.NI9205_E2]
 class_name = "ElectricFieldProbe"
 g_probe = -74.4
-calibration_file = "/home/placais/Documents/Projects/Multipac/2023.11.07_Campaign_with_CEA/2024.01.09_reworked_data/calibration/E2_fit_calibration.csv"
+calibration_file = "../data/calibration/E2_fit_calibration.csv"
 patch = true
 
 # ==================================
@@ -55,7 +55,7 @@ class_name = "CurrentProbe"
 [E3.instruments_kw.NI9205_E3]
 class_name = "ElectricFieldProbe"
 g_probe = -73.9
-calibration_file = "/home/placais/Documents/Projects/Multipac/2023.11.07_Campaign_with_CEA/2024.01.09_reworked_data/calibration/E3_fit_calibration.csv"
+calibration_file = "../data/calibration/E3_fit_calibration.csv"
 patch = true
 
 # ==================================
@@ -77,7 +77,7 @@ class_name = "CurrentProbe"
 [E4.instruments_kw.NI9205_E4]
 class_name = "ElectricFieldProbe"
 g_probe = -74.6
-calibration_file = "/home/placais/Documents/Projects/Multipac/2023.11.07_Campaign_with_CEA/2024.01.09_reworked_data/calibration/E4_fit_calibration.csv"
+calibration_file = "../data/calibration/E4_fit_calibration.csv"
 patch = true
 
 # [E8]
@@ -106,7 +106,7 @@ class_name = "CurrentProbe"
 [E5.instruments_kw.NI9205_E5]
 class_name = "ElectricFieldProbe"
 g_probe = -75.5
-calibration_file = "/home/placais/Documents/Projects/Multipac/2023.11.07_Campaign_with_CEA/2024.01.09_reworked_data/calibration/E5_fit_calibration.csv"
+calibration_file = "../data/calibration/E5_fit_calibration.csv"
 patch = true
 
 # ==================================
@@ -120,7 +120,7 @@ class_name = "CurrentProbe"
 [E6.instruments_kw.NI9205_E6]
 class_name = "ElectricFieldProbe"
 g_probe = -75.1
-calibration_file = "/home/placais/Documents/Projects/Multipac/2023.11.07_Campaign_with_CEA/2024.01.09_reworked_data/calibration/E6_fit_calibration.csv"
+calibration_file = "../data/calibration/E6_fit_calibration.csv"
 patch = true
 
 # ==================================
@@ -142,5 +142,5 @@ class_name = "CurrentProbe"
 [E7.instruments_kw.NI9205_E7]
 class_name = "ElectricFieldProbe"
 g_probe = -74.9
-calibration_file = "/home/placais/Documents/Projects/Multipac/2023.11.07_Campaign_with_CEA/2024.01.09_reworked_data/calibration/E7_fit_calibration.csv"
+calibration_file = "../data/calibration/E7_fit_calibration.csv"
 patch = true
