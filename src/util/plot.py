@@ -276,8 +276,11 @@ def set_labels(axes: Axes | np.ndarray[Axes],
         kwargs
 
     """
-    if not xlabel and xdata is not None:
-        xlabel = xdata.ylabel()
+    if not xlabel:
+        if xdata is not None:
+            xlabel = xdata.ylabel()
+        else:
+            xlabel = "Sample index"
 
     if not ylabel:
         ylabel = (obj.ylabel() for obj in ydata)
