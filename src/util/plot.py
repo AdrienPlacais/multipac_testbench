@@ -3,6 +3,7 @@
 """Define helper functions for plots."""
 from abc import ABCMeta
 from collections.abc import Iterable, Sequence
+import logging
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -274,6 +275,7 @@ def set_labels(axes: Axes | np.ndarray[Axes],
 
 def save_figure(axes: Axes | np.ndarray[Axes] | list[Axes],
                 png_path: Path,
+                verbose: bool = True,
                 **png_kwargs) -> None:
     """Save the figure.
 
@@ -283,8 +285,10 @@ def save_figure(axes: Axes | np.ndarray[Axes] | list[Axes],
         Holds one or several axes.
     png_path : Path
         Where figure shall be saved.
+    verbose : bool, optional
+        To print a message indicating where Figure is saved.
     **png_kwargs :
-        Keyword arguments for the ``savefig`` method.
+        Keyword arguments for the ``Figure.savefig`` method.
 
     """
     if isinstance(axes, (np.ndarray, list)):
@@ -292,13 +296,16 @@ def save_figure(axes: Axes | np.ndarray[Axes] | list[Axes],
     else:
         fig = axes.get_figure()
     fig.savefig(png_path, **png_kwargs)
+    if verbose:
+        logging.info(f"Figure saved @ {png_path = }")
 
 
 def save_dataframe(df_to_plot: pd.DataFrame,
                    csv_path: Path,
                    sep: str = '\t',
+                   verbose: bool = True,
                    **csv_kwargs) -> None:
-    """Save dataframe used to produce the plot.
+    r"""Save dataframe used to produce the plot.
 
     Parameters
     ----------
@@ -308,11 +315,15 @@ def save_dataframe(df_to_plot: pd.DataFrame,
         Where to save DataFrame.
     sep : str, optional
         Column delimiter. The default is ``'\t'``.
+    verbose : bool, optional
+        To print a message indicating where Figure is saved.
     csv_kwargs :
-        Othe keyword arguments.
+        Other keyword arguments for the ``DataFrame.to_csv`` method.
 
     """
     df_to_plot.to_csv(csv_path, sep=sep, **csv_kwargs)
+    if verbose:
+        logging.info(f"DataFrame saved @ {csv_path = }")
 
 
 def add_background_color_according_to_power_growth(
