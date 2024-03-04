@@ -157,10 +157,10 @@ class TestCampaign(list):
                 csv_path = test.output_filepath(csv_folder, ".csv")
 
             axes, df_plot = test.sweet_plot(*args,
-                                        png_path=png_path,
-                                        test_multipactor_bands=band,
-                                        csv_path=csv_path,
-                                        **kwargs)
+                                            png_path=png_path,
+                                            test_multipactor_bands=band,
+                                            csv_path=csv_path,
+                                            **kwargs)
             all_axes.append(axes)
             all_df.append(df_plot)
         return all_axes, all_df
@@ -423,6 +423,10 @@ class TestCampaign(list):
                Sarvas. «Computational methods for analyzing electron \
                multipacting in RF structures». In : Part. Accel. 59 (1998), p.\
                107-141. url : http://cds.cern.ch/record/1120302/files/p107.pdf.
+
+        .. todo::
+            Columns in the output file are illogic
+            xx | P_measured | R_measured | R_fit | P_fit
 
         Parameters
         ----------
