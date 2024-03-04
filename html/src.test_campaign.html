@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>src.test_campaign module &mdash; MULTIPAC test bench 1.5.1-7-gf08a1a7 documentation</title>
+  <title>src.test_campaign module &mdash; MULTIPAC test bench 1.5.1-15-g57a67c7 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,7 +15,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=48995598"></script>
+        <script src="_static/documentation_options.js?v=a235407c"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -39,7 +39,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.5.1-7-gf08a1a7
+                1.5.1-15-g57a67c7
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -136,8 +136,33 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.test_campaign.TestCampaign.sweet_plot">
-<span class="sig-name descname"><span class="pre">sweet_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">campaign_multipactor_bands</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">CampaignMultipactorBands</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">png_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csv_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Axes</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Axes</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#src.test_campaign.TestCampaign.sweet_plot" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">sweet_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">campaign_multipactor_bands</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">CampaignMultipactorBands</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">png_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csv_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_on_same_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Axes</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Axes</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Axes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Axes</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#src.test_campaign.TestCampaign.sweet_plot" title="Link to this definition"></a></dt>
 <dd><p>Recursively call <a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.sweet_plot" title="src.multipactor_test.MultipactorTest.sweet_plot"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MultipactorTest.sweet_plot()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> – Arguments that are passed to <a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.sweet_plot" title="src.multipactor_test.MultipactorTest.sweet_plot"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MultipactorTest.sweet_plot()</span></code></a>.</p></li>
+<li><p><strong>campaign_multipactor_bands</strong> (<a class="reference internal" href="src.multipactor_band.campaign_multipactor_bands.html#src.multipactor_band.campaign_multipactor_bands.CampaignMultipactorBands" title="src.multipactor_band.campaign_multipactor_bands.CampaignMultipactorBands"><em>CampaignMultipactorBands</em></a><em> | </em><em>list</em><em>[</em><em>None</em><em>]</em>) – <div class="line-block">
+<div class="line">None, optional</div>
+</div>
+<p>Object holding the <a class="reference internal" href="src.multipactor_band.test_multipactor_bands.html#src.multipactor_band.test_multipactor_bands.TestMultipactorBands" title="src.multipactor_band.test_multipactor_bands.TestMultipactorBands"><code class="xref py py-class docutils literal notranslate"><span class="pre">TestMultipactorBands</span></code></a> corresponding to
+each <a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest" title="src.multipactor_test.MultipactorTest"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipactorTest</span></code></a> stored in <code class="docutils literal notranslate"><span class="pre">self</span></code>. The default is
+None, in which case the multipactor zones are not drawn.</p>
+</p></li>
+<li><p><strong>png_folder</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – If provided, all the created figures will be saved there. The
+default is None.</p></li>
+<li><p><strong>csv_folder</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – If provided, all the created DataFrame will be saved there. The
+default is None.</p></li>
+<li><p><strong>all_on_same_plot</strong> (<em>bool</em><em>, </em><em>optional</em>) – If all the data from all the <a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest" title="src.multipactor_test.MultipactorTest"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipactorTest</span></code></a> should be
+drawn on the same Axes.</p></li>
+<li><p><strong>kwargs</strong> – Other keyword arguments passed to
+<a class="reference internal" href="src.multipactor_test.html#src.multipactor_test.MultipactorTest.sweet_plot" title="src.multipactor_test.MultipactorTest.sweet_plot"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MultipactorTest.sweet_plot()</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[Axes] | list[np.ndarray[Axes]]</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
