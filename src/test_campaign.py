@@ -575,7 +575,7 @@ class TestCampaign(list):
         if csv_path is not None:
             if csv_kwargs is None:
                 csv_kwargs = {}
-            plot.save_dataframe(df_to_plot, csv_path, **csv_kwargs)
+            plot.save_dataframe(voltages, csv_path, **csv_kwargs)
         return axes, voltages
 
     def susceptibility(self,
