@@ -9,6 +9,7 @@ from typing import Self
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from matplotlib import animation
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
@@ -95,16 +96,52 @@ class TestCampaign(list):
     def sweet_plot(
         self,
         *args,
-        campaign_multipactor_bands: CampaignMultipactorBands | list[None] | None = None,
+        campaign_multipactor_bands: CampaignMultipactorBands | list[None]
+        | None = None,
         png_folder: str | None = None,
         csv_folder: str | None = None,
+        all_on_same_plot: bool = False,
         **kwargs
-    ) -> list[Axes] | list[np.ndarray[Axes]]:
-        """Recursively call :meth:`.MultipactorTest.sweet_plot`."""
+    ) -> list[Axes] | list[np.ndarray[Axes]] | Axes | np.ndarray[Axes]:
+        """Recursively call :meth:`.MultipactorTest.sweet_plot`.
+
+        Parameters
+        ----------
+        args :
+            Arguments that are passed to :meth:`.MultipactorTest.sweet_plot`.
+        campaign_multipactor_bands : CampaignMultipactorBands | list[None]
+                | None, optional
+            Object holding the :class:`.TestMultipactorBands` corresponding to
+            each :class:`.MultipactorTest` stored in ``self``. The default is
+            None, in which case the multipactor zones are not drawn.
+        png_folder : str | None, optional
+            If provided, all the created figures will be saved there. The
+            default is None.
+        csv_folder : str | None, optional
+            If provided, all the created DataFrame will be saved there. The
+            default is None.
+        all_on_same_plot : bool, optional
+            If all the data from all the :class:`.MultipactorTest` should be
+            drawn on the same Axes.
+        kwargs :
+            Other keyword arguments passed to
+            :meth:`.MultipactorTest.sweet_plot`.
+
+        Returns
+        -------
+        list[Axes] | list[np.ndarray[Axes]]
+
+        """
         axes = []
         if campaign_multipactor_bands is None:
             campaign_multipactor_bands = [None for _ in self]
         zipper = zip(self, campaign_multipactor_bands, strict=True)
+
+        if all_on_same_plot:
+            return self._sweet_plot_same_plot(zipper,
+                                              *args,
+                                              **kwargs)
+
         for test, band in zipper:
             png_path = None
             if png_folder is not None:
@@ -119,6 +156,46 @@ class TestCampaign(list):
                                         test_multipactor_bands=band,
                                         csv_path=csv_path,
                                         **kwargs))
+        return axes
+
+    def _sweet_plot_same_plot(self,
+                              zipper: zip,
+                              *args,
+                              png_path: Path | None = None,
+                              png_kwargs: dict | None = None,
+                              csv_path: Path | None = None,
+                              csv_kwargs: dict | None = None,
+                              **kwargs
+                              ) -> Axes | np.ndarray[Axes]:
+        """Plot the various signals on the same Axes."""
+        if len(args) > 1:
+            logging.warning("I am not sure how the interaction of "
+                            "all_on_same_plot with several instruments plotted"
+                            " will go.")
+        axes = None
+        all_df = []
+        colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+        for i, (test, band) in enumerate(zipper):
+            axes, df_plot = test.sweet_plot(*args,
+                                            test_multipactor_bands=band,
+                                            ax=axes,
+                                            column_names=str(test),
+                                            title=' ',
+                                            color=colors[i],
+                                            **kwargs)
+            all_df.append(df_plot)
+        assert axes is not None
+        df_to_plot = pd.concat(all_df, axis=1)
+
+        if png_path is not None:
+            if png_kwargs is None:
+                png_kwargs = {}
+            plot.save_figure(axes, png_path, **png_kwargs)
+        if csv_path is not None:
+            if csv_kwargs is None:
+                csv_kwargs = {}
+            plot.save_dataframe(df_to_plot, csv_path, **csv_kwargs)
+
         return axes
 
     def plot_thresholds(self,

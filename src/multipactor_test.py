@@ -131,12 +131,17 @@ class MultipactorTest:
             grid: bool = True,
             title: str | list[str] = '',
             test_multipactor_bands: TestMultipactorBands | None = None,
+            column_names: str | list[str] = '',
             png_path: Path | None = None,
             png_kwargs: dict | None = None,
             csv_path: Path | None = None,
             csv_kwargs: dict | None = None,
+            ax: Axes | np.ndarray[Axes] | None = None,
             **kwargs) -> tuple[Axes | np.ndarray[Axes], pd.DataFrame]:
         """Plot ``ydata`` versus ``xdata``.
+
+        .. todo::
+            Kwargs mixed up between the different methods.
 
         Parameters
         ----------
@@ -163,13 +168,20 @@ class MultipactorTest:
         test_multipactor_bands : TestMultipactorBands | None, optional
             If provided, information is added to the plot to show where
             multipactor happens.
+        column_names : str | list[str], optional
+            To override the default column names. The default is an empty
+            string, in which we keep default names. This is used in particular
+            with the method :meth:`.TestCampaign.sweet_plot` when
+            ``all_on_same_plot=True``.
         png_path : Path | None, optional
             If specified, save the figure at ``png_path``.
         csv_path : Path | None, optional
             If specified, save the data used to produce the plot in
             ``csv_path``.
         **kwargs : dict
-            Other keyword arguments passed to the :meth:`pd.DataFrame.plot`.
+            Other keyword arguments passed to :meth:`pd.DataFrame.plot`,
+            :meth:`._set_y_data`, :meth:`.create_df_to_plot`,
+            :func:`.set_labels`.
 
         Returns
         -------
@@ -183,8 +195,12 @@ class MultipactorTest:
         data_to_plot, y_columns = self._set_y_data(data_to_plot,
                                                    *ydata,
                                                    exclude=exclude,
+                                                   column_names=column_names,
                                                    **kwargs)
-        df_to_plot = plot.create_df_to_plot(data_to_plot, tail=tail, **kwargs)
+        df_to_plot = plot.create_df_to_plot(data_to_plot,
+                                            tail=tail,
+                                            column_names=column_names,
+                                            **kwargs)
 
         if not title:
             title = str(self)
@@ -192,25 +208,30 @@ class MultipactorTest:
         x_column, y_column = plot.match_x_and_y_column_names(x_columns,
                                                              y_columns)
 
-        axes = plot.actual_plot(df_to_plot, x_column, y_column, grid=grid,
-                                title=title, **kwargs)
+        ax = plot.actual_plot(df_to_plot,
+                              x_column,
+                              y_column,
+                              grid=grid,
+                              title=title,
+                              ax=ax,
+                              **kwargs)
 
-        plot.set_labels(axes, *ydata, xdata=xdata, xlabel=xlabel,
+        plot.set_labels(ax, *ydata, xdata=xdata, xlabel=xlabel,
                         ylabel=ylabel, **kwargs)
 
         if test_multipactor_bands is not None:
             plot.add_instrument_multipactor_bands(test_multipactor_bands,
-                                                  axes, twinx=True)
+                                                  ax, twinx=True)
 
         if png_path is not None:
             if png_kwargs is None:
                 png_kwargs = {}
-            plot.save_figure(axes, png_path, **png_kwargs)
+            plot.save_figure(ax, png_path, **png_kwargs)
         if csv_path is not None:
             if csv_kwargs is None:
                 csv_kwargs = {}
             plot.save_dataframe(df_to_plot, csv_path, **csv_kwargs)
-        return axes, df_to_plot
+        return ax, df_to_plot
 
     def _set_x_data(self,
                     xdata: ABCMeta | None,
@@ -255,6 +276,7 @@ class MultipactorTest:
                     data_to_plot: list[pd.Series],
                     *ydata: ABCMeta,
                     exclude: Sequence[str] = (),
+                    column_names: str | list[str] = '',
                     **kwargs) -> tuple[list[pd.Series], list[list[str]]]:
         """Set the y-data that will be plotted.
 
@@ -267,6 +289,10 @@ class MultipactorTest:
             The class of the instruments to plot.
         exclude : Sequence[str], optional
             Name of some instruments to exclude. The default is an empty tuple.
+        column_names : str | list[str], optional
+            To override the default column names. The default is an empty
+            string, in which we keep default names. This is used in particular
+            with the method :meth:`.TestCampaign.sweet_plot` when
         kwargs :
             Other keyword arguments.
 
@@ -276,6 +302,8 @@ class MultipactorTest:
             List containing all the series that will be plotted.
         y_columns : list[list[str]]
             Containts, for every subplot, the name of the columns to plot.
+            If ``column_names`` is provided, it overrides the given
+            ``y_columns``.
 
         """
         instruments = [self.get_instruments(y) for y in ydata]
@@ -292,6 +320,13 @@ class MultipactorTest:
                                   "is 2D. Not supported.")
                     continue
                 data_to_plot.append(instrument.data_as_pd)
+
+        if column_names:
+            if len(y_columns) > 1:
+                logging.warning("This will lead to duplicate column names.")
+            if isinstance(column_names, str):
+                column_names = [column_names]
+            y_columns = [column_names for _ in y_columns]
 
         return data_to_plot, y_columns
 

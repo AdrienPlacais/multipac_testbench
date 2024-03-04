@@ -107,6 +107,7 @@ def finish_fig(fig: Figure,
 
 def create_df_to_plot(data_to_plot: list[pd.Series],
                       tail: int = -1,
+                      column_names: str | list[str] = '',
                       **kwargs,
                       ) -> pd.DataFrame:
     """Merge the series into a single dataframe.
@@ -119,6 +120,10 @@ def create_df_to_plot(data_to_plot: list[pd.Series],
         The number of points to plot, starting from the end of the test
         (fully conditioned). The default is ``-1``, in which case the full
         test is plotted.
+    column_names : str | list[str], optional
+        To override the default column names. The default is an empty string,
+        in which we keep default names. This is used in particular with the
+        method :meth:`.TestCampaign.sweet_plot` when ``all_on_same_plot=True``.
     kwargs :
         Other keyword arguments.
 
@@ -132,6 +137,16 @@ def create_df_to_plot(data_to_plot: list[pd.Series],
     df_to_plot = df_to_plot.tail(tail)
     # Remove duplicate columns
     df_to_plot = df_to_plot.loc[:, ~df_to_plot.columns.duplicated()].copy()
+
+    if column_names:
+        if isinstance(column_names, str):
+            column_names = [column_names]
+            old_column_names = df_to_plot.columns.values
+            assert len(column_names) == len(old_column_names)
+            columns_mapper = {old: new for old, new in zip(old_column_names,
+                                                           column_names)}
+            df_to_plot.rename(columns=columns_mapper, inplace=True)
+
     return df_to_plot
 
 
@@ -182,6 +197,8 @@ def actual_plot(df_to_plot: pd.DataFrame,
                 y_columns: list[list[str]] | list[str],
                 grid: bool = True,
                 title: list[str] | str = '',
+                sharex: bool | None = True,
+                ax: Axes | np.ndarray[Axes] | None = None,
                 **kwargs) -> Axes | np.ndarray[Axes]:
     """Plot the data, adapting to what is given.
 
@@ -207,26 +224,29 @@ def actual_plot(df_to_plot: pd.DataFrame,
         Plotted axes, or an array containing them.
 
     """
+    if ax is not None:
+        sharex = None
     if not isinstance(x_columns, list):
-        axes = df_to_plot.plot(x=x_columns,
-                               subplots=y_columns,
-                               sharex=True,
-                               grid=grid,
-                               title=title,
-                               **kwargs)
-        return axes
+        ax = df_to_plot.plot(x=x_columns,
+                             subplots=y_columns,
+                             sharex=sharex,
+                             grid=grid,
+                             title=title,
+                             ax=ax,
+                             **kwargs)
+        assert ax is not None
+        return ax
 
-    axes = None
     zipper = zip(x_columns, y_columns, strict=True)
     for x_col, y_col in zipper:
-        axes = df_to_plot.plot(x=x_col,
-                               y=y_col,
-                               ax=axes,
-                               grid=grid,
-                               title=title,
-                               **kwargs)
-    assert axes is not None
-    return axes
+        ax = df_to_plot.plot(x=x_col,
+                             y=y_col,
+                             ax=ax,
+                             grid=grid,
+                             title=title,
+                             **kwargs)
+    assert ax is not None
+    return ax
 
 
 def set_labels(axes: Axes | np.ndarray[Axes],
@@ -275,7 +295,7 @@ def set_labels(axes: Axes | np.ndarray[Axes],
 
 def save_figure(axes: Axes | np.ndarray[Axes] | list[Axes],
                 png_path: Path,
-                verbose: bool = True,
+                verbose: bool = False,
                 **png_kwargs) -> None:
     """Save the figure.
 
@@ -286,7 +306,8 @@ def save_figure(axes: Axes | np.ndarray[Axes] | list[Axes],
     png_path : Path
         Where figure shall be saved.
     verbose : bool, optional
-        To print a message indicating where Figure is saved.
+        To print a message indicating where Figure is saved. The default is
+        False.
     **png_kwargs :
         Keyword arguments for the ``Figure.savefig`` method.
 
@@ -303,7 +324,7 @@ def save_figure(axes: Axes | np.ndarray[Axes] | list[Axes],
 def save_dataframe(df_to_plot: pd.DataFrame,
                    csv_path: Path,
                    sep: str = '\t',
-                   verbose: bool = True,
+                   verbose: bool = False,
                    **csv_kwargs) -> None:
     r"""Save dataframe used to produce the plot.
 
@@ -316,7 +337,8 @@ def save_dataframe(df_to_plot: pd.DataFrame,
     sep : str, optional
         Column delimiter. The default is ``'\t'``.
     verbose : bool, optional
-        To print a message indicating where Figure is saved.
+        To print a message indicating where Figure is saved. The default is
+        False.
     csv_kwargs :
         Other keyword arguments for the ``DataFrame.to_csv`` method.
 
