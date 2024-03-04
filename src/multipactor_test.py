@@ -135,7 +135,7 @@ class MultipactorTest:
             png_kwargs: dict | None = None,
             csv_path: Path | None = None,
             csv_kwargs: dict | None = None,
-            **kwargs) -> Axes | np.ndarray[Axes]:
+            **kwargs) -> tuple[Axes | np.ndarray[Axes], pd.DataFrame]:
         """Plot ``ydata`` versus ``xdata``.
 
         Parameters
@@ -171,6 +171,13 @@ class MultipactorTest:
         **kwargs : dict
             Other keyword arguments passed to the :meth:`pd.DataFrame.plot`.
 
+        Returns
+        -------
+        axes : Axes | np.ndarray[Axes]
+            Objects holding the plot.
+        df_to_plot : pd.DataFrame
+            DataFrame holding the data that is plotted.
+
         """
         data_to_plot, x_columns = self._set_x_data(xdata, exclude=exclude)
         data_to_plot, y_columns = self._set_y_data(data_to_plot,
@@ -203,7 +210,7 @@ class MultipactorTest:
             if csv_kwargs is None:
                 csv_kwargs = {}
             plot.save_dataframe(df_to_plot, csv_path, **csv_kwargs)
-        return axes
+        return axes, df_to_plot
 
     def _set_x_data(self,
                     xdata: ABCMeta | None,
