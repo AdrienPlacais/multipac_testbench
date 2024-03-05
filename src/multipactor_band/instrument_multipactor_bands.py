@@ -20,6 +20,7 @@ class InstrumentMultipactorBands(list):
                  position: float,
                  info_test: str = '',
                  several_bands_politics: str = 'merge',
+                 color: str | None = None,
                  ) -> None:
         """Create the object.
 
@@ -51,6 +52,8 @@ class InstrumentMultipactorBands(list):
                 (currently not implemented)
                 - ``'merge'``: the final :class:`.MultipactorBand` spans from
                 start of first :class:`.MultipactorBand` to end of last.
+        color : str | None, optional
+            HTML color for plot, inherited from the :class:`.Instrument`.
 
         """
         list_of_multipactor_band = multipactor_to_list_of_mp_band(
@@ -65,6 +68,7 @@ class InstrumentMultipactorBands(list):
         self.instrument_name = instrument_name
         self.measurement_point_name = measurement_point_name
         self.position = position
+        self.color = color
 
         self._n_bands = len([x for x in self if x is not None])
 
@@ -89,7 +93,7 @@ class InstrumentMultipactorBands(list):
                      ) -> Axes:
         """Plot as staircase like."""
         ser = self.data_as_pd().astype(float) * scale
-        axes = ser.plot(ax=axes, **kwargs)
+        axes = ser.plot(ax=axes, color=self.color, **kwargs)
         return axes
 
     def lower_indexes(self) -> list[int | None]:

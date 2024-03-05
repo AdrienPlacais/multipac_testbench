@@ -20,6 +20,7 @@ class PickUp(IMeasurementPoint):
                  instrument_factory: InstrumentFactory,
                  instruments_kw: dict[str, dict[str, Any]],
                  position: float,
+                 color: str,
                  ) -> None:
         """Create the pick-up with all its instruments.
 
@@ -37,6 +38,8 @@ class PickUp(IMeasurementPoint):
             Dictionary which keys are name of the column where the data from
             the instrument is. Values are dictionaries with keyword arguments
             passed to the proper :class:`.Instrument`.
+        color : str
+            HTML color that will be used for every instrument in this pick-up.
 
         """
         self._add_key_val_to_dictionaries('position', position, instruments_kw)
@@ -47,6 +50,7 @@ class PickUp(IMeasurementPoint):
                          instrument_factory,
                          instruments_kw,
                          position=position,
+                         color=color,
                          )
 
     def _add_key_val_to_dictionaries(self,

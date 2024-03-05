@@ -28,6 +28,7 @@ class IMeasurementPoint(ABC):
                  instrument_factory: InstrumentFactory,
                  instruments_kw: dict[str, dict[str, Any]],
                  position: float,
+                 color: str | None = None,
                  ) -> None:
         """Create the all the global instruments.
 
@@ -41,12 +42,20 @@ class IMeasurementPoint(ABC):
             Dictionary which keys are name of the column where the data from
             the instrument is. Values are dictionaries with keyword arguments
             passed to the proper :class:`.Instrument`.
+        position : float
+            Position of the measurement point. It is a real if it is a
+            :class:`.PickUp`, and ``np.NaN`` for a :class:`.GlobalDiagnostics`.
+        color : str | None
+            HTML color of the plots. It is ``None`` for
+            :class:`.GlobalDiagnostics`.  The default is None.
 
         """
         self.name = name
         self.position = position
+        self.color = color
         self.instruments = [
-            instrument_factory.run(instr_name, df_data, **instr_kw)
+            instrument_factory.run(instr_name, df_data,
+                                   color=color, **instr_kw)
             for instr_name, instr_kw in instruments_kw.items()
         ]
         virtual_instruments = instrument_factory.run_virtual(
@@ -132,6 +141,7 @@ class IMeasurementPoint(ABC):
             self.name,
             instrument.position,
             info,
+            color=self.color,
         )
         if debug:
             axes = instrument.data_as_pd.plot(grid=True)

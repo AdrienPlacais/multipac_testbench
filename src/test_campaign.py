@@ -189,7 +189,7 @@ class TestCampaign(list):
                                             ax=axes,
                                             column_names=str(test),
                                             title=' ',
-                                            color=colors[i],
+                                            test_color=colors[i],
                                             **kwargs)
             all_df.append(df_plot)
         assert axes is not None

@@ -26,6 +26,7 @@ class Instrument(ABC):
                  data: pd.Series,
                  position: np.ndarray | float,
                  is_2d: bool = False,
+                 color: tuple[float, float, float] | None = None,
                  **kwargs,
                  ) -> None:
         """Instantiate the class.
@@ -43,6 +44,10 @@ class Instrument(ABC):
             To make the difference between instruments holding a single array
             of data (e.g. current vs time) and those holding several columns
             (eg forward and reflected power).
+        color : tuple[float, float, float] | None, optional
+            Color for the plots; all instruments from a same :class:`.PickUp`
+            have the same. The default is None, which happens for instruments
+            defined in a :class:`.GlobalDiagnostics`.
         kwargs :
             Additional keyword arguments coming from the ``.toml``
             configuration file.
@@ -53,6 +58,7 @@ class Instrument(ABC):
         self.position = position
 
         self.is_2d = is_2d
+        self.color = color
         plotters = self._get_plot_methods(is_2d)
         self.plot_vs_position, self.scatter_data = plotters
 

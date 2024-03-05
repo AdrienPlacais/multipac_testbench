@@ -28,6 +28,7 @@ from matplotlib import animation
 from matplotlib.artist import Artist
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+from matplotlib.colors import Colormap
 
 import multipac_testbench.src.instruments as ins
 from multipac_testbench.src.measurement_point.factory import \
@@ -132,6 +133,7 @@ class MultipactorTest:
             title: str | list[str] = '',
             test_multipactor_bands: TestMultipactorBands | None = None,
             column_names: str | list[str] = '',
+            test_color: str | None = None,
             png_path: Path | None = None,
             png_kwargs: dict | None = None,
             csv_path: Path | None = None,
@@ -173,6 +175,11 @@ class MultipactorTest:
             string, in which we keep default names. This is used in particular
             with the method :meth:`.TestCampaign.sweet_plot` when
             ``all_on_same_plot=True``.
+        test_color : str | None, optional
+            Color used by :meth:`.TestCampaign.sweet_plot` when
+            ``all_on_same_plot=True``. It overrides the :class:`.Instrument`
+            color and is used to discriminate every :class:`MultipactorTest`
+            from another. The default is None.
         png_path : Path | None, optional
             If specified, save the figure at ``png_path``.
         csv_path : Path | None, optional
@@ -192,11 +199,15 @@ class MultipactorTest:
 
         """
         data_to_plot, x_columns = self._set_x_data(xdata, exclude=exclude)
-        data_to_plot, y_columns = self._set_y_data(data_to_plot,
-                                                   *ydata,
-                                                   exclude=exclude,
-                                                   column_names=column_names,
-                                                   **kwargs)
+        data_to_plot, y_columns, color = self._set_y_data(
+            data_to_plot,
+            *ydata,
+            exclude=exclude,
+            column_names=column_names,
+            **kwargs)
+        if test_color is not None:
+            color = test_color
+
         df_to_plot = plot.create_df_to_plot(data_to_plot,
                                             tail=tail,
                                             column_names=column_names,
@@ -214,6 +225,7 @@ class MultipactorTest:
                               grid=grid,
                               title=title,
                               ax=ax,
+                              color=color,
                               **kwargs)
 
         plot.set_labels(ax, *ydata, xdata=xdata, xlabel=xlabel,
@@ -277,7 +289,10 @@ class MultipactorTest:
                     *ydata: ABCMeta,
                     exclude: Sequence[str] = (),
                     column_names: str | list[str] = '',
-                    **kwargs) -> tuple[list[pd.Series], list[list[str]]]:
+                    **kwargs
+                    ) -> tuple[list[pd.Series],
+                               list[list[str]],
+                               dict[str, str]]:
         """Set the y-data that will be plotted.
 
         Parameters
@@ -304,14 +319,21 @@ class MultipactorTest:
             Containts, for every subplot, the name of the columns to plot.
             If ``column_names`` is provided, it overrides the given
             ``y_columns``.
+        color : dict[str, str]
+            Dictionary linking column names in ``df_to_plot`` to HTML colors.
+            Used to keep the same color between different instruments at the
+            same :class:`.PickUp`.
 
         """
         instruments = [self.get_instruments(y) for y in ydata]
         y_columns = []
+        color: dict[str, str] = {}
+
         for sublist in instruments:
             y_columns.append([instrument.name
                               for instrument in sublist
                               if instrument.name not in exclude])
+
             for instrument in sublist:
                 if instrument.name in exclude:
                     continue
@@ -319,16 +341,20 @@ class MultipactorTest:
                     logging.error(f"You want to plot {instrument}, which data "
                                   "is 2D. Not supported.")
                     continue
+
                 data_to_plot.append(instrument.data_as_pd)
+                color[instrument.name] = instrument.color
 
         if column_names:
+            logging.info("Instrument.color attribute will not be used.")
             if len(y_columns) > 1:
                 logging.warning("This will lead to duplicate column names.")
             if isinstance(column_names, str):
                 column_names = [column_names]
+
             y_columns = [column_names for _ in y_columns]
 
-        return data_to_plot, y_columns
+        return data_to_plot, y_columns, color
 
     def plot_thresholds(
         self,

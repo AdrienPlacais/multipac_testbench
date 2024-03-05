@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Define a class to create the proper :class:`.IMeasurementPoint`."""
-import pandas as pd
 import logging
 
+import matplotlib.pyplot as plt
+import pandas as pd
 from multipac_testbench.src.instruments.factory import InstrumentFactory
 from multipac_testbench.src.measurement_point.global_diagnostics import \
     GlobalDiagnostics
@@ -36,7 +37,8 @@ class IMeasurementPointFactory:
     def run_single(self,
                    config_key: str,
                    config_value: dict,
-                   df_data: pd.DataFrame
+                   df_data: pd.DataFrame,
+                   color: tuple[float, float, float],
                    ) -> IMeasurementPoint:
         """Create a single measurement point.
 
@@ -67,6 +69,7 @@ class IMeasurementPointFactory:
         return PickUp(name=config_key,
                       df_data=df_data,
                       instrument_factory=self.instrument_factory,
+                      color=color,
                       **config_value)
 
     def run(self,
@@ -75,9 +78,14 @@ class IMeasurementPointFactory:
             verbose: bool = False,
             ) -> tuple[GlobalDiagnostics | None, list[PickUp]]:
         """Create all the measurement points."""
+        colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+        n_colors = len(colors)
         measurement_points = [
-            self.run_single(config_key, config_value, df_data)
-            for config_key, config_value in config.items()
+            self.run_single(config_key,
+                            config_value,
+                            df_data,
+                            colors[i % n_colors])
+            for i, (config_key, config_value) in enumerate(config.items())
         ]
 
         global_diagnostics = self._filter_global_diagnostics(

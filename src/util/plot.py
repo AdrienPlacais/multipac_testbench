@@ -12,8 +12,6 @@ import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-from multipac_testbench.src.multipactor_band.instrument_multipactor_bands import \
-    InstrumentMultipactorBands
 from multipac_testbench.src.util.multipactor_detectors import \
     start_and_end_of_contiguous_true_zones
 
@@ -199,6 +197,7 @@ def actual_plot(df_to_plot: pd.DataFrame,
                 title: list[str] | str = '',
                 sharex: bool | None = True,
                 ax: Axes | np.ndarray[Axes] | None = None,
+                color: dict[str, str] | None = None,
                 **kwargs) -> Axes | np.ndarray[Axes]:
     """Plot the data, adapting to what is given.
 
@@ -215,6 +214,15 @@ def actual_plot(df_to_plot: pd.DataFrame,
     title : list[str] | str, optional
         A title for the figure or every subplot if it is a list. The
         default is an empty string.
+    sharex : bool | None, optional
+        To let the different subplots share the same x-axis. The default is
+        True. It is set to None when we re-use already existing Axes.
+    ax : Axes | np.ndarray[Axes] | None, optional
+        To re-use already existing Axes. The defaut is None.
+    color : dict[str, str] | None, optional
+        Dictionary linking column names in ``df_to_plot`` to HTML colors. Used
+        to keep the same color between different instruments at the same
+        :class:`.PickUp`. The default is None.
     kwargs :
         Other keyword arguments passed to the plot function.
 
@@ -233,6 +241,7 @@ def actual_plot(df_to_plot: pd.DataFrame,
                              grid=grid,
                              title=title,
                              ax=ax,
+                             color=color,
                              **kwargs)
         assert ax is not None
         return ax
@@ -244,6 +253,7 @@ def actual_plot(df_to_plot: pd.DataFrame,
                              ax=ax,
                              grid=grid,
                              title=title,
+                             color=color,
                              **kwargs)
     assert ax is not None
     return ax
