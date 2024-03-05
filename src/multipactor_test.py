@@ -28,7 +28,6 @@ from matplotlib import animation
 from matplotlib.artist import Artist
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from matplotlib.colors import Colormap
 
 import multipac_testbench.src.instruments as ins
 from multipac_testbench.src.measurement_point.factory import \
@@ -471,17 +470,17 @@ class MultipactorTest:
             :class:`.InstrumentMultipactorBands`.
         raise_no_match_error : bool, optional
             If an error should be raised when no
-            :class:`.InstrumentMultipactorBands` match an :class:`ins.Instrument`.
-            The default is True.
+            :class:`.InstrumentMultipactorBands` match an
+            :class:`ins.Instrument`. The default is True.
         global_diagnostics : bool, optional
             If :class:`InstrumentMultipactorBands` that were obtained from a
             global diagnostic should be matched. The default is True.
         measurement_points_to_exclude : Sequence[IMeasurementPoint | str]
-            :class:`ins.Instrument` at this pick-ups are skipped. The default is
-            an empty tuple.
+            :class:`ins.Instrument` at this pick-ups are skipped. The default
+            is an empty tuple.
         instruments_to_ignore : Sequence[ins.Instrument | str], optional
-            :class:`ins.Instrument` in this sequence are skipped. The default is
-            an empty tuple.
+            :class:`ins.Instrument` in this sequence are skipped. The default
+            is an empty tuple.
 
         Returns
         -------
@@ -739,7 +738,8 @@ optional
         self,
         instruments_to_plot: Sequence[ABCMeta],
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
-        instrument_multipactor_bands: Sequence[InstrumentMultipactorBands] | None = None,
+        instrument_multipactor_bands: Sequence[InstrumentMultipactorBands]
+        | None = None,
         png_path: Path | None = None,
         **fig_kw,
     ) -> tuple[Figure, list[Axes]]:
@@ -771,10 +771,11 @@ optional
         measurement_points = self.get_measurement_points(
             to_exclude=measurement_points_to_exclude)
 
-        instrument_multipactor_bands = self._get_proper_instrument_multipactor_bands(
-            multipactor_measured_at=measurement_points,
-            instrument_multipactor_bands=instrument_multipactor_bands,
-            measurement_points_to_exclude=measurement_points_to_exclude)
+        instrument_multipactor_bands = \
+            self._get_proper_instrument_multipactor_bands(
+                multipactor_measured_at=measurement_points,
+                instrument_multipactor_bands=instrument_multipactor_bands,
+                measurement_points_to_exclude=measurement_points_to_exclude)
 
         for i, measurement_point in enumerate(measurement_points):
             measurement_point.scatter_instruments_data(instrument_class_axes,
@@ -805,8 +806,9 @@ optional
             default is None, in which case we look into every
             :class:`IMeasurementPoint` attribute of self.
         instruments_to_ignore : Sequence[ins.Instrument | str], optional
-            The :class:`ins.Instrument` or instrument names you do not want. The
-            default is an empty tuple, in which case no instrument is ignored.
+            The :class:`ins.Instrument` or instrument names you do not want.
+            The default is an empty tuple, in which case no instrument is
+            ignored.
 
         Returns
         -------
@@ -924,15 +926,16 @@ optional
 
     def get_instruments(
             self,
-            instruments_id: ABCMeta | Sequence[ABCMeta] | Sequence[str] | Sequence[ins.Instrument],
+            instruments_id: ABCMeta | Sequence[ABCMeta] | Sequence[str]
+            | Sequence[ins.Instrument],
             measurement_points_to_exclude: Sequence[IMeasurementPoint
                                                     | str] = (),
             instruments_to_ignore: Sequence[ins.Instrument | str] = (),
     ) -> list[ins.Instrument]:
         """Get all instruments matching ``instrument_id``."""
         match (instruments_id):
-            case list() | tuple() as instruments if types_match(instruments,
-                                                                ins.Instrument):
+            case list() | tuple() as instruments if types_match(
+                    instruments, ins.Instrument):
                 return instruments
 
             case list() | tuple() as names if types_match(names, str):
@@ -956,8 +959,8 @@ optional
                     measurement_points,
                     instruments_to_ignore=instruments_to_ignore)
             case _:
-                raise IOError(f"instruments is {type(instruments_id)} which is ",
-                              "not supported.")
+                raise IOError(f"instruments is {type(instruments_id)} which ",
+                              "is not supported.")
         return out
 
     def get_instrument(
