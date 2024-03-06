@@ -46,8 +46,20 @@ class InstrumentMultipactorBands(list):
             True where the power is growing, False where the power is
             decreasing, NaN where undetermined. The default is None, in which
             case it is not used.
-        several_bands_politics :
-            to update
+        several_bands_politics : {'keep_highest', 'keep_lowest', 'keep_all',\
+                'merge', 'keep_largest'}
+            What to to when several multipactor bands are found in the same
+            half power cycle:
+                - ``'keep_lowest'``: we keep :class:`.MultipactorBand` at the
+                lowest powers.
+                - ``'keep_highest'``: we keep :class:`.MultipactorBand` at the
+                highest powers.
+                - ``'keep_all'``: we keep all :class:`.MultipactorBand`.
+                - ``'merge'``: the resulting :class:`.MultipactorBand` will
+                span from start of first :class:`.MultipactorBand` to end of
+                last.
+                - ``'keep_largest'``: we keep the :class:`.MultipactorBand`
+                that was measured on the largest number of points.
         color : str | None, optional
             HTML color for plot, inherited from the :class:`.Instrument`.
 

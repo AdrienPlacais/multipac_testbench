@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Handle creation of the :class:`.MultipactorBand`. Not a Factory pattern."""
+"""Handle creation of the :class:`.MultipactorBand`."""
 import numpy as np
 
 from multipac_testbench.src.multipactor_band.multipactor_band import (
