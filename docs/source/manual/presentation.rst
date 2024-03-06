@@ -14,10 +14,12 @@ Go to `Gallery`_ for a quick overview of the available plots.
 
 Files
 -----
-A few operations are mandatory in order to read the files produced by LabVIEWER.
- - Mandatory: decimal should be changed from `,` to `.`.
- - Recommended: measurement index should start at `i=0`.
- - Recommended: comments in the right-most columns should be deleted.
+
+In order to read the files produced by LabViewer, it is adviced to do the following:
+
+ - Decimal should be changed from `,` to `.` (or use `decimal=','` when instantiating :class:`.MultipactorTest` or :class:`.TestCampaign`).
+ - Measurement index should start at `i=0` instead of `i=1`.
+ - Comments in the right-most columns should be deleted.
 
 Note that you can use the column separator that you want with the `sep` argument from the :py:meth:`.MultipactorTest.__init__` or :py:meth:`.TestCampaign.from_filepaths` methods.
 
