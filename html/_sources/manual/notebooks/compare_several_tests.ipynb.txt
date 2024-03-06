@@ -204,7 +204,7 @@
     }
    ],
    "source": [
-    "_ = test_campaign.sweet_plot(to_plot)"
+    "_, _ = test_campaign.sweet_plot(to_plot)"
    ]
   },
   {
@@ -240,7 +240,7 @@
     }
    ],
    "source": [
-    "_ = test_campaign.sweet_plot(to_plot, all_on_same_plot=True)"
+    "_, _ = test_campaign.sweet_plot(to_plot, all_on_same_plot=True)"
    ]
   }
  ],

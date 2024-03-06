@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>src.multipactor_band.multipactor_band module &mdash; MULTIPAC test bench 1.5.1-15-g57a67c7 documentation</title>
+  <title>src.multipactor_band.multipactor_band module &mdash; MULTIPAC test bench 1.5.1-26-ga128f9d documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,14 +15,14 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=a235407c"></script>
+        <script src="_static/documentation_options.js?v=7bd4e5d5"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="src.multipactor_band.test_multipactor_bands module" href="src.multipactor_band.test_multipactor_bands.html" />
+    <link rel="next" title="src.multipactor_band.polisher module" href="src.multipactor_band.polisher.html" />
     <link rel="prev" title="src.multipactor_band.instrument_multipactor_bands module" href="src.multipactor_band.instrument_multipactor_bands.html" /> 
 </head>
 
@@ -38,7 +38,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.5.1-15-g57a67c7
+                1.5.1-26-ga128f9d
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -60,8 +60,10 @@
 <li class="toctree-l3"><a class="reference internal" href="src.measurement_point.html">src.measurement_point package</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="src.multipactor_band.html">src.multipactor_band package</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="src.multipactor_band.campaign_multipactor_bands.html">src.multipactor_band.campaign_multipactor_bands module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.multipactor_band.creator.html">src.multipactor_band.creator module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.multipactor_band.instrument_multipactor_bands.html">src.multipactor_band.instrument_multipactor_bands module</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">src.multipactor_band.multipactor_band module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.multipactor_band.polisher.html">src.multipactor_band.polisher module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.multipactor_band.test_multipactor_bands.html">src.multipactor_band.test_multipactor_bands module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.multipactor_band.util.html">src.multipactor_band.util module</a></li>
 </ul>
@@ -109,45 +111,128 @@
 <p>i.e.: a set of measurement points where multipactor happens. A
 <a class="reference internal" href="#src.multipactor_band.multipactor_band.MultipactorBand" title="src.multipactor_band.multipactor_band.MultipactorBand"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipactorBand</span></code></a> is defined on half a power cycle.</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="src.multipactor_band.multipactor_band.MultipactorBand">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MultipactorBand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reached_second_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power_grows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.multipactor_band.multipactor_band.MultipactorBand" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="src.multipactor_band.multipactor_band.IMultipactorBand">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IMultipactorBand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pow_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.multipactor_band.multipactor_band.IMultipactorBand" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>First and last index of a multipactor zone.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="src.multipactor_band.multipactor_band.multipactor_to_list_of_mp_band">
-<span class="sig-name descname"><span class="pre">multipactor_to_list_of_mp_band</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">multipactor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">bool_</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power_is_growing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">bool_</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">several_bands_politics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'merge'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#src.multipactor_band.multipactor_band.MultipactorBand" title="src.multipactor_band.multipactor_band.MultipactorBand"><span class="pre">MultipactorBand</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#src.multipactor_band.multipactor_band.multipactor_to_list_of_mp_band" title="Link to this definition"></a></dt>
-<dd><p>Create the different <a class="reference internal" href="#src.multipactor_band.multipactor_band.MultipactorBand" title="src.multipactor_band.multipactor_band.MultipactorBand"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipactorBand</span></code></a>.</p>
+<p>Mother class of <a class="reference internal" href="#src.multipactor_band.multipactor_band.MultipactorBand" title="src.multipactor_band.multipactor_band.MultipactorBand"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipactorBand</span></code></a> and <a class="reference internal" href="#src.multipactor_band.multipactor_band.NoMultipactorBand" title="src.multipactor_band.multipactor_band.NoMultipactorBand"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoMultipactorBand</span></code></a>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.multipactor_band.multipactor_band.IMultipactorBand.pow_index">
+<span class="sig-name descname"><span class="pre">pow_index</span></span><a class="headerlink" href="#src.multipactor_band.multipactor_band.IMultipactorBand.pow_index" title="Link to this definition"></a></dt>
+<dd><p>Index of the half-power cycle, starting at zero.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>multipactor</strong> (np.ndarray[<a href="#id1"><span class="problematic" id="id2">np.bool_</span></a>]) – True means multipactor, False no multipactor.</p></li>
-<li><p><strong>power_is_growing</strong> (<em>np.ndarray</em><em>[</em><em>float</em><em>]</em>) – True means power is growing, False it is decreasing.</p></li>
-<li><p><strong>info</strong> (<em>str</em>) – To give more meaning to the error messages.</p></li>
-<li><p><strong>several_bands_politics</strong> (<em>{'keep_first'</em><em>, </em><em>'keep_last'</em><em>, </em><em>'keep_all'</em><em>, </em><em>'merge'}</em>) – <p>What to to when several multipactor bands are found in the same
-half-power cycle:</p>
-<blockquote>
-<div><ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">'keep_first'</span></code>: we keep first <a class="reference internal" href="#src.multipactor_band.multipactor_band.MultipactorBand" title="src.multipactor_band.multipactor_band.MultipactorBand"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipactorBand</span></code></a></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">'keep_last'</span></code>: we keep last <a class="reference internal" href="#src.multipactor_band.multipactor_band.MultipactorBand" title="src.multipactor_band.multipactor_band.MultipactorBand"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipactorBand</span></code></a></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">'keep_all'</span></code>: we keep all <a class="reference internal" href="#src.multipactor_band.multipactor_band.MultipactorBand" title="src.multipactor_band.multipactor_band.MultipactorBand"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipactorBand</span></code></a> (currently
-not implemented)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">'merge'</span></code>: the final <a class="reference internal" href="#src.multipactor_band.multipactor_band.MultipactorBand" title="src.multipactor_band.multipactor_band.MultipactorBand"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipactorBand</span></code></a> spans from start
-of first <a class="reference internal" href="#src.multipactor_band.multipactor_band.MultipactorBand" title="src.multipactor_band.multipactor_band.MultipactorBand"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipactorBand</span></code></a> to end of last.</p></li>
-</ul>
-</div></blockquote>
-</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>One object per half power cycle (i.e. one object for power growth, one
-for power decrease). None means that no multipactor was detected.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list[<a class="reference internal" href="#src.multipactor_band.multipactor_band.MultipactorBand" title="src.multipactor_band.multipactor_band.MultipactorBand">MultipactorBand</a> | None]</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">pow_index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.multipactor_band.multipactor_band.MultipactorBand">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MultipactorBand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pow_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reached_second_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power_grows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.multipactor_band.multipactor_band.MultipactorBand" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.multipactor_band.multipactor_band.IMultipactorBand" title="src.multipactor_band.multipactor_band.IMultipactorBand"><code class="xref py py-class docutils literal notranslate"><span class="pre">IMultipactorBand</span></code></a></p>
+<p>First and last index of a multipactor zone.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.multipactor_band.multipactor_band.MultipactorBand.first_index">
+<span class="sig-name descname"><span class="pre">first_index</span></span><a class="headerlink" href="#src.multipactor_band.multipactor_band.MultipactorBand.first_index" title="Link to this definition"></a></dt>
+<dd><p>Index where multipactor is first detected.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.multipactor_band.multipactor_band.MultipactorBand.last_index">
+<span class="sig-name descname"><span class="pre">last_index</span></span><a class="headerlink" href="#src.multipactor_band.multipactor_band.MultipactorBand.last_index" title="Link to this definition"></a></dt>
+<dd><p>Index where multipactor is last detected.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.multipactor_band.multipactor_band.MultipactorBand.reached_second_threshold">
+<span class="sig-name descname"><span class="pre">reached_second_threshold</span></span><a class="headerlink" href="#src.multipactor_band.multipactor_band.MultipactorBand.reached_second_threshold" title="Link to this definition"></a></dt>
+<dd><p>If multipactor disappeared at <code class="docutils literal notranslate"><span class="pre">upper_index</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.multipactor_band.multipactor_band.MultipactorBand.power_grows">
+<span class="sig-name descname"><span class="pre">power_grows</span></span><a class="headerlink" href="#src.multipactor_band.multipactor_band.MultipactorBand.power_grows" title="Link to this definition"></a></dt>
+<dd><p>If the object corresponds to a half-power cycle where power was
+growwing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.multipactor_band.multipactor_band.MultipactorBand.lower_index">
+<span class="sig-name descname"><span class="pre">lower_index</span></span><a class="headerlink" href="#src.multipactor_band.multipactor_band.MultipactorBand.lower_index" title="Link to this definition"></a></dt>
+<dd><p>Index corresponding to lower threshold.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.multipactor_band.multipactor_band.MultipactorBand.upper_index">
+<span class="sig-name descname"><span class="pre">upper_index</span></span><a class="headerlink" href="#src.multipactor_band.multipactor_band.MultipactorBand.upper_index" title="Link to this definition"></a></dt>
+<dd><p>Index corresponding to upper threshold. It is <code class="docutils literal notranslate"><span class="pre">None</span></code> if
+<code class="docutils literal notranslate"><span class="pre">power_grows=False</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">first_index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">last_index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">reached_second_threshold</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">power_grows</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#id4" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.multipactor_band.multipactor_band.NoMultipactorBand">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NoMultipactorBand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pow_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.multipactor_band.multipactor_band.NoMultipactorBand" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.multipactor_band.multipactor_band.IMultipactorBand" title="src.multipactor_band.multipactor_band.IMultipactorBand"><code class="xref py py-class docutils literal notranslate"><span class="pre">IMultipactorBand</span></code></a></p>
+<p>A dummy object to keep track of cycles without multipactor.</p>
 </dd></dl>
 
 </section>
@@ -157,7 +242,7 @@ for power decrease). None means that no multipactor was detected.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="src.multipactor_band.instrument_multipactor_bands.html" class="btn btn-neutral float-left" title="src.multipactor_band.instrument_multipactor_bands module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="src.multipactor_band.test_multipactor_bands.html" class="btn btn-neutral float-right" title="src.multipactor_band.test_multipactor_bands module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="src.multipactor_band.polisher.html" class="btn btn-neutral float-right" title="src.multipactor_band.polisher module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

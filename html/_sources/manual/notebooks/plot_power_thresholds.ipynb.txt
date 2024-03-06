@@ -273,7 +273,7 @@
     }
    ],
    "source": [
-    "axe = test_campaign.check_somersalo_scaling_law(\n",
+    "axe, _ = test_campaign.check_somersalo_scaling_law(\n",
     "    current_multipactor_bands,\n",
     "    drop_idx=[-1],\n",
     "    figsize=figsize,\n",

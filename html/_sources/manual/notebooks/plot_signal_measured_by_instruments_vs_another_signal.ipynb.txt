@@ -5,7 +5,7 @@
    "id": "e7d80e29-3aec-4498-a73f-e3eb6a77cd7d",
    "metadata": {},
    "source": [
-    "# Plot voltage thresholds"
+    "# Plot an instrument data vs another"
    ]
   },
   {
@@ -217,7 +217,7 @@
     }
    ],
    "source": [
-    "axe = multipactor_test.sweet_plot(\n",
+    "_, _ = multipactor_test.sweet_plot(\n",
     "    y_instrument,\n",
     "    xdata=x_instrument,\n",
     "    exclude=exclude,\n",
@@ -252,7 +252,7 @@
    ],
    "source": [
     "tail = 350  # this is approximatively the two last half-power cycles\n",
-    "axe = multipactor_test.sweet_plot(\n",
+    "_, _ = multipactor_test.sweet_plot(\n",
     "    y_instrument,\n",
     "    xdata=x_instrument,\n",
     "    exclude=exclude,\n",

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Plot voltage thresholds &mdash; MULTIPAC test bench 1.5.1-15-g57a67c7 documentation</title>
+  <title>Plot an instrument data vs another &mdash; MULTIPAC test bench 1.5.1-26-ga128f9d documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
@@ -16,7 +16,7 @@
   
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=a235407c"></script>
+        <script src="../../_static/documentation_options.js?v=7bd4e5d5"></script>
         <script src="../../_static/doctools.js?v=888ff710"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -41,7 +41,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.5.1-15-g57a67c7
+                1.5.1-26-ga128f9d
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -86,7 +86,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../gallery.html">Gallery</a></li>
-      <li class="breadcrumb-item active">Plot voltage thresholds</li>
+      <li class="breadcrumb-item active">Plot an instrument data vs another</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../_sources/manual/notebooks/plot_signal_measured_by_instruments_vs_another_signal.ipynb.txt" rel="nofollow"> View page source</a>
       </li>
@@ -96,8 +96,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="Plot-voltage-thresholds">
-<h1>Plot voltage thresholds<a class="headerlink" href="#Plot-voltage-thresholds" title="Link to this heading"></a></h1>
+  <section id="Plot-an-instrument-data-vs-another">
+<h1>Plot an instrument data vs another<a class="headerlink" href="#Plot-an-instrument-data-vs-another" title="Link to this heading"></a></h1>
 <p>Generic libraries:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -210,7 +210,7 @@ WARNING:root:There was 22 &#39;True&#39; points in the last 40 points of the pow
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">axe</span> <span class="o">=</span> <span class="n">multipactor_test</span><span class="o">.</span><span class="n">sweet_plot</span><span class="p">(</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">multipactor_test</span><span class="o">.</span><span class="n">sweet_plot</span><span class="p">(</span>
     <span class="n">y_instrument</span><span class="p">,</span>
     <span class="n">xdata</span><span class="o">=</span><span class="n">x_instrument</span><span class="p">,</span>
     <span class="n">exclude</span><span class="o">=</span><span class="n">exclude</span><span class="p">,</span>
@@ -232,7 +232,7 @@ WARNING:root:There was 22 &#39;True&#39; points in the last 40 points of the pow
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tail</span> <span class="o">=</span> <span class="mi">350</span>  <span class="c1"># this is approximatively the two last half-power cycles</span>
-<span class="n">axe</span> <span class="o">=</span> <span class="n">multipactor_test</span><span class="o">.</span><span class="n">sweet_plot</span><span class="p">(</span>
+<span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">multipactor_test</span><span class="o">.</span><span class="n">sweet_plot</span><span class="p">(</span>
     <span class="n">y_instrument</span><span class="p">,</span>
     <span class="n">xdata</span><span class="o">=</span><span class="n">x_instrument</span><span class="p">,</span>
     <span class="n">exclude</span><span class="o">=</span><span class="n">exclude</span><span class="p">,</span>

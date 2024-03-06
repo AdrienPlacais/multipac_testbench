@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>src.multipactor_band.instrument_multipactor_bands module &mdash; MULTIPAC test bench 1.5.1-15-g57a67c7 documentation</title>
+  <title>src.multipactor_band.instrument_multipactor_bands module &mdash; MULTIPAC test bench 1.5.1-26-ga128f9d documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,7 +15,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=a235407c"></script>
+        <script src="_static/documentation_options.js?v=7bd4e5d5"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -23,7 +23,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="src.multipactor_band.multipactor_band module" href="src.multipactor_band.multipactor_band.html" />
-    <link rel="prev" title="src.multipactor_band.campaign_multipactor_bands module" href="src.multipactor_band.campaign_multipactor_bands.html" /> 
+    <link rel="prev" title="src.multipactor_band.creator module" href="src.multipactor_band.creator.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -38,7 +38,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.5.1-15-g57a67c7
+                1.5.1-26-ga128f9d
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -60,8 +60,10 @@
 <li class="toctree-l3"><a class="reference internal" href="src.measurement_point.html">src.measurement_point package</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="src.multipactor_band.html">src.multipactor_band package</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="src.multipactor_band.campaign_multipactor_bands.html">src.multipactor_band.campaign_multipactor_bands module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.multipactor_band.creator.html">src.multipactor_band.creator module</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">src.multipactor_band.instrument_multipactor_bands module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.multipactor_band.multipactor_band.html">src.multipactor_band.multipactor_band module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.multipactor_band.polisher.html">src.multipactor_band.polisher module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.multipactor_band.test_multipactor_bands.html">src.multipactor_band.test_multipactor_bands module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="src.multipactor_band.util.html">src.multipactor_band.util module</a></li>
 </ul>
@@ -108,9 +110,9 @@
 <p>Keep track of all multipactor bands measured by an <a class="reference internal" href="src.instruments.html#src.instruments.Instrument" title="src.instruments.Instrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="src.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstrumentMultipactorBands</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">multipactor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">bool_</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power_is_growing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">bool_</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_point_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info_test</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">several_bands_politics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'merge'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstrumentMultipactorBands</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">multipactor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">bool_</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power_is_growing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">bool_</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_point_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info_test</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">several_bands_politics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'merge'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></p>
-<p>All <code class="xref py py-class docutils literal notranslate"><span class="pre">MultipactorBand</span></code> of a test, by a given instrument.</p>
+<p>All <code class="xref py py-class docutils literal notranslate"><span class="pre">IMultipactorBand</span></code> of a test, by a given instrument.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands.data_as_pd">
 <span class="sig-name descname"><span class="pre">data_as_pd</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Series</span></span></span><a class="headerlink" href="#src.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands.data_as_pd" title="Link to this definition"></a></dt>
@@ -121,6 +123,12 @@
 <dt class="sig sig-object py" id="src.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands.plot_as_bool">
 <span class="sig-name descname"><span class="pre">plot_as_bool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Axes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Axes</span></span></span><a class="headerlink" href="#src.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands.plot_as_bool" title="Link to this definition"></a></dt>
 <dd><p>Plot as staircase like.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands.actual_multipactor">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">actual_multipactor</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">MultipactorBand</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#src.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands.actual_multipactor" title="Link to this definition"></a></dt>
+<dd><p>Filter out the <a class="reference internal" href="src.multipactor_band.multipactor_band.html#src.multipactor_band.multipactor_band.NoMultipactorBand" title="src.multipactor_band.multipactor_band.NoMultipactorBand"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoMultipactorBand</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -143,7 +151,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="src.multipactor_band.campaign_multipactor_bands.html" class="btn btn-neutral float-left" title="src.multipactor_band.campaign_multipactor_bands module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="src.multipactor_band.creator.html" class="btn btn-neutral float-left" title="src.multipactor_band.creator module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="src.multipactor_band.multipactor_band.html" class="btn btn-neutral float-right" title="src.multipactor_band.multipactor_band module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
