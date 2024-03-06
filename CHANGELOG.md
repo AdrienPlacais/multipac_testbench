@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Modified
 
 - `sweet_plot` and `plot_thresholds` now return the plotted Axes as well as the pd.DataFrame to produce it.
+- Colors of instruments are set according to their pick-up.
+
+### Fixed
+
+- Last `MultipactorBand` was not added
+- Sometimes, a `MultipactorBand` was incorrectly created because the previous multipactor starting index was not properly reinitialized
 
 ## [1.5.1] 2024-03-02
 

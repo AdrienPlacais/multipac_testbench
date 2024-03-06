@@ -5,12 +5,16 @@ import numpy as np
 import pandas as pd
 from matplotlib.axes import Axes
 
-from multipac_testbench.src.multipactor_band.multipactor_band import \
-    multipactor_to_list_of_mp_band
+from multipac_testbench.src.multipactor_band.creator import create
+from multipac_testbench.src.multipactor_band.polisher import polish
+from multipac_testbench.src.multipactor_band.multipactor_band import (
+    IMultipactorBand,
+    MultipactorBand
+)
 
 
 class InstrumentMultipactorBands(list):
-    """All :class:`MultipactorBand` of a test, by a given instrument."""
+    """All :class:`IMultipactorBand` of a test, by a given instrument."""
 
     def __init__(self,
                  multipactor: np.ndarray[np.bool_],
@@ -26,7 +30,7 @@ class InstrumentMultipactorBands(list):
 
         Parameters
         ----------
-        list_of_multipactor_band : list[MultipactorBand]
+        list_of_multipactor_band : list[IMultipactorBand]
             Individual multipactor bands.
         multipactor : np.ndarray[np.bool_]
             Array where True means multipactor, False no multipactor.
@@ -42,35 +46,25 @@ class InstrumentMultipactorBands(list):
             True where the power is growing, False where the power is
             decreasing, NaN where undetermined. The default is None, in which
             case it is not used.
-        several_bands_politics : {'keep_first', 'keep_last', 'keep_all', \
-                'merge'}
-            What to to when several multipactor bands are found in the same
-            half-power cycle:
-                - ``'keep_first'``: we keep first :class:`.MultipactorBand`
-                - ``'keep_last'``: we keep last :class:`.MultipactorBand`
-                - ``'keep_all'``: we keep all :class:`.MultipactorBand`
-                (currently not implemented)
-                - ``'merge'``: the final :class:`.MultipactorBand` spans from
-                start of first :class:`.MultipactorBand` to end of last.
+        several_bands_politics :
+            to update
         color : str | None, optional
             HTML color for plot, inherited from the :class:`.Instrument`.
 
         """
-        list_of_multipactor_band = multipactor_to_list_of_mp_band(
-            multipactor,
-            power_is_growing,
-            info=info_test + f" {instrument_name}",
-            several_bands_politics=several_bands_politics,
-        )
-        super().__init__(list_of_multipactor_band)
-        self.multipactor = multipactor
+        bands = create(multipactor,
+                       power_is_growing,
+                       info=info_test + f" {instrument_name}")
+        bands = polish(bands, several_bands_politics)
+        super().__init__(bands)
 
+        self.multipactor = multipactor
         self.instrument_name = instrument_name
         self.measurement_point_name = measurement_point_name
         self.position = position
         self.color = color
 
-        self._n_bands = len([x for x in self if x is not None])
+        self._n_bands = len(self.actual_multipactor)
 
     def __str__(self) -> str:
         """Give concise information on the bands."""
@@ -96,11 +90,15 @@ class InstrumentMultipactorBands(list):
         axes = ser.plot(ax=axes, color=self.color, **kwargs)
         return axes
 
+    @property
+    def actual_multipactor(self) -> list[MultipactorBand]:
+        """Filter out the :class:`.NoMultipactorBand`."""
+        return [x for x in self if isinstance(x, MultipactorBand)]
+
     def lower_indexes(self) -> list[int | None]:
         """Get the indexes of all lower thresholds."""
-        return [x.lower_index if x is not None else None
-                for x in self]
+        return [getattr(x, 'lower_index', None) for x in self]
 
     def upper_indexes(self) -> list[int | None]:
         """Get the indexes of all upper thresholds."""
-        return [x.upper_index if x is not None else None for x in self]
+        return [getattr(x, 'upper_index', None) for x in self]

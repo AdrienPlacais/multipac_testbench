@@ -1079,7 +1079,7 @@ optional
             multipactor_bands = multipactor_bands.merge(
                 union='relaxed',
                 info_test=str(self),
-                several_bands_politics='keep_first')
+                several_bands_politics='keep_lowest')
 
         instruments = ins.ForwardPower, ins.ReflectionCoefficient
         df_somersalo = self.at_last_threshold(instruments,

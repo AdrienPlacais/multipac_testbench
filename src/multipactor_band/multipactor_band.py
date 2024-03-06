@@ -8,224 +8,81 @@ i.e.: a set of measurement points where multipactor happens. A
 """
 import logging
 import numpy as np
+from dataclasses import dataclass
 
 
-class MultipactorBand:
-    """First and last index of a multipactor zone."""
+@dataclass
+class IMultipactorBand:
+    """Mother class of :class:`MultipactorBand` and :class:`NoMultipactorBand`.
 
-    def __init__(self,
-                 first_index: int,
-                 last_index: int,
-                 reached_second_threshold: bool,
-                 power_grows: bool) -> None:
-        """Instantiate object."""
-        self.first_index = first_index
-        self.last_index = last_index
+    Attributes
+    ----------
+    pow_index : int
+        Index of the half-power cycle, starting at zero.
 
-        self.lower_index, self.upper_index = first_index, last_index
-        if not power_grows:
-            self.upper_index, self.lower_index = first_index, last_index
+    """
 
-        if not reached_second_threshold:
-            self.upper_index = None
-        self.reached_second_threshold = reached_second_threshold
+    pow_index: int
+
+
+@dataclass
+class MultipactorBand(IMultipactorBand):
+    """First and last index of a multipactor zone.
+
+    Attributes
+    ----------
+    first_index : int
+        Index where multipactor is first detected.
+    last_index : int
+        Index where multipactor is last detected.
+    reached_second_threshold : bool
+        If multipactor disappeared at ``upper_index``.
+    power_grows : bool
+        If the object corresponds to a half-power cycle where power was
+        growwing.
+    lower_index : int
+        Index corresponding to lower threshold.
+    upper_index : int | None
+        Index corresponding to upper threshold. It is ``None`` if
+        ``power_grows=False``.
+
+    """
+
+    first_index: int
+    last_index: int
+    reached_second_threshold: bool
+    power_grows: bool
+
+    def __post_init__(self) -> None:
+        """Set complementary quantities."""
+        self.lower_index, self.upper_index = self._set_lower_upper_indexes()
 
     def __repr__(self) -> str:
         """Inform."""
-        out = f"{self.first_index = }, {self.last_index = }, "
+        out = f"Half-power cycle #{self.pow_index}: "
+        out += f"{self.first_index = }, {self.last_index = }, "
         out += f"{self.lower_index = }, {self.upper_index = }"
         return out
 
+    def _set_lower_upper_indexes(self) -> tuple[int, int | None]:
+        """Determine lower/upper threshold indexes."""
+        lower_index, upper_index = self.first_index, self.last_index
+        if not self.power_grows:
+            upper_index, lower_index = lower_index, upper_index
 
-def _end_half_power_cycle(
-        first_index: int | None,
-        last_index: int | None,
-        index: int,
-        current_band: MultipactorBand | None,
-        power_grows: bool,
-) -> tuple[int | None, MultipactorBand | None]:
-    """Start a new power cycle."""
-    # Did not go out of the multipactor band
-    if first_index is not None and last_index is None:
-        assert current_band is None
-        last_index = index
-        current_band = MultipactorBand(first_index,
-                                       last_index,
-                                       reached_second_threshold=False,
-                                       power_grows=power_grows)
+        if not self.reached_second_threshold:
+            self.upper_index = None
 
-        first_index = index + 1
-        return first_index, current_band
-
-    return first_index, current_band
+        return lower_index, upper_index
 
 
-def _init_half_power_cycle(first_index: int | None = None
-                           ) -> tuple[int | None, None, None]:
-    """(Re)-init variables for a new half power cycle."""
-    last_index = None
-    current_band = None
-    return first_index, last_index, current_band
+class NoMultipactorBand(IMultipactorBand):
+    """A dummy object to keep track of cycles without multipactor."""
 
+    def __init__(self, pow_index: int) -> None:
+        """Instantiate object."""
+        super().__init__(pow_index)
 
-def _enter_a_mp_zone(last_index: int | None,
-                     index: int,
-                     current_band: MultipactorBand | None,
-                     info: str,
-                     ) -> int:
-    """Enter a multipactor zone."""
-    first_index = index + 1
-    if last_index is not None:
-        pass
-    if current_band is not None:
-        logging.debug(
-            f"{info} entering a new MP zone, but it is not the first of the "
-            "half-power cycle.")
-    return first_index
-
-
-def _exit_a_mp_zone(first_index: int | None,
-                    last_index: int,
-                    current_band: MultipactorBand | None,
-                    power_grows: bool,
-                    info: str,
-                    several_bands_politics: str,
-                    ) -> tuple[int, MultipactorBand]:
-    """Exit a multipactor zone.
-
-    Parameters
-    ----------
-    first_index : int | None
-        Index of entry in the zone. If it is None, an error is raised.
-    last_index : int
-        Current index, which is the the index of exit.
-    current_band : MultipactorBand | None
-        Previous :class:`MultipactorBand` in the same half-power cycle. If it
-        is not None, it means that several zones were detected. Its handling is
-        determined by ``several_bands_politics``.
-    power_grows : bool
-        If the power grows.
-    info : str
-        To give more meaning to the error messages.
-    several_bands_politics : {'keep_first', 'keep_last', 'keep_all', 'merge'}
-        What to to when several multipactor bands are found in the same
-        half-power cycle:
-            - ``'keep_first'``: we keep first :class:`MultipactorBand`
-            - ``'keep_last'``: we keep last :class:`MultipactorBand`
-            - ``'keep_all'``: we keep all :class:`MultipactorBand` (currently
-              not implemented)
-            - ``'merge'``: the final :class:`MultipactorBand` spans from start
-              of first :class:`MultipactorBand` to end of last.
-
-    Returns
-    -------
-    tuple[int, MultipactorBand]
-
-    """
-    assert first_index is not None, (
-        f"{info}: we are exiting a multipacting zone but I did not detect "
-        f"when it started. Check what happened around {last_index = }.")
-
-    if current_band is not None:
-        logging.info(
-            f"{info}: detected two multipactor bands in the same half-"
-            "power cycle. First one spanned from index "
-            f"{current_band.first_index} to {current_band.last_index}. "
-            f"Second one from {first_index} to {last_index}. I will "
-            f"{several_bands_politics}.")
-
-        match (several_bands_politics):
-            case 'keep_first':
-                first_index = current_band.first_index
-                last_index = current_band.last_index
-            case 'keep_last':
-                pass
-            case 'merge':
-                first_index = current_band.first_index
-            case 'keep_all':
-                raise NotImplementedError('Several multipactor bands per'
-                                          'power cycle not implemeneted.')
-            case _:
-                raise IOError(f"{several_bands_politics = } which is not "
-                              "handled.")
-
-    current_band = MultipactorBand(first_index,
-                                   last_index,
-                                   reached_second_threshold=True,
-                                   power_grows=power_grows)
-    return last_index, current_band
-
-
-def multipactor_to_list_of_mp_band(multipactor: np.ndarray[np.bool_],
-                                   power_is_growing: np.ndarray[np.bool_],
-                                   info: str = '',
-                                   several_bands_politics: str = 'merge',
-                                   ) -> list[MultipactorBand | None]:
-    """Create the different :class:`MultipactorBand`.
-
-    Parameters
-    ----------
-    multipactor : np.ndarray[np.bool_]
-        True means multipactor, False no multipactor.
-    power_is_growing : np.ndarray[float]
-        True means power is growing, False it is decreasing.
-    info : str
-        To give more meaning to the error messages.
-    several_bands_politics : {'keep_first', 'keep_last', 'keep_all', 'merge'}
-        What to to when several multipactor bands are found in the same
-        half-power cycle:
-            - ``'keep_first'``: we keep first :class:`MultipactorBand`
-            - ``'keep_last'``: we keep last :class:`MultipactorBand`
-            - ``'keep_all'``: we keep all :class:`MultipactorBand` (currently
-              not implemented)
-            - ``'merge'``: the final :class:`MultipactorBand` spans from start
-              of first :class:`MultipactorBand` to end of last.
-
-    Returns
-    -------
-    list[MultipactorBand | None]
-        One object per half power cycle (i.e. one object for power growth, one
-        for power decrease). None means that no multipactor was detected.
-
-    """
-    delta_multipactor = np.diff(multipactor)
-    delta_power_is_growing = np.diff(power_is_growing)
-    zip_enum = enumerate(zip(delta_multipactor, delta_power_is_growing))
-
-    all_bands = []
-    first_index, last_index, current_band = _init_half_power_cycle()
-
-    for i, (change_in_multipactor, change_in_power_growth) in zip_enum:
-        if not (change_in_multipactor or change_in_power_growth):
-            continue
-
-        if change_in_power_growth:
-            first_index, current_band = _end_half_power_cycle(
-                first_index,
-                last_index,
-                i,
-                current_band,
-                bool(power_is_growing[i])
-            )
-
-            all_bands.append(current_band)
-            first_index, last_index, current_band = _init_half_power_cycle(
-                first_index)
-            continue
-
-        if multipactor[i + 1]:
-            first_index = _enter_a_mp_zone(last_index,
-                                           i,
-                                           current_band,
-                                           info)
-            continue
-
-        last_index, current_band = _exit_a_mp_zone(
-            first_index,
-            last_index=i,
-            current_band=current_band,
-            power_grows=bool(power_is_growing[i]),
-            info=info,
-            several_bands_politics=several_bands_politics,
-            )
-    return all_bands
+    def __repr__(self) -> str:
+        """Inform."""
+        return f"Half-power cycle #{self.pow_index}: no MP."
