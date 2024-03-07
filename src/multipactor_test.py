@@ -594,9 +594,17 @@ optional
             keep_one_frame_over: int = 1,
             interval: int | None = None,
             only_first_frame: bool = False,
+            last_frame: int | None = None,
             **fig_kw,
     ) -> animation.FuncAnimation | list[Axes]:
-        """Represent measured signals with probe position."""
+        """Represent measured signals with probe position.
+
+        .. todo::
+            ``last_frame`` badly handled: gif will be as long as if the
+            ``last_frame`` was not set, except that images won't be updated
+            after the last frame.
+
+        """
         fig, axes_instruments = self._prepare_animation_fig(
             instruments_to_plot,
             **fig_kw
@@ -631,6 +639,7 @@ optional
                 keep_one_frame_over=keep_one_frame_over,
                 axes_instruments=axes_instruments,
                 artists=artists,
+                last_frame=last_frame,
             )
             assert artists is not None
             return artists
@@ -714,9 +723,13 @@ optional
             keep_one_frame_over: int,
             axes_instruments: dict[Axes, list[ins.Instrument]],
             artists: Sequence[Artist] | None = None,
+            last_frame: int | None = None,
     ) -> Sequence[Artist] | None:
         """Plot all instruments signal at proper axe and time step."""
         if step_idx % keep_one_frame_over != 0:
+            return
+
+        if last_frame is not None and step_idx > last_frame:
             return
 
         sample_index = step_idx + 1
