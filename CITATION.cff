@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "MULTIPAC testbench"
+abstract: Treat the signals produced by the MULTIPAC test bench.
+version: 1.5.2
+date-released: "2024-03-21"
+authors:
+  - family-names: Plaçais
+    given-names: Adrien
+    orcid: "https://orcid.org/0000-0001-6840-1685"
+identifiers:
+  - description: This is first study that used this library.
+    type: other
+    value: "Plaçais et al. (2024), «Traveling and standing wave multipactor measurements». In: Proc. Journées Scientifiques URSI France 2024. Paris, France."
+license: MIT
+repository-code: "https://github.com/AdrienPlacais/multipac_testbench"
