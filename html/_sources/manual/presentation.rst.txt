@@ -18,7 +18,7 @@ Files
 In order to read the files produced by LabViewer, it is adviced to do the following:
 
  - Decimal should be changed from `,` to `.` (or use `decimal=','` when instantiating :class:`.MultipactorTest` or :class:`.TestCampaign`).
- - Measurement index should start at `i=0`.
+ - Measurement index should start at `i=0` instead of `i=1`.
  - Comments in the right-most columns should be deleted.
 
 Note that you can use the column separator that you want with the `sep` argument from the :py:meth:`.MultipactorTest.__init__` or :py:meth:`.TestCampaign.from_filepaths` methods.
