@@ -348,8 +348,7 @@ class Instrument(ABC):
         axe: Axes | None = None,
         **kwargs,
     ) -> StemContainer:
-        """
-        Plot what instrument measured at its position, at a given time step.
+        """Plot what instrument measured at its position, at a given time step.
 
         Adapted to Pick-Up instruments.
 
@@ -383,7 +382,7 @@ class Instrument(ABC):
             data = self._raw_data[sample_index]
 
         if artist is not None:
-            artist[0].set_ydata(data)
+            artist[0].set_ydata([data])
             new_path = np.array([[position, 0.0], [position, data]])
             artist[1].set_paths([new_path])
             return artist
