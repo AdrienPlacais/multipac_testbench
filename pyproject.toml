@@ -1,0 +1,58 @@
+[project]
+authors = [{ name = "Adrien Plaçais", email = "placais@lpsc.in2p3.fr" }]
+classifiers = [
+   "Development Status :: 3 - Alpha",
+   "Intended Audience :: Science/Research",
+   "License :: OSI Approved :: MIT License",
+   "Operating System :: OS Independent",
+   "Programming Language :: Python :: 3.12",
+   "Topic :: Scientific/Engineering :: Physics",
+]
+dependencies = [
+   "matplotlib==3.9.1",
+   "myst-parser==3.0.1",
+   "nbsphinx==0.9.4",
+   "numpy==2.0.0",
+   "pandas==2.2.2",
+   "pytest==8.2.2",
+   "setuptools==70.2.0",
+   "scipy==1.14.1",
+   "sphinx-rtd-theme==2.0.0",
+]
+description = "Post-treat the data produced by the MULTIPAC test bench."
+keywords = ["post treatment", "multipactor"]
+name = "mutipac-testbench"
+readme = "README.md"
+requires-python = ">=3.12"
+version = "1.6.0"
+
+[project.scripts]
+
+[project.urls]
+Documentation = "https://adrienplacais.github.io/multipac_testbench/html/index.html"
+Homepage = "https://github.com/AdrienPlacais/multipac_testbench"
+
+[tool.black]
+line-length = 79
+target-version = ["py312"]
+
+[tool.isort]
+profile = "black"
+src_paths = ["./multipac_testbench/"]
+
+[tool.pytest.ini_options]
+addopts = ["--import-mode=importlib", "--strict-markers"]
+filterwarnings = ["ignore:.*cKDTree.*:DeprecationWarning"]
+markers = []
+minversion = "6.0"
+testpaths = ["tests"]
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages]
+find = { where = ["src"] }
+
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools>=42", "wheel"]

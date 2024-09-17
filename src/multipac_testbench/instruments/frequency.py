@@ -1,12 +1,10 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Define a fake frequency probe."""
+
 from typing import Self
+
 import numpy as np
 import pandas as pd
-
-from multipac_testbench.src.instruments.virtual_instrument import \
-    VirtualInstrument
+from multipac_testbench.instruments.virtual_instrument import VirtualInstrument
 
 
 class Frequency(VirtualInstrument):
@@ -17,12 +15,13 @@ class Frequency(VirtualInstrument):
     """
 
     @classmethod
-    def from_user_defined_frequency(cls,
-                                    freq_mhz: float,
-                                    n_points: int,
-                                    name: str = 'Reference frequency',
-                                    **kwargs
-                                    ) -> Self:
+    def from_user_defined_frequency(
+        cls,
+        freq_mhz: float,
+        n_points: int,
+        name: str = "Reference frequency",
+        **kwargs,
+    ) -> Self:
         r"""Instantiate the object with a constant frequency.
 
         Parameters
@@ -43,7 +42,7 @@ class Frequency(VirtualInstrument):
         """
         raw_data = np.full(n_points, freq_mhz)
         df_data = pd.Series(raw_data, name=name, **kwargs)
-        return cls(name, df_data, position=np.NaN, **kwargs)
+        return cls(name, df_data, position=np.nan, **kwargs)
 
     @classmethod
     def ylabel(cls) -> str:

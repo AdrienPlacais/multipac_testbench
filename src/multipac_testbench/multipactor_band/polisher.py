@@ -1,26 +1,29 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Handle post-treatment of the :class:`.MultipactorBand`."""
-from multipac_testbench.src.multipactor_band.multipactor_band import (
+
+from itertools import groupby
+
+from multipac_testbench.multipactor_band.multipactor_band import (
     IMultipactorBand,
     MultipactorBand,
     NoMultipactorBand,
 )
-from itertools import groupby
 
 
 # =============================================================================
 # Helpers
 # =============================================================================
-def group_by_power_cycle(input_list: list[IMultipactorBand]
-                         ) -> list[list[MultipactorBand] | NoMultipactorBand]:
+def group_by_power_cycle(
+    input_list: list[IMultipactorBand],
+) -> list[list[MultipactorBand] | NoMultipactorBand]:
     """Put in sublists the :class:`IMultipactorBand` of same power cycle.
 
     :class:`.NoMultipactorBand` are not put in a sublist.
 
     """
-    grouped = [[band for band in bands]
-               for _, bands in groupby(input_list, key=lambda x: x.pow_index)]
+    grouped = [
+        [band for band in bands]
+        for _, bands in groupby(input_list, key=lambda x: x.pow_index)
+    ]
     for i, group in enumerate(grouped):
         if len(group) == 1 and isinstance(group[0], NoMultipactorBand):
             grouped[i] = group[0]  # type: ignore
@@ -110,8 +113,9 @@ def _merge(bands: list[IMultipactorBand]) -> list[IMultipactorBand]:
             merged.append(group)
             continue
 
-        reached_second_threshold = all([x.reached_second_threshold
-                                        for x in group])
+        reached_second_threshold = all(
+            [x.reached_second_threshold for x in group]
+        )
         new = MultipactorBand(
             group[0].pow_index,
             group[0].first_index,
@@ -124,19 +128,20 @@ def _merge(bands: list[IMultipactorBand]) -> list[IMultipactorBand]:
 
 
 POLISHERS = {
-    'keep_all': _keep_all_bands,
-    'keep_largest': _keep_largest,
-    'keep_lowest': _keep_lowest,
-    'keep_highest': _keep_highest,
-    'merge': _merge,
+    "keep_all": _keep_all_bands,
+    "keep_largest": _keep_largest,
+    "keep_lowest": _keep_lowest,
+    "keep_highest": _keep_highest,
+    "merge": _merge,
 }
 
 
 # =============================================================================
 # Main function
 # =============================================================================
-def polish(bands: list[IMultipactorBand],
-           politics: str) -> list[IMultipactorBand]:
+def polish(
+    bands: list[IMultipactorBand], politics: str
+) -> list[IMultipactorBand]:
     """
     Clean the given ``bands`` when there is a power cycle with several bands.
 
@@ -160,7 +165,8 @@ def polish(bands: list[IMultipactorBand],
             was measured on the largest number of points.
 
     """
-    assert politics in POLISHERS, (f"You asked {politics = } but allowed "
-                                   f"are {POLISHERS.keys()}")
+    assert politics in POLISHERS, (
+        f"You asked {politics = } but allowed " f"are {POLISHERS.keys()}"
+    )
     polisher = POLISHERS[politics]
     return polisher(bands)

@@ -1,27 +1,27 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Define an object to keep measurements at a pick-up."""
+
 from typing import Any
 
 import numpy as np
 import pandas as pd
-
-from multipac_testbench.src.instruments.factory import InstrumentFactory
-from multipac_testbench.src.measurement_point.i_measurement_point import \
-    IMeasurementPoint
+from multipac_testbench.instruments.factory import InstrumentFactory
+from multipac_testbench.measurement_point.i_measurement_point import (
+    IMeasurementPoint,
+)
 
 
 class PickUp(IMeasurementPoint):
     """Hold measurements at a single pick-up."""
 
-    def __init__(self,
-                 name: str,
-                 df_data: pd.DataFrame,
-                 instrument_factory: InstrumentFactory,
-                 instruments_kw: dict[str, dict[str, Any]],
-                 position: float,
-                 color: str,
-                 ) -> None:
+    def __init__(
+        self,
+        name: str,
+        df_data: pd.DataFrame,
+        instrument_factory: InstrumentFactory,
+        instruments_kw: dict[str, dict[str, Any]],
+        position: float,
+        color: str,
+    ) -> None:
         """Create the pick-up with all its instruments.
 
         Parameters
@@ -42,22 +42,25 @@ class PickUp(IMeasurementPoint):
             HTML color that will be used for every instrument in this pick-up.
 
         """
-        self._add_key_val_to_dictionaries('position', position, instruments_kw)
-        assert not np.isnan(position), ("position = np.NaN is reserved to "
-                                        "global diagnostics.")
-        super().__init__(name,
-                         df_data,
-                         instrument_factory,
-                         instruments_kw,
-                         position=position,
-                         color=color,
-                         )
+        self._add_key_val_to_dictionaries("position", position, instruments_kw)
+        assert not np.isnan(position), (
+            "position = np.nan is reserved to " "global diagnostics."
+        )
+        super().__init__(
+            name,
+            df_data,
+            instrument_factory,
+            instruments_kw,
+            position=position,
+            color=color,
+        )
 
-    def _add_key_val_to_dictionaries(self,
-                                     key: str,
-                                     value: Any,
-                                     instruments_kw: dict[str, dict[str, Any]],
-                                     ) -> None:
+    def _add_key_val_to_dictionaries(
+        self,
+        key: str,
+        value: Any,
+        instruments_kw: dict[str, dict[str, Any]],
+    ) -> None:
         """
         Add ``key``-``value`` pair to sub-dictionaries of ``instruments_kw``.
 

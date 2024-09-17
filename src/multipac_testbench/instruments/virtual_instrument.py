@@ -1,9 +1,7 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Define an instrument-like object."""
-import pandas as pd
 
-from multipac_testbench.src.instruments.instrument import Instrument
+import pandas as pd
+from multipac_testbench.instruments.instrument import Instrument
 
 
 class VirtualInstrument(Instrument):
@@ -15,9 +13,6 @@ class VirtualInstrument(Instrument):
 
     """
 
-    def __init__(self,
-                 name: str,
-                 raw_data: pd.Series,
-                 **kwargs) -> None:
+    def __init__(self, name: str, raw_data: pd.Series, **kwargs) -> None:
         """Instantiate object."""
         super().__init__(name, raw_data, **kwargs)

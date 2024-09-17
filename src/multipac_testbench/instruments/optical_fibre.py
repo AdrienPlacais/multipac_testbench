@@ -1,12 +1,11 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Define optical fivre to detect multipactor arcs.
 
 .. todo::
     Find out the units for optical fibre.
 
 """
-from multipac_testbench.src.instruments.instrument import Instrument
+
+from multipac_testbench.instruments.instrument import Instrument
 
 
 class OpticalFibre(Instrument):

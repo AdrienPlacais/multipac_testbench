@@ -1,7 +1,6 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Define Penning to measure evolution of pressure."""
-from multipac_testbench.src.instruments.instrument import Instrument
+
+from multipac_testbench.instruments.instrument import Instrument
 
 
 class Penning(Instrument):

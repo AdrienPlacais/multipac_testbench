@@ -1,9 +1,8 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Define helper functions for plots."""
+
+import logging
 from abc import ABCMeta
 from collections.abc import Iterable, Sequence
-import logging
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -11,20 +10,21 @@ import numpy as np
 import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+from multipac_testbench.multipactor_band.test_multipactor_bands import (
+    TestMultipactorBands,
+)
+from multipac_testbench.util.multipactor_detectors import (
+    start_and_end_of_contiguous_true_zones,
+)
 
-from multipac_testbench.src.util.multipactor_detectors import \
-    start_and_end_of_contiguous_true_zones
 
-from multipac_testbench.src.multipactor_band.test_multipactor_bands \
-    import TestMultipactorBands
-
-
-def create_fig(title: str = '',
-               instruments_to_plot: Sequence[ABCMeta] = (),
-               xlabel: str | None = None,
-               subplot_kw: dict | None = None,
-               **fig_kw,
-               ) -> tuple[Figure, dict[ABCMeta, Axes]]:
+def create_fig(
+    title: str = "",
+    instruments_to_plot: Sequence[ABCMeta] = (),
+    xlabel: str | None = None,
+    subplot_kw: dict | None = None,
+    **fig_kw,
+) -> tuple[Figure, dict[ABCMeta, Axes]]:
     """Create the figure and axes.
 
     Parameters
@@ -48,30 +48,27 @@ def create_fig(title: str = '',
     if subplot_kw is None:
         subplot_kw = {}
     nrows = len(instruments_to_plot)
-    instrument_class_axes = _create_axes(instruments_to_plot,
-                                         fig,
-                                         nrows,
-                                         xlabel,
-                                         **subplot_kw)
+    instrument_class_axes = _create_axes(
+        instruments_to_plot, fig, nrows, xlabel, **subplot_kw
+    )
 
     if len(title) > 0:
         fig.suptitle(title)
     return fig, instrument_class_axes
 
 
-def _create_axes(instruments_to_plot: Sequence[ABCMeta],
-                 fig: Figure,
-                 nrows: int,
-                 xlabel: str | None = None,
-                 **subplot_kw,
-                 ) -> dict[ABCMeta, Axes]:
+def _create_axes(
+    instruments_to_plot: Sequence[ABCMeta],
+    fig: Figure,
+    nrows: int,
+    xlabel: str | None = None,
+    **subplot_kw,
+) -> dict[ABCMeta, Axes]:
     """Create the axes."""
     axes = []
     sharex = None
     for row in range(nrows):
-        axe = fig.add_subplot(nrows, 1, row + 1,
-                              sharex=sharex,
-                              **subplot_kw)
+        axe = fig.add_subplot(nrows, 1, row + 1, sharex=sharex, **subplot_kw)
         axes.append(axe)
         sharex = axes[0]
 
@@ -83,15 +80,16 @@ def _create_axes(instruments_to_plot: Sequence[ABCMeta],
     axe = None
     for instrument_class, axe in instrument_class_axes.items():
         axe.grid(True)
-        ylabel = getattr(instrument_class, 'ylabel', lambda: 'default')()
+        ylabel = getattr(instrument_class, "ylabel", lambda: "default")()
         axe.set_ylabel(ylabel)
     return instrument_class_axes
 
 
-def finish_fig(fig: Figure,
-               axes: Iterable[Axes],
-               png_path: Path | None = None,
-               ) -> tuple[Figure, list[Axes]]:
+def finish_fig(
+    fig: Figure,
+    axes: Iterable[Axes],
+    png_path: Path | None = None,
+) -> tuple[Figure, list[Axes]]:
     """Save the figure, create the legend."""
     axes = [axe for axe in axes]
     for axe in axes:
@@ -103,11 +101,12 @@ def finish_fig(fig: Figure,
     return fig, axes
 
 
-def create_df_to_plot(data_to_plot: list[pd.Series],
-                      tail: int = -1,
-                      column_names: str | list[str] = '',
-                      **kwargs,
-                      ) -> pd.DataFrame:
+def create_df_to_plot(
+    data_to_plot: list[pd.Series],
+    tail: int = -1,
+    column_names: str | list[str] = "",
+    **kwargs,
+) -> pd.DataFrame:
     """Merge the series into a single dataframe.
 
     Parameters
@@ -141,16 +140,17 @@ def create_df_to_plot(data_to_plot: list[pd.Series],
             column_names = [column_names]
             old_column_names = df_to_plot.columns.values
             assert len(column_names) == len(old_column_names)
-            columns_mapper = {old: new for old, new in zip(old_column_names,
-                                                           column_names)}
+            columns_mapper = {
+                old: new for old, new in zip(old_column_names, column_names)
+            }
             df_to_plot.rename(columns=columns_mapper, inplace=True)
 
     return df_to_plot
 
 
 def match_x_and_y_column_names(
-        x_columns: list[str] | None,
-        y_columns: list[list[str]],
+    x_columns: list[str] | None,
+    y_columns: list[list[str]],
 ) -> tuple[list[str] | str | None, list[list[str]] | list[str]]:
     """Match name of x columns with y columns, remove duplicate columns.
 
@@ -190,15 +190,17 @@ def match_x_and_y_column_names(
     return x_column, y_column
 
 
-def actual_plot(df_to_plot: pd.DataFrame,
-                x_columns: list[str] | str | None,
-                y_columns: list[list[str]] | list[str],
-                grid: bool = True,
-                title: list[str] | str = '',
-                sharex: bool | None = True,
-                ax: Axes | np.ndarray[Axes] | None = None,
-                color: dict[str, str] | None = None,
-                **kwargs) -> Axes | np.ndarray[Axes]:
+def actual_plot(
+    df_to_plot: pd.DataFrame,
+    x_columns: list[str] | str | None,
+    y_columns: list[list[str]] | list[str],
+    grid: bool = True,
+    title: list[str] | str = "",
+    sharex: bool | None = True,
+    ax: Axes | np.ndarray[Axes] | None = None,
+    color: dict[str, str] | None = None,
+    **kwargs,
+) -> Axes | np.ndarray[Axes]:
     """Plot the data, adapting to what is given.
 
     Parameters
@@ -235,37 +237,42 @@ def actual_plot(df_to_plot: pd.DataFrame,
     if ax is not None:
         sharex = None
     if not isinstance(x_columns, list):
-        ax = df_to_plot.plot(x=x_columns,
-                             subplots=y_columns,
-                             sharex=sharex,
-                             grid=grid,
-                             title=title,
-                             ax=ax,
-                             color=color,
-                             **kwargs)
+        ax = df_to_plot.plot(
+            x=x_columns,
+            subplots=y_columns,
+            sharex=sharex,
+            grid=grid,
+            title=title,
+            ax=ax,
+            color=color,
+            **kwargs,
+        )
         assert ax is not None
         return ax
 
     zipper = zip(x_columns, y_columns, strict=True)
     for x_col, y_col in zipper:
-        ax = df_to_plot.plot(x=x_col,
-                             y=y_col,
-                             ax=ax,
-                             grid=grid,
-                             title=title,
-                             color=color,
-                             **kwargs)
+        ax = df_to_plot.plot(
+            x=x_col,
+            y=y_col,
+            ax=ax,
+            grid=grid,
+            title=title,
+            color=color,
+            **kwargs,
+        )
     assert ax is not None
     return ax
 
 
-def set_labels(axes: Axes | np.ndarray[Axes],
-               *ydata: ABCMeta,
-               xdata: ABCMeta | None = None,
-               xlabel: str = '',
-               ylabel: str | Iterable = '',
-               **kwargs
-               ) -> None:
+def set_labels(
+    axes: Axes | np.ndarray[Axes],
+    *ydata: ABCMeta,
+    xdata: ABCMeta | None = None,
+    xlabel: str = "",
+    ylabel: str | Iterable = "",
+    **kwargs,
+) -> None:
     """Set proper ylabel for every subplot.
 
     Parameters
@@ -296,9 +303,9 @@ def set_labels(axes: Axes | np.ndarray[Axes],
         ylabel = (obj.ylabel() for obj in ydata)
 
     if isinstance(ylabel, str):
-        ylabel = ylabel,
+        ylabel = (ylabel,)
     if isinstance(axes, Axes):
-        axes = axes,
+        axes = (axes,)
     for axe, ylab in zip(axes, ylabel):
         axe.set_ylabel(ylab)
         if not xlabel:
@@ -306,10 +313,12 @@ def set_labels(axes: Axes | np.ndarray[Axes],
         axe.set_xlabel(xlabel)
 
 
-def save_figure(axes: Axes | np.ndarray[Axes] | list[Axes],
-                png_path: Path,
-                verbose: bool = False,
-                **png_kwargs) -> None:
+def save_figure(
+    axes: Axes | np.ndarray[Axes] | list[Axes],
+    png_path: Path,
+    verbose: bool = False,
+    **png_kwargs,
+) -> None:
     """Save the figure.
 
     Parameters
@@ -334,11 +343,13 @@ def save_figure(axes: Axes | np.ndarray[Axes] | list[Axes],
         logging.info(f"Figure saved @ {png_path = }")
 
 
-def save_dataframe(df_to_plot: pd.DataFrame,
-                   csv_path: Path,
-                   sep: str = '\t',
-                   verbose: bool = False,
-                   **csv_kwargs) -> None:
+def save_dataframe(
+    df_to_plot: pd.DataFrame,
+    csv_path: Path,
+    sep: str = "\t",
+    verbose: bool = False,
+    **csv_kwargs,
+) -> None:
     r"""Save dataframe used to produce the plot.
 
     Parameters
@@ -362,11 +373,11 @@ def save_dataframe(df_to_plot: pd.DataFrame,
 
 
 def add_background_color_according_to_power_growth(
-        axe: Axes | Sequence[Axes] | np.ndarray[Axes],
-        where_is_growing: list[bool | float],
-        grow_kw: dict | None = None,
-        decrease_kw: dict | None = None,
-        legend: bool = True,
+    axe: Axes | Sequence[Axes] | np.ndarray[Axes],
+    where_is_growing: list[bool | float],
+    grow_kw: dict | None = None,
+    decrease_kw: dict | None = None,
+    legend: bool = True,
 ) -> None:
     """Add a background color to indicate where power grows or not.
 
@@ -376,7 +387,7 @@ def add_background_color_according_to_power_growth(
         The Axes on which to plot. If several are given, we sequentially call
         this function.
     where_is_growing : list[bool | float]
-        A list containing True where power grows, False where decreases, np.NaN
+        A list containing True where power grows, False where decreases, np.nan
         when undetermined. Typical return value from
         :meth:`.ForwardPower.where_is_growing`.
     grow_kw : dict | None, optional
@@ -392,35 +403,40 @@ def add_background_color_according_to_power_growth(
     if isinstance(axe, (Sequence, np.ndarray)):
         for ax in axe:
             add_background_color_according_to_power_growth(
-                ax, where_is_growing, grow_kw, decrease_kw, legend)
+                ax, where_is_growing, grow_kw, decrease_kw, legend
+            )
         return
     as_array = np.array(where_is_growing)
 
     if grow_kw is None:
-        grow_kw = {'color': 'b', 'alpha': 0.2}
-    _add_single_bg_color(as_array, axe, "Power grows", invert_array=False,
-                         **grow_kw)
+        grow_kw = {"color": "b", "alpha": 0.2}
+    _add_single_bg_color(
+        as_array, axe, "Power grows", invert_array=False, **grow_kw
+    )
 
     if decrease_kw is None:
-        decrease_kw = {'color': 'r', 'alpha': 0.2}
-    _add_single_bg_color(as_array, axe, "Power decreases", invert_array=True,
-                         **decrease_kw)
+        decrease_kw = {"color": "r", "alpha": 0.2}
+    _add_single_bg_color(
+        as_array, axe, "Power decreases", invert_array=True, **decrease_kw
+    )
 
     if legend:
         axe.legend()
 
 
-def _add_single_bg_color(where_is_growing: np.ndarray,
-                         axe: Axes,
-                         label: str | None,
-                         invert_array: bool,
-                         **color_kw: dict) -> None:
+def _add_single_bg_color(
+    where_is_growing: np.ndarray,
+    axe: Axes,
+    label: str | None,
+    invert_array: bool,
+    **color_kw: dict,
+) -> None:
     """Add a single background color to the plot.
 
     Parameters
     ----------
     where_is_growing : np.ndarray
-        Array where 1. means power grows, 0. means it decreases, np.NaN is
+        Array where 1. means power grows, 0. means it decreases, np.nan is
         undetermined.
     axe : Axes
         Where color should be plotted.
@@ -444,24 +460,28 @@ def _add_single_bg_color(where_is_growing: np.ndarray,
 
 
 def add_instrument_multipactor_bands(
-        test_multipactor_bands: TestMultipactorBands,
-        axes: np.ndarray[Axes] | Axes | None = None,
-        scale: float = 1.,
-        alpha: float = .5,
-        legend: bool = True,
-        twinx: bool = False,
-        **kwargs,
+    test_multipactor_bands: TestMultipactorBands,
+    axes: np.ndarray[Axes] | Axes | None = None,
+    scale: float = 1.0,
+    alpha: float = 0.5,
+    legend: bool = True,
+    twinx: bool = False,
+    **kwargs,
 ) -> Axes | np.ndarray[Axes]:
     """Add the multipactor bands to a pre-existing plot."""
     if isinstance(axes, np.ndarray):
-        axes_aslist = [add_instrument_multipactor_bands(test_multipactor_bands,
-                                                        axe,
-                                                        scale=scale,
-                                                        alpha=alpha,
-                                                        legend=legend,
-                                                        twinx=twinx,
-                                                        **kwargs)
-                       for axe in axes]
+        axes_aslist = [
+            add_instrument_multipactor_bands(
+                test_multipactor_bands,
+                axe,
+                scale=scale,
+                alpha=alpha,
+                legend=legend,
+                twinx=twinx,
+                **kwargs,
+            )
+            for axe in axes
+        ]
         axes = np.array(axes_aslist, dtype=object)
         return axes
 
@@ -470,11 +490,9 @@ def add_instrument_multipactor_bands(
         assert axes is not None
         mp_axes = axes.twinx()
 
-    mp_axes = test_multipactor_bands.plot_as_bool(mp_axes,
-                                                  scale,
-                                                  alpha,
-                                                  legend,
-                                                  **kwargs)
+    mp_axes = test_multipactor_bands.plot_as_bool(
+        mp_axes, scale, alpha, legend, **kwargs
+    )
     if legend:
         assert axes is not None
         _merge_legends(axes, mp_axes)

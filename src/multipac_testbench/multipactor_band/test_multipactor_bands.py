@@ -1,11 +1,10 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Store all the :class:`.InstrumentMultipactorBands` of a test."""
+
 import numpy as np
 from matplotlib.axes import Axes
-
-from multipac_testbench.src.multipactor_band.instrument_multipactor_bands \
-    import InstrumentMultipactorBands
+from multipac_testbench.multipactor_band.instrument_multipactor_bands import (
+    InstrumentMultipactorBands,
+)
 
 
 class TestMultipactorBands(list):
@@ -20,13 +19,14 @@ class TestMultipactorBands(list):
         super().__init__(instruments_multipactor_bands)
         self.power_is_growing = power_is_growing
 
-    def plot_as_bool(self,
-                     axes: Axes | None,
-                     scale: float = 1.,
-                     alpha: float = .5,
-                     legend: bool = True,
-                     **kwargs,
-                     ) -> Axes:
+    def plot_as_bool(
+        self,
+        axes: Axes | None,
+        scale: float = 1.0,
+        alpha: float = 0.5,
+        legend: bool = True,
+        **kwargs,
+    ) -> Axes:
         """Plot the multipactor bands."""
         original_scale = scale
         for instrument_multipactor_bands in self:
@@ -35,22 +35,21 @@ class TestMultipactorBands(list):
                 axes.plot([], [])
                 continue
 
-            axes = instrument_multipactor_bands.plot_as_bool(axes=axes,
-                                                             scale=scale,
-                                                             alpha=alpha,
-                                                             legend=legend,
-                                                             **kwargs)
+            axes = instrument_multipactor_bands.plot_as_bool(
+                axes=axes, scale=scale, alpha=alpha, legend=legend, **kwargs
+            )
             scale += original_scale * 1e-2
         assert axes is not None
         return axes
 
-    def merge(self,
-              union: str,
-              name: str = '',
-              filter_out_none: bool = True,
-              info_test: str = '',
-              several_bands_politics: str = 'merge',
-              ) -> InstrumentMultipactorBands:
+    def merge(
+        self,
+        union: str,
+        name: str = "",
+        filter_out_none: bool = True,
+        info_test: str = "",
+        several_bands_politics: str = "merge",
+    ) -> InstrumentMultipactorBands:
         """Merge the :class:`InstrumentMultipactorBands` in ``self``.
 
         For that, we merge their ``multipactor`` boolean numpy array and
@@ -112,7 +111,7 @@ ion: bool``.
         if len(set(positions)) == 1:
             position = positions[0]
         else:
-            position = np.NaN
+            position = np.nan
 
         instrument_multipactor_bands = InstrumentMultipactorBands(
             multipactor,
@@ -146,6 +145,6 @@ def _or(multipactor_in: list[np.ndarray[np.bool_]]) -> np.ndarray[np.bool_]:
 
 
 MULTIPACTOR_ARRAY_MERGERS = {
-    'strict': _and,
-    'relaxed': _or,
+    "strict": _and,
+    "relaxed": _or,
 }  #:

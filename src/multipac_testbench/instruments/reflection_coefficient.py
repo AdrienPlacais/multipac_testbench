@@ -1,19 +1,16 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 r"""Define the reflection coefficient virtual probe.
 
 As for now, it is always a real, i.e. it is :math:`R = |\Gamma|`.
 
 """
+
 import logging
 from typing import Self
 
 import numpy as np
 import pandas as pd
-from multipac_testbench.src.instruments.power import (ForwardPower,
-                                                      ReflectedPower)
-from multipac_testbench.src.instruments.virtual_instrument import \
-    VirtualInstrument
+from multipac_testbench.instruments.power import ForwardPower, ReflectedPower
+from multipac_testbench.instruments.virtual_instrument import VirtualInstrument
 
 
 class ReflectionCoefficient(VirtualInstrument):
@@ -34,16 +31,17 @@ class ReflectionCoefficient(VirtualInstrument):
     """
 
     @classmethod
-    def from_powers(cls,
-                    forward: ForwardPower,
-                    reflected: ReflectedPower,
-                    name: str = 'Reflection_coefficient',
-                    **kwargs
-                    ) -> Self:
+    def from_powers(
+        cls,
+        forward: ForwardPower,
+        reflected: ReflectedPower,
+        name: str = "Reflection_coefficient",
+        **kwargs,
+    ) -> Self:
         """Compute the reflection coefficient from given :class:`.Power`."""
         data = _compute_reflection_coef(forward.data, reflected.data)
         ser_data = pd.Series(data, name=name)
-        return cls(name=name, raw_data=ser_data, position=np.NaN, **kwargs)
+        return cls(name=name, raw_data=ser_data, position=np.nan, **kwargs)
 
     @classmethod
     def ylabel(cls) -> str:
@@ -51,31 +49,35 @@ class ReflectionCoefficient(VirtualInstrument):
         return "Reflection coefficient $R$"
 
 
-def _compute_reflection_coef(forward_data: np.ndarray,
-                             reflected_data: np.ndarray,
-                             warn_reflected_higher_than_forward: bool = True,
-                             warn_gamma_too_close_to_unity: bool = True,
-                             tol: float = 5e-2,
-                             ) -> np.ndarray:
+def _compute_reflection_coef(
+    forward_data: np.ndarray,
+    reflected_data: np.ndarray,
+    warn_reflected_higher_than_forward: bool = True,
+    warn_gamma_too_close_to_unity: bool = True,
+    tol: float = 5e-2,
+) -> np.ndarray:
     r"""Compute the reflection coefficient :math:`R`."""
     reflection_coefficient = np.abs(np.sqrt(reflected_data / forward_data))
 
-    invalid_indexes = np.where(reflection_coefficient > 1.)[0]
+    invalid_indexes = np.where(reflection_coefficient > 1.0)[0]
     n_invalid = len(invalid_indexes)
     if n_invalid > 0:
-        reflection_coefficient[invalid_indexes] = np.NaN
+        reflection_coefficient[invalid_indexes] = np.nan
         if warn_reflected_higher_than_forward:
-            logging.warning(f"{n_invalid} points were removed in R "
-                            "calculation, where reflected power was higher "
-                            "than forward power.")
+            logging.warning(
+                f"{n_invalid} points were removed in R "
+                "calculation, where reflected power was higher "
+                "than forward power."
+            )
 
-    invalid_indexes = np.where(
-        np.abs(reflection_coefficient - 1.) < tol)[0]
+    invalid_indexes = np.where(np.abs(reflection_coefficient - 1.0) < tol)[0]
     n_invalid = len(invalid_indexes)
     if n_invalid > 0:
-        reflection_coefficient[invalid_indexes] = np.NaN
+        reflection_coefficient[invalid_indexes] = np.nan
         if warn_gamma_too_close_to_unity:
-            logging.warning(f"{n_invalid} points were removed in R "
-                            "calculation, where reflected power was too close "
-                            f"to forward power. Tolerance was: {tol = }.")
+            logging.warning(
+                f"{n_invalid} points were removed in R "
+                "calculation, where reflected power was too close "
+                f"to forward power. Tolerance was: {tol = }."
+            )
     return reflection_coefficient

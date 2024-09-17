@@ -1,17 +1,21 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Define functions to detect where multipactor happens."""
-from typing import Any, Sequence
+
+from typing import Any
+
 import numpy as np
+from multipac_testbench.util.filtering import (
+    remove_isolated_false,
+    remove_isolated_true,
+)
 
-from multipac_testbench.src.util.filtering import (remove_isolated_true,
-                                                   remove_isolated_false)
 
-def quantity_is_above_threshold(quantity: np.ndarray,
-                                threshold: float,
-                                consecutive_criterion: int = 0,
-                                minimum_number_of_points: int = 1,
-                                **kwargs: Any) -> np.ndarray:
+def quantity_is_above_threshold(
+    quantity: np.ndarray,
+    threshold: float,
+    consecutive_criterion: int = 0,
+    minimum_number_of_points: int = 1,
+    **kwargs: Any,
+) -> np.ndarray:
     """Detect where ``quantity`` is above a given threshold.
 
     Parameters
@@ -41,7 +45,9 @@ def quantity_is_above_threshold(quantity: np.ndarray,
         multipactor = remove_isolated_false(multipactor, consecutive_criterion)
 
     if minimum_number_of_points > 1:
-        multipactor = remove_isolated_true(multipactor, minimum_number_of_points)
+        multipactor = remove_isolated_true(
+            multipactor, minimum_number_of_points
+        )
 
     return multipactor
 
@@ -60,7 +66,7 @@ def start_and_end_of_contiguous_true_zones(
     ----------
     multipactor :  np.ndarray[np.bool_]
         Iterable where True means there is multipactor, False no multipactor,
-        and np.NaN undetermined.
+        and np.nan undetermined.
 
     Returns
     -------

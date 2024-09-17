@@ -1,31 +1,35 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Define an object to store data from several :class:`.MultipactorTest`."""
+
+import logging
 from abc import ABCMeta
 from collections.abc import Callable, Sequence
-import logging
 from pathlib import Path
 from typing import Self
 
+import matplotlib.pyplot as plt
+import multipac_testbench.instruments as ins
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from matplotlib import animation
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-
-import multipac_testbench.src.instruments as ins
-from multipac_testbench.src.measurement_point.i_measurement_point import \
-    IMeasurementPoint
-from multipac_testbench.src.multipactor_band.campaign_multipactor_bands import \
-    CampaignMultipactorBands
-from multipac_testbench.src.multipactor_band.instrument_multipactor_bands import \
-    InstrumentMultipactorBands
-from multipac_testbench.src.multipactor_test import MultipactorTest
-from multipac_testbench.src.theoretical.somersalo import (
-    fit_somersalo_scaling, plot_somersalo_analytical, plot_somersalo_measured,
-    somersalo_base_plot)
-from multipac_testbench.src.util import log_manager, plot
+from multipac_testbench.measurement_point.i_measurement_point import (
+    IMeasurementPoint,
+)
+from multipac_testbench.multipactor_band.campaign_multipactor_bands import (
+    CampaignMultipactorBands,
+)
+from multipac_testbench.multipactor_band.instrument_multipactor_bands import (
+    InstrumentMultipactorBands,
+)
+from multipac_testbench.multipactor_test import MultipactorTest
+from multipac_testbench.theoretical.somersalo import (
+    fit_somersalo_scaling,
+    plot_somersalo_analytical,
+    plot_somersalo_measured,
+    somersalo_base_plot,
+)
+from multipac_testbench.util import log_manager, plot
 
 
 class TestCampaign(list):
@@ -36,15 +40,16 @@ class TestCampaign(list):
         super().__init__(multipactor_tests)
 
     @classmethod
-    def from_filepaths(cls,
-                       filepaths: Sequence[Path],
-                       frequencies: Sequence[float],
-                       swrs: Sequence[float],
-                       config: dict,
-                       info: Sequence[str] = (),
-                       sep: str = ';',
-                       **kwargs,
-                       ) -> Self:
+    def from_filepaths(
+        cls,
+        filepaths: Sequence[Path],
+        frequencies: Sequence[float],
+        swrs: Sequence[float],
+        config: dict,
+        info: Sequence[str] = (),
+        sep: str = ";",
+        **kwargs,
+    ) -> Self:
         """Instantiate the :class:`.MultipactorTest` and :class:`TestCampaign`.
 
         Parameters
@@ -69,21 +74,23 @@ class TestCampaign(list):
 
         """
         if len(info) == 0:
-            info = ['' for _ in filepaths]
+            info = ["" for _ in filepaths]
         args = zip(filepaths, frequencies, swrs, info, strict=True)
 
         logfile = Path(filepaths[0].parent / "multipac_testbench.log")
         log_manager.set_up_logging(logfile_file=logfile)
 
         multipactor_tests = [
-            MultipactorTest(filepath,
-                            config,
-                            freq_mhz,
-                            swr,
-                            info,
-                            sep=sep,
-                            verbose=i == 0,
-                            **kwargs)
+            MultipactorTest(
+                filepath,
+                config,
+                freq_mhz,
+                swr,
+                info,
+                sep=sep,
+                verbose=i == 0,
+                **kwargs,
+            )
             for i, (filepath, freq_mhz, swr, info) in enumerate(args)
         ]
         return cls(multipactor_tests)
@@ -96,14 +103,17 @@ class TestCampaign(list):
     def sweet_plot(
         self,
         *args,
-        campaign_multipactor_bands: CampaignMultipactorBands | list[None]
-        | None = None,
+        campaign_multipactor_bands: (
+            CampaignMultipactorBands | list[None] | None
+        ) = None,
         png_folder: str | None = None,
         csv_folder: str | None = None,
         all_on_same_plot: bool = False,
-        **kwargs
-    ) -> tuple[list[Axes] | list[np.ndarray[Axes]] | Axes | np.ndarray[Axes],
-               list[pd.DataFrame] | pd.DataFrame]:
+        **kwargs,
+    ) -> tuple[
+        list[Axes] | list[np.ndarray[Axes]] | Axes | np.ndarray[Axes],
+        list[pd.DataFrame] | pd.DataFrame,
+    ]:
         """Recursively call :meth:`.MultipactorTest.sweet_plot`.
 
         Parameters
@@ -143,9 +153,7 @@ class TestCampaign(list):
         zipper = zip(self, campaign_multipactor_bands, strict=True)
 
         if all_on_same_plot:
-            return self._sweet_plot_same_plot(zipper,
-                                              *args,
-                                              **kwargs)
+            return self._sweet_plot_same_plot(zipper, *args, **kwargs)
 
         for test, band in zipper:
             png_path = None
@@ -156,41 +164,47 @@ class TestCampaign(list):
             if csv_folder is not None:
                 csv_path = test.output_filepath(csv_folder, ".csv")
 
-            axes, df_plot = test.sweet_plot(*args,
-                                            png_path=png_path,
-                                            test_multipactor_bands=band,
-                                            csv_path=csv_path,
-                                            **kwargs)
+            axes, df_plot = test.sweet_plot(
+                *args,
+                png_path=png_path,
+                test_multipactor_bands=band,
+                csv_path=csv_path,
+                **kwargs,
+            )
             all_axes.append(axes)
             all_df.append(df_plot)
         return all_axes, all_df
 
-    def _sweet_plot_same_plot(self,
-                              zipper: zip,
-                              *args,
-                              png_path: Path | None = None,
-                              png_kwargs: dict | None = None,
-                              csv_path: Path | None = None,
-                              csv_kwargs: dict | None = None,
-                              **kwargs
-                              ) -> tuple[Axes | np.ndarray[Axes],
-                                         pd.DataFrame]:
+    def _sweet_plot_same_plot(
+        self,
+        zipper: zip,
+        *args,
+        png_path: Path | None = None,
+        png_kwargs: dict | None = None,
+        csv_path: Path | None = None,
+        csv_kwargs: dict | None = None,
+        **kwargs,
+    ) -> tuple[Axes | np.ndarray[Axes], pd.DataFrame]:
         """Plot the various signals on the same Axes."""
         if len(args) > 1:
-            logging.warning("I am not sure how the interaction of "
-                            "all_on_same_plot with several instruments plotted"
-                            " will go.")
+            logging.warning(
+                "I am not sure how the interaction of "
+                "all_on_same_plot with several instruments plotted"
+                " will go."
+            )
         axes = None
         all_df = []
-        colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+        colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
         for i, (test, band) in enumerate(zipper):
-            axes, df_plot = test.sweet_plot(*args,
-                                            test_multipactor_bands=band,
-                                            ax=axes,
-                                            column_names=str(test),
-                                            title=' ',
-                                            test_color=colors[i],
-                                            **kwargs)
+            axes, df_plot = test.sweet_plot(
+                *args,
+                test_multipactor_bands=band,
+                ax=axes,
+                column_names=str(test),
+                title=" ",
+                test_color=colors[i],
+                **kwargs,
+            )
             all_df.append(df_plot)
         assert axes is not None
         df_to_plot = pd.concat(all_df, axis=1)
@@ -206,15 +220,15 @@ class TestCampaign(list):
 
         return axes, df_to_plot
 
-    def plot_thresholds(self,
-                        instrument_id_plot: ABCMeta,
-                        campaign_multipactor_bands: CampaignMultipactorBands,
-                        *args,
-                        png_folder: str | None = None,
-                        csv_folder: str | None = None,
-                        **kwargs
-                        ) -> tuple[list[Axes] | list[np.ndarray[Axes]],
-                                   list[pd.DataFrame]]:
+    def plot_thresholds(
+        self,
+        instrument_id_plot: ABCMeta,
+        campaign_multipactor_bands: CampaignMultipactorBands,
+        *args,
+        png_folder: str | None = None,
+        csv_folder: str | None = None,
+        **kwargs,
+    ) -> tuple[list[Axes] | list[np.ndarray[Axes]], list[pd.DataFrame]]:
         """Recursively call :meth:`.MultipactorTest.plot_thresholds`."""
         all_axes = []
         all_df = []
@@ -234,34 +248,36 @@ class TestCampaign(list):
                 *args,
                 png_path=png_path,
                 csv_path=csv_path,
-                **kwargs)
+                **kwargs,
+            )
             all_axes.append(axes)
             all_df.append(df_plot)
         return all_axes, all_df
 
     def at_last_threshold(
-            self,
-            instrument_id: ABCMeta | Sequence[ABCMeta],
-            campaign_multipactor_bands: CampaignMultipactorBands,
-            *args,
-            **kwargs) -> pd.DataFrame:
+        self,
+        instrument_id: ABCMeta | Sequence[ABCMeta],
+        campaign_multipactor_bands: CampaignMultipactorBands,
+        *args,
+        **kwargs,
+    ) -> pd.DataFrame:
         """Make a resume of data measured at last thresholds."""
         zipper = zip(self, campaign_multipactor_bands, strict=True)
         df_thresholds = [
             test.at_last_threshold(instrument_id, band, *args, **kwargs)
-            for test, band in zipper]
+            for test, band in zipper
+        ]
         return pd.concat(df_thresholds)
 
     def detect_multipactor(
-            self,
-            multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
-            instrument_class: ABCMeta,
-            *args,
-            power_is_growing_kw: dict[str, int | float] | None = None,
-            measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (
-            ),
-            debug: bool = False,
-            **kwargs,
+        self,
+        multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
+        instrument_class: ABCMeta,
+        *args,
+        power_is_growing_kw: dict[str, int | float] | None = None,
+        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
+        debug: bool = False,
+        **kwargs,
     ) -> CampaignMultipactorBands:
         """Create the :class:`.InstrumentMultipactorBands` objects.
 
@@ -301,18 +317,22 @@ class TestCampaign(list):
                 power_is_growing_kw=power_is_growing_kw,
                 measurement_points_to_exclude=measurement_points_to_exclude,
                 debug=debug,
-                **kwargs)
-            for test in self]
+                **kwargs,
+            )
+            for test in self
+        ]
         campaign_multipactor_bands = CampaignMultipactorBands(
-            tests_multipactor_bands)
+            tests_multipactor_bands
+        )
         return campaign_multipactor_bands
 
-    def somersalo_chart(self,
-                        multipactor_bands: CampaignMultipactorBands,
-                        orders_one_point: tuple[int, ...] = (
-                            1, 2, 3, 4, 5, 6, 7),
-                        orders_two_point: tuple[int, ...] = (1, ),
-                        **fig_kw) -> tuple[Figure, Axes, Axes]:
+    def somersalo_chart(
+        self,
+        multipactor_bands: CampaignMultipactorBands,
+        orders_one_point: tuple[int, ...] = (1, 2, 3, 4, 5, 6, 7),
+        orders_two_point: tuple[int, ...] = (1,),
+        **fig_kw,
+    ) -> tuple[Figure, Axes, Axes]:
         """Create a Somersalo plot, with theoretical results and measured.
 
         .. todo::
@@ -346,20 +366,26 @@ class TestCampaign(list):
         log_power = np.linspace(-1.5, 3.5, 2)
         xlim = (log_power[0], log_power[-1])
         ylim_one_point = (2.2, 9.2)
-        ylim_two_point = (3.8, 11.)
+        ylim_two_point = (3.8, 11.0)
 
-        fig, ax1, ax2 = somersalo_base_plot(xlim=xlim,
-                                            ylim_one_point=ylim_one_point,
-                                            ylim_two_point=ylim_two_point,
-                                            **fig_kw)
-        one_point_kw = {'points': 'one',
-                        'orders': orders_one_point,
-                        'ax': ax1,
-                        'ls': '-'}
-        two_point_kw = {'points': 'two',
-                        'orders': orders_two_point,
-                        'ax': ax2,
-                        'ls': '--'}
+        fig, ax1, ax2 = somersalo_base_plot(
+            xlim=xlim,
+            ylim_one_point=ylim_one_point,
+            ylim_two_point=ylim_two_point,
+            **fig_kw,
+        )
+        one_point_kw = {
+            "points": "one",
+            "orders": orders_one_point,
+            "ax": ax1,
+            "ls": "-",
+        }
+        two_point_kw = {
+            "points": "two",
+            "orders": orders_two_point,
+            "ax": ax2,
+            "ls": "--",
+        }
         for kwargs in (one_point_kw, two_point_kw):
             plot_somersalo_analytical(log_power=log_power, **kwargs)
 
@@ -367,11 +393,13 @@ class TestCampaign(list):
         ax1.grid(True)
         return fig, ax1, ax2
 
-    def _add_somersalo_measured(self,
-                                ax1: Axes, ax2: Axes,
-                                multipactor_bands: CampaignMultipactorBands,
-                                **plot_kw
-                                ) -> None:
+    def _add_somersalo_measured(
+        self,
+        ax1: Axes,
+        ax2: Axes,
+        multipactor_bands: CampaignMultipactorBands,
+        **plot_kw,
+    ) -> None:
         """Put the measured multipacting limits on Somersalo plot.
 
         .. todo::
@@ -384,15 +412,19 @@ class TestCampaign(list):
         zipper = zip(self, multipactor_bands, strict=True)
         for test, bands in zipper:
             somersalo_data = test.data_for_somersalo(bands)
-            plot_somersalo_measured(mp_test_name=str(test),
-                                    somersalo_data=somersalo_data,
-                                    ax1=ax1, ax2=ax2,
-                                    **plot_kw)
+            plot_somersalo_measured(
+                mp_test_name=str(test),
+                somersalo_data=somersalo_data,
+                ax1=ax1,
+                ax2=ax2,
+                **plot_kw,
+            )
 
     def check_somersalo_scaling_law(
         self,
-        multipactor_bands: CampaignMultipactorBands
-        | Sequence[InstrumentMultipactorBands],
+        multipactor_bands: (
+            CampaignMultipactorBands | Sequence[InstrumentMultipactorBands]
+        ),
         show_fit: bool = True,
         use_theoretical_r: bool = False,
         full_output: bool = True,
@@ -473,11 +505,12 @@ class TestCampaign(list):
         zipper = zip(self, multipactor_bands, strict=True)
         data_for_somersalo = [
             test.data_for_somersalo_scaling_law(band, use_theoretical_r)
-            for (test, band) in zipper]
-        df_somersalo = pd.concat(data_for_somersalo).filter(like='Lower')
+            for (test, band) in zipper
+        ]
+        df_somersalo = pd.concat(data_for_somersalo).filter(like="Lower")
 
-        x_col = df_somersalo.filter(like='ReflectionCoefficient').columns
-        y_col = df_somersalo.filter(like='ForwardPower').columns
+        x_col = df_somersalo.filter(like="ReflectionCoefficient").columns
+        y_col = df_somersalo.filter(like="ForwardPower").columns
         axes = df_somersalo.plot(
             x=x_col.values[0],
             y=y_col,
@@ -485,18 +518,17 @@ class TestCampaign(list):
             ylabel=ins.ForwardPower.ylabel(),
             grid=True,
             ms=15,
-            marker='+',
-            **fig_kw)
+            marker="+",
+            **fig_kw,
+        )
 
         if drop_idx is not None:
-            df_somersalo.drop(
-                df_somersalo.index[drop_idx], inplace=True)
+            df_somersalo.drop(df_somersalo.index[drop_idx], inplace=True)
 
         if show_fit:
-            df_fit = fit_somersalo_scaling(df_somersalo,
-                                           full_output=full_output,
-                                           plot=True,
-                                           axes=axes)
+            df_fit = fit_somersalo_scaling(
+                df_somersalo, full_output=full_output, plot=True, axes=axes
+            )
             df_somersalo = pd.concat([df_somersalo, df_fit], axis=1)
 
         if png_path is not None:
@@ -511,14 +543,14 @@ class TestCampaign(list):
         return axes, df_somersalo
 
     def voltage_thresholds(
-            self,
-            campaign_multipactor_bands: CampaignMultipactorBands,
-            measurement_points_to_exclude: Sequence[str] = (),
-            png_path: Path | None = None,
-            png_kwargs: dict | None = None,
-            csv_path: Path | None = None,
-            csv_kwargs: dict | None = None,
-            **fig_kw,
+        self,
+        campaign_multipactor_bands: CampaignMultipactorBands,
+        measurement_points_to_exclude: Sequence[str] = (),
+        png_path: Path | None = None,
+        png_kwargs: dict | None = None,
+        csv_path: Path | None = None,
+        csv_kwargs: dict | None = None,
+        **fig_kw,
     ) -> tuple[Axes, pd.DataFrame]:
         """Plot the lower and upper thresholds as voltage.
 
@@ -556,22 +588,25 @@ class TestCampaign(list):
         voltages = self.at_last_threshold(
             ins.FieldProbe,
             campaign_multipactor_bands,
-            measurement_points_to_exclude=measurement_points_to_exclude)
+            measurement_points_to_exclude=measurement_points_to_exclude,
+        )
 
-        axes = voltages.filter(like='Lower').plot(grid=True,
-                                                  ylabel="Thresholds $V$ [V]",
-                                                  marker='o',
-                                                  ms=10,
-                                                  **fig_kw,
-                                                  )
+        axes = voltages.filter(like="Lower").plot(
+            grid=True,
+            ylabel="Thresholds $V$ [V]",
+            marker="o",
+            ms=10,
+            **fig_kw,
+        )
         axes.set_prop_cycle(None)
-        axes = voltages.filter(like='Upper').plot(grid=True,
-                                                  ax=axes,
-                                                  ylabel="Thresholds $V$ [V]",
-                                                  marker='^',
-                                                  ms=10,
-                                                  **fig_kw,
-                                                  )
+        axes = voltages.filter(like="Upper").plot(
+            grid=True,
+            ax=axes,
+            ylabel="Thresholds $V$ [V]",
+            marker="^",
+            ms=10,
+            **fig_kw,
+        )
         if png_path is not None:
             if png_kwargs is None:
                 png_kwargs = {}
@@ -582,19 +617,20 @@ class TestCampaign(list):
             plot.save_dataframe(voltages, csv_path, **csv_kwargs)
         return axes, voltages
 
-    def susceptibility(self,
-                       campaign_multipactor_bands: CampaignMultipactorBands,
-                       measurement_points_to_exclude: Sequence[str] = (),
-                       keep_only_travelling: bool = True,
-                       tol: float = 1e-6,
-                       gap_in_cm: float | None = None,
-                       xlabel: str = r'$f\times d~[\mathrm{MHz\cdot cm}]$',
-                       png_path: Path | None = None,
-                       png_kwargs: dict | None = None,
-                       csv_path: Path | None = None,
-                       csv_kwargs: dict | None = None,
-                       **fig_kw,
-                       ) -> tuple[Axes, pd.DataFrame]:
+    def susceptibility(
+        self,
+        campaign_multipactor_bands: CampaignMultipactorBands,
+        measurement_points_to_exclude: Sequence[str] = (),
+        keep_only_travelling: bool = True,
+        tol: float = 1e-6,
+        gap_in_cm: float | None = None,
+        xlabel: str = r"$f\times d~[\mathrm{MHz\cdot cm}]$",
+        png_path: Path | None = None,
+        png_kwargs: dict | None = None,
+        csv_path: Path | None = None,
+        csv_kwargs: dict | None = None,
+        **fig_kw,
+    ) -> tuple[Axes, pd.DataFrame]:
         """Create a susceptiblity chart.
 
         Parameters
@@ -639,11 +675,12 @@ class TestCampaign(list):
         df_susceptibility = self.at_last_threshold(
             ins.FieldProbe,
             campaign_multipactor_bands,
-            measurement_points_to_exclude=measurement_points_to_exclude)
+            measurement_points_to_exclude=measurement_points_to_exclude,
+        )
 
         frequencies = np.array([test.freq_mhz for test in self])
         if gap_in_cm is None:
-            gap_in_cm = .5 * (3.878 - 1.687)
+            gap_in_cm = 0.5 * (3.878 - 1.687)
             logging.info(f"Used default {gap_in_cm = }")
 
         df_susceptibility[xlabel] = frequencies * gap_in_cm
@@ -654,21 +691,19 @@ class TestCampaign(list):
             is_travelling = [abs(x - 1.0) < tol for x in swr]
             df_susceptibility = df_susceptibility[is_travelling]
 
-        axes = df_susceptibility.filter(like='Lower').plot(
-            marker='o',
-            lw=0.,
-            **fig_kw
+        axes = df_susceptibility.filter(like="Lower").plot(
+            marker="o", lw=0.0, **fig_kw
         )
         axes.set_prop_cycle(None)
-        axes = df_susceptibility.filter(like='Upper').plot(
+        axes = df_susceptibility.filter(like="Upper").plot(
             ax=axes,
-            ylabel='Measured voltage [V]',
-            marker='^',
-            lw=0.,
+            ylabel="Measured voltage [V]",
+            marker="^",
+            lw=0.0,
             grid=True,
             logx=True,
             logy=True,
-            **fig_kw
+            **fig_kw,
         )
         if png_path is not None:
             if png_kwargs is None:
@@ -681,11 +716,11 @@ class TestCampaign(list):
         return axes, df_susceptibility
 
     def animate_instruments_vs_position(
-            self,
-            *args,
-            out_folder: str | None = None,
-            iternum: int = 100,
-            **kwargs
+        self,
+        *args,
+        out_folder: str | None = None,
+        iternum: int = 100,
+        **kwargs,
     ) -> list[animation.FuncAnimation]:
         """Call all :meth:`.MultipactorTest.animate_instruments_vs_position`"""
         animations = []
@@ -693,10 +728,9 @@ class TestCampaign(list):
             gif_path = None
             if out_folder is not None:
                 gif_path = test.output_filepath(out_folder, ".gif")
-            animation = test.animate_instruments_vs_position(*args,
-                                                             gif_path=gif_path,
-                                                             num=iternum + i,
-                                                             **kwargs)
+            animation = test.animate_instruments_vs_position(
+                *args, gif_path=gif_path, num=iternum + i, **kwargs
+            )
             animations.append(animation)
         return animations
 
@@ -705,20 +739,19 @@ class TestCampaign(list):
         for test in self:
             test.reconstruct_voltage_along_line(*args, **kwargs)
 
-    def scatter_instruments_data(self,
-                                 *args,
-                                 out_folder: str | None = None,
-                                 iternum: int = 200,
-                                 **kwargs) -> None:
+    def scatter_instruments_data(
+        self,
+        *args,
+        out_folder: str | None = None,
+        iternum: int = 200,
+        **kwargs,
+    ) -> None:
         """Call all :meth:`.MultipactorTest.scatter_instruments_data`."""
         for i, test in enumerate(self):
             png_path = None
             if out_folder is not None:
                 png_path = test.output_filepath(out_folder, ".png")
             _ = test.scatter_instruments_data(
-                *args,
-                num=iternum + i,
-                png_path=png_path,
-                **kwargs
+                *args, num=iternum + i, png_path=png_path, **kwargs
             )
         return

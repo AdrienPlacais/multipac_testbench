@@ -1,6 +1,5 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Define an object to keep several related measurements."""
+
 import logging
 from abc import ABC, ABCMeta
 from typing import Any, Callable, Sequence
@@ -8,11 +7,11 @@ from typing import Any, Callable, Sequence
 import numpy as np
 import pandas as pd
 from matplotlib.axes import Axes
-
-from multipac_testbench.src.instruments.factory import InstrumentFactory
-from multipac_testbench.src.instruments.instrument import Instrument
-from multipac_testbench.src.multipactor_band.instrument_multipactor_bands \
-    import InstrumentMultipactorBands
+from multipac_testbench.instruments.factory import InstrumentFactory
+from multipac_testbench.instruments.instrument import Instrument
+from multipac_testbench.multipactor_band.instrument_multipactor_bands import (
+    InstrumentMultipactorBands,
+)
 
 
 class IMeasurementPoint(ABC):
@@ -22,14 +21,15 @@ class IMeasurementPoint(ABC):
 
     """
 
-    def __init__(self,
-                 name: str,
-                 df_data: pd.DataFrame,
-                 instrument_factory: InstrumentFactory,
-                 instruments_kw: dict[str, dict[str, Any]],
-                 position: float,
-                 color: str | None = None,
-                 ) -> None:
+    def __init__(
+        self,
+        name: str,
+        df_data: pd.DataFrame,
+        instrument_factory: InstrumentFactory,
+        instruments_kw: dict[str, dict[str, Any]],
+        position: float,
+        color: str | None = None,
+    ) -> None:
         """Create the all the global instruments.
 
         Parameters
@@ -44,7 +44,7 @@ class IMeasurementPoint(ABC):
             passed to the proper :class:`.Instrument`.
         position : float
             Position of the measurement point. It is a real if it is a
-            :class:`.PickUp`, and ``np.NaN`` for a :class:`.GlobalDiagnostics`.
+            :class:`.PickUp`, and ``np.nan`` for a :class:`.GlobalDiagnostics`.
         color : str | None
             HTML color of the plots. It is ``None`` for
             :class:`.GlobalDiagnostics`.  The default is None.
@@ -54,8 +54,9 @@ class IMeasurementPoint(ABC):
         self.position = position
         self.color = color
         self.instruments = [
-            instrument_factory.run(instr_name, df_data,
-                                   color=color, **instr_kw)
+            instrument_factory.run(
+                instr_name, df_data, color=color, **instr_kw
+            )
             for instr_name, instr_kw in instruments_kw.items()
         ]
         virtual_instruments = instrument_factory.run_virtual(
@@ -74,10 +75,11 @@ class IMeasurementPoint(ABC):
         for instrument in instruments:
             self.instruments.append(instrument)
 
-    def get_instruments(self,
-                        instrument_class: ABCMeta,
-                        instruments_to_ignore: Sequence[Instrument | str] = (),
-                        ) -> list[Instrument]:
+    def get_instruments(
+        self,
+        instrument_class: ABCMeta,
+        instruments_to_ignore: Sequence[Instrument | str] = (),
+    ) -> list[Instrument]:
         """
         Get instruments which are (sub) classes of ``instrument_class``.
 
@@ -85,13 +87,15 @@ class IMeasurementPoint(ABC):
         desired instrument class.
 
         """
-        instrument_names_to_ignore = [x if isinstance(x, str)
-                                      else x.name
-                                      for x in instruments_to_ignore]
+        instrument_names_to_ignore = [
+            x if isinstance(x, str) else x.name for x in instruments_to_ignore
+        ]
         instruments = [
-            instrument for instrument in self.instruments
+            instrument
+            for instrument in self.instruments
             if isinstance(instrument, instrument_class)
-            and instrument.name not in instrument_names_to_ignore]
+            and instrument.name not in instrument_names_to_ignore
+        ]
         return instruments
 
     def get_instrument(self, *args, **kwargs) -> Instrument | None:
@@ -105,14 +109,17 @@ class IMeasurementPoint(ABC):
             return
         if len(instruments) == 1:
             return instruments[0]
-        raise IOError(f"More than one instrument found with {args = } and "
-                      f"{kwargs = }.")
+        raise IOError(
+            f"More than one instrument found with {args = } and "
+            f"{kwargs = }."
+        )
 
-    def add_post_treater(self,
-                         post_treater: Callable[[np.ndarray], np.ndarray],
-                         instrument_class: ABCMeta = Instrument,
-                         verbose: bool = False,
-                         ) -> None:
+    def add_post_treater(
+        self,
+        post_treater: Callable[[np.ndarray], np.ndarray],
+        instrument_class: ABCMeta = Instrument,
+        verbose: bool = False,
+    ) -> None:
         """Add post-treatment functions to instruments."""
         instruments = self.get_instruments(instrument_class)
         for instrument in instruments:
@@ -122,12 +129,12 @@ class IMeasurementPoint(ABC):
                 logging.info(f"A post-treater was added to {str(instrument)}.")
 
     def detect_multipactor(
-            self,
-            multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
-            instrument_class: ABCMeta,
-            power_is_growing: np.ndarray[np.bool_],
-            debug: bool = False,
-            info: str = '',
+        self,
+        multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
+        instrument_class: ABCMeta,
+        power_is_growing: np.ndarray[np.bool_],
+        debug: bool = False,
+        info: str = "",
     ) -> InstrumentMultipactorBands | None:
         """Detect multipactor with ``multipac_detector``."""
         instrument = self.get_instrument(instrument_class)
@@ -147,18 +154,20 @@ class IMeasurementPoint(ABC):
             axes = instrument.data_as_pd.plot(grid=True)
             axes = axes.twinx()
             df_float = pd.DataFrame(
-                {'Power grows?': power_is_growing,
-                 'Multipactor?': multipactor[1:],
-                 }).astype(float)
+                {
+                    "Power grows?": power_is_growing,
+                    "Multipactor?": multipactor[1:],
+                }
+            ).astype(float)
             axes = df_float.plot(ax=axes, grid=True)
 
         return instrument_multipactor_bands
 
     def scatter_instruments_data(
-            self,
-            instrument_class_axes: dict[ABCMeta, Axes],
-            xdata: float,
-            instrument_multipactor_bands: InstrumentMultipactorBands
+        self,
+        instrument_class_axes: dict[ABCMeta, Axes],
+        xdata: float,
+        instrument_multipactor_bands: InstrumentMultipactorBands,
     ) -> None:
         """Scatter data measured by desired instruments."""
         for instrument_class, axes in instrument_class_axes.items():
@@ -167,4 +176,5 @@ class IMeasurementPoint(ABC):
                 continue
 
             instrument.scatter_data(
-                axes, instrument_multipactor_bands.multipactor, xdata)
+                axes, instrument_multipactor_bands.multipactor, xdata
+            )

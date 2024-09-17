@@ -1,22 +1,26 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Ensure that :class:`.InstrumentMultipactorBands` are consistently used."""
+
 from abc import ABCMeta
 from collections.abc import Callable, Sequence
 from typing import overload
 
 import numpy as np
-
-from multipac_testbench.src.instruments.instrument import Instrument
-from multipac_testbench.src.measurement_point.i_measurement_point import \
-    IMeasurementPoint
-from multipac_testbench.src.multipactor_band.instrument_multipactor_bands \
-    import InstrumentMultipactorBands
+from multipac_testbench.instruments.instrument import Instrument
+from multipac_testbench.measurement_point.i_measurement_point import (
+    IMeasurementPoint,
+)
+from multipac_testbench.multipactor_band.instrument_multipactor_bands import (
+    InstrumentMultipactorBands,
+)
 
 
 def _create_zip(
     obj: Sequence[Instrument] | Sequence[IMeasurementPoint],
-    instrument_multipactor_bands: InstrumentMultipactorBands | Sequence[InstrumentMultipactorBands] | None,
+    instrument_multipactor_bands: (
+        InstrumentMultipactorBands
+        | Sequence[InstrumentMultipactorBands]
+        | None
+    ),
     assert_positions_match: bool = True,
 ) -> zip:
     """Zip ``obj`` with ``instrument_multipactor_bands``.
@@ -48,7 +52,9 @@ def _create_zip(
         return zip(obj, [None for _ in obj])
 
     if isinstance(instrument_multipactor_bands, InstrumentMultipactorBands):
-        instrument_multipactor_bands = [instrument_multipactor_bands for _ in obj]
+        instrument_multipactor_bands = [
+            instrument_multipactor_bands for _ in obj
+        ]
 
     assert len(obj) == len(instrument_multipactor_bands), (
         f"Mismatch between {obj} ({len(obj) = }) and "
@@ -59,14 +65,18 @@ def _create_zip(
     if not assert_positions_match:
         return zipper
 
-    for single_obj, mp_bands in zip(obj, instrument_multipactor_bands, strict=True):
+    for single_obj, mp_bands in zip(
+        obj, instrument_multipactor_bands, strict=True
+    ):
         if mp_bands is None:
             continue
         if positions_match(single_obj, mp_bands):
             continue
-        raise IOError(f"The position of {single_obj} ({single_obj.position})"
-                      f"does not match the position of {instrument_multipactor_bands} "
-                      f"({mp_bands.position}).")
+        raise IOError(
+            f"The position of {single_obj} ({single_obj.position})"
+            f"does not match the position of {instrument_multipactor_bands} "
+            f"({mp_bands.position})."
+        )
     return zipper
 
 
@@ -115,44 +125,55 @@ def _match_by_name(
     matching_instrument_multipactor_bands = []
 
     for single_obj in obj:
-        single_matching = [band for band in instrument_multipactor_bands
-                           if band_name_getter(band) == single_obj.name]
+        single_matching = [
+            band
+            for band in instrument_multipactor_bands
+            if band_name_getter(band) == single_obj.name
+        ]
         if len(single_matching) == 0:
             if assert_every_obj_has_instrument_multipactor_bands:
-                raise IOError("No InstrumentMultipactorBands was found for "
-                              f"{single_obj = }")
+                raise IOError(
+                    "No InstrumentMultipactorBands was found for "
+                    f"{single_obj = }"
+                )
             matching_instrument_multipactor_bands.append(None)
             continue
 
         if len(single_matching) > 1:
-            raise IOError("Several InstrumentMultipactorBands match this object: "
-                          "undefined policy.")
+            raise IOError(
+                "Several InstrumentMultipactorBands match this object: "
+                "undefined policy."
+            )
         matching_instrument_multipactor_bands.append(single_matching[0])
     return matching_instrument_multipactor_bands
 
 
-def _band_name_getter(obj_type: ABCMeta) -> Callable[[InstrumentMultipactorBands], str]:
+def _band_name_getter(
+    obj_type: ABCMeta,
+) -> Callable[[InstrumentMultipactorBands], str]:
     """Get the proper function to get the :class:`.InstrumentMultipactorBands` names."""
     if issubclass(obj_type, Instrument):
         return lambda band: band.instrument_name
-    if issubclass(obj_type,  IMeasurementPoint):
+    if issubclass(obj_type, IMeasurementPoint):
         return lambda band: band.measurement_point_name
     raise TypeError(f"{obj_type = } not supported")
 
 
-def positions_match(obj: Instrument | IMeasurementPoint,
-                    instrument_multipactor_bands: InstrumentMultipactorBands,
-                    tol: float = 1e-6) -> bool:
+def positions_match(
+    obj: Instrument | IMeasurementPoint,
+    instrument_multipactor_bands: InstrumentMultipactorBands,
+    tol: float = 1e-6,
+) -> bool:
     """
     Check that positions of ``obj`` and ``instrument_multipactor_bands`` are consistent.
 
     Parameters
     ----------
     obj : Instrument | IMeasurementPoint
-        An object with a ``position`` attribute. It it is ``np.NaN``, it means
+        An object with a ``position`` attribute. It it is ``np.nan``, it means
         that the object under study is "global" and we return True.
     instrument_multipactor_bands : InstrumentMultipactorBands
-        The multipactor bands to check. If its ``position`` is ``np.NaN``, it
+        The multipactor bands to check. If its ``position`` is ``np.nan``, it
         means that the multipactor is detected at the scale of the whole
         testbench. In this case, we return True.
     tol : float, optional
@@ -166,14 +187,16 @@ def positions_match(obj: Instrument | IMeasurementPoint,
     """
     if instrument_multipactor_bands is None:
         return True
-    if instrument_multipactor_bands.position is np.NaN:
+    if instrument_multipactor_bands.position is np.nan:
         return True
 
-    obj_pos = getattr(obj, 'position', None)
-    assert obj_pos is not None, "position attribute should never be None. It" \
-        + " should be np.NaN for global instruments / measurement points."
+    obj_pos = getattr(obj, "position", None)
+    assert obj_pos is not None, (
+        "position attribute should never be None. It"
+        + " should be np.nan for global instruments / measurement points."
+    )
 
-    if obj_pos is np.NaN:
+    if obj_pos is np.nan:
         return True
 
     if abs(instrument_multipactor_bands.position - obj_pos) > tol:

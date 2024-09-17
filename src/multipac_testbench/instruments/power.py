@@ -1,20 +1,18 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Define power probes to measure forward and reflected power."""
-import numpy as np
 
-from multipac_testbench.src.instruments.instrument import Instrument
-from multipac_testbench.src.util.filtering import (
+import numpy as np
+from multipac_testbench.instruments.instrument import Instrument
+from multipac_testbench.util.filtering import (
     array_is_growing,
-    remove_trailing_true,
     remove_isolated_false,
+    remove_trailing_true,
 )
 
 
 class Power(Instrument):
     """An instrument to measure power."""
 
-    def __init__(self, *args, position: float = np.NaN, **kwargs) -> None:
+    def __init__(self, *args, position: float = np.nan, **kwargs) -> None:
         """Instantiate the instrument, declare other specific attributes."""
         super().__init__(*args, position=position, **kwargs)
 
@@ -23,10 +21,12 @@ class Power(Instrument):
         """Label used for plots."""
         return r"Power [W]"
 
-    def where_is_growing(self,
-                         minimum_number_of_points: int = 50,
-                         n_trailing_points_to_check: int = 40,
-                         **kwargs) -> np.ndarray[np.bool_]:
+    def where_is_growing(
+        self,
+        minimum_number_of_points: int = 50,
+        n_trailing_points_to_check: int = 40,
+        **kwargs,
+    ) -> np.ndarray[np.bool_]:
         """Determine where power is growing (``True``) and where it is not.
 
         .. todo::
@@ -39,10 +39,8 @@ class Power(Instrument):
         previous_value = True
         for i in range(n_points):
             local_is_growing = array_is_growing(
-                self.data,
-                i,
-                undetermined_value=previous_value,
-                **kwargs)
+                self.data, i, undetermined_value=previous_value, **kwargs
+            )
 
             is_growing.append(local_is_growing)
             previous_value = local_is_growing
@@ -51,15 +49,17 @@ class Power(Instrument):
 
         # Remove isolated False
         if minimum_number_of_points > 0:
-            arr_growing = remove_isolated_false(arr_growing,
-                                                minimum_number_of_points)
+            arr_growing = remove_isolated_false(
+                arr_growing, minimum_number_of_points
+            )
 
         # Also ensure that last power growth is False
         if n_trailing_points_to_check > 0:
             arr_growing = remove_trailing_true(
                 arr_growing,
                 n_trailing_points_to_check,
-                array_name_for_warning='power growth')
+                array_name_for_warning="power growth",
+            )
 
         return arr_growing
 

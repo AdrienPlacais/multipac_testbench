@@ -1,20 +1,19 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Handle creation of the :class:`.MultipactorBand`."""
-import numpy as np
 
-from multipac_testbench.src.multipactor_band.multipactor_band import (
+import numpy as np
+from multipac_testbench.multipactor_band.multipactor_band import (
     IMultipactorBand,
     MultipactorBand,
     NoMultipactorBand,
 )
 
 
-def _enter_a_mp_zone(first_index: int | None,
-                     last_index: int | None,
-                     index: int,
-                     info: str,
-                     ) -> int:
+def _enter_a_mp_zone(
+    first_index: int | None,
+    last_index: int | None,
+    index: int,
+    info: str,
+) -> int:
     """Enter a multipactor zone.
 
     .. note::
@@ -42,23 +41,26 @@ def _enter_a_mp_zone(first_index: int | None,
         Index at which current multipactor starts.
 
     """
-    assert first_index is None, (f"{info}: was previous MP zone correctly "
-                                 f"reinitialized? {first_index = }, {index = }"
-                                 )
-    assert last_index is None, (f"{info}: was previous MP zone correctly "
-                                f"reinitialized? {last_index = }, {index = }"
-                                )
+    assert first_index is None, (
+        f"{info}: was previous MP zone correctly "
+        f"reinitialized? {first_index = }, {index = }"
+    )
+    assert last_index is None, (
+        f"{info}: was previous MP zone correctly "
+        f"reinitialized? {last_index = }, {index = }"
+    )
     first_index = index + 1
     return first_index
 
 
-def _exit_a_mp_zone(first_index: int | None,
-                    last_index: int | None,
-                    power_grows: bool,
-                    pow_index: int,
-                    info: str,
-                    at_end_of_power_cycle: bool = False,
-                    ) -> tuple[None, None, MultipactorBand]:
+def _exit_a_mp_zone(
+    first_index: int | None,
+    last_index: int | None,
+    power_grows: bool,
+    pow_index: int,
+    info: str,
+    at_end_of_power_cycle: bool = False,
+) -> tuple[None, None, MultipactorBand]:
     """Exit a multipactor zone.
 
     Parameters
@@ -88,21 +90,27 @@ def _exit_a_mp_zone(first_index: int | None,
     """
     assert first_index is not None, (
         f"{info}: we are exiting a multipacting zone but I did not detect "
-        f"when it started. Check what happened around {last_index = }.")
+        f"when it started. Check what happened around {last_index = }."
+    )
     assert last_index is not None
 
-    band = MultipactorBand(pow_index, first_index, last_index,
-                           reached_second_threshold=not at_end_of_power_cycle,
-                           power_grows=power_grows)
+    band = MultipactorBand(
+        pow_index,
+        first_index,
+        last_index,
+        reached_second_threshold=not at_end_of_power_cycle,
+        power_grows=power_grows,
+    )
     first_index, last_index = None, None
     return first_index, last_index, band
 
 
-def _init_half_power_cycle(info: str,
-                           pow_index: int = -1,
-                           index: int = 0,
-                           previous_band: IMultipactorBand | None = None,
-                           ) -> tuple[int | None, None, int, None]:
+def _init_half_power_cycle(
+    info: str,
+    pow_index: int = -1,
+    index: int = 0,
+    previous_band: IMultipactorBand | None = None,
+) -> tuple[int | None, None, int, None]:
     """(Re)-init variables for a new half power cycle."""
     first_index, last_index = None, None
     pow_index += 1
@@ -111,37 +119,46 @@ def _init_half_power_cycle(info: str,
     if index == 0:
         return first_index, last_index, pow_index, next_band
 
-    still_in_a_mp_zone = (isinstance(previous_band, MultipactorBand)
-                          and not previous_band.reached_second_threshold)
+    still_in_a_mp_zone = (
+        isinstance(previous_band, MultipactorBand)
+        and not previous_band.reached_second_threshold
+    )
     if still_in_a_mp_zone:
         first_index = _enter_a_mp_zone(first_index, last_index, index, info)
     return first_index, last_index, pow_index, next_band
 
 
-def _end_half_power_cycle(first_index: int | None,
-                          last_index: int | None,
-                          index: int,
-                          power_grows: bool,
-                          pow_index: int,
-                          info: str,
-                          ) -> MultipactorBand | None:
+def _end_half_power_cycle(
+    first_index: int | None,
+    last_index: int | None,
+    index: int,
+    power_grows: bool,
+    pow_index: int,
+    info: str,
+) -> MultipactorBand | None:
     """Start a new power cycle."""
     band = None
     if first_index is not None and last_index is None:
         last_index = index
-        _, _, band = _exit_a_mp_zone(first_index, last_index, power_grows,
-                                     pow_index, info,
-                                     at_end_of_power_cycle=True)
+        _, _, band = _exit_a_mp_zone(
+            first_index,
+            last_index,
+            power_grows,
+            pow_index,
+            info,
+            at_end_of_power_cycle=True,
+        )
     return band
 
 
 # =============================================================================
 # Main function
 # =============================================================================
-def create(multipactor: np.ndarray[np.bool_],
-           power_is_growing: np.ndarray[np.bool_],
-           info: str = '',
-           ) -> list[MultipactorBand | None]:
+def create(
+    multipactor: np.ndarray[np.bool_],
+    power_is_growing: np.ndarray[np.bool_],
+    info: str = "",
+) -> list[MultipactorBand | None]:
     """Create the different :class:`MultipactorBand`.
 
     Parameters
@@ -179,26 +196,33 @@ def create(multipactor: np.ndarray[np.bool_],
     first_index, last_index, pow_index, band = _init_half_power_cycle(info)
 
     for i, (change_in_multipactor, change_in_power_growth) in zip_enum:
-        last_iter = (i + 1 == i_max)
+        last_iter = i + 1 == i_max
 
         if not (change_in_multipactor or change_in_power_growth or last_iter):
             continue
 
         if change_in_power_growth or last_iter:
             # a current band is returned if we are still multipacting
-            band = _end_half_power_cycle(first_index, last_index, i,
-                                         bool(power_is_growing[i]), pow_index,
-                                         info)
+            band = _end_half_power_cycle(
+                first_index,
+                last_index,
+                i,
+                bool(power_is_growing[i]),
+                pow_index,
+                info,
+            )
             if band is not None:
                 all_bands.append(band)
 
-            no_mp_during_this_cycle = (len(all_bands) == 0
-                                       or all_bands[-1].pow_index != pow_index)
+            no_mp_during_this_cycle = (
+                len(all_bands) == 0 or all_bands[-1].pow_index != pow_index
+            )
             if no_mp_during_this_cycle:
                 all_bands.append(NoMultipactorBand(pow_index))
 
             first_index, last_index, pow_index, band = _init_half_power_cycle(
-                info, pow_index, i, band)
+                info, pow_index, i, band
+            )
             continue
 
         if multipactor[i + 1]:

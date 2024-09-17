@@ -1,13 +1,11 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Define various smoothing/smoothing functions for measured data."""
+
 import numpy as np
 
 
-def running_mean(input_data: np.ndarray,
-                 n_mean: int,
-                 mode: str = 'full',
-                 **kwargs) -> np.ndarray:
+def running_mean(
+    input_data: np.ndarray, n_mean: int, mode: str = "full", **kwargs
+) -> np.ndarray:
     """Compute the runnning mean. Taken from `this link`_.
 
     .. _this link: https://stackoverflow.com/questions/13728392/\
@@ -47,12 +45,13 @@ moving-average-or-running-mean
     return np.convolve(input_data, np.ones(n_mean) / n_mean, mode=mode)
 
 
-def v_coax_to_v_acquisition(v_coax: np.ndarray,
-                            g_probe: float,
-                            a_rack: float,
-                            b_rack: float,
-                            z_0: float = 50.,
-                            ) -> np.ndarray:
+def v_coax_to_v_acquisition(
+    v_coax: np.ndarray,
+    g_probe: float,
+    a_rack: float,
+    b_rack: float,
+    z_0: float = 50.0,
+) -> np.ndarray:
     r"""Convert coaxial voltage to acquisition voltage.
 
     This is the inverse of the function that is implemented in LabVIEWER.
@@ -77,19 +76,20 @@ def v_coax_to_v_acquisition(v_coax: np.ndarray,
         Acquisition voltage in :math:`[0, 10~\mathrm{V}]`.
 
     """
-    p_w = v_coax**2 / (2. * z_0)
-    p_dbm = 30. + 10. * np.log10(p_w)
-    p_acq = p_dbm - abs(g_probe + 3.)
+    p_w = v_coax**2 / (2.0 * z_0)
+    p_dbm = 30.0 + 10.0 * np.log10(p_w)
+    p_acq = p_dbm - abs(g_probe + 3.0)
     v_acq = (p_acq - b_rack) / a_rack
     return v_acq
 
 
-def v_acquisition_to_v_coax(v_acq: np.ndarray,
-                            g_probe: float,
-                            a_rack: float,
-                            b_rack: float,
-                            z_0: float = 50.,
-                            ) -> np.ndarray:
+def v_acquisition_to_v_coax(
+    v_acq: np.ndarray,
+    g_probe: float,
+    a_rack: float,
+    b_rack: float,
+    z_0: float = 50.0,
+) -> np.ndarray:
     r"""Convert acquisition voltage to coaxial voltage.
 
     This is the same function that is implemented in LabVIEWER.
@@ -115,7 +115,7 @@ def v_acquisition_to_v_coax(v_acq: np.ndarray,
 
     """
     p_acq = v_acq * a_rack + b_rack
-    p_dbm = abs(g_probe + 3.) + p_acq
-    p_w = 10**((p_dbm - 30.) / 10.)
-    v_coax = np.sqrt(2. * z_0 * p_w)
+    p_dbm = abs(g_probe + 3.0) + p_acq
+    p_w = 10 ** ((p_dbm - 30.0) / 10.0)
+    v_coax = np.sqrt(2.0 * z_0 * p_w)
     return v_coax

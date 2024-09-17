@@ -1,21 +1,18 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 r"""Define the SWR virtual probe.
 
 It is the Voltage Standing Wave Ratio.
 
 """
+
 from typing import Self
 
 import numpy as np
 import pandas as pd
-
-from multipac_testbench.src.instruments.power import (ForwardPower,
-                                                      ReflectedPower)
-from multipac_testbench.src.instruments.reflection_coefficient import \
-    ReflectionCoefficient
-from multipac_testbench.src.instruments.virtual_instrument import \
-    VirtualInstrument
+from multipac_testbench.instruments.power import ForwardPower, ReflectedPower
+from multipac_testbench.instruments.reflection_coefficient import (
+    ReflectionCoefficient,
+)
+from multipac_testbench.instruments.virtual_instrument import VirtualInstrument
 
 
 class SWR(VirtualInstrument):
@@ -36,29 +33,30 @@ class SWR(VirtualInstrument):
     """
 
     @classmethod
-    def from_powers(cls,
-                    forward: ForwardPower,
-                    reflected: ReflectedPower,
-                    name: str = 'SWR',
-                    **kwargs
-                    ) -> Self:
+    def from_powers(
+        cls,
+        forward: ForwardPower,
+        reflected: ReflectedPower,
+        name: str = "SWR",
+        **kwargs,
+    ) -> Self:
         """Compute the reflection coefficient from given :class:`.Power`."""
         reflection_coefficient = ReflectionCoefficient(forward, reflected)
-        return cls.from_reflection_coefficient(reflection_coefficient,
-                                               name=name,
-                                               **kwargs)
+        return cls.from_reflection_coefficient(
+            reflection_coefficient, name=name, **kwargs
+        )
 
     @classmethod
     def from_reflection_coefficient(
-            cls,
-            reflection_coefficient: ReflectionCoefficient,
-            name: str = 'SWR',
-            **kwargs
+        cls,
+        reflection_coefficient: ReflectionCoefficient,
+        name: str = "SWR",
+        **kwargs,
     ) -> Self:
         """Compute the SWR from given :class:`.ReflectionCoefficient`."""
         data = _compute_swr(reflection_coefficient.data)
         ser_data = pd.Series(data, name=name)
-        return cls(name=name, raw_data=ser_data, position=np.NaN, **kwargs)
+        return cls(name=name, raw_data=ser_data, position=np.nan, **kwargs)
 
     @classmethod
     def ylabel(cls) -> str:
@@ -68,5 +66,5 @@ class SWR(VirtualInstrument):
 
 def _compute_swr(reflection_coefficient: np.ndarray) -> np.ndarray:
     """Compute the :math:`SWR`."""
-    swr = (1. + reflection_coefficient) / (1. - reflection_coefficient)
+    swr = (1.0 + reflection_coefficient) / (1.0 - reflection_coefficient)
     return swr

@@ -1,13 +1,10 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Keep track of a single multipactor band.
 
 i.e.: a set of measurement points where multipactor happens. A
 :class:`MultipactorBand` is defined on half a power cycle.
 
 """
-import logging
-import numpy as np
+
 from dataclasses import dataclass
 
 

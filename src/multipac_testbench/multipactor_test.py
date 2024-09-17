@@ -1,5 +1,3 @@
-# !/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Define an object to store and treat data from pick-ups.
 
 .. todo::
@@ -17,30 +15,29 @@
 
 """
 import itertools
+import logging
 from abc import ABCMeta
 from collections.abc import Callable, Iterable, Sequence
-import logging
 from pathlib import Path
 
+import multipac_testbench.instruments as ins
 import numpy as np
 import pandas as pd
 from matplotlib import animation
 from matplotlib.artist import Artist
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-
-import multipac_testbench.src.instruments as ins
-from multipac_testbench.src.measurement_point.factory import \
-    IMeasurementPointFactory
-from multipac_testbench.src.measurement_point.i_measurement_point import \
-    IMeasurementPoint
-from multipac_testbench.src.multipactor_band.instrument_multipactor_bands \
-    import InstrumentMultipactorBands
-from multipac_testbench.src.multipactor_band.test_multipactor_bands \
-    import TestMultipactorBands
-from multipac_testbench.src.util import plot
-from multipac_testbench.src.util.animate import get_limits
-from multipac_testbench.src.util.helper import output_filepath
+from multipac_testbench.measurement_point.factory import IMeasurementPointFactory
+from multipac_testbench.measurement_point.i_measurement_point import IMeasurementPoint
+from multipac_testbench.multipactor_band.instrument_multipactor_bands import (
+    InstrumentMultipactorBands,
+)
+from multipac_testbench.multipactor_band.test_multipactor_bands import (
+    TestMultipactorBands,
+)
+from multipac_testbench.util import plot
+from multipac_testbench.util.animate import get_limits
+from multipac_testbench.util.helper import output_filepath
 
 
 class MultipactorTest:

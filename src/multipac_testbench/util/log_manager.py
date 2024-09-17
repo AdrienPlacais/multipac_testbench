@@ -1,7 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Python dual-logging setup (console and log file).
+"""Python dual-logging setup (console and log file).
 
 It supports different log levels and colorized output.
 
@@ -17,6 +14,7 @@ https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
     Modernize this, with type hint etc.
 
 """
+
 import logging
 import os
 import sys
@@ -25,12 +23,13 @@ from pathlib import Path
 
 class LogFormatter(logging.Formatter):
     """Logging formatter supporting colorized output."""
+
     COLOR_CODES = {
         logging.CRITICAL: "\033[1;35m",  # bright/bold magenta
-        logging.ERROR:    "\033[1;31m",  # bright/bold red
-        logging.WARNING:  "\033[1;33m",  # bright/bold yellow
-        logging.INFO:     "\033[0;37m",  # white / light gray
-        logging.DEBUG:    "\033[1;30m"  # bright/bold black / dark gray
+        logging.ERROR: "\033[1;31m",  # bright/bold red
+        logging.WARNING: "\033[1;33m",  # bright/bold yellow
+        logging.INFO: "\033[0;37m",  # white / light gray
+        logging.DEBUG: "\033[1;30m",  # bright/bold black / dark gray
     }
 
     RESET_CODE = "\033[0m"
@@ -40,7 +39,7 @@ class LogFormatter(logging.Formatter):
         self.color = color
 
     def format(self, record, *args, **kwargs):
-        if (self.color == True and record.levelno in self.COLOR_CODES):
+        if self.color == True and record.levelno in self.COLOR_CODES:
             record.color_on = self.COLOR_CODES[record.levelno]
             record.color_off = self.RESET_CODE
         else:
@@ -49,10 +48,16 @@ class LogFormatter(logging.Formatter):
         return super(LogFormatter, self).format(record, *args, **kwargs)
 
 
-def set_up_logging(console_log_output='stdout', console_log_level='INFO', console_log_color=True,
-                   console_log_line_template="%(color_on)s[%(levelname)-8s] [%(filename)-20s]%(color_off)s %(message)s",
-                   logfile_file=Path('lightwin.log'), logfile_log_level='INFO', logfile_log_color=False,
-                   logfile_line_template="%(color_on)s[%(asctime)s] [%(levelname)-8s] [%(filename)-20s]%(color_off)s %(message)s"):
+def set_up_logging(
+    console_log_output="stdout",
+    console_log_level="INFO",
+    console_log_color=True,
+    console_log_line_template="%(color_on)s[%(levelname)-8s] [%(filename)-20s]%(color_off)s %(message)s",
+    logfile_file=Path("lightwin.log"),
+    logfile_log_level="INFO",
+    logfile_log_color=False,
+    logfile_line_template="%(color_on)s[%(asctime)s] [%(levelname)-8s] [%(filename)-20s]%(color_off)s %(message)s",
+):
     """Set up logging."""
     # Remove previous logger
     del logging.root.handlers[:]
@@ -73,8 +78,10 @@ def set_up_logging(console_log_output='stdout', console_log_level='INFO', consol
     elif console_log_output == "stderr":
         console_log_output = sys.stderr
     else:
-        print("Failed to set console output: invalid output: '%s'" %
-              console_log_output)
+        print(
+            "Failed to set console output: invalid output: '%s'"
+            % console_log_output
+        )
         return False
     console_handler = logging.StreamHandler(console_log_output)
 
@@ -83,13 +90,16 @@ def set_up_logging(console_log_output='stdout', console_log_level='INFO', consol
         # only accepts uppercase level names
         console_handler.setLevel(console_log_level.upper())
     except:
-        print("Failed to set console log level: invalid level: '%s'" %
-              console_log_level)
+        print(
+            "Failed to set console log level: invalid level: '%s'"
+            % console_log_level
+        )
         return False
 
     # Create and set formatter, add console handler to logger
     console_formatter = LogFormatter(
-        fmt=console_log_line_template, color=console_log_color)
+        fmt=console_log_line_template, color=console_log_color
+    )
     console_handler.setFormatter(console_formatter)
     logger.addHandler(console_handler)
 
@@ -105,13 +115,16 @@ def set_up_logging(console_log_output='stdout', console_log_level='INFO', consol
         # only accepts uppercase level names
         logfile_handler.setLevel(logfile_log_level.upper())
     except:
-        print("Failed to set log file log level: invalid level: '%s'" %
-              logfile_log_level)
+        print(
+            "Failed to set log file log level: invalid level: '%s'"
+            % logfile_log_level
+        )
         return False
 
     # Create and set formatter, add log file handler to logger
     logfile_formatter = LogFormatter(
-        fmt=logfile_line_template, color=logfile_log_color)
+        fmt=logfile_line_template, color=logfile_log_color
+    )
     logfile_handler.setFormatter(logfile_formatter)
     logger.addHandler(logfile_handler)
 
@@ -124,11 +137,16 @@ def main():
 
     # Set up logging
     script_name = os.path.splitext(os.path.basename(sys.argv[0]))[0]
-    if (not set_up_logging(
-            console_log_output="stdout", console_log_level="warning", console_log_color=True,
-            console_log_line_template="%(color_on)s[%(levelname)-8s] [%(filename)-20s]%(color_off)s %(message)s",
-            logfile_file='lightwin.log', logfile_log_level='INFO', logfile_log_color=False,
-            logfile_line_template="%(color_on)s[%(asctime)s] [%(levelname)-8s] [%(filename)-20s]%(color_off)s %(message)s")):
+    if not set_up_logging(
+        console_log_output="stdout",
+        console_log_level="warning",
+        console_log_color=True,
+        console_log_line_template="%(color_on)s[%(levelname)-8s] [%(filename)-20s]%(color_off)s %(message)s",
+        logfile_file="lightwin.log",
+        logfile_log_level="INFO",
+        logfile_log_color=False,
+        logfile_line_template="%(color_on)s[%(asctime)s] [%(levelname)-8s] [%(filename)-20s]%(color_off)s %(message)s",
+    ):
         print("Failed to set up logging, aborting.")
         return 1
 
@@ -141,6 +159,5 @@ def main():
 
 
 # Call main function
-if (__name__ == "__main__"):
+if __name__ == "__main__":
     sys.exit(main())
-
