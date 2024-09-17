@@ -7,7 +7,7 @@ The steps are straightforward and can be summarized as follows:
 1. Clone the repository:
 `git clone git@github.com:AdrienPlacais/multipac_testbench.git`
 2. Create a dedicated Python environment.
-3. Navigate to the newly created folder and install the library with all dependencies: `pip install -e .`
+3. Navigate to the main `multipac_testbench` folder and install the library with all dependencies: `pip install -e .`
 
 Note that you will need Python 3.11 or higher to use the library.
 
