@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Plot voltage thresholds &mdash; MULTIPAC test bench 1.5.2 documentation</title>
+  <title>Plot voltage thresholds &mdash; MULTIPAC test bench 1.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
@@ -16,8 +16,8 @@
   
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=73275c37"></script>
-        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/documentation_options.js?v=72d88caf"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
@@ -41,7 +41,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.5.2
+                1.6.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -68,7 +68,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../multipac_testbench/modules.html">API Reference</a></li>
 </ul>
 
         </div>
@@ -116,10 +116,10 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">multipac_testbench.src.test_campaign</span> <span class="kn">import</span> <span class="n">TestCampaign</span>
-<span class="kn">import</span> <span class="nn">multipac_testbench.src.instruments</span> <span class="k">as</span> <span class="nn">ins</span>
-<span class="kn">from</span> <span class="nn">multipac_testbench.src.util.post_treaters</span> <span class="kn">import</span> <span class="n">running_mean</span>
-<span class="kn">from</span> <span class="nn">multipac_testbench.src.util.multipactor_detectors</span> <span class="kn">import</span> \
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">multipac_testbench.test_campaign</span> <span class="kn">import</span> <span class="n">TestCampaign</span>
+<span class="kn">import</span> <span class="nn">multipac_testbench.instruments</span> <span class="k">as</span> <span class="nn">ins</span>
+<span class="kn">from</span> <span class="nn">multipac_testbench.util.post_treaters</span> <span class="kn">import</span> <span class="n">running_mean</span>
+<span class="kn">from</span> <span class="nn">multipac_testbench.util.multipactor_detectors</span> <span class="kn">import</span> \
     <span class="n">quantity_is_above_threshold</span>
 </pre></div>
 </div>
@@ -166,7 +166,7 @@
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 <span class="ansi-white-fg">[INFO    ] [factory.py          ]</span> 1 set of global diagnostics defined:
-        GlobalDiagnostic global, with instruments: [&#39;ForwardPower (NI9205_Power1)&#39;, &#39;ReflectedPower (NI9205_Power2)&#39;, &#39;ReflectionCoefficient (Reflection_coefficient)&#39;, &#39;SWR (SWR)&#39;]
+        GlobalDiagnostic global, with instruments: [&#39;ForwardPower (NI9205_Power1)&#39;, &#39;ReflectedPower (NI9205_Power2)&#39;, &#39;ReflectionCoefficient (Reflection_coefficient)&#39;, &#39;SWR (SWR)&#39;, &#39;Frequency (Reference frequency)&#39;]
 <span class="ansi-white-fg">[INFO    ] [factory.py          ]</span> 10 pick-ups created:
 <span class="ansi-white-fg">[INFO    ] [factory.py          ]</span>    Pick-Up E1 at z = 0.000m, with instruments: [&#39;CurrentProbe (NI9205_MP1l)&#39;, &#39;FieldProbe (NI9205_E1)&#39;]
 <span class="ansi-white-fg">[INFO    ] [factory.py          ]</span>    Pick-Up V1 at z = 0.130m, with instruments: [&#39;Penning (NI9205_Penning1)&#39;]
@@ -233,10 +233,7 @@
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 <span class="ansi-yellow-intense-fg ansi-bold">[WARNING ] [filtering.py        ]</span> There was 31 &#39;True&#39; points in the last 40 points of the power growth array. Setting it to False.
-<span class="ansi-yellow-intense-fg ansi-bold">[WARNING ] [multipactor_band.py ]</span> I guess there was two MP bands for this power cycle!! To investigate. Only keeping second one...  120.0MHz, SWR 2.0 instrument_name = &#39;NI9205_MP7l&#39;
 <span class="ansi-yellow-intense-fg ansi-bold">[WARNING ] [filtering.py        ]</span> There was 22 &#39;True&#39; points in the last 40 points of the power growth array. Setting it to False.
-<span class="ansi-yellow-intense-fg ansi-bold">[WARNING ] [multipactor_band.py ]</span> I guess there was two MP bands for this power cycle!! To investigate. Only keeping second one...  120.0MHz, SWR inf, short-circuit instrument_name = &#39;NI9205_MP5l&#39;
-<span class="ansi-yellow-intense-fg ansi-bold">[WARNING ] [multipactor_band.py ]</span> I guess there was two MP bands for this power cycle!! To investigate. Only keeping second one...  120.0MHz, SWR inf, short-circuit instrument_name = &#39;NI9205_MP7l&#39;
 </pre></div></div>
 </div>
 <p>Check that detected multipactor zones are consistent:</p>
@@ -262,7 +259,7 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.legend.Legend at 0x7fbf47cf5cd0&gt;
+&lt;matplotlib.legend.Legend at 0x7fc269053260&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -285,7 +282,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2023, A. Plaçais.</p>
+    <p>&#169; Copyright 2024, A. Plaçais.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

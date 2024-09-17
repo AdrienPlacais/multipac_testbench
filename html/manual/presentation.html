@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Introduction &mdash; MULTIPAC test bench 1.5.2 documentation</title>
+  <title>Introduction &mdash; MULTIPAC test bench 1.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
 
@@ -15,8 +15,8 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=73275c37"></script>
-        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/documentation_options.js?v=72d88caf"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -38,7 +38,7 @@
             MULTIPAC test bench
           </a>
               <div class="version">
-                1.5.2
+                1.6.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -56,7 +56,7 @@
 <li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gallery.html">Gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../multipac_testbench/modules.html">API Reference</a></li>
 </ul>
 
         </div>
@@ -95,12 +95,12 @@ Go to <a class="reference internal" href="gallery.html"><span class="doc">Galler
 <p>In order to read the files produced by LabViewer, it is adviced to do the following:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p>Decimal should be changed from <code class="docutils literal notranslate"><span class="pre">,</span></code> to <code class="docutils literal notranslate"><span class="pre">.</span></code> (or use <code class="docutils literal notranslate"><span class="pre">decimal=','</span></code> when instantiating <a class="reference internal" href="../src.multipactor_test.html#src.multipactor_test.MultipactorTest" title="src.multipactor_test.MultipactorTest"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipactorTest</span></code></a> or <a class="reference internal" href="../src.test_campaign.html#src.test_campaign.TestCampaign" title="src.test_campaign.TestCampaign"><code class="xref py py-class docutils literal notranslate"><span class="pre">TestCampaign</span></code></a>).</p></li>
+<li><p>Decimal should be changed from <code class="docutils literal notranslate"><span class="pre">,</span></code> to <code class="docutils literal notranslate"><span class="pre">.</span></code> (or use <code class="docutils literal notranslate"><span class="pre">decimal=','</span></code> when instantiating <a class="reference internal" href="../multipac_testbench/multipac_testbench.multipactor_test.html#multipac_testbench.multipactor_test.MultipactorTest" title="multipac_testbench.multipactor_test.MultipactorTest"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipactorTest</span></code></a> or <a class="reference internal" href="../multipac_testbench/multipac_testbench.test_campaign.html#multipac_testbench.test_campaign.TestCampaign" title="multipac_testbench.test_campaign.TestCampaign"><code class="xref py py-class docutils literal notranslate"><span class="pre">TestCampaign</span></code></a>).</p></li>
 <li><p>Measurement index should start at <code class="docutils literal notranslate"><span class="pre">i=0</span></code> instead of <code class="docutils literal notranslate"><span class="pre">i=1</span></code>.</p></li>
 <li><p>Comments in the right-most columns should be deleted.</p></li>
 </ul>
 </div></blockquote>
-<p>Note that you can use the column separator that you want with the <code class="docutils literal notranslate"><span class="pre">sep</span></code> argument from the <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultipactorTest.__init__()</span></code> or <a class="reference internal" href="../src.test_campaign.html#src.test_campaign.TestCampaign.from_filepaths" title="src.test_campaign.TestCampaign.from_filepaths"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TestCampaign.from_filepaths()</span></code></a> methods.</p>
+<p>Note that you can use the column separator that you want with the <code class="docutils literal notranslate"><span class="pre">sep</span></code> argument from the <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultipactorTest.__init__()</span></code> or <a class="reference internal" href="../multipac_testbench/multipac_testbench.test_campaign.html#multipac_testbench.test_campaign.TestCampaign.from_filepaths" title="multipac_testbench.test_campaign.TestCampaign.from_filepaths"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TestCampaign.from_filepaths()</span></code></a> methods.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Some text editors such as Windows Notepad are not adapted to big files such as the measurement files.
@@ -124,7 +124,7 @@ Prefer Notepad++ or a spreadsheet editor.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2023, A. Plaçais.</p>
+    <p>&#169; Copyright 2024, A. Plaçais.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

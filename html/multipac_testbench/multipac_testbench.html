@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>multipac_testbench package &mdash; MULTIPAC test bench 1.6.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=72d88caf"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="multipac_testbench.instruments package" href="multipac_testbench.instruments.html" />
+    <link rel="prev" title="multipac_testbench" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MULTIPAC test bench
+          </a>
+              <div class="version">
+                1.6.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../manual/presentation.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/gallery.html">Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/tutorials.html">Tutorials</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">multipac_testbench package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html">multipac_testbench.instruments package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.measurement_point.html">multipac_testbench.measurement_point package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.multipactor_band.html">multipac_testbench.multipactor_band package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.theoretical.html">multipac_testbench.theoretical package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.util.html">multipac_testbench.util package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.multipactor_test.html">multipac_testbench.multipactor_test module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.test_campaign.html">multipac_testbench.test_campaign module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MULTIPAC test bench</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">multipac_testbench</a></li>
+      <li class="breadcrumb-item active">multipac_testbench package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/multipac_testbench/multipac_testbench.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-multipac_testbench">
+<span id="multipac-testbench-package"></span><h1>multipac_testbench package<a class="headerlink" href="#module-multipac_testbench" title="Link to this heading"></a></h1>
+<p>This package stores all the function to study MULTIPAC testbench.</p>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="multipac_testbench.instruments.html">multipac_testbench.instruments package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.CurrentProbe"><code class="docutils literal notranslate"><span class="pre">CurrentProbe</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.CurrentProbe.ylabel"><code class="docutils literal notranslate"><span class="pre">CurrentProbe.ylabel()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.IElectricField"><code class="docutils literal notranslate"><span class="pre">IElectricField</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.IElectricField.ylabel"><code class="docutils literal notranslate"><span class="pre">IElectricField.ylabel()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.FieldProbe"><code class="docutils literal notranslate"><span class="pre">FieldProbe</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.FieldProbe.ylabel"><code class="docutils literal notranslate"><span class="pre">FieldProbe.ylabel()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.ForwardPower"><code class="docutils literal notranslate"><span class="pre">ForwardPower</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.ForwardPower.ylabel"><code class="docutils literal notranslate"><span class="pre">ForwardPower.ylabel()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.Frequency"><code class="docutils literal notranslate"><span class="pre">Frequency</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.Frequency.from_user_defined_frequency"><code class="docutils literal notranslate"><span class="pre">Frequency.from_user_defined_frequency()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.Frequency.ylabel"><code class="docutils literal notranslate"><span class="pre">Frequency.ylabel()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.Instrument"><code class="docutils literal notranslate"><span class="pre">Instrument</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.Instrument.ylabel"><code class="docutils literal notranslate"><span class="pre">Instrument.ylabel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.Instrument.label"><code class="docutils literal notranslate"><span class="pre">Instrument.label</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.Instrument.from_pd_dataframe"><code class="docutils literal notranslate"><span class="pre">Instrument.from_pd_dataframe()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.Instrument.class_name"><code class="docutils literal notranslate"><span class="pre">Instrument.class_name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.Instrument.data_as_pd"><code class="docutils literal notranslate"><span class="pre">Instrument.data_as_pd</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.Instrument.data"><code class="docutils literal notranslate"><span class="pre">Instrument.data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.Instrument.post_treaters"><code class="docutils literal notranslate"><span class="pre">Instrument.post_treaters</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.Instrument.add_post_treater"><code class="docutils literal notranslate"><span class="pre">Instrument.add_post_treater()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.Instrument.at_thresholds"><code class="docutils literal notranslate"><span class="pre">Instrument.at_thresholds()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.Instrument.multipactor_band_at_same_position"><code class="docutils literal notranslate"><span class="pre">Instrument.multipactor_band_at_same_position()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.OpticalFibre"><code class="docutils literal notranslate"><span class="pre">OpticalFibre</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.OpticalFibre.ylabel"><code class="docutils literal notranslate"><span class="pre">OpticalFibre.ylabel()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.Penning"><code class="docutils literal notranslate"><span class="pre">Penning</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.Penning.ylabel"><code class="docutils literal notranslate"><span class="pre">Penning.ylabel()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.Power"><code class="docutils literal notranslate"><span class="pre">Power</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.Power.ylabel"><code class="docutils literal notranslate"><span class="pre">Power.ylabel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.Power.where_is_growing"><code class="docutils literal notranslate"><span class="pre">Power.where_is_growing()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.Reconstructed"><code class="docutils literal notranslate"><span class="pre">Reconstructed</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.Reconstructed.ylabel"><code class="docutils literal notranslate"><span class="pre">Reconstructed.ylabel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.Reconstructed.data"><code class="docutils literal notranslate"><span class="pre">Reconstructed.data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.Reconstructed.fit_info"><code class="docutils literal notranslate"><span class="pre">Reconstructed.fit_info</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.Reconstructed.label"><code class="docutils literal notranslate"><span class="pre">Reconstructed.label</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.Reconstructed.fit_voltage"><code class="docutils literal notranslate"><span class="pre">Reconstructed.fit_voltage()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.ReflectedPower"><code class="docutils literal notranslate"><span class="pre">ReflectedPower</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.ReflectedPower.ylabel"><code class="docutils literal notranslate"><span class="pre">ReflectedPower.ylabel()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.ReflectionCoefficient"><code class="docutils literal notranslate"><span class="pre">ReflectionCoefficient</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.ReflectionCoefficient.from_powers"><code class="docutils literal notranslate"><span class="pre">ReflectionCoefficient.from_powers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.ReflectionCoefficient.ylabel"><code class="docutils literal notranslate"><span class="pre">ReflectionCoefficient.ylabel()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.SWR"><code class="docutils literal notranslate"><span class="pre">SWR</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.SWR.from_powers"><code class="docutils literal notranslate"><span class="pre">SWR.from_powers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.SWR.from_reflection_coefficient"><code class="docutils literal notranslate"><span class="pre">SWR.from_reflection_coefficient()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.SWR.ylabel"><code class="docutils literal notranslate"><span class="pre">SWR.ylabel()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="multipac_testbench.instruments.html#multipac_testbench.instruments.VirtualInstrument"><code class="docutils literal notranslate"><span class="pre">VirtualInstrument</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="multipac_testbench.instruments.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.electric_field.html">multipac_testbench.instruments.electric_field package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.instruments.electric_field.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="multipac_testbench.instruments.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.current_probe.html">multipac_testbench.instruments.current_probe module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.instruments.current_probe.html#multipac_testbench.instruments.current_probe.CurrentProbe"><code class="docutils literal notranslate"><span class="pre">CurrentProbe</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.factory.html">multipac_testbench.instruments.factory module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.instruments.factory.html#multipac_testbench.instruments.factory.STRING_TO_INSTRUMENT_CLASS"><code class="docutils literal notranslate"><span class="pre">STRING_TO_INSTRUMENT_CLASS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.instruments.factory.html#multipac_testbench.instruments.factory.InstrumentFactory"><code class="docutils literal notranslate"><span class="pre">InstrumentFactory</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.frequency.html">multipac_testbench.instruments.frequency module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.instruments.frequency.html#multipac_testbench.instruments.frequency.Frequency"><code class="docutils literal notranslate"><span class="pre">Frequency</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.instrument.html">multipac_testbench.instruments.instrument module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.instruments.instrument.html#multipac_testbench.instruments.instrument.Instrument"><code class="docutils literal notranslate"><span class="pre">Instrument</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.optical_fibre.html">multipac_testbench.instruments.optical_fibre module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.instruments.optical_fibre.html#multipac_testbench.instruments.optical_fibre.OpticalFibre"><code class="docutils literal notranslate"><span class="pre">OpticalFibre</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.penning.html">multipac_testbench.instruments.penning module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.instruments.penning.html#multipac_testbench.instruments.penning.Penning"><code class="docutils literal notranslate"><span class="pre">Penning</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.power.html">multipac_testbench.instruments.power module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.instruments.power.html#multipac_testbench.instruments.power.Power"><code class="docutils literal notranslate"><span class="pre">Power</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.instruments.power.html#multipac_testbench.instruments.power.ForwardPower"><code class="docutils literal notranslate"><span class="pre">ForwardPower</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.instruments.power.html#multipac_testbench.instruments.power.ReflectedPower"><code class="docutils literal notranslate"><span class="pre">ReflectedPower</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.reflection_coefficient.html">multipac_testbench.instruments.reflection_coefficient module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.instruments.reflection_coefficient.html#multipac_testbench.instruments.reflection_coefficient.ReflectionCoefficient"><code class="docutils literal notranslate"><span class="pre">ReflectionCoefficient</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.swr.html">multipac_testbench.instruments.swr module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.instruments.swr.html#multipac_testbench.instruments.swr.SWR"><code class="docutils literal notranslate"><span class="pre">SWR</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.instruments.virtual_instrument.html">multipac_testbench.instruments.virtual_instrument module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.instruments.virtual_instrument.html#multipac_testbench.instruments.virtual_instrument.VirtualInstrument"><code class="docutils literal notranslate"><span class="pre">VirtualInstrument</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="multipac_testbench.measurement_point.html">multipac_testbench.measurement_point package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="multipac_testbench.measurement_point.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.measurement_point.factory.html">multipac_testbench.measurement_point.factory module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.measurement_point.factory.html#multipac_testbench.measurement_point.factory.IMeasurementPointFactory"><code class="docutils literal notranslate"><span class="pre">IMeasurementPointFactory</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.measurement_point.global_diagnostics.html">multipac_testbench.measurement_point.global_diagnostics module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.measurement_point.global_diagnostics.html#multipac_testbench.measurement_point.global_diagnostics.GlobalDiagnostics"><code class="docutils literal notranslate"><span class="pre">GlobalDiagnostics</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.measurement_point.i_measurement_point.html">multipac_testbench.measurement_point.i_measurement_point module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.measurement_point.i_measurement_point.html#multipac_testbench.measurement_point.i_measurement_point.IMeasurementPoint"><code class="docutils literal notranslate"><span class="pre">IMeasurementPoint</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.measurement_point.pick_up.html">multipac_testbench.measurement_point.pick_up module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.measurement_point.pick_up.html#multipac_testbench.measurement_point.pick_up.PickUp"><code class="docutils literal notranslate"><span class="pre">PickUp</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="multipac_testbench.multipactor_band.html">multipac_testbench.multipactor_band package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="multipac_testbench.multipactor_band.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.multipactor_band.campaign_multipactor_bands.html">multipac_testbench.multipactor_band.campaign_multipactor_bands module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.multipactor_band.campaign_multipactor_bands.html#multipac_testbench.multipactor_band.campaign_multipactor_bands.CampaignMultipactorBands"><code class="docutils literal notranslate"><span class="pre">CampaignMultipactorBands</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.multipactor_band.creator.html">multipac_testbench.multipactor_band.creator module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.multipactor_band.creator.html#multipac_testbench.multipactor_band.creator.create"><code class="docutils literal notranslate"><span class="pre">create()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.multipactor_band.instrument_multipactor_bands.html">multipac_testbench.multipactor_band.instrument_multipactor_bands module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.multipactor_band.instrument_multipactor_bands.html#multipac_testbench.multipactor_band.instrument_multipactor_bands.InstrumentMultipactorBands"><code class="docutils literal notranslate"><span class="pre">InstrumentMultipactorBands</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.multipactor_band.multipactor_band.html">multipac_testbench.multipactor_band.multipactor_band module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.multipactor_band.multipactor_band.html#multipac_testbench.multipactor_band.multipactor_band.IMultipactorBand"><code class="docutils literal notranslate"><span class="pre">IMultipactorBand</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.multipactor_band.multipactor_band.html#multipac_testbench.multipactor_band.multipactor_band.MultipactorBand"><code class="docutils literal notranslate"><span class="pre">MultipactorBand</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.multipactor_band.multipactor_band.html#multipac_testbench.multipactor_band.multipactor_band.NoMultipactorBand"><code class="docutils literal notranslate"><span class="pre">NoMultipactorBand</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.multipactor_band.polisher.html">multipac_testbench.multipactor_band.polisher module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.multipactor_band.polisher.html#multipac_testbench.multipactor_band.polisher.group_by_power_cycle"><code class="docutils literal notranslate"><span class="pre">group_by_power_cycle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.multipactor_band.polisher.html#multipac_testbench.multipactor_band.polisher.polish"><code class="docutils literal notranslate"><span class="pre">polish()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.multipactor_band.test_multipactor_bands.html">multipac_testbench.multipactor_band.test_multipactor_bands module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.multipactor_band.test_multipactor_bands.html#multipac_testbench.multipactor_band.test_multipactor_bands.TestMultipactorBands"><code class="docutils literal notranslate"><span class="pre">TestMultipactorBands</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.multipactor_band.test_multipactor_bands.html#multipac_testbench.multipactor_band.test_multipactor_bands.MULTIPACTOR_ARRAY_MERGERS"><code class="docutils literal notranslate"><span class="pre">MULTIPACTOR_ARRAY_MERGERS</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.multipactor_band.util.html">multipac_testbench.multipactor_band.util module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.multipactor_band.util.html#multipac_testbench.multipactor_band.util.positions_match"><code class="docutils literal notranslate"><span class="pre">positions_match()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="multipac_testbench.theoretical.html">multipac_testbench.theoretical package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="multipac_testbench.theoretical.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.theoretical.somersalo.html">multipac_testbench.theoretical.somersalo module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.theoretical.somersalo.html#multipac_testbench.theoretical.somersalo.somersalo_base_plot"><code class="docutils literal notranslate"><span class="pre">somersalo_base_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.theoretical.somersalo.html#multipac_testbench.theoretical.somersalo.webdplotdigitizerpoints_to_data"><code class="docutils literal notranslate"><span class="pre">webdplotdigitizerpoints_to_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.theoretical.somersalo.html#multipac_testbench.theoretical.somersalo.plot_somersalo_analytical"><code class="docutils literal notranslate"><span class="pre">plot_somersalo_analytical()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.theoretical.somersalo.html#multipac_testbench.theoretical.somersalo.plot_somersalo_measured"><code class="docutils literal notranslate"><span class="pre">plot_somersalo_measured()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.theoretical.somersalo.html#multipac_testbench.theoretical.somersalo.somersalo_scaling_law"><code class="docutils literal notranslate"><span class="pre">somersalo_scaling_law()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.theoretical.somersalo.html#multipac_testbench.theoretical.somersalo.fit_somersalo_scaling"><code class="docutils literal notranslate"><span class="pre">fit_somersalo_scaling()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="multipac_testbench.util.html">multipac_testbench.util package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="multipac_testbench.util.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.util.animate.html">multipac_testbench.util.animate module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.util.animate.html#multipac_testbench.util.animate.get_limits"><code class="docutils literal notranslate"><span class="pre">get_limits()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.util.filtering.html">multipac_testbench.util.filtering module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.util.filtering.html#multipac_testbench.util.filtering.remove_trailing_true"><code class="docutils literal notranslate"><span class="pre">remove_trailing_true()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.util.filtering.html#multipac_testbench.util.filtering.array_is_growing"><code class="docutils literal notranslate"><span class="pre">array_is_growing()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.util.filtering.html#multipac_testbench.util.filtering.remove_isolated_true"><code class="docutils literal notranslate"><span class="pre">remove_isolated_true()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.util.filtering.html#multipac_testbench.util.filtering.remove_isolated_false"><code class="docutils literal notranslate"><span class="pre">remove_isolated_false()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.util.helper.html">multipac_testbench.util.helper module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.util.helper.html#multipac_testbench.util.helper.output_filepath"><code class="docutils literal notranslate"><span class="pre">output_filepath()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.util.helper.html#multipac_testbench.util.helper.r_squared"><code class="docutils literal notranslate"><span class="pre">r_squared()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.util.log_manager.html">multipac_testbench.util.log_manager module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.util.log_manager.html#multipac_testbench.util.log_manager.LogFormatter"><code class="docutils literal notranslate"><span class="pre">LogFormatter</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.util.log_manager.html#multipac_testbench.util.log_manager.set_up_logging"><code class="docutils literal notranslate"><span class="pre">set_up_logging()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.util.log_manager.html#multipac_testbench.util.log_manager.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.util.multipactor_detectors.html">multipac_testbench.util.multipactor_detectors module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.util.multipactor_detectors.html#multipac_testbench.util.multipactor_detectors.quantity_is_above_threshold"><code class="docutils literal notranslate"><span class="pre">quantity_is_above_threshold()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.util.multipactor_detectors.html#multipac_testbench.util.multipactor_detectors.start_and_end_of_contiguous_true_zones"><code class="docutils literal notranslate"><span class="pre">start_and_end_of_contiguous_true_zones()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.util.plot.html">multipac_testbench.util.plot module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.util.plot.html#multipac_testbench.util.plot.create_fig"><code class="docutils literal notranslate"><span class="pre">create_fig()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.util.plot.html#multipac_testbench.util.plot.finish_fig"><code class="docutils literal notranslate"><span class="pre">finish_fig()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.util.plot.html#multipac_testbench.util.plot.create_df_to_plot"><code class="docutils literal notranslate"><span class="pre">create_df_to_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.util.plot.html#multipac_testbench.util.plot.match_x_and_y_column_names"><code class="docutils literal notranslate"><span class="pre">match_x_and_y_column_names()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.util.plot.html#multipac_testbench.util.plot.actual_plot"><code class="docutils literal notranslate"><span class="pre">actual_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.util.plot.html#multipac_testbench.util.plot.set_labels"><code class="docutils literal notranslate"><span class="pre">set_labels()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.util.plot.html#multipac_testbench.util.plot.save_figure"><code class="docutils literal notranslate"><span class="pre">save_figure()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.util.plot.html#multipac_testbench.util.plot.save_dataframe"><code class="docutils literal notranslate"><span class="pre">save_dataframe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.util.plot.html#multipac_testbench.util.plot.add_background_color_according_to_power_growth"><code class="docutils literal notranslate"><span class="pre">add_background_color_according_to_power_growth()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.util.plot.html#multipac_testbench.util.plot.add_instrument_multipactor_bands"><code class="docutils literal notranslate"><span class="pre">add_instrument_multipactor_bands()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.util.post_treaters.html">multipac_testbench.util.post_treaters module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.util.post_treaters.html#multipac_testbench.util.post_treaters.running_mean"><code class="docutils literal notranslate"><span class="pre">running_mean()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.util.post_treaters.html#multipac_testbench.util.post_treaters.v_coax_to_v_acquisition"><code class="docutils literal notranslate"><span class="pre">v_coax_to_v_acquisition()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multipac_testbench.util.post_treaters.html#multipac_testbench.util.post_treaters.v_acquisition_to_v_coax"><code class="docutils literal notranslate"><span class="pre">v_acquisition_to_v_coax()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="multipac_testbench.multipactor_test.html">multipac_testbench.multipactor_test module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="multipac_testbench.multipactor_test.html#multipac_testbench.multipactor_test.MultipactorTest"><code class="docutils literal notranslate"><span class="pre">MultipactorTest</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.multipactor_test.html#multipac_testbench.multipactor_test.MultipactorTest.add_post_treater"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.add_post_treater()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.multipactor_test.html#multipac_testbench.multipactor_test.MultipactorTest.sweet_plot"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.sweet_plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.multipactor_test.html#multipac_testbench.multipactor_test.MultipactorTest.plot_thresholds"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.plot_thresholds()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.multipactor_test.html#multipac_testbench.multipactor_test.MultipactorTest.instruments_and_multipactor_bands"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.instruments_and_multipactor_bands()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.multipactor_test.html#multipac_testbench.multipactor_test.MultipactorTest.at_last_threshold"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.at_last_threshold()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.multipactor_test.html#multipac_testbench.multipactor_test.MultipactorTest.detect_multipactor"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.detect_multipactor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.multipactor_test.html#multipac_testbench.multipactor_test.MultipactorTest.animate_instruments_vs_position"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.animate_instruments_vs_position()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.multipactor_test.html#multipac_testbench.multipactor_test.MultipactorTest.scatter_instruments_data"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.scatter_instruments_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.multipactor_test.html#multipac_testbench.multipactor_test.MultipactorTest.get_measurement_points"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.get_measurement_points()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.multipactor_test.html#multipac_testbench.multipactor_test.MultipactorTest.get_measurement_point"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.get_measurement_point()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.multipactor_test.html#multipac_testbench.multipactor_test.MultipactorTest.get_instruments"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.get_instruments()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.multipactor_test.html#multipac_testbench.multipactor_test.MultipactorTest.get_instrument"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.get_instrument()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.multipactor_test.html#multipac_testbench.multipactor_test.MultipactorTest.reconstruct_voltage_along_line"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.reconstruct_voltage_along_line()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.multipactor_test.html#multipac_testbench.multipactor_test.MultipactorTest.data_for_somersalo"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.data_for_somersalo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.multipactor_test.html#multipac_testbench.multipactor_test.MultipactorTest.data_for_somersalo_scaling_law"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.data_for_somersalo_scaling_law()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.multipactor_test.html#multipac_testbench.multipactor_test.MultipactorTest.output_filepath"><code class="docutils literal notranslate"><span class="pre">MultipactorTest.output_filepath()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="multipac_testbench.multipactor_test.html#multipac_testbench.multipactor_test.types"><code class="docutils literal notranslate"><span class="pre">types()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="multipac_testbench.multipactor_test.html#multipac_testbench.multipactor_test.types_match"><code class="docutils literal notranslate"><span class="pre">types_match()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="multipac_testbench.test_campaign.html">multipac_testbench.test_campaign module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="multipac_testbench.test_campaign.html#multipac_testbench.test_campaign.TestCampaign"><code class="docutils literal notranslate"><span class="pre">TestCampaign</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.test_campaign.html#multipac_testbench.test_campaign.TestCampaign.from_filepaths"><code class="docutils literal notranslate"><span class="pre">TestCampaign.from_filepaths()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.test_campaign.html#multipac_testbench.test_campaign.TestCampaign.add_post_treater"><code class="docutils literal notranslate"><span class="pre">TestCampaign.add_post_treater()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.test_campaign.html#multipac_testbench.test_campaign.TestCampaign.sweet_plot"><code class="docutils literal notranslate"><span class="pre">TestCampaign.sweet_plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.test_campaign.html#multipac_testbench.test_campaign.TestCampaign.plot_thresholds"><code class="docutils literal notranslate"><span class="pre">TestCampaign.plot_thresholds()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.test_campaign.html#multipac_testbench.test_campaign.TestCampaign.at_last_threshold"><code class="docutils literal notranslate"><span class="pre">TestCampaign.at_last_threshold()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.test_campaign.html#multipac_testbench.test_campaign.TestCampaign.detect_multipactor"><code class="docutils literal notranslate"><span class="pre">TestCampaign.detect_multipactor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.test_campaign.html#multipac_testbench.test_campaign.TestCampaign.somersalo_chart"><code class="docutils literal notranslate"><span class="pre">TestCampaign.somersalo_chart()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.test_campaign.html#multipac_testbench.test_campaign.TestCampaign.check_somersalo_scaling_law"><code class="docutils literal notranslate"><span class="pre">TestCampaign.check_somersalo_scaling_law()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.test_campaign.html#multipac_testbench.test_campaign.TestCampaign.voltage_thresholds"><code class="docutils literal notranslate"><span class="pre">TestCampaign.voltage_thresholds()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.test_campaign.html#multipac_testbench.test_campaign.TestCampaign.susceptibility"><code class="docutils literal notranslate"><span class="pre">TestCampaign.susceptibility()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.test_campaign.html#multipac_testbench.test_campaign.TestCampaign.animate_instruments_vs_position"><code class="docutils literal notranslate"><span class="pre">TestCampaign.animate_instruments_vs_position()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.test_campaign.html#multipac_testbench.test_campaign.TestCampaign.reconstruct_voltage_along_line"><code class="docutils literal notranslate"><span class="pre">TestCampaign.reconstruct_voltage_along_line()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multipac_testbench.test_campaign.html#multipac_testbench.test_campaign.TestCampaign.scatter_instruments_data"><code class="docutils literal notranslate"><span class="pre">TestCampaign.scatter_instruments_data()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="multipac_testbench" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="multipac_testbench.instruments.html" class="btn btn-neutral float-right" title="multipac_testbench.instruments package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, A. Plaçais.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
