@@ -28,12 +28,8 @@ from matplotlib import animation
 from matplotlib.artist import Artist
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from multipac_testbench.measurement_point.factory import (
-    IMeasurementPointFactory,
-)
-from multipac_testbench.measurement_point.i_measurement_point import (
-    IMeasurementPoint,
-)
+from multipac_testbench.measurement_point.factory import IMeasurementPointFactory
+from multipac_testbench.measurement_point.i_measurement_point import IMeasurementPoint
 from multipac_testbench.multipactor_band.instrument_multipactor_bands import (
     InstrumentMultipactorBands,
 )
@@ -75,15 +71,25 @@ class MultipactorTest:
             An additional string to identify this test in plots.
         sep : str
             Delimiter between two columns in ``filepath``.
-        verbise : bool, optional
+        verbose : bool, optional
             To print information on the structure of the test bench, as it was
             understood. The default is False.
 
         """
         self.filepath = filepath
-        df_data = pd.read_csv(
-            filepath, sep=sep, index_col="Sample index", **kwargs
-        )
+        try:
+            df_data = pd.read_csv(
+                filepath, sep=sep, index_col="Sample index", **kwargs
+            )
+        except Exception as e:
+            logging.error(
+                f"There was a mismatch is the number of columns in {filepath}"
+                ". Check that the number of column header match the number of "
+                "columns, and that the trailing comments in the first lines "
+                "were removed."
+            )
+            logging.exception(e)
+            raise e
         self._n_points = len(df_data)
         self.df_data = df_data
 
