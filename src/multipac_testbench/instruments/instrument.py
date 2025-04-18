@@ -33,24 +33,24 @@ class Instrument(ABC):
 
         Parameters
         ----------
-        name : str
+        name :
             Name of the instrument.
-        data : pd.Series
+        data :
             ``x`` and ``y`` data as saved in the ``.csv`` produced by LabVIEW.
-        position : np.ndarray | float
+        position :
             The position of the instrument. If irrelevant (global diagnostic),
             must be set to np.nan.
-        is_2d : bool, optional
+        is_2d :
             To make the difference between instruments holding a single array
             of data (e.g. current vs time) and those holding several columns
             (eg forward and reflected power).
-        color : tuple[float, float, float] | None, optional
+        color :
             Color for the plots; all instruments from a same :class:`.PickUp`
             have the same. The default is None, which happens for instruments
             defined in a :class:`.GlobalDiagnostics`.
         kwargs :
-            Additional keyword arguments coming from the ``.toml``
-            configuration file.
+            Additional keyword arguments coming from the ``TOML`` configuration
+            file.
 
         """
         self.name = name
@@ -94,9 +94,9 @@ class Instrument(ABC):
 
         Parameters
         ----------
-        name : str
+        name :
             Name of the instrument.
-        raw_data : pd.DataFrame
+        raw_data :
             Object holding several columns of the ``.csv``.
         kwargs :
             Other keyword arguments passed to the :class:`.Instrument`.
@@ -113,13 +113,12 @@ class Instrument(ABC):
 
     @property
     def class_name(self) -> str:
-        """Shortcut to the name of the instrument class."""
+        """Get the name of the instrument class."""
         return self.__class__.__name__
 
     @property
     def data(self) -> np.ndarray:
-        """
-        Get the treated data.
+        """Get the treated data.
 
         Note that in order to save time, ``_data`` is not re-calculated
         from ``raw_data`` every time. Hence, it is primordial to re-set
@@ -176,7 +175,7 @@ class Instrument(ABC):
 
         Parameters
         ----------
-        post_treaters : list[Callable[[np.ndarray], np.ndarray]]
+        post_treaters :
             Post-treating functions.
 
         """
@@ -191,7 +190,7 @@ class Instrument(ABC):
 
         Parameters
         ----------
-        post_treater : Callable[[np.ndarray], np.ndarray]
+        post_treater :
             Post-treating function to add. It must take an array as input, and
             return an array with the same size as output.
 
@@ -276,23 +275,22 @@ class Instrument(ABC):
 
         Parameters
         ----------
-        multipactor_bands : TestMultipactorBands | InstrumentMultipactorBands
+        multipactor_bands :
             List of :class:`.InstrumentMultipactorBands` among which you want
             to find the match. If a :class:`.InstrumentMultipactorBands` is
             given, return it back without further checking.
-        tol : float, optional
-            Mismatch allowed between positions. The default is ``1e-10``.
-        global_diagnostics : bool, optional
+        tol :
+            Mismatch allowed between positions.
+        global_diagnostics :
             If multipactor detected by a global instrument should be returned.
-            The default is False.
-        raise_no_match_error : bool, optional
-            If True, method always return an object. The default is False.
+        raise_no_match_error :
+            If True, method always return an object.
         kwargs :
             Other keyword arguments.
 
         Returns
         -------
-        InstrumentMultipactorBands
+        matching_multipactor_bands : InstrumentMultipactorBands
 
         """
         if isinstance(multipactor_bands, InstrumentMultipactorBands):
@@ -315,15 +313,14 @@ class Instrument(ABC):
                 return
 
             raise ValueError(
-                f"No MultipactorBand among {multipactor_bands} "
-                f"with a position matching {self} was found."
+                f"No MultipactorBand among {multipactor_bands} with a position"
+                f" matching {self} was found."
             )
 
         if n_found > 1:
             logging.warning(
-                "There are several multipactor bands that were "
-                f"measured for the same instrument {self}:"
-                f"{matching_multipactor_bands}"
+                "There are several multipactor bands that were measured for "
+                f"the same instrument {self}: {matching_multipactor_bands}"
             )
 
         return matching_multipactor_bands[0]
@@ -354,19 +351,18 @@ class Instrument(ABC):
 
         Parameters
         ----------
-        sample_index : int
+        sample_index :
             Index of the measurements.
-        raw : bool
-            If the raw data should be plotted. The default is False.
-        color : tuple[float, float, float] | None, optional
-            Color of the plot. The default is None (default color).
-        artist : StemContainer | None, optional
+        raw :
+            If the raw data should be plotted.
+        color :
+            Color of the plot.
+        artist :
             If provided, the stem Artist object is updated rather than
-            overwritten. It is mandatory for matplotlib animation to work. The
-            default is None.
-        axe : Axes | None, optional
+            overwritten. It is mandatory for matplotlib animation to work.
+        axe :
             Axe where the artist should be created. It must be provided if
-            ``artist`` is not given. The default is None.
+            ``artist`` is not given.
 
         Returns
         -------
@@ -408,19 +404,18 @@ class Instrument(ABC):
 
         Parameters
         ----------
-        sample_index : int
+        sample_index :
             Index of the measurements.
-        raw : bool
-            If the raw data should be plotted. The default is False.
-        color : tuple[float, float, float] | None, optional
-            Color of the plot. The default is None (default color).
-        artist : Line2D | None, optional
+        raw :
+            If the raw data should be plotted.
+        color :
+            Color of the plot.
+        artist :
             If provided, the Line2D Artist object is updated rather than
-            overwritten. It is mandatory for matplotlib animation to work. The
-            default is None.
-        axe : Axes | None, optional
+            overwritten. It is mandatory for matplotlib animation to work.
+        axe :
             Axe where the artist should be created. It must be provided if
-            ``artist`` is not given. The default is None.
+            ``artist`` is not given.
 
         Returns
         -------
@@ -456,11 +451,11 @@ class Instrument(ABC):
 
         Parameters
         ----------
-        axes : Axes
+        axes :
             Where to plot.
-        multipactor : np.ndarray
+        multipactor :
             True where there is multipactor, False elsewhere.
-        xdata : float | np.ndarray | None, optional
+        xdata :
             x position of the data. The default is None, in which case we take
             :attr:`self._position`.
 

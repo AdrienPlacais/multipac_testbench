@@ -54,22 +54,22 @@ class TestCampaign(list):
 
         Parameters
         ----------
-        filepaths : Sequence[Path]
+        filepaths :
            Filepaths to the LabViewer files.
-        frequencies : Sequence[float]
+        frequencies :
             Frequencies matching the filepaths.
-        swrs : Sequence[float]
+        swrs :
             SWRs matching the filepaths.
-        config : dict
+        config :
             Configuration of the test bench.
-        info : Sequence[str]
+        info :
             Other information string to identify each multipactor test.
-        sep : str
+        sep :
             Delimiter between the columns.
 
         Returns
         -------
-        TestCampaign
+        test_campaign : TestCampaign
             List of :class:`.MultipactorTest`.
 
         """
@@ -120,18 +120,16 @@ class TestCampaign(list):
         ----------
         args :
             Arguments that are passed to :meth:`.MultipactorTest.sweet_plot`.
-        campaign_multipactor_bands : CampaignMultipactorBands | list[None]
+        campaign_multipactor_bands :
                 | None, optional
             Object holding the :class:`.TestMultipactorBands` corresponding to
             each :class:`.MultipactorTest` stored in ``self``. The default is
             None, in which case the multipactor zones are not drawn.
-        png_folder : str | None, optional
-            If provided, all the created figures will be saved there. The
-            default is None.
-        csv_folder : str | None, optional
-            If provided, all the created DataFrame will be saved there. The
-            default is None.
-        all_on_same_plot : bool, optional
+        png_folder :
+            If provided, all the created figures will be saved there.
+        csv_folder :
+            If provided, all the created DataFrame will be saved there.
+        all_on_same_plot :
             If all the data from all the :class:`.MultipactorTest` should be
             drawn on the same Axes.
         kwargs :
@@ -140,9 +138,9 @@ class TestCampaign(list):
 
         Returns
         -------
-        list[Axes] | list[np.ndarray[Axes]] | Axes | np.ndarray[Axes]
+        axes : list[Axes] | list[np.ndarray[Axes]] | Axes | np.ndarray[Axes]
             Holds plotted fig.
-        list[pd.DataFrame] | pd.DataFrame
+        data : list[pd.DataFrame] | pd.DataFrame
             Holds data used to create the plot.
 
         """
@@ -283,22 +281,22 @@ class TestCampaign(list):
 
         Parameters
         ----------
-        multipac_detector : Callable[[np.ndarray], np.ndarray[np.bool_]]
+        multipac_detector :
             Function that takes in the ``data`` of an :class:`.Instrument` and
             returns an array, where True means multipactor and False no
             multipactor.
-        instrument_class : ABCMeta
+        instrument_class :
             Type of instrument on which ``multipac_detector`` should be
             applied.
-        power_is_growing_kw : dict[str, int | float] | None, optional
+        power_is_growing_kw :
             Keyword arguments passed to the function that determines when power
-            is increasing, when it is decreasing. The default is None.
-        measurement_points_to_exclude : Sequence[IMeasurementPoint | str] = ()
+            is increasing, when it is decreasing.
+        measurement_points_to_exclude :
             :class:`.IMeasurementPoint` where you do not want to know if there
             is multipacting.
-        debug : bool, optional
+        debug :
             To plot the data used for multipactor detection, where power grows,
-            where multipactor is detected. The default is False.
+            where multipactor is detected.
 
         Returns
         -------
@@ -341,13 +339,13 @@ class TestCampaign(list):
 
         Parameters
         ----------
-        instrument_multipactor_bands : Sequence[InstrumentMultipactorBands]
+        instrument_multipactor_bands :
             An object holding the multipactor information for every
             :class:`.MultipactorTest` in ``self``.
-        orders_one_point : tuple[int, ...], optional
+        orders_one_point :
             The multipactor orders to plot for one point multipactor. The
             default is orders 1 to 8, as in Somersalo's plot.
-        orders_two_point : tuple[int, ...]
+        orders_two_point :
             The multipactor orders to plot for two point multipactor. The
             default is order 1 only, as in Somersalo's plot.
         fig_kw :
@@ -355,11 +353,11 @@ class TestCampaign(list):
 
         Returns
         -------
-        Figure :
+        fig : Figure
             Holds the plotted figure.
-        Axes :
+        ax1 : Axes
             Left axis (one-point multipactor).
-        Axes :
+        ax2 : Axes
             Right axis (two-point multipactor).
 
         """
@@ -462,29 +460,27 @@ class TestCampaign(list):
 
         Parameters
         ----------
-        campaign_multipactor_bands : CampaignMultipactorBands \
-                | Sequence[InstrumentMultipactorBands]
+        campaign_multipactor_bands :
             Object holding the information on where multipactor happens. If a
             :class:`.CampaignMultipactorBands` object is given, take every
             :class:`.TestMultipactorBands` in it and merge it. You can also
             provide one :class:`.InstrumentMultipactorBands` per multipactor
             test.
-        show_fit : bool, optional
-            To perform a fit and plot it. The default is True.
-        use_theoretical_r : bool, optional
+        show_fit :
+            To perform a fit and plot it.
+        use_theoretical_r :
             Another patch to allow fitting and plotting using the theoretical
             reflection coefficient instead of the one calculated from
-            :math:`P_f` and :math:`P_r`. The default is False.
-        png_path : Path | None, optional
+            :math:`P_f` and :math:`P_r`.
+        png_path :
             If provided, the resulting figure will be saved at this location.
-            The default is None.
-        png_kwargs : dict | None, optional
+        png_kwargs :
             Other keyword arguments passed to the :func:`plot.save_figure`
-            function. The default is None.
-        csv_path : Path | None, optional
+            function.
+        csv_path :
             If provided, the data to produce the figure will be saved in this
-            location. The default is None.
-        csv_kwargs : dict | None, optional
+            location.
+        csv_kwargs :
             Other keyword arguments passed to the :func:`plot.save_dataframe`
             function.
         fig_kw :
@@ -492,13 +488,13 @@ class TestCampaign(list):
 
         Returns
         -------
-        Axes
+        axes : Axes
             Holds the plot.
-        pd.DataFrame
+        data : pd.DataFrame
             Holds the data that was plotted.
 
         """
-        frequencies = set([test.freq_mhz for test in self])
+        frequencies = {test.freq_mhz for test in self}
         if len(frequencies) != 1:
             raise NotImplementedError("Plot over several freqs to implement")
 
@@ -556,20 +552,20 @@ class TestCampaign(list):
 
         Parameters
         ----------
-        campaign_multipactor_bands : CampaignMultipactorBands
+        campaign_multipactor_bands :
             Object holding where multipactor happens for every test.
-        measurement_points_to_exclude : Sequence[str], optional
+        measurement_points_to_exclude :
             Some measurement points to exclude. The default is an empty tuple.
-        png_path : Path | None, optional
+        png_path :
             If provided, the resulting figure will be saved at this location.
             The default is None.
-        png_kwargs : dict | None, optional
+        png_kwargs :
             Other keyword arguments passed to the :func:`plot.save_figure`
             function. The default is None.
-        csv_path : Path | None, optional
+        csv_path :
             If provided, the data to produce the figure will be saved in this
             location. The default is None.
-        csv_kwargs : dict | None, optional
+        csv_kwargs :
             Other keyword arguments passed to the :func:`plot.save_dataframe`
             function.
         fig_kw :
@@ -579,9 +575,13 @@ class TestCampaign(list):
         Returns
         -------
         tuple[Axes, pd.DataFrame]
+        axes : Axes
+            Plotted axes.
+        data : pd.DataFrame
+            Corresponding data.
 
         """
-        frequencies = set([test.freq_mhz for test in self])
+        frequencies = {test.freq_mhz for test in self}
         if len(frequencies) != 1:
             raise NotImplementedError("Plot over several freqs to implement")
 
@@ -635,31 +635,29 @@ class TestCampaign(list):
 
         Parameters
         ----------
-        campaign_multipactor_bands : CampaignMultipactorBands
+        campaign_multipactor_bands :
             Object holding where multipactor happens for every test.
-        measurement_points_to_exclude : Sequence[str], optional
-            Some measurement points to exclude. The default is an empty tuple.
-        keep_only_travelling: bool, optional
-            To remove points where :math:`SWR` is not unity. This is the
-            default.
-        tol : float, optional
+        measurement_points_to_exclude :
+            Some measurement points to exclude.
+        keep_only_travelling :
+            To remove points where :math:`SWR` is not unity.
+        tol :
             Tolerance over the :math:`SWR` when performing the
-            ``keep_only_travelling`` check. The default is ``1e-6``.
-        gap_in_cm : float | None, optional
+            ``keep_only_travelling`` check.
+        gap_in_cm :
             Gap of the system. If not provided, we take the value of MULTIPAC
             test bench.
-        xlabel : str, optional
+        xlabel :
             The xlabel for the plot. The default is good enough.
-        png_path : Path | None, optional
+        png_path :
             If provided, the resulting figure will be saved at this location.
-            The default is None.
-        png_kwargs : dict | None, optional
+        png_kwargs :
             Other keyword arguments passed to the :func:`plot.save_figure`
-            function. The default is None.
-        csv_path : Path | None, optional
+            function.
+        csv_path :
             If provided, the data to produce the figure will be saved in this
-            location. The default is None.
-        csv_kwargs : dict | None, optional
+            location.
+        csv_kwargs :
             Other keyword arguments passed to the :func:`plot.save_dataframe`
             function.
         fig_kw :
@@ -669,7 +667,10 @@ class TestCampaign(list):
         Returns
         -------
         tuple[Axes, pd.DataFrame]
-
+        axes : Axes
+            Plotted axes.
+        data : pd.DataFrame
+            Corresponding data.
 
         """
         df_susceptibility = self.at_last_threshold(
