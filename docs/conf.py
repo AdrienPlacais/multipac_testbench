@@ -5,38 +5,47 @@
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
-import os
-import re
-import sys
+from __future__ import annotations
 
-sys.path.insert(
-    0,
-    os.path.abspath(
-        "/home/placais/Documents/Simulation/python/multipac_testbench/src/"
-    ),
-)
+import os
+import sys
+from pprint import pformat
+
+import multipac_testbench
+from sphinx.util import inspect
+
+sys.path.append(os.path.abspath("./_ext"))
 
 project = "MULTIPAC test bench"
-copyright = "2024, A. Plaçais"
 author = "Adrien Plaçais"
-release = "1.6.0"
+copyright = "2025, " + author
 
-# See https://protips.readthedocs.io/git-tag-version.html
-# The full version, including alpha/beta/rc tags.
-release = re.sub("^v", "", os.popen("git describe").read().strip())
-# The short X.Y version.
-version = release
+version = multipac_testbench.__version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    "sphinx.ext.napoleon",
-    "sphinx.ext.autodoc",
-    "sphinx_rtd_theme",
-    "sphinx.ext.todo",
+    "sphinx_extensions",
+    "myst_parser",
     "nbsphinx",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.todo",
+    "sphinx.ext.viewcode",
+    "sphinx_autodoc_typehints",
+    "sphinx_rtd_theme",
+    "sphinx_tabs.tabs",
 ]
+
+autodoc_default_options = {
+    "members": True,
+    "member-order": "bysource",  # Keep original members order
+    "private-members": True,  # Document _private members
+    "special-members": "__init__, __post_init__, __str__",  # Document those special members
+    "undoc-members": True,  # Document members without doc
+}
 
 add_module_names = False
 default_role = "literal"
@@ -48,24 +57,47 @@ exclude_patterns = [
     "Thumbs.db",
     ".DS_Store",
     "experimental",
+    "simultipac/modules.rst",
 ]
-autodoc_member_order = "bysource"
+
+# -- Check that there is no broken link --------------------------------------
+nitpicky = False
+nitpick_ignore = [
+    # Not recognized by Sphinx, don't know if this is normal
+    ("py:class", "optional"),
+    ("py:class", "T"),
+]
+
+# Link to other libraries
+intersphinx_mapping = {
+    "matplotlib": ("https://matplotlib.org/stable/", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "pandas": ("https://pandas.pydata.org/docs", None),
+    "python": ("https://docs.python.org/3", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
+}
+
+# Parameters for sphinx-autodoc-typehints
+always_document_param_types = True
+always_use_bar_union = True
+typehints_defaults = "comma"
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
-
 html_theme = "sphinx_rtd_theme"
-html_theme_options = {
-    "display_version": True,
-}
 html_static_path = ["_static"]
+html_sidebars = {
+    "**": [
+        "versions.html",
+    ],
+}
 
-# -- Options for LaTeX output ------------------------------------------------
-# https://stackoverflow.com/questions/28454217/how-to-avoid-the-too-deeply-nested-error-when-creating-pdfs-with-sphinx
-latex_elements = {"preamble": r"\usepackage{enumitem}\setlistdepth{99}"}
 
-# List of zero or more Sphinx-specific warning categories to be squelched (i.e.,
-# suppressed, ignored).
-suppress_warnings = [
-    "ref.python",
-]
+# -- Constants display fix ---------------------------------------------------
+# https://stackoverflow.com/a/65195854
+def object_description(obj: object) -> str:
+    """Format the given object for a clearer printing."""
+    return pformat(obj, indent=4)
+
+
+inspect.object_description = object_description
