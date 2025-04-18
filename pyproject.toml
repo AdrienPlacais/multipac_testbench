@@ -31,7 +31,7 @@ docs = [
    "sphinx-tabs>=3.4,<4",
    "sphinxcontrib-bibtex>=2.6,<3",
 ]
-test = ["pytest>=8.3.2, <9", "pytest-mock>=3.14, <4"]
+test = ["pytest>=8.3.2, <9", "pytest-mock>=3.14, <4", "nbmake>=1.5.4,<2"]
 
 [project.scripts]
 
