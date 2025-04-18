@@ -28,8 +28,12 @@ from matplotlib import animation
 from matplotlib.artist import Artist
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from multipac_testbench.measurement_point.factory import IMeasurementPointFactory
-from multipac_testbench.measurement_point.i_measurement_point import IMeasurementPoint
+from multipac_testbench.measurement_point.factory import (
+    IMeasurementPointFactory,
+)
+from multipac_testbench.measurement_point.i_measurement_point import (
+    IMeasurementPoint,
+)
 from multipac_testbench.multipactor_band.instrument_multipactor_bands import (
     InstrumentMultipactorBands,
 )
@@ -59,21 +63,21 @@ class MultipactorTest:
 
         Parameters
         ----------
-        filepath : Path
+        filepath :
             Path to the results file produced by LabViewer.
-        config : dict
+        config :
             Configuration ``.toml`` of the testbench.
-        freq_mhz : float
-            Frequency of the test in :math:\mathrm{MHz}:
-        swr : float
+        freq_mhz :
+            Frequency of the test in :unit:`MHz`.
+        swr :
             Expected Voltage Signal Wave Ratio.
-        info : str, optional
+        info :
             An additional string to identify this test in plots.
-        sep : str
+        sep :
             Delimiter between two columns in ``filepath``.
-        verbose : bool, optional
+        verbose :
             To print information on the structure of the test bench, as it was
-            understood. The default is False.
+            understood.
 
         """
         self.filepath = filepath
@@ -163,45 +167,45 @@ class MultipactorTest:
 
         Parameters
         ----------
-        *ydata : ABCMeta
+        *ydata :
             Class of the instruments to plot.
-        xdata : ABCMeta | None, optional
+        xdata :
             Class of instrument to use as x-data. If there is several
             instruments which have this class, only one ``ydata`` is allowed
             and number of ``x`` and ``y`` instruments must match. The default
             is None, in which case data is plotted vs sample index.
-        exclude : Sequence[str], optional
+        exclude :
             Name of the instruments that you do not want to see plotted.
-        tail : int, optional
+        tail :
             Specify this to only plot the last ``tail`` points. Useful to
             select only the last power cycle.
-        xlabel : str, optional
+        xlabel :
             Label of x axis.
-        ylabel : str | Iterable, optional
+        ylabel :
             Label of y axis.
-        grid : bool, optional
+        grid :
             To show the grid.
-        title : str | list[str], optional
+        title :
             Title of the plot or of the subplots.
-        test_multipactor_bands : TestMultipactorBands | None, optional
+        test_multipactor_bands :
             If provided, information is added to the plot to show where
             multipactor happens.
-        column_names : str | list[str], optional
+        column_names :
             To override the default column names. The default is an empty
             string, in which we keep default names. This is used in particular
             with the method :meth:`.TestCampaign.sweet_plot` when
             ``all_on_same_plot=True``.
-        test_color : str | None, optional
+        test_color :
             Color used by :meth:`.TestCampaign.sweet_plot` when
             ``all_on_same_plot=True``. It overrides the :class:`.Instrument`
             color and is used to discriminate every :class:`MultipactorTest`
-            from another. The default is None.
-        png_path : Path | None, optional
+            from another.
+        png_path :
             If specified, save the figure at ``png_path``.
-        csv_path : Path | None, optional
+        csv_path :
             If specified, save the data used to produce the plot in
             ``csv_path``.
-        **kwargs : dict
+        **kwargs :
             Other keyword arguments passed to :meth:`pd.DataFrame.plot`,
             :meth:`._set_y_data`, :meth:`.create_df_to_plot`,
             :func:`.set_labels`.
@@ -275,16 +279,16 @@ class MultipactorTest:
 
         Parameters
         ----------
-        xdata : ABCMeta | None
+        xdata :
             Class of an instrument, or None (in this case, use default index).
-        exclude : Sequence[str], optional
+        exclude :
             Name of instruments to exclude. The default is an empty tuple.
 
         Returns
         -------
         data_to_plot : list[pd.Series]
             Contains the data used for x axis.
-        list[str] | None
+        x_columns : list[str] | None
             Name of the column(s) used for x axis.
 
         """
@@ -324,14 +328,14 @@ class MultipactorTest:
 
         Parameters
         ----------
-        data_to_plot : list[pd.Series]
+        data_to_plot :
             List already containing the x-data, or nothing if the index is to
             be used.
-        *ydata : ABCMeta
+        *ydata :
             The class of the instruments to plot.
-        exclude : Sequence[str], optional
+        exclude :
             Name of some instruments to exclude. The default is an empty tuple.
-        column_names : str | list[str], optional
+        column_names :
             To override the default column names. The default is an empty
             string, in which we keep default names. This is used in particular
             with the method :meth:`.TestCampaign.sweet_plot` when
@@ -414,31 +418,31 @@ class MultipactorTest:
 
         Parameters
         ----------
-        instrument_id : ABCMeta
+        instrument_id :
             Class of instrument to plot. Makes most sense with
             :class:`ins.ForwardPower` or :class:`ins.FieldProbe`.
-        multipactor_bands : TestMultipactorBands | InstrumentMultipactorBands
+        multipactor_bands :
             Object containing the indexes of multipacting. If only a
             :class:`.InstrumentMultipactorBands` is given, all plotted
             instruments will use it.
-        measurement_points_to_exclude : Sequence[IMeasurementPoint | str]
+        measurement_points_to_exclude :
             To exclude some pick-ups.
-        instruments_to_ignore : Sequence[ins.Instrument | str]
+        instruments_to_ignore :
             To exclude some instruments.
-        png_path : Path | None
+        png_path :
             If provided, figure will be saved there.
-        png_kwargs : dict | None
+        png_kwargs :
             Keyword arguments for the :meth:`.Figure.savefig` method.
-        csv_path : Path | None
+        csv_path :
             If provided, plotted data will be saved there.
-        csv_kwargs : dict | None
+        csv_kwargs :
             Keyword arguments for the :meth:`.DataFrame.to_csv` method.
 
         Returns
         -------
-        Axes | np.ndarray[Axes]
+        axes : Axes | np.ndarray[Axes]
             Hold plotted axes.
-        pd.DataFrame
+        df_thresholds : pd.DataFrame
             The data used to produce the plot.
 
         """
@@ -497,24 +501,24 @@ class MultipactorTest:
 
         Parameters
         ----------
-        instruments_id : ABCMeta
+        instruments_id :
             Class of instrument under study.
-        multipactor_bands : TestMultipactorBands | InstrumentMultipactorBands
+        multipactor_bands :
             All multipactor bands, among which we will be looking. If only one
             is given (:class:`.InstrumentMultipactorBands`), then all
             :class:`ins.Instrument` will be matched with the same identical
             :class:`.InstrumentMultipactorBands`.
-        raise_no_match_error : bool, optional
+        raise_no_match_error :
             If an error should be raised when no
             :class:`.InstrumentMultipactorBands` match an
             :class:`ins.Instrument`. The default is True.
-        global_diagnostics : bool, optional
+        global_diagnostics :
             If :class:`InstrumentMultipactorBands` that were obtained from a
             global diagnostic should be matched. The default is True.
-        measurement_points_to_exclude : Sequence[IMeasurementPoint | str]
+        measurement_points_to_exclude :
             :class:`ins.Instrument` at this pick-ups are skipped. The default
             is an empty tuple.
-        instruments_to_ignore : Sequence[ins.Instrument | str], optional
+        instruments_to_ignore :
             :class:`ins.Instrument` in this sequence are skipped. The default
             is an empty tuple.
 
@@ -584,20 +588,20 @@ class MultipactorTest:
 
         Parameters
         ----------
-        multipac_detector : callable[[np.ndarray], np.ndarray[np.bool_]]
+        multipac_detector :
             Function that takes in the ``data`` of an :class:`Instrument`
             and returns an array, where True means multipactor and False no
             multipactor.
-        instrument_class : ABCMeta
+        instrument_class :
             Type of instrument on which ``multipac_detector`` should be
             applied.
-        power_is_growing_kw : dict[str, int | float] | None, optional
+        power_is_growing_kw :
             Keyword arguments passed to the function that determines when power
             is increasing, when it is decreasing. The default is None.
-        measurement_points_to_exclude : Sequence[IMeasurementPoint | str], optional
+        measurement_points_to_exclude :
             Some measurement points that should not be considered. The default
             is an empty tuple.
-        debug : bool | ins.Instrument, optional
+        debug :
             To plot the data used for multipactor detection, where power grows,
             where multipactor is detected. The default is False.
 
@@ -674,7 +678,7 @@ class MultipactorTest:
 
             Parameters
             ----------
-            step_idx : int
+            step_idx :
                 Step that shall be plotted.
 
             Returns
@@ -717,13 +721,13 @@ class MultipactorTest:
 
         Parameters
         ----------
-        to_plot : Sequence[ABCMeta]
+        to_plot :
             Classes of instruments you want to see.
-        measurement_points_to_exclude : tuple[str, ...]
+        measurement_points_to_exclude :
             Measurement points that should not appear.
-        instruments_to_ignore_for_limits : tuple[str, ...]
+        instruments_to_ignore_for_limits :
             Instruments to plot, but that can go off limits.
-        instruments_to_ignore : Sequence[ins.Instrument | str]
+        instruments_to_ignore :
             Instruments that will not even be plotted.
         fig_kw :
             Other keyword arguments for Figure.
@@ -867,13 +871,13 @@ class MultipactorTest:
 
         Parameters
         ----------
-        instrument_class : ABCMeta
+        instrument_class :
             Class of the desired instruments.
-        measurement_points : Sequence[IMeasurementPoint] | None, optional
+        measurement_points :
             The measurement points from which you want the instruments. The
             default is None, in which case we look into every
             :class:`IMeasurementPoint` attribute of self.
-        instruments_to_ignore : Sequence[ins.Instrument | str], optional
+        instruments_to_ignore :
             The :class:`ins.Instrument` or instrument names you do not want.
             The default is an empty tuple, in which case no instrument is
             ignored.
@@ -911,7 +915,7 @@ class MultipactorTest:
 
         Parameters
         ----------
-        instrument_name : Sequence[str]
+        instrument_name :
             Name of the desired instruments.
 
         Returns
@@ -930,8 +934,8 @@ class MultipactorTest:
         if len(instrument_names) != len(instruments):
             logging.warning(
                 f"You asked for {instrument_names = }, I give you "
-                f"{[instr.name for instr in instruments]} which "
-                "has a different length."
+                f"{[instr.name for instr in instruments]} which has a "
+                "different length."
             )
         return instruments
 
@@ -944,10 +948,10 @@ class MultipactorTest:
 
         Parameters
         ----------
-        names : Sequence[str], optional
+        names :
             If given, only the :class:`.IMeasurementPoint` which name is in
             ``names`` will be returned.
-        to_exclude : Sequence[str | IMeasurementPoint], optional
+        to_exclude :
             List of objects or objects names to exclude from returned list.
 
         Returns
@@ -979,10 +983,10 @@ class MultipactorTest:
 
         Parameters
         ----------
-        name : str | None, optional
+        name :
             If given, only the :class:`.IMeasurementPoint` which name is in
             ``names`` will be returned.
-        to_exclude : Sequence[str | IMeasurementPoint], optional
+        to_exclude :
             List of objects or objects names to exclude from returned list.
 
         Returns
@@ -1044,7 +1048,7 @@ class MultipactorTest:
                     instruments_to_ignore=instruments_to_ignore,
                 )
             case _:
-                raise IOError(
+                raise OSError(
                     f"instruments is {type(instruments_id)} which ",
                     "is not supported.",
                 )
@@ -1070,7 +1074,7 @@ class MultipactorTest:
                 )
 
         if len(instruments) == 0:
-            raise IOError("No instrument found.")
+            raise OSError("No instrument found.")
         if len(instruments) > 1:
             logging.warning("Several instruments found. Returning first one.")
         return instruments[0]
@@ -1145,7 +1149,7 @@ class MultipactorTest:
 
         Parameters
         ----------
-        multipactor_bands : TestMultipactorBands | InstrumentMultipactorBands
+        multipactor_bands :
             Object telling where multipactor happens. If it is a
             :class:`.TestMultipactorBands`, we merge all the
             :class:`.InstrumentMultipactorBands` in it, to know where the first
@@ -1153,7 +1157,7 @@ class MultipactorTest:
             anywhere in the testbench (``union='relaxed'``). You can also
             provide directly an :class:`.InstrumentMultipactorBands`; we will
             take its last :class:`.MultipactorBand`.
-        use_theoretical_r : bool, optional
+        use_theoretical_r :
             If set to True, we return the :math:`R` corresponding to the
             user-defined :math:`SWR`. The default is False.
         kwargs :
@@ -1161,7 +1165,7 @@ class MultipactorTest:
 
         Returns
         -------
-        pd.DataFrame
+        data : pd.DataFrame
             Holds the lower and upper :math:`P_f` during last half power cycle,
             as well as reflection coefficient :math:`R` at same time steps.
 
@@ -1198,7 +1202,7 @@ class MultipactorTest:
 
 def types(my_list: Sequence) -> set[type]:
     """Get all different types in given list."""
-    return set(type(x) for x in my_list)
+    return {type(x) for x in my_list}
 
 
 def types_match(my_list: Sequence, to_match: type) -> bool:

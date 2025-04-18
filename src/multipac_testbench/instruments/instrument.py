@@ -36,7 +36,7 @@ class Instrument(ABC):
         name :
             Name of the instrument.
         data :
-            ``x`` and ``y`` data as saved in the ``.csv`` produced by LabVIEW.
+            ``x`` and ``y`` data as saved in the ``CSV`` produced by LabVIEW.
         position :
             The position of the instrument. If irrelevant (global diagnostic),
             must be set to np.nan.
@@ -90,14 +90,14 @@ class Instrument(ABC):
         raw_data: pd.DataFrame,
         **kwargs,
     ) -> Self:
-        """Instantiate the object from several ``.csv`` file columns.
+        """Instantiate the object from several ``CSV`` file columns.
 
         Parameters
         ----------
         name :
             Name of the instrument.
         raw_data :
-            Object holding several columns of the ``.csv``.
+            Object holding several columns of the ``CSV``.
         kwargs :
             Other keyword arguments passed to the :class:`.Instrument`.
 

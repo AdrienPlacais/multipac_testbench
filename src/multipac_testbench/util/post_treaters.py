@@ -13,32 +13,26 @@ moving-average-or-running-mean
 
     Parameters
     ----------
-    input_data : np.ndarray
+    input_data :
         Data to smooth of shape ``N``.
-    n_mean : int
+    n_mean :
         Number of points on which running mean is ran.
-    mode : {'full', 'valid', 'same'}, optional
-        'full':
-          By default, mode is 'full'.  This returns the convolution
+    mode :
+        - By default, mode is 'full'.  This returns the convolution
           at each point of overlap, with an output shape of (N+M-1,). At
           the end-points of the convolution, the signals do not overlap
           completely, and boundary effects may be seen.
-
-        'same':
-          Mode 'same' returns output of length ``max(M, N)``.  Boundary
-          effects are still visible.
-
-        'valid':
-          Mode 'valid' returns output of length
-          ``max(M, N) - min(M, N) + 1``.  The convolution product is only given
-          for points where the signals overlap completely.  Values outside
-          the signal boundary have no effect.
-
+        - 'same': Mode 'same' returns output of length ``max(M, N)``.
+          Boundary effects are still visible.
+        - 'valid': Mode 'valid' returns output of length
+          ``max(M, N) - min(M, N) + 1``. The convolution product is only
+            given for points where the signals overlap completely. Values
+            outside the signal boundary have no effect.
         (taken from numpy documentation)
 
     Returns
     -------
-    np.ndarray
+    data : np.ndarray
         Smoothed data.
 
     """
@@ -58,17 +52,17 @@ def v_coax_to_v_acquisition(
 
     Parameters
     ----------
-    v_coax : np.ndarray
-        :math:`V_\mathrm{coax}` in :math:`\mathrm{V}`, which should be the
-        content of the ``NI9205_Ex`` columns.
-    g_probe : float
+    v_coax :
+        :math:`V_\mathrm{coax}` in :unit:`V`, which should be the content of
+        the ``NI9205_Ex`` columns.
+    g_probe :
         Total attenuation. Probe specific, also depends on frequency.
-    a_rack : float
-        Rack calibration slope in :math:`\mathrm{dBm/V}`.
-    b_rack : float
-        Rack calibration constant in :math:`\mathrm{dBm}`.
-    z_0 : float, optional
-        Line impedance in :math:`\Ohm`. The default is 50.
+    a_rack :
+        Rack calibration slope in :unit:`dBm/V`.
+    b_rack :
+        Rack calibration constant in :unit:`dBm`.
+    z_0 :
+        Line impedance in :math:`\Ohm`.
 
     Returns
     -------
@@ -96,22 +90,22 @@ def v_acquisition_to_v_coax(
 
     Parameters
     ----------
-    v_acq : np.ndarray
+    v_acq :
         Acquisition voltage in :math:`[0, 10~\mathrm{V}]`.
-    g_probe : float
+    g_probe :
         Total attenuation. Probe specific, also depends on frequency.
-    a_rack : float
-        Rack calibration slope in :math:`\mathrm{dBm/V}`.
-    b_rack : float
-        Rack calibration constant in :math:`\mathrm{dBm}`.
-    z_0 : float, optional
-        Line impedance in :math:`\Ohm`. The default is 50.
+    a_rack :
+        Rack calibration slope in :unit:`dBm/V`.
+    b_rack :
+        Rack calibration constant in :unit:`dBm`.
+    z_0 :
+        Line impedance in :math:`\Ohm`.
 
     Returns
     -------
     v_coax : np.ndarray
-        :math:`V_\mathrm{coax}` in :math:`\mathrm{V}`, which should be the
-        content of the ``NI9205_Ex`` columns.
+        :math:`V_\mathrm{coax}` in :unit:`V`, which should be the content of
+        the ``NI9205_Ex`` columns.
 
     """
     p_acq = v_acq * a_rack + b_rack

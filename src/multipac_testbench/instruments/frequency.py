@@ -10,7 +10,7 @@ from multipac_testbench.instruments.virtual_instrument import VirtualInstrument
 class Frequency(VirtualInstrument):
     r"""Store a frequency.
 
-    By default, the frequency is in :math:`\mathrm{MHz}`.
+    By default, the frequency is in :unit:`MHz`.
 
     """
 
@@ -27,17 +27,18 @@ class Frequency(VirtualInstrument):
         Parameters
         ----------
         freq_mhz : float
-            Frequency in :math:`\mathrm{MHz}`.
+            Frequency in :unit:`MHz`.
         n_points : int
             Number of points to fill.
         name : str
             Name of the series and of the instrument.
         kwargs :
-            Other keyword arguments passed to pd.Series and constructor.
+            Other keyword arguments passed to ``pd.Series`` and constructor.
 
         Returns
         -------
-        Self
+        frequency : Self
+            Instantiated object.
 
         """
         raw_data = np.full(n_points, freq_mhz)

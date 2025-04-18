@@ -29,15 +29,12 @@ class FieldProbe(IElectricField):
 
         Parameters
         ----------
-        g_probe : float | None, optional
-            Total attenuation. Probe specific, also depends on frequency. The
-            default is None.
-        a_rack : float | None, optional
-            Rack calibration slope in :math:`\mathrm{V/dBm}`. The default is
-            None.
-        b_rack : float | None, optional
-            Rack calibration constant in :math:`\mathrm{dBm}`. The default is
-            None.
+        g_probe :
+            Total attenuation. Probe specific, also depends on frequency.
+        a_rack :
+            Rack calibration slope in :unit:`V/dBm`.
+        b_rack :
+            Rack calibration constant in :unit:`dBm`.
 
         """
         super().__init__(*args, **kwargs)

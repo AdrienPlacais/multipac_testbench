@@ -37,26 +37,25 @@ class InstrumentFactory:
 
         Parameters
         ----------
-        name : str
+        name :
             Name of the instrument. For clarity, it should match the name of a
             column in ``df_data`` when it is possible.
-        df_data : pd.DataFrame
-            Content of the multipactor tests results ``.csv`` file.
-        class_name : {'CurrentProbe', 'ElectricFieldProbe', 'OpticalFibre',\
-'Penning', 'Power'}
-            Name of the instrument class, as given in the ``.toml`` file.
-        column_header : str | list[str] | None, optional
+        df_data :
+            Content of the multipactor tests results ``CSV`` file.
+        class_name :
+            Name of the instrument class, as given in the ``TOML`` file.
+        column_header :
             Name of the column(s) from which the data of the instrument will
             be taken. The default is None, in which case ``column_header`` is
             set to ``name``. In general it is not necessary to provide it. An
-            exception is when several ``.csv`` columns should be loaded in the
+            exception is when several ``CSV`` columns should be loaded in the
             instrument.
-        instruments_kw : Any
-            Other keyword arguments in the ``.toml`` file.
+        instruments_kw :
+            Other keyword arguments in the ``TOML`` file.
 
         Returns
         -------
-        Instrument
+        instrument : Instrument
             Instrument properly subclassed.
 
         """
@@ -82,26 +81,26 @@ class InstrumentFactory:
         instruments: Sequence[ins.Instrument],
         is_global: bool = False,
         **kwargs,
-    ) -> Sequence[ins.VirtualInstrument]:
+    ) -> list[ins.VirtualInstrument]:
         """Add the implemented :class:`.VirtualInstrument`.
 
         Parameters
         ----------
-        instruments : Sequence[ins.Instrument]
+        instruments :
             The :class:`.Instrument` that were already created. They are used
             to compute derived quantities, in particular :math:`SWR` and
             :math:`R`.
-        is_global : bool, optional
+        is_global :
             Tells if the :class:`.IMeasurementPoint` from which this method is
             called is global. It allows to forbid creation of one
             :class:`.Frequency` or one :class:`.SWR` instrument per
-            :class:`.IMeasurementPoint`. The default is False.
+            :class:`.IMeasurementPoint`.
         kwargs :
             Other keyword arguments passed to :meth:`._power_related`.
 
         Returns
         -------
-        Sequence[ins.VirtualInstrument]
+        virtuals : list[ins.VirtualInstrument]
             The created virtual instruments.
 
         """
@@ -132,9 +131,9 @@ class InstrumentFactory:
         ]
         if len(forwards) != 1 or len(reflecteds) != 1:
             logging.error(
-                "Should have exactly one ForwardPower and one "
-                "ReflectedPower instruments. Skipping SWR and R, "
-                "this may create problems in the future."
+                "Should have exactly one ForwardPower and one ReflectedPower "
+                "instruments. Skipping SWR and R, this may create problems in "
+                "the future."
             )
             return ()
 

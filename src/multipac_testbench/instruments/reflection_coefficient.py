@@ -65,9 +65,8 @@ def _compute_reflection_coef(
         reflection_coefficient[invalid_indexes] = np.nan
         if warn_reflected_higher_than_forward:
             logging.warning(
-                f"{n_invalid} points were removed in R "
-                "calculation, where reflected power was higher "
-                "than forward power."
+                f"{n_invalid} points were removed in R calculation, where "
+                "reflected power was higher than forward power."
             )
 
     invalid_indexes = np.where(np.abs(reflection_coefficient - 1.0) < tol)[0]
@@ -76,8 +75,8 @@ def _compute_reflection_coef(
         reflection_coefficient[invalid_indexes] = np.nan
         if warn_gamma_too_close_to_unity:
             logging.warning(
-                f"{n_invalid} points were removed in R "
-                "calculation, where reflected power was too close "
-                f"to forward power. Tolerance was: {tol = }."
+                f"{n_invalid} points were removed in R calculation, where "
+                "reflected power was too close to forward power. Tolerance "
+                f"was: {tol = }."
             )
     return reflection_coefficient

@@ -160,7 +160,7 @@ def _model(
 
     Parameters
     ----------
-    var : np.ndarray
+    var :
         Variables, namely :math:`[P_f, R, z]`.
 
     Returns
@@ -220,21 +220,21 @@ def voltage_vs_position(
 
     Parameters
     ----------
-    pos : float | np.ndarray
-        :math:`z` position in :math:`m`.
-    v_f : float
-        Forward voltage :math:`V_f` in :math:`V`.
-    gamma : float
+    pos :
+        :math:`z` position in :unit:`m`.
+    v_f :
+        Forward voltage :math:`V_f` in :unit:`V`.
+    gamma :
         Voltage reflexion coefficient :math:`\Gamma`.
-    beta : float
-        Propagation constant :math:`\beta` in :math:`m^{-1}`.
-    psi_0 : float
+    beta :
+        Propagation constant :math:`\beta` in :unit:`m^{-1}`.
+    psi_0 :
         Dephasing constant :math:`\psi_0`.
 
     Returns
     -------
-    float | np.ndarray
-        :math:`V(z)` at proper position in :math:`V`.
+    voltage : float | np.ndarray
+        :math:`V(z)` at proper position in :unit:`V`.
 
     """
     assert not isinstance(v_f, complex), "not implemented"
