@@ -97,7 +97,7 @@ class FieldProbe(IElectricField):
             usecols=[a_col, b_col, freq_col],
         )
         if freq_mhz not in data.index:
-            data.loc[freq_mhz] = [np.NaN, np.NaN]
+            data.loc[freq_mhz] = [np.nan, np.nan]
             data.sort_index(inplace=True)
             data.interpolate(inplace=True)
         ser = data.loc[freq_mhz]
