@@ -7,6 +7,7 @@ from multipac_testbench.util.filtering import (
     remove_isolated_false,
     remove_trailing_true,
 )
+from numpy.typing import NDArray
 
 
 class Power(Instrument):
@@ -26,7 +27,7 @@ class Power(Instrument):
         minimum_number_of_points: int = 50,
         n_trailing_points_to_check: int = 40,
         **kwargs,
-    ) -> np.ndarray[np.bool_]:
+    ) -> NDArray[np.bool]:
         """Determine where power is growing (``True``) and where it is not.
 
         .. todo::
@@ -37,6 +38,7 @@ class Power(Instrument):
         is_growing: list[bool] = []
 
         previous_value = True
+        assert isinstance(n_points, int)
         for i in range(n_points):
             local_is_growing = array_is_growing(
                 self.data, i, undetermined_value=previous_value, **kwargs

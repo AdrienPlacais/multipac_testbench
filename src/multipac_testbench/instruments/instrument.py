@@ -15,6 +15,7 @@ from multipac_testbench.multipactor_band.instrument_multipactor_bands import (
 from multipac_testbench.multipactor_band.test_multipactor_bands import (
     TestMultipactorBands,
 )
+from numpy.typing import NDArray
 
 
 class Instrument(ABC):
@@ -24,7 +25,7 @@ class Instrument(ABC):
         self,
         name: str,
         data: pd.Series,
-        position: np.ndarray | float,
+        position: NDArray[np.float64] | float,
         is_2d: bool = False,
         color: tuple[float, float, float] | None = None,
         **kwargs,
@@ -63,10 +64,12 @@ class Instrument(ABC):
         self.plot_vs_position, self.scatter_data = plotters
 
         self._raw_data: pd.Series = data
-        self._data: np.ndarray
+        self._data: NDArray[np.float64]
         self._data_as_pd: pd.Series
 
-        self._post_treaters: list[Callable[[np.ndarray], np.ndarray]] = []
+        self._post_treaters: list[
+            Callable[[NDArray[np.float64]], NDArray[np.float64]]
+        ] = []
 
     def __str__(self) -> str:
         """Give concise information on instrument."""
@@ -117,7 +120,7 @@ class Instrument(ABC):
         return self.__class__.__name__
 
     @property
-    def data(self) -> np.ndarray:
+    def data(self) -> NDArray[np.float64]:
         """Get the treated data.
 
         Note that in order to save time, ``_data`` is not re-calculated
@@ -149,7 +152,7 @@ class Instrument(ABC):
         return self._data_as_pd
 
     @data.setter
-    def data(self, new_data: np.ndarray) -> None:
+    def data(self, new_data: NDArray[np.float64]) -> None:
         """Set ``data``, clean previous ``_data_as_pd``."""
         self._data = new_data
         if hasattr(self, "_data_as_pd"):
@@ -163,13 +166,18 @@ class Instrument(ABC):
         return plotters
 
     @property
-    def post_treaters(self) -> list[Callable[[np.ndarray], np.ndarray]]:
+    def post_treaters(
+        self,
+    ) -> list[Callable[[NDArray[np.float64]], NDArray[np.float64]]]:
         """Get the list of the post-treating functions."""
         return self._post_treaters
 
     @post_treaters.setter
     def post_treaters(
-        self, post_treaters: list[Callable[[np.ndarray], np.ndarray]]
+        self,
+        post_treaters: list[
+            Callable[[NDArray[np.float64]], NDArray[np.float64]]
+        ],
     ) -> None:
         """Set the full list of post-treating functions at once.
 
@@ -184,7 +192,8 @@ class Instrument(ABC):
         self._post_treaters = post_treaters
 
     def add_post_treater(
-        self, post_treater: Callable[[np.ndarray], np.ndarray]
+        self,
+        post_treater: Callable[[NDArray[np.float64]], NDArray[np.float64]],
     ) -> None:
         """Append a single post-treating function.
 
@@ -325,7 +334,7 @@ class Instrument(ABC):
 
         return matching_multipactor_bands[0]
 
-    def _post_treat(self, data: np.ndarray) -> np.ndarray:
+    def _post_treat(self, data: NDArray[np.float64]) -> NDArray[np.float64]:
         """Apply all post-treatment functions."""
         original_data_shape = data.shape
         for post_treater in self.post_treaters:
@@ -444,8 +453,8 @@ class Instrument(ABC):
     def _scatter_data_1d(
         self,
         axes: Axes,
-        multipactor: np.ndarray,
-        xdata: float | np.ndarray | None = None,
+        multipactor: NDArray[np.bool],
+        xdata: float | NDArray[np.float64] | None = None,
     ) -> None:
         """Plot ``data``, discriminating where there is multipactor or not.
 

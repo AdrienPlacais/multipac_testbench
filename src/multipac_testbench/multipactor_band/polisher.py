@@ -1,6 +1,7 @@
 """Handle post-treatment of the :class:`.MultipactorBand`."""
 
 from itertools import groupby
+from typing import Literal
 
 from multipac_testbench.multipactor_band.multipactor_band import (
     IMultipactorBand,
@@ -96,7 +97,7 @@ def _merge(bands: list[IMultipactorBand]) -> list[IMultipactorBand]:
 
     Parameters
     ----------
-    multipactor_bands : list[IMultipactorBand]
+    multipactor_bands :
         List of multipactor bands, some of which may belong to the same half
         power cycle.
 
@@ -134,35 +135,37 @@ POLISHERS = {
     "keep_highest": _keep_highest,
     "merge": _merge,
 }
+POLISHER_T = Literal[
+    "keep_all", "keep_largest", "keep_lowest", "keep_highest", "merge"
+]
 
 
 # =============================================================================
 # Main function
 # =============================================================================
 def polish(
-    bands: list[IMultipactorBand], politics: str
+    bands: list[IMultipactorBand], politics: POLISHER_T
 ) -> list[IMultipactorBand]:
     """
     Clean the given ``bands`` when there is a power cycle with several bands.
 
     Parameters
     ----------
-    bands : list[IMultipactorBand]
+    bands :
         List of bands, where we can have multiple multipactor bands per power
         cycle.
-    several_bands_politics : {'keep_highest', 'keep_lowest', 'keep_all',\
-            'merge', 'keep_largest'}
+    several_bands_politics :
         What to to when several multipactor bands are found in the same half
         power cycle:
-            - ``'keep_lowest'``: we keep :class:`.MultipactorBand` at the
-            lowest powers.
-            - ``'keep_highest'``: we keep :class:`.MultipactorBand` at the
-            highest powers.
-            - ``'keep_all'``: we keep all :class:`.MultipactorBand`.
-            - ``'merge'``: the resulting :class:`.MultipactorBand` will span
-            from start of first :class:`.MultipactorBand` to end of last.
-            - ``'keep_largest'``: we keep the :class:`.MultipactorBand` that
-            was measured on the largest number of points.
+           - ``'keep_lowest'``: we keep :class:`.MultipactorBand` at the
+             lowest powers.
+           - ``'keep_highest'``: we keep :class:`.MultipactorBand` at the
+             highest powers.
+           - ``'keep_all'``: we keep all :class:`.MultipactorBand`.
+           - ``'merge'``: the resulting :class:`.MultipactorBand` will span
+             from start of first :class:`.MultipactorBand` to end of last.
+           - ``'keep_largest'``: we keep the :class:`.MultipactorBand` that was
+             measured on the largest number of points.
 
     """
     assert politics in POLISHERS, (

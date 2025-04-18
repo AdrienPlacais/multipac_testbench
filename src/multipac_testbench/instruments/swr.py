@@ -13,6 +13,7 @@ from multipac_testbench.instruments.reflection_coefficient import (
     ReflectionCoefficient,
 )
 from multipac_testbench.instruments.virtual_instrument import VirtualInstrument
+from numpy.typing import NDArray
 
 
 class SWR(VirtualInstrument):
@@ -64,7 +65,9 @@ class SWR(VirtualInstrument):
         return "$SWR$"
 
 
-def _compute_swr(reflection_coefficient: np.ndarray) -> np.ndarray:
+def _compute_swr(
+    reflection_coefficient: NDArray[np.float64],
+) -> NDArray[np.float64]:
     """Compute the :math:`SWR`."""
     swr = (1.0 + reflection_coefficient) / (1.0 - reflection_coefficient)
     return swr

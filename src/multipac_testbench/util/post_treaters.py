@@ -1,11 +1,19 @@
 """Define various smoothing/smoothing functions for measured data."""
 
+from typing import Literal
+
 import numpy as np
+from numpy.typing import NDArray
+
+CONVOLUTION_MODES = Literal["full", "same", "valid"]
 
 
 def running_mean(
-    input_data: np.ndarray, n_mean: int, mode: str = "full", **kwargs
-) -> np.ndarray:
+    input_data: NDArray[np.float64],
+    n_mean: int,
+    mode: CONVOLUTION_MODES = "full",
+    **kwargs,
+) -> NDArray[np.float64]:
     """Compute the runnning mean. Taken from `this link`_.
 
     .. _this link: https://stackoverflow.com/questions/13728392/\
@@ -32,20 +40,22 @@ moving-average-or-running-mean
 
     Returns
     -------
-    data : np.ndarray
+    data : NDArray[np.float64]
         Smoothed data.
 
     """
-    return np.convolve(input_data, np.ones(n_mean) / n_mean, mode=mode)
+    return np.convolve(input_data, np.ones(n_mean) / n_mean, mode=mode).astype(
+        np.float64
+    )
 
 
 def v_coax_to_v_acquisition(
-    v_coax: np.ndarray,
+    v_coax: NDArray[np.float64],
     g_probe: float,
     a_rack: float,
     b_rack: float,
     z_0: float = 50.0,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Convert coaxial voltage to acquisition voltage.
 
     This is the inverse of the function that is implemented in LabVIEWER.
@@ -66,24 +76,24 @@ def v_coax_to_v_acquisition(
 
     Returns
     -------
-    v_acq : np.ndarray
+    v_acq : NDArray[np.float64]
         Acquisition voltage in :math:`[0, 10~\mathrm{V}]`.
 
     """
     p_w = v_coax**2 / (2.0 * z_0)
     p_dbm = 30.0 + 10.0 * np.log10(p_w)
     p_acq = p_dbm - abs(g_probe + 3.0)
-    v_acq = (p_acq - b_rack) / a_rack
+    v_acq = ((p_acq - b_rack) / a_rack).astype(np.float64)
     return v_acq
 
 
 def v_acquisition_to_v_coax(
-    v_acq: np.ndarray,
+    v_acq: NDArray[np.float64],
     g_probe: float,
     a_rack: float,
     b_rack: float,
     z_0: float = 50.0,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Convert acquisition voltage to coaxial voltage.
 
     This is the same function that is implemented in LabVIEWER.
@@ -103,7 +113,7 @@ def v_acquisition_to_v_coax(
 
     Returns
     -------
-    v_coax : np.ndarray
+    v_coax : NDArray[np.float64]
         :math:`V_\mathrm{coax}` in :unit:`V`, which should be the content of
         the ``NI9205_Ex`` columns.
 

@@ -30,6 +30,7 @@ from multipac_testbench.theoretical.somersalo import (
     somersalo_base_plot,
 )
 from multipac_testbench.util import log_manager, plot
+from numpy.typing import NDArray
 
 
 class TestCampaign(list):
@@ -111,7 +112,7 @@ class TestCampaign(list):
         all_on_same_plot: bool = False,
         **kwargs,
     ) -> tuple[
-        list[Axes] | list[np.ndarray[Axes]] | Axes | np.ndarray[Axes],
+        list[Axes] | list[NDArray[Axes]] | Axes | NDArray[Axes],
         list[pd.DataFrame] | pd.DataFrame,
     ]:
         """Recursively call :meth:`.MultipactorTest.sweet_plot`.
@@ -138,7 +139,7 @@ class TestCampaign(list):
 
         Returns
         -------
-        axes : list[Axes] | list[np.ndarray[Axes]] | Axes | np.ndarray[Axes]
+        axes : list[Axes] | list[NDArray[Axes]] | Axes | NDArray[Axes]
             Holds plotted fig.
         data : list[pd.DataFrame] | pd.DataFrame
             Holds data used to create the plot.
@@ -182,7 +183,7 @@ class TestCampaign(list):
         csv_path: Path | None = None,
         csv_kwargs: dict | None = None,
         **kwargs,
-    ) -> tuple[Axes | np.ndarray[Axes], pd.DataFrame]:
+    ) -> tuple[Axes | NDArray[Axes], pd.DataFrame]:
         """Plot the various signals on the same Axes."""
         if len(args) > 1:
             logging.warning(
@@ -226,7 +227,7 @@ class TestCampaign(list):
         png_folder: str | None = None,
         csv_folder: str | None = None,
         **kwargs,
-    ) -> tuple[list[Axes] | list[np.ndarray[Axes]], list[pd.DataFrame]]:
+    ) -> tuple[list[Axes] | list[NDArray[Axes]], list[pd.DataFrame]]:
         """Recursively call :meth:`.MultipactorTest.plot_thresholds`."""
         all_axes = []
         all_df = []
@@ -269,7 +270,7 @@ class TestCampaign(list):
 
     def detect_multipactor(
         self,
-        multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
+        multipac_detector: Callable[[NDArray[np.float64]], NDArray[np.bool]],
         instrument_class: ABCMeta,
         *args,
         power_is_growing_kw: dict[str, int | float] | None = None,
@@ -666,7 +667,6 @@ class TestCampaign(list):
 
         Returns
         -------
-        tuple[Axes, pd.DataFrame]
         axes : Axes
             Plotted axes.
         data : pd.DataFrame

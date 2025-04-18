@@ -12,6 +12,7 @@ from multipac_testbench.instruments.instrument import Instrument
 from multipac_testbench.multipactor_band.instrument_multipactor_bands import (
     InstrumentMultipactorBands,
 )
+from numpy.typing import NDArray
 
 
 class IMeasurementPoint(ABC):
@@ -109,14 +110,14 @@ class IMeasurementPoint(ABC):
             return
         if len(instruments) == 1:
             return instruments[0]
-        raise IOError(
+        raise OSError(
             f"More than one instrument found with {args = } and "
             f"{kwargs = }."
         )
 
     def add_post_treater(
         self,
-        post_treater: Callable[[np.ndarray], np.ndarray],
+        post_treater: Callable[[NDArray[np.float64]], NDArray[np.float64]],
         instrument_class: ABCMeta = Instrument,
         verbose: bool = False,
     ) -> None:
@@ -130,9 +131,9 @@ class IMeasurementPoint(ABC):
 
     def detect_multipactor(
         self,
-        multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
+        multipac_detector: Callable[[NDArray[np.float64]], NDArray[np.bool]],
         instrument_class: ABCMeta,
-        power_is_growing: np.ndarray[np.bool_],
+        power_is_growing: NDArray[np.bool],
         debug: bool = False,
         info: str = "",
     ) -> InstrumentMultipactorBands | None:

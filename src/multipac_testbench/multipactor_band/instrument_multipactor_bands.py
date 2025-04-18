@@ -8,6 +8,7 @@ from multipac_testbench.multipactor_band.multipactor_band import (
     MultipactorBand,
 )
 from multipac_testbench.multipactor_band.polisher import polish
+from numpy.typing import NDArray
 
 
 class InstrumentMultipactorBands(list):
@@ -15,8 +16,8 @@ class InstrumentMultipactorBands(list):
 
     def __init__(
         self,
-        multipactor: np.ndarray[np.bool_],
-        power_is_growing: np.ndarray[np.bool_],
+        multipactor: NDArray[np.bool],
+        power_is_growing: NDArray[np.bool],
         instrument_name: str,
         measurement_point_name: str,
         position: float,
@@ -28,24 +29,23 @@ class InstrumentMultipactorBands(list):
 
         Parameters
         ----------
-        list_of_multipactor_band : list[IMultipactorBand]
+        list_of_multipactor_band :
             Individual multipactor bands.
-        multipactor : np.ndarray[np.bool_]
+        multipactor :
             Array where True means multipactor, False no multipactor.
-        instrument_name : str
+        instrument_name :
             Name of the instrument that detected this multipactor.
-        measurement_point_name : str
+        measurement_point_name :
             Where this multipactor was detected.
-        position : float
+        position :
             Where multipactor was detected. If not applicable, in particular if
             the object represents multipactor anywhere in the testbench, it
             will be np.nan.
-        power_is_growing : list[bool | float] | None, optional
+        power_is_growing :
             True where the power is growing, False where the power is
             decreasing, NaN where undetermined. The default is None, in which
             case it is not used.
-        several_bands_politics : {'keep_highest', 'keep_lowest', 'keep_all',\
-                'merge', 'keep_largest'}
+        several_bands_politics :
             What to to when several multipactor bands are found in the same
             half power cycle:
                 - ``'keep_lowest'``: we keep :class:`.MultipactorBand` at the
@@ -58,7 +58,7 @@ class InstrumentMultipactorBands(list):
                 last.
                 - ``'keep_largest'``: we keep the :class:`.MultipactorBand`
                 that was measured on the largest number of points.
-        color : str | None, optional
+        color :
             HTML color for plot, inherited from the :class:`.Instrument`.
 
         """
@@ -99,6 +99,7 @@ class InstrumentMultipactorBands(list):
         """Plot as staircase like."""
         ser = self.data_as_pd().astype(float) * scale
         axes = ser.plot(ax=axes, color=self.color, **kwargs)
+        assert axes is not None
         return axes
 
     @property

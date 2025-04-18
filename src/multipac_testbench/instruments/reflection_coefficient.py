@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 from multipac_testbench.instruments.power import ForwardPower, ReflectedPower
 from multipac_testbench.instruments.virtual_instrument import VirtualInstrument
+from numpy.typing import NDArray
 
 
 class ReflectionCoefficient(VirtualInstrument):
@@ -50,12 +51,12 @@ class ReflectionCoefficient(VirtualInstrument):
 
 
 def _compute_reflection_coef(
-    forward_data: np.ndarray,
-    reflected_data: np.ndarray,
+    forward_data: NDArray[np.float64],
+    reflected_data: NDArray[np.float64],
     warn_reflected_higher_than_forward: bool = True,
     warn_gamma_too_close_to_unity: bool = True,
     tol: float = 5e-2,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Compute the reflection coefficient :math:`R`."""
     reflection_coefficient = np.abs(np.sqrt(reflected_data / forward_data))
 

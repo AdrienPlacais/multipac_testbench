@@ -7,35 +7,35 @@ from multipac_testbench.util.filtering import (
     remove_isolated_false,
     remove_isolated_true,
 )
+from numpy.typing import NDArray
 
 
 def quantity_is_above_threshold(
-    quantity: np.ndarray,
+    quantity: NDArray[np.float64],
     threshold: float,
     consecutive_criterion: int = 0,
     minimum_number_of_points: int = 1,
     **kwargs: Any,
-) -> np.ndarray:
+) -> NDArray[np.bool]:
     """Detect where ``quantity`` is above a given threshold.
 
     Parameters
     ----------
-    quantity : np.ndarray
+    quantity :
         Array of measured multipactor quantity.
-    threshold : float
+    threshold :
         Quantity value above which multipactor is detected.
-    consecutive_criterion : int, optional
+    consecutive_criterion :
         If provided, we gather multipactor zones that were separated by
         ``consecutive_criterion`` measure points or less.
-    minimum_number_of_points : int, optional
+    minimum_number_of_points :
         If provided, the multipactor must happen on at least
         ``minimum_number_of_points`` consecutive points, otherwise we consider
-        that it was a measurement flaw. The default is 1.
-
+        that it was a measurement flaw.
 
     Returns
     -------
-    np.ndarray
+    multipactor : NDArray[np.bool]
         True where multipactor was detected.
 
     """
@@ -53,7 +53,7 @@ def quantity_is_above_threshold(
 
 
 def start_and_end_of_contiguous_true_zones(
-    multipactor: np.ndarray[np.bool_],
+    multipactor: NDArray[np.bool],
 ) -> list[tuple[int, int]]:
     """Get indexes of the entry and exit of contiguous multipactor zones.
 
@@ -64,13 +64,13 @@ def start_and_end_of_contiguous_true_zones(
 
     Parameters
     ----------
-    multipactor :  np.ndarray[np.bool_]
+    multipactor :
         Iterable where True means there is multipactor, False no multipactor,
         and np.nan undetermined.
 
     Returns
     -------
-    zones : Sequence[tuple[int, int]]
+    zones : list[tuple[int, int]]
         List of first and last index of every multipactor band (multipactor
         contiguous zone).
 

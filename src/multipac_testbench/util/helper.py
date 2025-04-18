@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import numpy as np
+from numpy.typing import NDArray
 
 
 def output_filepath(
@@ -54,7 +55,9 @@ def output_filepath(
     return folder / filename
 
 
-def r_squared(residue: np.ndarray, expected: np.ndarray) -> float:
+def r_squared(
+    residue: NDArray[np.float64], expected: NDArray[np.float64]
+) -> float:
     """Compute the :math:`R^2` criterion to evaluate a fit.
 
     For Scipy ``curve_fit`` ``result`` output: ``residue`` is

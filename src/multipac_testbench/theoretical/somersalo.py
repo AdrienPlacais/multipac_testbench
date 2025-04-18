@@ -17,6 +17,7 @@ import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from multipac_testbench.util import helper
+from numpy.typing import NDArray
 from scipy.optimize import curve_fit
 
 SOMERSALO_ANALYTICAL_PARAMETERS_ONE = {
@@ -45,13 +46,13 @@ def somersalo_base_plot(
 
     Parameters
     ----------
-    xlim : tuple[float, float], optional
+    xlim :
         Limits for the x axis. The default matches the figure from Somersalo's
         paper.
-    ylim_one_point : tuple[float, float], optional
+    ylim_one_point :
         Limits for the one-point (left) y axis. The default matches the figure
         from Somersalo's paper.
-    ylim_two_point : tuple[float, float], optional
+    ylim_two_point :
         Limits for the two-point (right) y axis. The default matches the figure
         from Somersalo's paper.
     fig_kw :
@@ -59,7 +60,7 @@ def somersalo_base_plot(
 
     Returns
     -------
-    tuple[Figure, Axes, Axes]
+    out : tuple[Figure, Axes, Axes]
         Figure, left and right Axis.
 
     """
@@ -82,8 +83,12 @@ def somersalo_base_plot(
 
 
 def webdplotdigitizerpoints_to_data(
-    log_power: np.ndarray, x_0: float, x_1: float, y_0: float, y_1: float
-) -> np.ndarray:
+    log_power: NDArray[np.float64],
+    x_0: float,
+    x_1: float,
+    y_0: float,
+    y_1: float,
+) -> NDArray[np.float64]:
     """Fit the webplot points and compute Somersalo curve."""
     a = (y_1 - y_0) / (x_1 - x_0)
     b = a * y_1 - x_1
@@ -91,7 +96,7 @@ def webdplotdigitizerpoints_to_data(
 
 
 def _one_point_analytical(
-    log_power: np.ndarray,
+    log_power: NDArray[np.float64],
     order: int,
 ) -> pd.DataFrame:
     r"""Compute one-point multipactor bands of order ``order``.
@@ -101,14 +106,14 @@ def _one_point_analytical(
 
     Parameters
     ----------
-    log_power : np.ndarray
-        Log (base 10) of power in kW.
-    order : int
+    log_power :
+        Log (base 10) of power in :unit:`kW`.
+    order :
         Order of the multipacting band.
 
     Returns
     -------
-    pd.DataFrame
+    df_one_point : pd.DataFrame
         Lower and upper multipactor limits, in :math:`(\mathrm{GHz} \times
         \mathrm{mm})^4 \times \Omega`.
 
@@ -130,7 +135,7 @@ def _one_point_analytical(
 
 
 def _two_point_analytical(
-    log_power: np.ndarray,
+    log_power: NDArray[np.float64],
     order: int,
 ) -> pd.DataFrame:
     r"""Compute two-point multipactor bands of order ``order``.
@@ -140,9 +145,9 @@ def _two_point_analytical(
 
     Parameters
     ----------
-    log_power : np.ndarray
+    log_power :
         Log (base 10) of power in kW.
-    order : int
+    order :
         Order of the multipacting band.
 
     Returns
@@ -253,14 +258,14 @@ def somersalo_scaling_law(reflected: np.ndarray, p_tw: float) -> np.ndarray:
 
     Parameters
     ----------
-    reflected : np.ndarray
+    reflected :
         Reflection coefficient.
-    p_tw : float
+    p_tw :
         Traveling Wave lower threshold (power).
 
     Returns
     -------
-    p_mw : np.ndarray
+    p_mw : NDArray[np.float64]
         Mixed Wave lower threshold.
 
     """
@@ -280,21 +285,21 @@ def fit_somersalo_scaling(
 
     Parameters
     ----------
-    df_somersalo : pd.DataFrame
+    df_somersalo :
         DataFrame holding reflection coefficient and forward power. We take the
         proper columns by looking for ``'ReflectionCoefficient'`` and
         ``'ForwardPower'`` column names.
-    full_output : bool
+    full_output :
         To ask for more detailed information on the fit process.
-    plot : bool
+    plot :
         To plot the fitted scaling law or not.
-    axes : Axes | None, optional
+    axes :
         Axes on which scaling law will be drawn. If not provided, a new Axe
         will be created.
 
     Returns
     -------
-    pd.DataFrame
+    df_fitted : pd.DataFrame
         Holds the fitted Somersalo scaling law.
 
     """

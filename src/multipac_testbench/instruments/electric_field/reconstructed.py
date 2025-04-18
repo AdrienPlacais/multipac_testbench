@@ -23,6 +23,7 @@ from multipac_testbench.instruments.reflection_coefficient import (
     ReflectionCoefficient,
 )
 from multipac_testbench.util.helper import r_squared
+from numpy.typing import NDArray
 from scipy import optimize
 from scipy.constants import c
 
@@ -38,7 +39,9 @@ class Reconstructed(IElectricField):
         forward_power: ForwardPower,
         reflection: ReflectionCoefficient,
         freq_mhz: float,
-        position: np.ndarray = np.linspace(0.0, 1.3, 201),
+        position: NDArray[np.float64] = np.linspace(
+            0.0, 1.3, 201, dtype=np.float64
+        ),
         z_ohm: float = 50.0,
         **kwargs,
     ) -> None:
@@ -54,7 +57,7 @@ class Reconstructed(IElectricField):
         self._beta = c / freq_mhz * 1e-6
 
         self._psi_0: float
-        self._data: np.ndarray | None = None
+        self._data: NDArray[np.float64] | None = None
         self._z_ohm = z_ohm
         self._r_squared: float
 
@@ -64,7 +67,7 @@ class Reconstructed(IElectricField):
         return r"Reconstructed voltage [V]"
 
     @property
-    def data(self) -> np.ndarray:
+    def data(self) -> NDArray[np.float64]:
         """Give the calculated voltage at every pos and sample index.
 
         .. note::
@@ -151,7 +154,7 @@ class Reconstructed(IElectricField):
 
 
 def _model(
-    var: np.ndarray,
+    var: NDArray[np.float64],
     psi_0: float,
     beta: float,
     z_ohm: float = 50.0,
@@ -165,7 +168,7 @@ def _model(
 
     Returns
     -------
-    v : float | np.ndarray
+    v : float | NDArray[np.float64]
         Voltage at position :math:`z` for forward power :math:`P_f`.
 
     """
@@ -174,7 +177,9 @@ def _model(
     return voltage_vs_position(pos, v_f, reflection, beta, psi_0)
 
 
-def _power_to_volt(power: np.ndarray, z_ohm: float = 50.0) -> np.ndarray:
+def _power_to_volt(
+    power: NDArray[np.float64], z_ohm: float = 50.0
+) -> NDArray[np.float64]:
     return 2.0 * np.sqrt(power * z_ohm)
 
 
@@ -190,21 +195,21 @@ def voltage_vs_position(
 
 @overload
 def voltage_vs_position(
-    pos: np.ndarray,
+    pos: NDArray[np.float64],
     v_f: float,
     reflection: float,
     beta: float,
     psi_0: float,
-) -> np.ndarray: ...
+) -> NDArray[np.float64]: ...
 
 
 def voltage_vs_position(
-    pos: float | np.ndarray,
+    pos: float | NDArray[np.float64],
     v_f: float,
     reflection: float,
     beta: float,
     psi_0: float,
-) -> float | np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""Compute voltage in coaxial line at given position.
 
     The equation is:
@@ -233,7 +238,7 @@ def voltage_vs_position(
 
     Returns
     -------
-    voltage : float | np.ndarray
+    voltage : float | NDArray[np.float64]
         :math:`V(z)` at proper position in :unit:`V`.
 
     """

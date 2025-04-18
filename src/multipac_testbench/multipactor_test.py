@@ -43,6 +43,7 @@ from multipac_testbench.multipactor_band.test_multipactor_bands import (
 from multipac_testbench.util import plot
 from multipac_testbench.util.animate import get_limits
 from multipac_testbench.util.helper import output_filepath
+from numpy.typing import NDArray
 
 
 class MultipactorTest:
@@ -99,9 +100,8 @@ class MultipactorTest:
 
         if df_data.index[0] != 0:
             logging.error(
-                "Your Sample index column does not start at 0. I "
-                "should patch this, but meanwhile expect some "
-                "index mismatches."
+                "Your Sample index column does not start at 0. I should patch "
+                "this, but meanwhile expect some index mismatches."
             )
 
         imeasurement_point_factory = IMeasurementPointFactory(
@@ -157,9 +157,9 @@ class MultipactorTest:
         png_kwargs: dict | None = None,
         csv_path: Path | None = None,
         csv_kwargs: dict | None = None,
-        ax: Axes | np.ndarray[Axes] | None = None,
+        ax: Axes | NDArray[Axes] | None = None,
         **kwargs,
-    ) -> tuple[Axes | np.ndarray[Axes], pd.DataFrame]:
+    ) -> tuple[Axes | NDArray[Axes], pd.DataFrame]:
         """Plot ``ydata`` versus ``xdata``.
 
         .. todo::
@@ -212,7 +212,7 @@ class MultipactorTest:
 
         Returns
         -------
-        axes : Axes | np.ndarray[Axes]
+        axes : Axes | NDArray[Axes]
             Objects holding the plot.
         df_to_plot : pd.DataFrame
             DataFrame holding the data that is plotted.
@@ -405,7 +405,7 @@ class MultipactorTest:
         csv_path: Path | None = None,
         csv_kwargs: dict | None = None,
         **kwargs,
-    ) -> tuple[Axes | np.ndarray[Axes], pd.DataFrame]:
+    ) -> tuple[Axes | NDArray[Axes], pd.DataFrame]:
         """Plot instrument ``to_plot`` at every multipactor threshold.
 
         When ``to_plot`` is :class:`ins.ForwardPower` or
@@ -440,7 +440,7 @@ class MultipactorTest:
 
         Returns
         -------
-        axes : Axes | np.ndarray[Axes]
+        axes : Axes | NDArray[Axes]
             Hold plotted axes.
         df_thresholds : pd.DataFrame
             The data used to produce the plot.
@@ -577,7 +577,7 @@ class MultipactorTest:
 
     def detect_multipactor(
         self,
-        multipac_detector: Callable[[np.ndarray], np.ndarray[np.bool_]],
+        multipac_detector: Callable[[NDArray[np.float64]], NDArray[np.bool]],
         instrument_class: ABCMeta,
         power_is_growing_kw: dict[str, int | float] | None = None,
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),

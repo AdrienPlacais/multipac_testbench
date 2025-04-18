@@ -6,6 +6,7 @@ from multipac_testbench.multipactor_band.multipactor_band import (
     MultipactorBand,
     NoMultipactorBand,
 )
+from numpy.typing import NDArray
 
 
 def _enter_a_mp_zone(
@@ -23,15 +24,15 @@ def _enter_a_mp_zone(
 
     Parameters
     ----------
-    first_index : int | None
+    first_index :
         Index at which the previous multipactor started. We just check if it is
         None to catch eventual corner cases.
-    last_index : int | None
+    last_index :
         Index at which the previous multipactor ended. We just check if it is
         None to catch eventual corner cases.
-    index : int
+    index :
         Current index at which an entry in multipactor regime was detected.
-    info : str
+    info :
         Information on the test and the multipactor instrument detector for
         more explicit error messages.
 
@@ -42,12 +43,12 @@ def _enter_a_mp_zone(
 
     """
     assert first_index is None, (
-        f"{info}: was previous MP zone correctly "
-        f"reinitialized? {first_index = }, {index = }"
+        f"{info}: was previous MP zone correctly reinitialized? "
+        f"{first_index = }, {index = }"
     )
     assert last_index is None, (
-        f"{info}: was previous MP zone correctly "
-        f"reinitialized? {last_index = }, {index = }"
+        f"{info}: was previous MP zone correctly reinitialized? "
+        f"{last_index = }, {index = }"
     )
     first_index = index + 1
     return first_index
@@ -65,27 +66,29 @@ def _exit_a_mp_zone(
 
     Parameters
     ----------
-    first_index : int | None
+    first_index :
         Index of entry in the zone. If it is None, an error is raised.
-    last_index : int
+    last_index :
         Current index, which is the the index of exit.
-    current_band : MultipactorBand | None
+    current_band :
         Previous :class:`MultipactorBand` in the same half-power cycle. If it
         is not None, it means that several zones were detected. Its handling is
         determined by ``several_bands_politics``.
-    power_grows : bool
+    power_grows :
         If the power grows.
-    pow_index : int
+    pow_index :
         Index of the current power half cycle.
-    info : str
+    info :
         To give more meaning to the error messages.
-    reached_end_of_power_cycle : bool, optional
+    reached_end_of_power_cycle :
         If this function is called when we reach the end of a half power cycle.
         The default is False.
 
     Returns
     -------
-    tuple[int, MultipactorBand]
+    first_index : None
+    last_index : None
+    band : MultipactorBand
 
     """
     assert first_index is not None, (
@@ -155,33 +158,33 @@ def _end_half_power_cycle(
 # Main function
 # =============================================================================
 def create(
-    multipactor: np.ndarray[np.bool_],
-    power_is_growing: np.ndarray[np.bool_],
+    multipactor: NDArray[np.bool],
+    power_is_growing: NDArray[np.bool],
     info: str = "",
 ) -> list[MultipactorBand | None]:
     """Create the different :class:`MultipactorBand`.
 
     Parameters
     ----------
-    multipactor : np.ndarray[np.bool_]
+    multipactor :
         True means multipactor, False no multipactor.
-    power_is_growing : np.ndarray[float]
+    power_is_growing :
         True means power is growing, False it is decreasing.
-    info : str
+    info :
         To give more meaning to the error messages.
-    several_bands_politics : {'keep_first', 'keep_last', 'keep_all', 'merge'}
+    several_bands_politics :
         What to to when several multipactor bands are found in the same
         half-power cycle:
-            - ``'keep_first'``: we keep first :class:`MultipactorBand`
-            - ``'keep_last'``: we keep last :class:`MultipactorBand`
-            - ``'keep_all'``: we keep all :class:`MultipactorBand` (currently
-              not implemented)
-            - ``'merge'``: the final :class:`MultipactorBand` spans from start
-              of first :class:`MultipactorBand` to end of last.
+           - ``'keep_first'``: we keep first :class:`MultipactorBand`
+           - ``'keep_last'``: we keep last :class:`MultipactorBand`
+           - ``'keep_all'``: we keep all :class:`MultipactorBand` (currently
+             not implemented)
+           - ``'merge'``: the final :class:`MultipactorBand` spans from start
+             of first :class:`MultipactorBand` to end of last.
 
     Returns
     -------
-    list[MultipactorBand | None]
+    all_bands : list[MultipactorBand | None]
         One object per half power cycle (i.e. one object for power growth, one
         for power decrease). None means that no multipactor was detected.
 

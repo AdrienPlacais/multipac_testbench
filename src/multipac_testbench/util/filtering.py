@@ -8,29 +8,30 @@ import logging
 from typing import overload
 
 import numpy as np
+from numpy.typing import NDArray
 
 
 def remove_trailing_true(
-    data: np.ndarray[np.bool_],
+    data: NDArray[np.bool],
     n_trailing_points_to_check: int = 50,
     array_name_for_warning: str = "",
-) -> np.ndarray[np.bool_]:
+) -> NDArray[np.bool]:
     """Replace trailing ``True`` by False.
 
     Parameters
     ----------
-    data : np.ndarray[np.bool_]
+    data :
         Boolean array to treat.
-    n_trailing_points_to_check : int, optional
+    n_trailing_points_to_check :
         The number of points at the end of array that shall be checked. The
         default is 50, which is a good balance to remove unwanted starts of new
         power cycle at the end of the array.
-    array_name_for_warning : str, optional
+    array_name_for_warning :
         Name of the array, to print a more informative warning message.
 
     Returns
     -------
-    np.ndarray[np.bool_]
+    data : NDArray[np.bool]
         Boolean array without trailing True.
 
     """
@@ -41,9 +42,8 @@ def remove_trailing_true(
     if array_name_for_warning:
         logging.warning(
             f"There was {trailing_true} 'True' points in the last "
-            f"{n_trailing_points_to_check} "
-            f"points of the {array_name_for_warning} array. "
-            "Setting it to False."
+            f"{n_trailing_points_to_check} points of the "
+            f"{array_name_for_warning} array. Setting it to False."
         )
     data[-n_trailing_points_to_check:] = False
     return data
@@ -51,7 +51,7 @@ def remove_trailing_true(
 
 @overload
 def array_is_growing(
-    array: np.ndarray,
+    array: NDArray[np.float64],
     index: int,
     width: int = 10,
     tol: float = 1e-5,
@@ -62,7 +62,7 @@ def array_is_growing(
 
 @overload
 def array_is_growing(
-    array: np.ndarray,
+    array: NDArray[np.float64],
     index: int,
     width: int = 10,
     tol: float = 1e-5,
@@ -72,7 +72,7 @@ def array_is_growing(
 
 
 def array_is_growing(
-    array: np.ndarray,
+    array: NDArray[np.float64],
     index: int,
     width: int = 10,
     tol: float = 1e-5,
@@ -83,25 +83,24 @@ def array_is_growing(
 
     Parameters
     ----------
-    array : np.ndarray
+    array :
         Array under study.
-    index : int
+    index :
         Where you want to know if we increase.
-    width : int, optional
-        Width of the sample to determine increase. The default is ``10``.
-    tol : float, optional
+    width :
+        Width of the sample to determine increase.
+    tol :
         If absolute value of variation between ``array[idx-width/2]`` and
-        ``array[idx+width/2]`` is lower than ``tol``, we return a ``NaN``. The
-        default is ``1e-5``.
-    default_first_value : bool, optional
+        ``array[idx+width/2]`` is lower than ``tol``, we return a ``NaN``.
+    default_first_value :
         Default return for the first values. The default is True, which means
         that we suppose that power increases at the start.
-    undetermined_value : bool | None, optional
-        Default value for when the output is undetermined. The default is None.
+    undetermined_value :
+        Default value for when the output is undetermined.
 
     Returns
     -------
-    bool | None
+    is_growing : bool | None
         If the array is locally increasing, ``undetermined_value`` if
         undetermined.
 
@@ -121,10 +120,9 @@ def array_is_growing(
 
 
 def remove_isolated_true(
-    array: np.ndarray[np.bool_], minimum_number_of_points: int
-) -> np.ndarray:
-    """
-    Remove 'True' observed on less than ``minimum_number_of_points`` points.
+    array: NDArray[np.bool], minimum_number_of_points: int
+) -> NDArray[np.bool]:
+    """Remove 'True' observed on less than ``minimum_number_of_points`` points.
 
     Basically the same as ``_merge_consecutive``.
 
@@ -136,7 +134,7 @@ def remove_isolated_true(
         + np.arange(n_points + 1 - window_width)[:, None]
     )
 
-    window: np.ndarray[np.bool_]
+    window: NDArray[np.bool]
     for i, window in enumerate(array[indexer]):
         if window[0]:
             # True at start of window
@@ -157,8 +155,8 @@ def remove_isolated_true(
 
 
 def remove_isolated_false(
-    array: np.ndarray, consecutive_criterion: int
-) -> np.ndarray:
+    array: NDArray[np.bool], consecutive_criterion: int
+) -> NDArray[np.bool]:
     """
     Merge multipac zones separated by ``consecutive_criterion`` points.
 
