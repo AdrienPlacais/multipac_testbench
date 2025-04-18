@@ -1,4 +1,4 @@
-multipac\_testbench.measurement\_point.factory module
+factory module
 =====================================================
 
 .. automodule:: multipac_testbench.measurement_point.factory

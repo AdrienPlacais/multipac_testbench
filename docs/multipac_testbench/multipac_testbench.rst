@@ -10,7 +10,7 @@ Subpackages
 -----------
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 5
 
    multipac_testbench.instruments
    multipac_testbench.measurement_point
@@ -22,7 +22,7 @@ Submodules
 ----------
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 5
 
    multipac_testbench.multipactor_test
    multipac_testbench.test_campaign

@@ -1,4 +1,4 @@
-multipac\_testbench.multipactor\_band package
+multipactor\_band package
 =============================================
 
 .. automodule:: multipac_testbench.multipactor_band
@@ -10,7 +10,7 @@ Submodules
 ----------
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 5
 
    multipac_testbench.multipactor_band.campaign_multipactor_bands
    multipac_testbench.multipactor_band.creator

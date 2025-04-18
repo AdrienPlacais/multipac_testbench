@@ -1,4 +1,4 @@
-multipac\_testbench.instruments.frequency module
+frequency module
 ================================================
 
 .. automodule:: multipac_testbench.instruments.frequency

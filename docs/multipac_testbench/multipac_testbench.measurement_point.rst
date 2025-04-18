@@ -1,4 +1,4 @@
-multipac\_testbench.measurement\_point package
+measurement\_point package
 ==============================================
 
 .. automodule:: multipac_testbench.measurement_point
@@ -10,7 +10,7 @@ Submodules
 ----------
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 5
 
    multipac_testbench.measurement_point.factory
    multipac_testbench.measurement_point.global_diagnostics

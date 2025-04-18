@@ -1,4 +1,4 @@
-multipac\_testbench.util.plot module
+plot module
 ====================================
 
 .. automodule:: multipac_testbench.util.plot

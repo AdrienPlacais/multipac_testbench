@@ -1,4 +1,4 @@
-multipac\_testbench.instruments.electric\_field.reconstructed module
+reconstructed module
 ====================================================================
 
 .. automodule:: multipac_testbench.instruments.electric_field.reconstructed

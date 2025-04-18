@@ -1,4 +1,4 @@
-multipac\_testbench.multipactor\_band.creator module
+creator module
 ====================================================
 
 .. automodule:: multipac_testbench.multipactor_band.creator

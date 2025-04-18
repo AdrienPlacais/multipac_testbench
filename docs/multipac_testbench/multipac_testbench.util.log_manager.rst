@@ -1,4 +1,4 @@
-multipac\_testbench.util.log\_manager module
+log\_manager module
 ============================================
 
 .. automodule:: multipac_testbench.util.log_manager

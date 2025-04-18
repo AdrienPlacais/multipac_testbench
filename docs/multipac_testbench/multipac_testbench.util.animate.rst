@@ -1,4 +1,4 @@
-multipac\_testbench.util.animate module
+animate module
 =======================================
 
 .. automodule:: multipac_testbench.util.animate

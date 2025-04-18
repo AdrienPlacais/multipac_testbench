@@ -9,7 +9,7 @@ SOURCEDIR     = .
 BUILDDIR      = _build/
 SRC_DIR       = ../src
 EXCLUDE_DIR   = ../src/multipac_testbench/experimental/*
-APIDOC_DIR    = simultipac
+APIDOC_DIR    = multipac_testbench
 
 .PHONY: help clean apidoc html 
 

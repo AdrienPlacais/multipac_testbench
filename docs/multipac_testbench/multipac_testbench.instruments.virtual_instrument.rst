@@ -1,4 +1,4 @@
-multipac\_testbench.instruments.virtual\_instrument module
+virtual\_instrument module
 ==========================================================
 
 .. automodule:: multipac_testbench.instruments.virtual_instrument

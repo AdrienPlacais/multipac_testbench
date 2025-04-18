@@ -1,4 +1,4 @@
-multipac\_testbench.util package
+util package
 ================================
 
 .. automodule:: multipac_testbench.util
@@ -10,7 +10,7 @@ Submodules
 ----------
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 5
 
    multipac_testbench.util.animate
    multipac_testbench.util.filtering

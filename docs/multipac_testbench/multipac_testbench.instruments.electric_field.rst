@@ -1,4 +1,4 @@
-multipac\_testbench.instruments.electric\_field package
+electric\_field package
 =======================================================
 
 .. automodule:: multipac_testbench.instruments.electric_field
@@ -10,7 +10,7 @@ Submodules
 ----------
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 5
 
    multipac_testbench.instruments.electric_field.field_probe
    multipac_testbench.instruments.electric_field.i_electric_field

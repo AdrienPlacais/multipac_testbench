@@ -1,4 +1,4 @@
-multipac\_testbench.multipactor\_band.polisher module
+polisher module
 =====================================================
 
 .. automodule:: multipac_testbench.multipactor_band.polisher

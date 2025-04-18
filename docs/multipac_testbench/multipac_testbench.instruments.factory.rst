@@ -1,4 +1,4 @@
-multipac\_testbench.instruments.factory module
+factory module
 ==============================================
 
 .. automodule:: multipac_testbench.instruments.factory

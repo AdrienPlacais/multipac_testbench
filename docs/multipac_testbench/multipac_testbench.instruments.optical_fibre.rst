@@ -1,4 +1,4 @@
-multipac\_testbench.instruments.optical\_fibre module
+optical\_fibre module
 =====================================================
 
 .. automodule:: multipac_testbench.instruments.optical_fibre

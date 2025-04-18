@@ -1,4 +1,4 @@
-multipac\_testbench.instruments.electric\_field.field\_probe module
+field\_probe module
 ===================================================================
 
 .. automodule:: multipac_testbench.instruments.electric_field.field_probe

@@ -1,4 +1,4 @@
-multipac\_testbench.util.filtering module
+filtering module
 =========================================
 
 .. automodule:: multipac_testbench.util.filtering

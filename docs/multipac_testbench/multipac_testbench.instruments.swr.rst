@@ -1,4 +1,4 @@
-multipac\_testbench.instruments.swr module
+swr module
 ==========================================
 
 .. automodule:: multipac_testbench.instruments.swr

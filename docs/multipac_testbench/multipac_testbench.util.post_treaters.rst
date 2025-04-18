@@ -1,4 +1,4 @@
-multipac\_testbench.util.post\_treaters module
+post\_treaters module
 ==============================================
 
 .. automodule:: multipac_testbench.util.post_treaters

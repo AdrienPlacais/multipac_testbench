@@ -1,4 +1,4 @@
-multipac\_testbench.theoretical.somersalo module
+somersalo module
 ================================================
 
 .. automodule:: multipac_testbench.theoretical.somersalo

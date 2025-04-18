@@ -1,4 +1,4 @@
-multipac\_testbench.theoretical package
+theoretical package
 =======================================
 
 .. automodule:: multipac_testbench.theoretical
@@ -10,6 +10,6 @@ Submodules
 ----------
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 5
 
    multipac_testbench.theoretical.somersalo

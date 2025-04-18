@@ -1,4 +1,4 @@
-multipac\_testbench.instruments.penning module
+penning module
 ==============================================
 
 .. automodule:: multipac_testbench.instruments.penning

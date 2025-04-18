@@ -1,4 +1,4 @@
-multipac\_testbench.instruments.power module
+power module
 ============================================
 
 .. automodule:: multipac_testbench.instruments.power

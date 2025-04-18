@@ -1,4 +1,4 @@
-multipac\_testbench.util.helper module
+helper module
 ======================================
 
 .. automodule:: multipac_testbench.util.helper

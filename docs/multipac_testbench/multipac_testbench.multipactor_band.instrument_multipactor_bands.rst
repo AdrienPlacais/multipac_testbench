@@ -1,4 +1,4 @@
-multipac\_testbench.multipactor\_band.instrument\_multipactor\_bands module
+instrument\_multipactor\_bands module
 ===========================================================================
 
 .. automodule:: multipac_testbench.multipactor_band.instrument_multipactor_bands
