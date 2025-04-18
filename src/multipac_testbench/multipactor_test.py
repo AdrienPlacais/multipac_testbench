@@ -66,7 +66,7 @@ class MultipactorTest:
         filepath :
             Path to the results file produced by LabViewer.
         config :
-            Configuration ``.toml`` of the testbench.
+            Configuration ``TOML`` of the testbench.
         freq_mhz :
             Frequency of the test in :unit:`MHz`.
         swr :

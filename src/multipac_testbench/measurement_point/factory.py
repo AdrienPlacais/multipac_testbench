@@ -18,7 +18,7 @@ class IMeasurementPointFactory:
     """Class to create the proper :class:`.GlobalDiagnostics` :class:`.PickUp`.
 
     It infers the proper type, position of instruments as well as the measured
-    data from the configuration ``.toml`` file and the measurements ``.csv``
+    data from the configuration ``TOML`` file and the measurements ``CSV``
     file.
 
     """
@@ -46,19 +46,19 @@ class IMeasurementPointFactory:
 
         Parameters
         ----------
-        config_key : str
-            A key from the ``.toml`` file. If 'global' keyword is in the key,
+        config_key :
+            A key from the ``TOML`` file. If 'global' keyword is in the key,
             we return a :class:`.GlobalDiagnostics`. Else, we return a
             :class:`.PickUp`.
-        config_value : dict
-            Values from the ``.toml`` file corresponding to ``config_key``,
+        config_value :
+            Values from the ``TOML`` file corresponding to ``config_key``,
             which will passed down to the created :class:`.IMeasurementPoint`.
-        df_data : pd.DataFrame
-            Full data from the ``.csv`` file.
+        df_data :
+            Full data from the ``CSV`` file.
 
         Returns
         -------
-        IMeasurementPoint
+        measurement_point : IMeasurementPoint
             A :class:`.GlobalDiagnostics` or :class:`.PickUp`.
 
         """
@@ -120,10 +120,10 @@ class IMeasurementPointFactory:
                 )
             return global_diagnostics[0]
 
-        raise IOError(
-            "Several global diagnostics were found! It means that"
-            " several entries in the .toml file have the word "
-            "'global' in their entries. Please gather them."
+        raise OSError(
+            "Several global diagnostics were found! It means that several "
+            "entries in the .toml file have the word 'global' in their "
+            "entries. Please gather them."
         )
 
     def _filter_pick_ups(
@@ -135,7 +135,7 @@ class IMeasurementPointFactory:
         pick_ups = [x for x in measurement_points if isinstance(x, PickUp)]
         n_pick_ups = len(pick_ups)
         if len(pick_ups) == 0:
-            raise IOError("No pick-up was defined.")
+            raise OSError("No pick-up was defined.")
 
         if verbose:
             logging.info(f"{n_pick_ups} pick-ups created:")

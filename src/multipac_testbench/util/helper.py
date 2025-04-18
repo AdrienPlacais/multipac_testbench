@@ -16,21 +16,21 @@ def output_filepath(
 
     Parameters
     ----------
-    filepath : Path
-        Name of the data ``.csv`` file from LabViewer.
-    swr : float
+    filepath :
+        Name of the data ``CSV`` file from LabViewer.
+    swr :
         Theoretical :math:`SWR` to add to the output file name.
-    freq_mhz : float
+    freq_mhz :
         Theoretical rf frequency to add to the output file name.
-    out_folder : str | Path
+    out_folder :
         Relative name of the folder where data will be saved; it is defined
         w.r.t. to the parent folder of ``filepath``.
-    extension : str
+    extension :
         Extension of the output file, with the dot.
 
     Returns
     -------
-    Path
+    filename : Path
         A full filepath.
 
     """
