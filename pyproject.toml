@@ -18,7 +18,7 @@ dependencies = [
 description = "Post-treat the data produced by the MULTIPAC test bench."
 dynamic = ["version"]
 keywords = ["post treatment", "multipactor"]
-name = "mutipac-testbench"
+name = "multipac_testbench"
 readme = "README.md"
 requires-python = ">=3.11"
 
