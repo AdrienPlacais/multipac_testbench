@@ -9,23 +9,29 @@ classifiers = [
    "Topic :: Scientific/Engineering :: Physics",
 ]
 dependencies = [
-   "matplotlib==3.9.1",
-   "myst-parser==3.0.1",
-   "nbmake==1.5.4",
-   "nbsphinx==0.9.4",
-   "numpy==2.0.0",
-   "pandas==2.2.2",
-   "pytest==8.2.2",
-   "setuptools==70.2.0",
-   "scipy==1.14.1",
-   "sphinx-rtd-theme==2.0.0",
+   "matplotlib>=3.9.1, <4",
+   "numpy>=2, <3",
+   "pandas>=2.2, <3",
+   "pre-commit>=4, <5",
+   "scipy>=1.15,<2",
 ]
 description = "Post-treat the data produced by the MULTIPAC test bench."
+dynamic = ["version"]
 keywords = ["post treatment", "multipactor"]
 name = "mutipac-testbench"
 readme = "README.md"
 requires-python = ">=3.11"
-version = "1.6.0"
+
+[project.optional-dependencies]
+docs = [
+   "myst-parser>=4, <5",
+   "nbsphinx>=0.9.6, <1",
+   "sphinx-autodoc-typehints>=3.0.1, <4",
+   "sphinx-rtd-theme>=3, <4",
+   "sphinx-tabs>=3.4,<4",
+   "sphinxcontrib-bibtex>=2.6,<3",
+]
+test = ["pytest>=8.3.2, <9", "pytest-mock>=3.14, <4"]
 
 [project.scripts]
 
@@ -54,6 +60,13 @@ package-dir = { "" = "src" }
 [tool.setuptools.packages]
 find = { where = ["src"] }
 
+[tool.setuptools_scm]
+
+[tool.cibuildwheel]
+build-verbosity = 1
+test-command = 'pytest {project}/tests -m "not implementation and not slow"'
+test-extras = "test"
+
 [build-system]
 build-backend = "setuptools.build_meta"
-requires = ["setuptools>=42", "wheel"]
+requires = ["setuptools>=64", "setuptools-scm>=8, <9"]
