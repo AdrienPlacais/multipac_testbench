@@ -35,20 +35,20 @@ class IMeasurementPoint(ABC):
 
         Parameters
         ----------
-        df_data : pd.DataFrame
+        df_data :
             df_data
-        instrument_factory : InstrumentFactory
+        instrument_factory :
             An object that creates :class:`.Instrument`.
-        instruments_kw : dict[str, dict[str, Any]]
+        instruments_kw :
             Dictionary which keys are name of the column where the data from
             the instrument is. Values are dictionaries with keyword arguments
             passed to the proper :class:`.Instrument`.
-        position : float
+        position :
             Position of the measurement point. It is a real if it is a
             :class:`.PickUp`, and ``np.nan`` for a :class:`.GlobalDiagnostics`.
-        color : str | None
+        color :
             HTML color of the plots. It is ``None`` for
-            :class:`.GlobalDiagnostics`.  The default is None.
+            :class:`.GlobalDiagnostics`.
 
         """
         self.name = name
@@ -81,8 +81,7 @@ class IMeasurementPoint(ABC):
         instrument_class: ABCMeta,
         instruments_to_ignore: Sequence[Instrument | str] = (),
     ) -> list[Instrument]:
-        """
-        Get instruments which are (sub) classes of ``instrument_class``.
+        """Get instruments which are (sub) classes of ``instrument_class``.
 
         An empty list is returned when current pick-up has no instrument of the
         desired instrument class.
@@ -111,8 +110,7 @@ class IMeasurementPoint(ABC):
         if len(instruments) == 1:
             return instruments[0]
         raise OSError(
-            f"More than one instrument found with {args = } and "
-            f"{kwargs = }."
+            f"More than one instrument found with {args = } and {kwargs = }."
         )
 
     def add_post_treater(

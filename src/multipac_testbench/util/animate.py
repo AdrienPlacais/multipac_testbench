@@ -15,15 +15,15 @@ def get_limits(
 
     Parameters
     ----------
-    axes_instruments : dict[Axes, Sequence[ins.Instrument]]
+    axes_instruments :
         Dictionary linking all the :class:`ins.Instrument` to the Axe they
         should be plotted onto.
-    instruments_to_ignore_for_limits : Sequence[ins.Instrument | str]
+    instruments_to_ignore_for_limits :
         Instruments that should not modify the limits.
 
     Returns
     -------
-    dict[Axes, tuple[float, float]]
+    limits : dict[Axes, tuple[float, float]]
         Dictionary linking avery Axe with its limits.
 
     """
@@ -39,10 +39,10 @@ def get_limits(
             if instrument.name not in names_to_ignore
         ]
 
-        lowers = [np.nanmin(data) for data in all_data]
+        lowers = [float(np.nanmin(data)) for data in all_data]
         lower = min(lowers)
 
-        uppers = [np.nanmax(data) for data in all_data]
+        uppers = [float(np.nanmax(data)) for data in all_data]
         upper = max(uppers)
         amplitude = abs(upper - lower)
 

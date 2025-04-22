@@ -14,7 +14,7 @@ class IMultipactorBand:
 
     Attributes
     ----------
-    pow_index : int
+    pow_index :
         Index of the half-power cycle, starting at zero.
 
     """
@@ -28,18 +28,18 @@ class MultipactorBand(IMultipactorBand):
 
     Attributes
     ----------
-    first_index : int
+    first_index :
         Index where multipactor is first detected.
-    last_index : int
+    last_index :
         Index where multipactor is last detected.
-    reached_second_threshold : bool
+    reached_second_threshold :
         If multipactor disappeared at ``upper_index``.
-    power_grows : bool
+    power_grows :
         If the object corresponds to a half-power cycle where power was
         growwing.
-    lower_index : int
+    lower_index :
         Index corresponding to lower threshold.
-    upper_index : int | None
+    upper_index :
         Index corresponding to upper threshold. It is ``None`` if
         ``power_grows=False``.
 

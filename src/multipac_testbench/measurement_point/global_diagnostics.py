@@ -22,11 +22,11 @@ class GlobalDiagnostics(IMeasurementPoint):
 
         Parameters
         ----------
-        df_data : pd.DataFrame
+        df_data :
             df_data
-        instrument_factory : InstrumentFactory
+        instrument_factory :
             An object that creates :class:`.Instrument`.
-        instruments_kw : dict[str, dict]
+        instruments_kw :
             Dictionary which keys are name of the column where the data from
             the instrument is. Values are dictionaries with keyword arguments
             passed to the proper :class:`.Instrument`.

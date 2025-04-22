@@ -26,26 +26,26 @@ class PickUp(IMeasurementPoint):
 
         Parameters
         ----------
-        name : str
+        name :
             Name of the pick-up.
-        df_data : pd.DataFrame
+        df_data :
             df_data
-        instrument_factory : InstrumentFactory
+        instrument_factory :
             An object that creates :class:`.Instrument`.
-        position : float
+        position :
             Position pf the pick-up.
-        instruments_kw : dict[str, dict[str, Any]]
+        instruments_kw :
             Dictionary which keys are name of the column where the data from
             the instrument is. Values are dictionaries with keyword arguments
             passed to the proper :class:`.Instrument`.
-        color : str
+        color :
             HTML color that will be used for every instrument in this pick-up.
 
         """
         self._add_key_val_to_dictionaries("position", position, instruments_kw)
-        assert not np.isnan(position), (
-            "position = np.nan is reserved to " "global diagnostics."
-        )
+        assert not np.isnan(
+            position
+        ), "position = np.nan is reserved to global diagnostics."
         super().__init__(
             name,
             df_data,

@@ -26,11 +26,11 @@ class Frequency(VirtualInstrument):
 
         Parameters
         ----------
-        freq_mhz : float
+        freq_mhz :
             Frequency in :unit:`MHz`.
-        n_points : int
+        n_points :
             Number of points to fill.
-        name : str
+        name :
             Name of the series and of the instrument.
         kwargs :
             Other keyword arguments passed to ``pd.Series`` and constructor.

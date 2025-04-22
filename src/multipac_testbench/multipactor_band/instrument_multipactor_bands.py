@@ -7,7 +7,7 @@ from multipac_testbench.multipactor_band.creator import create
 from multipac_testbench.multipactor_band.multipactor_band import (
     MultipactorBand,
 )
-from multipac_testbench.multipactor_band.polisher import polish
+from multipac_testbench.multipactor_band.polisher import POLISHER_T, polish
 from numpy.typing import NDArray
 
 
@@ -22,7 +22,7 @@ class InstrumentMultipactorBands(list):
         measurement_point_name: str,
         position: float,
         info_test: str = "",
-        several_bands_politics: str = "merge",
+        several_bands_politics: POLISHER_T = "merge",
         color: str | None = None,
     ) -> None:
         """Create the object.
