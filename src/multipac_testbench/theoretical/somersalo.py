@@ -1,11 +1,7 @@
 """Produce the Somersalo plots.
 
-Numerical implementation of the work from Somersalo et al.[1]_.
-
-.. [1] Erkki Somersalo, Pasi Yla-Oijala, Dieter Proch et Jukka Sarvas. \
-«Computational methods for analyzing electron multipacting in RF structures». \
-In : Part. Accel. 59 (1998), p. 107-141. \
-url : http://cds.cern.ch/record/1120302/files/p107.pdf.
+Numerical implementation of the work from Somersalo et al.
+:cite:`Somersalo1998`.
 
 """
 
@@ -243,18 +239,13 @@ def plot_somersalo_measured(
 def somersalo_scaling_law(reflected: np.ndarray, p_tw: float) -> np.ndarray:
     r"""Compute :math:`P_{MW} = f(P_{TW}, R)`.
 
-    Somersalo et al. [1]_ link the mixed wave (:math:`MW`) forward power
-    with the traveling wave (:math:`TW`) forward power through reflection
-    coefficient :math:`R`.
+    Somersalo et al. :cite:`Somersalo1998` link the mixed wave (:math:`MW`)
+    forward power with the traveling wave (:math:`TW`) forward power through
+    reflection coefficient :math:`R`.
 
     .. math::
 
         P_\mathrm{MW} \sim \frac{1}{(1 + R)^2}P_\mathrm{TW}
-
-    .. [1] Erkki Somersalo, Pasi Yla-Oijala, Dieter Proch et Jukka \
-           Sarvas. «Computational methods for analyzing electron \
-           multipacting in RF structures». In : Part. Accel. 59 (1998), p.\
-           107-141. url : http://cds.cern.ch/record/1120302/files/p107.pdf.
 
     Parameters
     ----------
@@ -319,8 +310,7 @@ def fit_somersalo_scaling(
     if full_output:
         r_squared = helper.r_squared(result[2]["fvec"], p_fit)
         somer_index = (
-            f"Fit ({somer_index} = {popt[0]:3.1f}W,"
-            + f" $r^2$ = {r_squared:3.3f})"
+            f"Fit ({somer_index} = {popt[0]:3.1f}W, $r^2$ = {r_squared:3.3f})"
         )
 
     else:

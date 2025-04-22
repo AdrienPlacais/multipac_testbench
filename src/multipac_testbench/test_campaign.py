@@ -436,9 +436,9 @@ class TestCampaign(list):
     ) -> tuple[Axes, pd.DataFrame]:
         r"""Represent evolution of forward power threshold with :math:`R`.
 
-        Somersalo et al. [1]_ link the mixed wave (:math:`MW`) forward power
-        with the traveling wave (:math:`TW`) forward power through reflection
-        coefficient :math:`R`.
+        Somersalo et al. :cite:`Somersalo1998` link the mixed wave (:math:`MW`)
+        forward power with the traveling wave (:math:`TW`) forward power
+        through reflection coefficient :math:`R`.
 
         .. math::
 
@@ -449,11 +449,6 @@ class TestCampaign(list):
             threshold is reached when multipactor is detected anywhere in the
             system. Also, we represent the thresholds that were measured during
             the last half-power cycle.
-
-        .. [1] Erkki Somersalo, Pasi Yla-Oijala, Dieter Proch et Jukka \
-               Sarvas. «Computational methods for analyzing electron \
-               multipacting in RF structures». In : Part. Accel. 59 (1998), p.\
-               107-141. url : http://cds.cern.ch/record/1120302/files/p107.pdf.
 
         .. todo::
             Columns in the output file are illogic

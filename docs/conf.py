@@ -37,6 +37,7 @@ extensions = [
     "sphinx_autodoc_typehints",
     "sphinx_rtd_theme",
     "sphinx_tabs.tabs",
+    "sphinxcontrib.bibtex",
 ]
 
 add_module_names = False
@@ -51,6 +52,7 @@ exclude_patterns = [
     "experimental",
     "**/.pytest_cache/*",
 ]
+bibtex_bibfiles = ["references.bib"]
 
 # -- autodoc ---------------------------------------------------
 autodoc_default_options = {
