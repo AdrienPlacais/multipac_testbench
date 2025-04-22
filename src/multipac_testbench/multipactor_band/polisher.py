@@ -103,7 +103,7 @@ def _merge(bands: list[IMultipactorBand]) -> list[IMultipactorBand]:
 
     Returns
     -------
-    list[IMultipactorBand]
+    merged : list[IMultipactorBand]
         List of multipactor bands, only one per half power cycle.
 
     """
@@ -154,18 +154,19 @@ def polish(
     bands :
         List of bands, where we can have multiple multipactor bands per power
         cycle.
-    several_bands_politics :
+    politics :
         What to to when several multipactor bands are found in the same half
         power cycle:
-           - ``'keep_lowest'``: we keep :class:`.MultipactorBand` at the
-             lowest powers.
-           - ``'keep_highest'``: we keep :class:`.MultipactorBand` at the
-             highest powers.
-           - ``'keep_all'``: we keep all :class:`.MultipactorBand`.
-           - ``'merge'``: the resulting :class:`.MultipactorBand` will span
-             from start of first :class:`.MultipactorBand` to end of last.
-           - ``'keep_largest'``: we keep the :class:`.MultipactorBand` that was
-             measured on the largest number of points.
+
+        - ``'keep_lowest'``: we keep :class:`.MultipactorBand` at the lowest
+          powers.
+        - ``'keep_highest'``: we keep :class:`.MultipactorBand` at the highest
+          powers.
+        - ``'keep_all'``: we keep all :class:`.MultipactorBand`.
+        - ``'merge'``: the resulting :class:`.MultipactorBand` will span from
+          start of first :class:`.MultipactorBand` to end of last.
+        - ``'keep_largest'``: we keep the :class:`.MultipactorBand` that was
+          measured on the largest number of points.
 
     """
     assert politics in POLISHERS, (

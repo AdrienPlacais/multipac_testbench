@@ -1,7 +1,8 @@
 """Keep track of a single multipactor band.
 
-i.e.: a set of measurement points where multipactor happens. A
-:class:`MultipactorBand` is defined on half a power cycle.
+A multipactor band a sequence of consecutive measurement points where
+multipactor happens. A :class:`MultipactorBand` is defined on half a power
+cycle.
 
 """
 
@@ -10,15 +11,9 @@ from dataclasses import dataclass
 
 @dataclass
 class IMultipactorBand:
-    """Mother class of :class:`MultipactorBand` and :class:`NoMultipactorBand`.
+    """Mother class of :class:`MultipactorBand` and :class:`NoMultipactorBand`."""
 
-    Attributes
-    ----------
-    pow_index :
-        Index of the half-power cycle, starting at zero.
-
-    """
-
+    #: Index of the half-power cycle, starting at zero.
     pow_index: int
 
 
@@ -26,7 +21,7 @@ class IMultipactorBand:
 class MultipactorBand(IMultipactorBand):
     """First and last index of a multipactor zone.
 
-    Attributes
+    Parameters
     ----------
     first_index :
         Index where multipactor is first detected.
@@ -36,7 +31,7 @@ class MultipactorBand(IMultipactorBand):
         If multipactor disappeared at ``upper_index``.
     power_grows :
         If the object corresponds to a half-power cycle where power was
-        growwing.
+        growing.
     lower_index :
         Index corresponding to lower threshold.
     upper_index :

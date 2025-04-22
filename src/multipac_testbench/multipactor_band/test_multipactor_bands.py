@@ -7,6 +7,7 @@ from matplotlib.axes import Axes
 from multipac_testbench.multipactor_band.instrument_multipactor_bands import (
     InstrumentMultipactorBands,
 )
+from multipac_testbench.multipactor_band.polisher import POLISHER_T
 from numpy.typing import NDArray
 
 
@@ -77,7 +78,7 @@ class TestMultipactorBands(list):
         name: str = "",
         filter_out_none: bool = True,
         info_test: str = "",
-        several_bands_politics: str = "merge",
+        several_bands_politics: POLISHER_T = "merge",
     ) -> InstrumentMultipactorBands:
         """Merge the :class:`InstrumentMultipactorBands` in ``self``.
 
@@ -92,30 +93,29 @@ ion: bool``.
 
         Parameters
         ----------
-        union : {'strict', 'relaxed'}
+        union :
             How the multipactor zones should be merged. It 'strict', all
             instruments must detect multipactor to consider that multipactor
             happened. If 'relaxed', only one instrument suffices.
-        name : str, optional
+        name :
             Name that will be given to the returned
             :class:`InstrumentMultipactorBands`. The default is an empty
             string, in which case a default meaningful name will be given.
-        filter_out_none : bool, optional
+        filter_out_none :
             To remove the ``None`` in ``self``. The default is True.
-        info_test : str, optional
+        info_test :
             To give more explicit output when there is a problem in the merging
             process. The default is an empty string.
-        several_bands_politics : {'keep_first', 'keep_last', 'keep_all', \
-                'merge'}
+        several_bands_politics :
             What to to when several multipactor bands are found in the same
             half-power cycle:
-                - ``'keep_first'``: we keep first :class:`.MultipactorBand`
-                - ``'keep_last'``: we keep last :class:`.MultipactorBand`
-                - ``'keep_all'``: we keep all :class:`.MultipactorBand`
-                (currently not implemented)
-                - ``'merge'``: the final :class:`.MultipactorBand` spans from
-                start of first :class:`.MultipactorBand` to end of last.
 
+            - ``'keep_first'``: we keep first :class:`.MultipactorBand`
+            - ``'keep_last'``: we keep last :class:`.MultipactorBand`
+            - ``'keep_all'``: we keep all :class:`.MultipactorBand` (currently
+              not implemented)
+            - ``'merge'``: the final :class:`.MultipactorBand` spans from start
+              of first :class:`.MultipactorBand` to end of last.
 
         Returns
         -------

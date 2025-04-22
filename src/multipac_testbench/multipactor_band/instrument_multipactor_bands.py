@@ -29,10 +29,12 @@ class InstrumentMultipactorBands(list):
 
         Parameters
         ----------
-        list_of_multipactor_band :
-            Individual multipactor bands.
         multipactor :
             Array where True means multipactor, False no multipactor.
+        power_is_growing :
+            True where the power is growing, False where the power is
+            decreasing, NaN where undetermined. The default is None, in which
+            case it is not used.
         instrument_name :
             Name of the instrument that detected this multipactor.
         measurement_point_name :
@@ -41,23 +43,21 @@ class InstrumentMultipactorBands(list):
             Where multipactor was detected. If not applicable, in particular if
             the object represents multipactor anywhere in the testbench, it
             will be np.nan.
-        power_is_growing :
-            True where the power is growing, False where the power is
-            decreasing, NaN where undetermined. The default is None, in which
-            case it is not used.
+        info_test :
+            TODO
         several_bands_politics :
             What to to when several multipactor bands are found in the same
             half power cycle:
-                - ``'keep_lowest'``: we keep :class:`.MultipactorBand` at the
-                lowest powers.
-                - ``'keep_highest'``: we keep :class:`.MultipactorBand` at the
-                highest powers.
-                - ``'keep_all'``: we keep all :class:`.MultipactorBand`.
-                - ``'merge'``: the resulting :class:`.MultipactorBand` will
-                span from start of first :class:`.MultipactorBand` to end of
-                last.
-                - ``'keep_largest'``: we keep the :class:`.MultipactorBand`
-                that was measured on the largest number of points.
+
+            - ``'keep_lowest'``: we keep :class:`.MultipactorBand` at the
+              lowest powers.
+            - ``'keep_highest'``: we keep :class:`.MultipactorBand` at the
+              highest powers.
+            - ``'keep_all'``: we keep all :class:`.MultipactorBand`.
+            - ``'merge'``: the resulting :class:`.MultipactorBand` will span
+              from start of first :class:`.MultipactorBand` to end of last.
+            - ``'keep_largest'``: we keep the :class:`.MultipactorBand` that
+              was measured on the largest number of points.
         color :
             HTML color for plot, inherited from the :class:`.Instrument`.
 

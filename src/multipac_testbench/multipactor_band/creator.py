@@ -71,7 +71,7 @@ def _exit_a_mp_zone(
     last_index :
         Current index, which is the the index of exit.
     current_band :
-        Previous :class:`MultipactorBand` in the same half-power cycle. If it
+        Previous :class:`.MultipactorBand` in the same half-power cycle. If it
         is not None, it means that several zones were detected. Its handling is
         determined by ``several_bands_politics``.
     power_grows :
@@ -82,13 +82,15 @@ def _exit_a_mp_zone(
         To give more meaning to the error messages.
     reached_end_of_power_cycle :
         If this function is called when we reach the end of a half power cycle.
-        The default is False.
 
     Returns
     -------
     first_index : None
+        TODO
     last_index : None
+        TODO
     band : MultipactorBand
+        TODO
 
     """
     assert first_index is not None, (
@@ -175,18 +177,19 @@ def create(
     several_bands_politics :
         What to to when several multipactor bands are found in the same
         half-power cycle:
-           - ``'keep_first'``: we keep first :class:`MultipactorBand`
-           - ``'keep_last'``: we keep last :class:`MultipactorBand`
-           - ``'keep_all'``: we keep all :class:`MultipactorBand` (currently
-             not implemented)
-           - ``'merge'``: the final :class:`MultipactorBand` spans from start
-             of first :class:`MultipactorBand` to end of last.
+
+        - ``'keep_first'``: we keep first :class:`MultipactorBand`
+        - ``'keep_last'``: we keep last :class:`MultipactorBand`
+        - ``'keep_all'``: we keep all :class:`MultipactorBand` (currently not
+          implemented)
+        - ``'merge'``: the final :class:`MultipactorBand` spans from start
+          of first :class:`MultipactorBand` to end of last.
 
     Returns
     -------
     all_bands : list[MultipactorBand | None]
-        One object per half power cycle (i.e. one object for power growth, one
-        for power decrease). None means that no multipactor was detected.
+        One object per half power cycle (*i.e.* one object for power growth,
+        one for power decrease). None means that no multipactor was detected.
 
     """
     delta_multipactor = np.diff(multipactor)

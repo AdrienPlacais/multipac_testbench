@@ -122,7 +122,6 @@ class TestCampaign(list):
         args :
             Arguments that are passed to :meth:`.MultipactorTest.sweet_plot`.
         campaign_multipactor_bands :
-                | None, optional
             Object holding the :class:`.TestMultipactorBands` corresponding to
             each :class:`.MultipactorTest` stored in ``self``. The default is
             None, in which case the multipactor zones are not drawn.
