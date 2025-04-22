@@ -40,7 +40,6 @@ extensions = [
     "sphinx_tabs.tabs",
     "sphinxcontrib.bibtex",
 ]
-
 add_module_names = False
 default_role = "literal"
 todo_include_todos = True
@@ -57,12 +56,16 @@ bibtex_bibfiles = ["references.bib"]
 
 # -- autodoc ---------------------------------------------------
 autodoc_default_options = {
-    "members": True,
+    "ignore-module-all": True,
+    # Ref of inherited methods, when not specifically redefined
+    # for example: :meth:`.ForwardPower.where_is_growing`:
+    "inherited-members": True,
+    "show_inheritance": True,
     "member-order": "bysource",  # Keep original members order
+    "members": True,
     "private-members": True,  # Document _private members
     "special-members": "__init__, __post_init__, __str__",  # Document those special members
     "undoc-members": True,  # Document members without doc
-    "ignore-module-all": True,
 }
 
 # -- Check that there is no broken link --------------------------------------
