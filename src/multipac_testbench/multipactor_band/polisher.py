@@ -103,7 +103,7 @@ def _merge(bands: list[IMultipactorBand]) -> list[IMultipactorBand]:
 
     Returns
     -------
-    merged : list[IMultipactorBand]
+    merged :
         List of multipactor bands, only one per half power cycle.
 
     """

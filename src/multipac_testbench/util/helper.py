@@ -31,7 +31,7 @@ def output_filepath(
 
     Returns
     -------
-    filename : Path
+    filename :
         A full filepath.
 
     """

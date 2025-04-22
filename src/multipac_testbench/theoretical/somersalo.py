@@ -56,7 +56,7 @@ def somersalo_base_plot(
 
     Returns
     -------
-    out : tuple[Figure, Axes, Axes]
+    out :
         Figure, left and right Axis.
 
     """
@@ -109,7 +109,7 @@ def _one_point_analytical(
 
     Returns
     -------
-    df_one_point : pd.DataFrame
+    df_one_point :
         Lower and upper multipactor limits, in :math:`(\mathrm{GHz} \times
         \mathrm{mm})^4 \times \Omega`.
 
@@ -256,7 +256,7 @@ def somersalo_scaling_law(reflected: np.ndarray, p_tw: float) -> np.ndarray:
 
     Returns
     -------
-    p_mw : NDArray[np.float64]
+    p_mw :
         Mixed Wave lower threshold.
 
     """
@@ -290,7 +290,7 @@ def fit_somersalo_scaling(
 
     Returns
     -------
-    df_fitted : pd.DataFrame
+    df_fitted :
         Holds the fitted Somersalo scaling law.
 
     """

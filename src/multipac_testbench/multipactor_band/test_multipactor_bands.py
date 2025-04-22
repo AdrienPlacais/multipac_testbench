@@ -119,7 +119,7 @@ ion: bool``.
 
         Returns
         -------
-        instrument_multipactor_bands : InstrumentMultipactorBands
+        instrument_multipactor_bands :
             Object holding merged multipactor bands.
 
         """

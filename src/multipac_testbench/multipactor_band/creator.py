@@ -38,7 +38,7 @@ def _enter_a_mp_zone(
 
     Returns
     -------
-    first_index : int
+    first_index :
         Index at which current multipactor starts.
 
     """
@@ -85,11 +85,11 @@ def _exit_a_mp_zone(
 
     Returns
     -------
-    first_index : None
+    first_index :
         TODO
-    last_index : None
+    last_index :
         TODO
-    band : MultipactorBand
+    band :
         TODO
 
     """
@@ -187,7 +187,7 @@ def create(
 
     Returns
     -------
-    all_bands : list[MultipactorBand | None]
+    all_bands :
         One object per half power cycle (*i.e.* one object for power growth,
         one for power decrease). None means that no multipactor was detected.
 

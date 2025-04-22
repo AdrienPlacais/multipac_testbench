@@ -55,7 +55,7 @@ class InstrumentFactory:
 
         Returns
         -------
-        instrument : Instrument
+        instrument :
             Instrument properly subclassed.
 
         """
@@ -100,7 +100,7 @@ class InstrumentFactory:
 
         Returns
         -------
-        virtuals : list[ins.VirtualInstrument]
+        virtuals :
             The created virtual instruments.
 
         """

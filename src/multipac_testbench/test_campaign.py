@@ -70,7 +70,7 @@ class TestCampaign(list):
 
         Returns
         -------
-        test_campaign : TestCampaign
+        test_campaign :
             List of :class:`.MultipactorTest`.
 
         """
@@ -138,9 +138,9 @@ class TestCampaign(list):
 
         Returns
         -------
-        axes : list[Axes] | list[NDArray[Axes]] | Axes | NDArray[Axes]
+        axes :
             Holds plotted fig.
-        data : list[pd.DataFrame] | pd.DataFrame
+        data :
             Holds data used to create the plot.
 
         """
@@ -300,7 +300,7 @@ class TestCampaign(list):
 
         Returns
         -------
-        nested_instrument_multipactor_bands : list[list[InstrumentMultipactorBands]]
+        nested_instrument_multipactor_bands :
             :class:`.InstrumentMultipactorBands` objects holding when multipactor
             happens. They are sorted first by :class:`.MultipactorTest` (outer
             level), then per :class:`.Instrument` of class ``instrument_class``
@@ -353,11 +353,11 @@ class TestCampaign(list):
 
         Returns
         -------
-        fig : Figure
+        fig :
             Holds the plotted figure.
-        ax1 : Axes
+        ax1 :
             Left axis (one-point multipactor).
-        ax2 : Axes
+        ax2 :
             Right axis (two-point multipactor).
 
         """
@@ -483,9 +483,9 @@ class TestCampaign(list):
 
         Returns
         -------
-        axes : Axes
+        axes :
             Holds the plot.
-        data : pd.DataFrame
+        data :
             Holds the data that was plotted.
 
         """
@@ -570,9 +570,9 @@ class TestCampaign(list):
         Returns
         -------
         tuple[Axes, pd.DataFrame]
-        axes : Axes
+        axes :
             Plotted axes.
-        data : pd.DataFrame
+        data :
             Corresponding data.
 
         """
@@ -661,9 +661,9 @@ class TestCampaign(list):
 
         Returns
         -------
-        axes : Axes
+        axes :
             Plotted axes.
-        data : pd.DataFrame
+        data :
             Corresponding data.
 
         """

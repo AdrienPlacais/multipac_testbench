@@ -23,7 +23,7 @@ def get_limits(
 
     Returns
     -------
-    limits : dict[Axes, tuple[float, float]]
+    limits :
         Dictionary linking avery Axe with its limits.
 
     """

@@ -5,6 +5,7 @@
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+
 from __future__ import annotations
 
 import os
@@ -65,11 +66,13 @@ autodoc_default_options = {
 }
 
 # -- Check that there is no broken link --------------------------------------
-nitpicky = False
+nitpicky = True
 nitpick_ignore = [
     # Not recognized by Sphinx, don't know if this is normal
     ("py:class", "optional"),
     ("py:class", "T"),
+    ("py:class", "np.float64"),
+    ("py:class", "numpy.float64"),
 ]
 
 # Link to other libraries
@@ -81,10 +84,13 @@ intersphinx_mapping = {
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
 }
 
-# Parameters for sphinx-autodoc-typehints
+# Parameters for sphinx-autodoc-typehints and napoleon
 always_document_param_types = True
 always_use_bar_union = True
 typehints_defaults = "comma"
+typehints_use_rtype = True
+autodoc_typehints = "description"
+napoleon_use_rtype = False
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

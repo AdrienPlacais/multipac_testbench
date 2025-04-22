@@ -31,7 +31,7 @@ def remove_trailing_true(
 
     Returns
     -------
-    data : NDArray[np.bool]
+    data :
         Boolean array without trailing True.
 
     """
@@ -100,7 +100,7 @@ def array_is_growing(
 
     Returns
     -------
-    is_growing : bool | None
+    is_growing :
         If the array is locally increasing, ``undetermined_value`` if
         undetermined.
 

@@ -106,7 +106,7 @@ class Instrument(ABC):
 
         Returns
         -------
-        instrument : Instrument
+        instrument :
             An instrument. Note that its ``data`` attribute will be a 2D
             array.
 
@@ -299,7 +299,7 @@ class Instrument(ABC):
 
         Returns
         -------
-        matching_multipactor_bands : InstrumentMultipactorBands
+        matching_multipactor_bands :
 
         """
         if isinstance(multipactor_bands, InstrumentMultipactorBands):
@@ -375,7 +375,7 @@ class Instrument(ABC):
 
         Returns
         -------
-        artist : StemContainer
+        artist :
             The plotted stem.
 
         """
@@ -428,7 +428,7 @@ class Instrument(ABC):
 
         Returns
         -------
-        artist : Line2D
+        artist :
             The plotted line.
 
         """

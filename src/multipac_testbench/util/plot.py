@@ -37,9 +37,9 @@ def create_fig(
 
     Returns
     -------
-    fig : Figure
+    fig :
         Figure holding the axes.
-    instrument_class_axes : dict[ABCMeta, Axes]
+    instrument_class_axes :
         Dictionary linking the class of the instruments to plot with the
         associated axes.
 
@@ -127,7 +127,7 @@ def create_df_to_plot(
 
     Returns
     -------
-    df_to_plot : pd.DataFrame
+    df_to_plot :
         Contains x and y data that will be plotted.
 
     """
@@ -164,9 +164,9 @@ def match_x_and_y_column_names(
 
     Returns
     -------
-    x_columns : list[str] | str | None
+    x_columns :
         Name of the instrument(s) used as x-axis.
-    y_columns : list[list[str]] | list[str]
+    y_columns :
         Name of the instruments for y-axis.
 
     """

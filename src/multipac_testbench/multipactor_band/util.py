@@ -41,7 +41,7 @@ def _create_zip(
 
     Returns
     -------
-    zipper : zip
+    zipper :
         Object storing matching pairs of ``obj`` and
         :class:`.InstrumentMultipactorBands`.
 
@@ -99,7 +99,7 @@ def positions_match(
 
     Returns
     -------
-    flag : bool
+    flag :
         If the positions of ``obj`` and ``instrument_multipactor_bands`` match.
 
     """

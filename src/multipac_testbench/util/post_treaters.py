@@ -45,7 +45,7 @@ moving-average-or-running-mean
 
     Returns
     -------
-    data : NDArray[np.float64]
+    data :
         Smoothed data.
 
     """
@@ -77,11 +77,11 @@ def v_coax_to_v_acquisition(
     b_rack :
         Rack calibration constant in :unit:`dBm`.
     z_0 :
-        Line impedance in :math:`\Ohm`.
+        Line impedance in :unit:`\\Omega`.
 
     Returns
     -------
-    v_acq : NDArray[np.float64]
+    v_acq :
         Acquisition voltage in :math:`[0, 10~\mathrm{V}]`.
 
     """
@@ -114,11 +114,11 @@ def v_acquisition_to_v_coax(
     b_rack :
         Rack calibration constant in :unit:`dBm`.
     z_0 :
-        Line impedance in :math:`\Ohm`.
+        Line impedance in :unit:`\\Omega`.
 
     Returns
     -------
-    v_coax : NDArray[np.float64]
+    v_coax :
         :math:`V_\mathrm{coax}` in :unit:`V`, which should be the content of
         the ``NI9205_Ex`` columns.
 

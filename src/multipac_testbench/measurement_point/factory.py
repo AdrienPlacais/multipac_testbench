@@ -58,7 +58,7 @@ class IMeasurementPointFactory:
 
         Returns
         -------
-        measurement_point : IMeasurementPoint
+        measurement_point :
             A :class:`.GlobalDiagnostics` or :class:`.PickUp`.
 
         """

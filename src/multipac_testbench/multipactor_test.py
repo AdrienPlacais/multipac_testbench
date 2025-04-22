@@ -212,9 +212,9 @@ class MultipactorTest:
 
         Returns
         -------
-        axes : Axes | NDArray[Axes]
+        axes :
             Objects holding the plot.
-        df_to_plot : pd.DataFrame
+        df_to_plot :
             DataFrame holding the data that is plotted.
 
         """
@@ -286,9 +286,9 @@ class MultipactorTest:
 
         Returns
         -------
-        data_to_plot : list[pd.Series]
+        data_to_plot :
             Contains the data used for x axis.
-        x_columns : list[str] | None
+        x_columns :
             Name of the column(s) used for x axis.
 
         """
@@ -344,13 +344,13 @@ class MultipactorTest:
 
         Returns
         -------
-        data_to_plot : list[pd.Series]
+        data_to_plot :
             List containing all the series that will be plotted.
-        y_columns : list[list[str]]
+        y_columns :
             Containts, for every subplot, the name of the columns to plot.
             If ``column_names`` is provided, it overrides the given
             ``y_columns``.
-        color : dict[str, str]
+        color :
             Dictionary linking column names in ``df_to_plot`` to HTML colors.
             Used to keep the same color between different instruments at the
             same :class:`.PickUp`.
@@ -440,9 +440,9 @@ class MultipactorTest:
 
         Returns
         -------
-        axes : Axes | NDArray[Axes]
+        axes :
             Hold plotted axes.
-        df_thresholds : pd.DataFrame
+        df_thresholds :
             The data used to produce the plot.
 
         """
@@ -524,7 +524,7 @@ class MultipactorTest:
 
         Returns
         -------
-        zipper : zip
+        zipper :
             Object matching every :class:`ins.Instrument` with the appropriate
             :class:`.InstrumentMultipactorBands`.
 
@@ -607,7 +607,7 @@ class MultipactorTest:
 
         Returns
         -------
-        test_multipactor_bands : TestMultipactorBands
+        test_multipactor_bands :
             Objets containing when multipactor happens, according to
             ``multipac_detector``, at every pick-up holding an
             :class:`ins.Instrument` of type ``instrument_class``.
@@ -683,7 +683,7 @@ class MultipactorTest:
 
             Returns
             -------
-            artists : Sequence[Artist]
+            artists :
                 Updated artists.
 
             """
@@ -734,9 +734,9 @@ class MultipactorTest:
 
         Returns
         -------
-        fig : Figure
+        fig :
          Figure holding the axes.
-        axes_instruments : dict[Axes, list[ins.Instrument]]
+        axes_instruments :
             Links the instruments to plot with the Axes they should be plotted
             on.
 
@@ -884,7 +884,7 @@ class MultipactorTest:
 
         Returns
         -------
-        instruments : list[ins.Instrument]
+        instruments :
             All the instruments matching the required conditions.
 
         """
@@ -920,7 +920,7 @@ class MultipactorTest:
 
         Returns
         -------
-        instruments : list[ins.Instrument]
+        instruments :
             All the instruments matching the required conditions.
 
         """
@@ -956,7 +956,7 @@ class MultipactorTest:
 
         Returns
         -------
-        i_measurement_points : Sequence[IMeasurementPoint]
+        i_measurement_points :
             The desired objects.
 
         """
@@ -991,7 +991,7 @@ class MultipactorTest:
 
         Returns
         -------
-        measurement_point : IMeasurementPoint
+        measurement_point :
             The desired object.
 
         """
@@ -1165,7 +1165,7 @@ class MultipactorTest:
 
         Returns
         -------
-        data : pd.DataFrame
+        data :
             Holds the lower and upper :math:`P_f` during last half power cycle,
             as well as reflection coefficient :math:`R` at same time steps.
 
