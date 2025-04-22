@@ -19,6 +19,10 @@ def running_mean(
     .. _this link: https://stackoverflow.com/questions/13728392/\
 moving-average-or-running-mean
 
+    See Also
+    --------
+    :func:`numpy.convolve`
+
     Parameters
     ----------
     input_data :
@@ -26,16 +30,17 @@ moving-average-or-running-mean
     n_mean :
         Number of points on which running mean is ran.
     mode :
-        - By default, mode is 'full'.  This returns the convolution
-          at each point of overlap, with an output shape of (N+M-1,). At
+        - By default, mode is ``'full``'.  This returns the convolution
+          at each point of overlap, with an output shape of ``(N+M-1,)``. At
           the end-points of the convolution, the signals do not overlap
           completely, and boundary effects may be seen.
-        - 'same': Mode 'same' returns output of length ``max(M, N)``.
+        - ``'same'``: Mode ``'same'`` returns output of length ``max(M, N)``.
           Boundary effects are still visible.
-        - 'valid': Mode 'valid' returns output of length
-          ``max(M, N) - min(M, N) + 1``. The convolution product is only
-            given for points where the signals overlap completely. Values
-            outside the signal boundary have no effect.
+        - ``'valid'``: Mode ``'valid'`` returns output of length ``max(M, N) -
+          min(M, N) + 1``. The convolution product is only given for points
+          where the signals overlap completely. Values outside the signal
+          boundary have no effect.
+
         (taken from numpy documentation)
 
     Returns
