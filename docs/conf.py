@@ -64,23 +64,6 @@ autodoc_default_options = {
     "ignore-module-all": True,
 }
 
-# autodoc_type_aliases = {
-#     "CurrentProbe": "multipac_testbench.instruments.CurrentProbe",
-#     "IElectricField": "multipac_testbench.instruments.IElectricField",
-#     "FieldProbe": "multipac_testbench.instruments.FieldProbe",
-#     "ForwardPower": "multipac_testbench.instruments.ForwardPower",
-#     "Frequency": "multipac_testbench.instruments.Frequency",
-#     "Instrument": "multipac_testbench.instruments.Instrument",
-#     "OpticalFibre": "multipac_testbench.instruments.OpticalFibre",
-#     "Penning": "multipac_testbench.instruments.Penning",
-#     "Power": "multipac_testbench.instruments.Power",
-#     "Reconstructed": "multipac_testbench.instruments.Reconstructed",
-#     "ReflectedPower": "multipac_testbench.instruments.ReflectedPower",
-#     "ReflectionCoefficient": "multipac_testbench.instruments.ReflectionCoefficient",
-#     "SWR": "multipac_testbench.instruments.SWR",
-#     "VirtualInstrument": "multipac_testbench.instruments.VirtualInstrument",
-# }
-
 # -- Check that there is no broken link --------------------------------------
 nitpicky = False
 nitpick_ignore = [
@@ -102,8 +85,6 @@ intersphinx_mapping = {
 always_document_param_types = True
 always_use_bar_union = True
 typehints_defaults = "comma"
-# typehints_fully_qualified = False
-# python_use_unqualified_type_names = True
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
