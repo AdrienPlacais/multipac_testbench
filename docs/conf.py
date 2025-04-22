@@ -49,6 +49,7 @@ exclude_patterns = [
     "Thumbs.db",
     ".DS_Store",
     "experimental",
+    "**/.pytest_cache/*",
 ]
 
 # -- autodoc ---------------------------------------------------
