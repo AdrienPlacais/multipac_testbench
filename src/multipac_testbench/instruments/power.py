@@ -34,11 +34,10 @@ class Power(Instrument):
             May be necessary to also remove isolated True
 
         """
-        n_points = self._raw_data.index[-1]
+        n_points = len(self._raw_data)
         is_growing: list[bool] = []
 
         previous_value = True
-        assert isinstance(n_points, int)
         for i in range(n_points):
             local_is_growing = array_is_growing(
                 self.data, i, undetermined_value=previous_value, **kwargs
