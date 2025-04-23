@@ -7,6 +7,13 @@ This library is designed to post-treat the data from the MULTIPAC multipactor te
 1. Create a dedicated Python environment, activate it.
 2. Run `pip install multipac_testbench`
 
+> [!NOTE]
+> If you are completely new to Python and these instructions are unclear, check [this tutorial](https://python-guide.readthedocs.io/en/latest/).
+> In particular, you will want to:
+> 1. [Install Python](https://python-guide.readthedocs.io/en/latest/starting/installation/) 3.11 or higher.
+> 2. [Learn to use Python environments](https://python-guide.readthedocs.io/en/latest/dev/virtualenvs/), `pipenv` or `virtualenv`.
+> 3. [Install a Python IDE](https://python-guide.readthedocs.io/en/latest/dev/env/#ides) such as Spyder or VSCode.
+
 ### Developers
 1. Clone the repository:
 `git clone git@github.com:AdrienPlacais/multipac_testbench.git`
