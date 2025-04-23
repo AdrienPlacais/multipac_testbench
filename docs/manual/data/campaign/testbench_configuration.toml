@@ -17,10 +17,10 @@ position = 0e0
 class_name = "CurrentProbe"
 
 [E1.instruments_kw.NI9205_E1]
+calibration_file = "../data/calibration/E1_fit_calibration.csv"
 class_name = "ElectricFieldProbe"
 g_probe = -77.3
 patch = true
-calibration_file = "../data/calibration/E1_fit_calibration.csv"
 
 # ==================================
 [V1]
@@ -39,9 +39,9 @@ position = 0.26
 class_name = "CurrentProbe"
 
 [E2.instruments_kw.NI9205_E2]
+calibration_file = "../data/calibration/E2_fit_calibration.csv"
 class_name = "ElectricFieldProbe"
 g_probe = -74.4
-calibration_file = "../data/calibration/E2_fit_calibration.csv"
 patch = true
 
 # ==================================
@@ -53,9 +53,9 @@ position = 0.39
 class_name = "CurrentProbe"
 
 [E3.instruments_kw.NI9205_E3]
+calibration_file = "../data/calibration/E3_fit_calibration.csv"
 class_name = "ElectricFieldProbe"
 g_probe = -73.9
-calibration_file = "../data/calibration/E3_fit_calibration.csv"
 patch = true
 
 # ==================================
@@ -75,14 +75,14 @@ position = 0.611
 class_name = "CurrentProbe"
 
 [E4.instruments_kw.NI9205_E4]
+calibration_file = "../data/calibration/E4_fit_calibration.csv"
 class_name = "ElectricFieldProbe"
 g_probe = -74.6
-calibration_file = "../data/calibration/E4_fit_calibration.csv"
 patch = true
 
 # [E8]
 # position = 0.611
-# 
+#
 # [E8.instruments_kw]
 # [E8.instruments_kw.NI9205_MP8l]
 # class_name = "CurrentProbe"
@@ -90,7 +90,7 @@ patch = true
 # ==================================
 # [OF]
 # position = 0.656
-# 
+#
 # [OF.instruments_kw]
 # [OF.instruments_kw.NI9205_Arc1]
 # class_name = "OpticalFibre"
@@ -104,9 +104,9 @@ position = 0.832
 class_name = "CurrentProbe"
 
 [E5.instruments_kw.NI9205_E5]
+calibration_file = "../data/calibration/E5_fit_calibration.csv"
 class_name = "ElectricFieldProbe"
 g_probe = -75.5
-calibration_file = "../data/calibration/E5_fit_calibration.csv"
 patch = true
 
 # ==================================
@@ -118,9 +118,9 @@ position = 0.962
 class_name = "CurrentProbe"
 
 [E6.instruments_kw.NI9205_E6]
+calibration_file = "../data/calibration/E6_fit_calibration.csv"
 class_name = "ElectricFieldProbe"
 g_probe = -75.1
-calibration_file = "../data/calibration/E6_fit_calibration.csv"
 patch = true
 
 # ==================================
@@ -140,7 +140,7 @@ position = 1.222
 class_name = "CurrentProbe"
 
 [E7.instruments_kw.NI9205_E7]
+calibration_file = "../data/calibration/E7_fit_calibration.csv"
 class_name = "ElectricFieldProbe"
 g_probe = -74.9
-calibration_file = "../data/calibration/E7_fit_calibration.csv"
 patch = true
