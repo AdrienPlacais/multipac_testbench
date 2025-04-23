@@ -2,7 +2,7 @@
 
 import logging
 from collections.abc import Sequence
-from typing import Any
+from typing import Any, Literal
 
 import multipac_testbench.instruments as ins
 import pandas as pd
@@ -16,6 +16,15 @@ STRING_TO_INSTRUMENT_CLASS = {
     "Penning": ins.Penning,
     "ReflectedPower": ins.ReflectedPower,
 }  #:
+INSTRUMENT_NAME_T = Literal[
+    "CurrentProbe",
+    "ElectricFieldProbe",
+    "FieldProbe",
+    "ForwardPower",
+    "OpticalFibre",
+    "Penning",
+    "ReflectedPower",
+]
 
 
 class InstrumentFactory:
@@ -29,7 +38,7 @@ class InstrumentFactory:
         self,
         name: str,
         df_data: pd.DataFrame,
-        class_name: str,
+        class_name: INSTRUMENT_NAME_T,
         column_header: str | list[str] | None = None,
         **instruments_kw: Any,
     ) -> ins.Instrument:
@@ -60,8 +69,8 @@ class InstrumentFactory:
 
         """
         assert class_name in STRING_TO_INSTRUMENT_CLASS, (
-            f"{class_name = } not recognized, check "
-            "STRING_TO_INSTRUMENT_CLASS in instrument/factory.py"
+            f"{class_name = } not recognized, check STRING_TO_INSTRUMENT_CLASS"
+            "in instrument/factory.py"
         )
         instrument_class = STRING_TO_INSTRUMENT_CLASS[class_name]
 

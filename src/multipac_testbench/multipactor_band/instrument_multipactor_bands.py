@@ -12,7 +12,7 @@ from numpy.typing import NDArray
 
 
 class InstrumentMultipactorBands(list):
-    """All :class:`IMultipactorBand` of a test, by a given instrument."""
+    """All :class:`.IMultipactorBand` of a test, by a given instrument."""
 
     def __init__(
         self,

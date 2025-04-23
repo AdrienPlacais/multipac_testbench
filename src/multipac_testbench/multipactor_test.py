@@ -198,7 +198,7 @@ class MultipactorTest:
         test_color :
             Color used by :meth:`.TestCampaign.sweet_plot` when
             ``all_on_same_plot=True``. It overrides the :class:`.Instrument`
-            color and is used to discriminate every :class:`MultipactorTest`
+            color and is used to discriminate every :class:`.MultipactorTest`
             from another.
         png_path :
             If specified, save the figure at ``png_path``.
@@ -206,8 +206,8 @@ class MultipactorTest:
             If specified, save the data used to produce the plot in
             ``csv_path``.
         **kwargs :
-            Other keyword arguments passed to :meth:`pd.DataFrame.plot`,
-            :meth:`._set_y_data`, :meth:`.create_df_to_plot`,
+            Other keyword arguments passed to :meth:`pandas.DataFrame.plot`,
+            :meth:`._set_y_data`, :func:`.create_df_to_plot`,
             :func:`.set_labels`.
 
         Returns
@@ -374,8 +374,8 @@ class MultipactorTest:
                     continue
                 if isinstance(instrument.data_as_pd, pd.DataFrame):
                     logging.error(
-                        f"You want to plot {instrument}, which data "
-                        "is 2D. Not supported."
+                        f"You want to plot {instrument}, which data is 2D. Not"
+                        " supported."
                     )
                     continue
 
@@ -408,9 +408,9 @@ class MultipactorTest:
     ) -> tuple[Axes | NDArray[Axes], pd.DataFrame]:
         """Plot instrument ``to_plot`` at every multipactor threshold.
 
-        When ``to_plot`` is :class:`ins.ForwardPower` or
-        :class:`ins.FieldProbe`, the output is the threshold. But this method
-        works with any instrument type.
+        When ``to_plot`` is :class:`.ForwardPower` or :class:`.FieldProbe`,
+        the output is the threshold. But this method works with any instrument
+        type.
 
         .. todo::
             Add a way to fit exponential (?) law on the thresholds. Will need
@@ -420,7 +420,7 @@ class MultipactorTest:
         ----------
         instrument_id :
             Class of instrument to plot. Makes most sense with
-            :class:`ins.ForwardPower` or :class:`ins.FieldProbe`.
+            :class:`.ForwardPower` or :class:`.FieldProbe`.
         multipactor_bands :
             Object containing the indexes of multipacting. If only a
             :class:`.InstrumentMultipactorBands` is given, all plotted
@@ -432,11 +432,12 @@ class MultipactorTest:
         png_path :
             If provided, figure will be saved there.
         png_kwargs :
-            Keyword arguments for the :meth:`.Figure.savefig` method.
+            Keyword arguments for the :meth:`matplotlib.figure.Figure.savefig`
+            method.
         csv_path :
             If provided, plotted data will be saved there.
         csv_kwargs :
-            Keyword arguments for the :meth:`.DataFrame.to_csv` method.
+            Keyword arguments for the :meth:`pandas.DataFrame.to_csv` method.
 
         Returns
         -------
@@ -506,26 +507,26 @@ class MultipactorTest:
         multipactor_bands :
             All multipactor bands, among which we will be looking. If only one
             is given (:class:`.InstrumentMultipactorBands`), then all
-            :class:`ins.Instrument` will be matched with the same identical
+            :class:`.Instrument` will be matched with the same identical
             :class:`.InstrumentMultipactorBands`.
         raise_no_match_error :
             If an error should be raised when no
             :class:`.InstrumentMultipactorBands` match an
-            :class:`ins.Instrument`. The default is True.
+            :class:`.Instrument`. The default is True.
         global_diagnostics :
-            If :class:`InstrumentMultipactorBands` that were obtained from a
+            If :class:`.InstrumentMultipactorBands` that were obtained from a
             global diagnostic should be matched. The default is True.
         measurement_points_to_exclude :
-            :class:`ins.Instrument` at this pick-ups are skipped. The default
+            :class:`.Instrument` at this pick-ups are skipped. The default
             is an empty tuple.
         instruments_to_ignore :
-            :class:`ins.Instrument` in this sequence are skipped. The default
+            :class:`.Instrument` in this sequence are skipped. The default
             is an empty tuple.
 
         Returns
         -------
         zipper :
-            Object matching every :class:`ins.Instrument` with the appropriate
+            Object matching every :class:`.Instrument` with the appropriate
             :class:`.InstrumentMultipactorBands`.
 
         """
@@ -589,7 +590,7 @@ class MultipactorTest:
         Parameters
         ----------
         multipac_detector :
-            Function that takes in the ``data`` of an :class:`Instrument`
+            Function that takes in the ``data`` of an :class:`.Instrument`
             and returns an array, where True means multipactor and False no
             multipactor.
         instrument_class :
@@ -610,7 +611,7 @@ class MultipactorTest:
         test_multipactor_bands :
             Objets containing when multipactor happens, according to
             ``multipac_detector``, at every pick-up holding an
-            :class:`ins.Instrument` of type ``instrument_class``.
+            :class:`.Instrument` of type ``instrument_class``.
 
         """
         forward_power = self.get_instrument(ins.ForwardPower)
@@ -876,9 +877,9 @@ class MultipactorTest:
         measurement_points :
             The measurement points from which you want the instruments. The
             default is None, in which case we look into every
-            :class:`IMeasurementPoint` attribute of self.
+            :class:`.IMeasurementPoint` attribute of self.
         instruments_to_ignore :
-            The :class:`ins.Instrument` or instrument names you do not want.
+            The :class:`.Instrument` or instrument names you do not want.
             The default is an empty tuple, in which case no instrument is
             ignored.
 

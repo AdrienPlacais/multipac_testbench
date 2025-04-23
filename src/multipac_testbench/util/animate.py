@@ -16,7 +16,7 @@ def get_limits(
     Parameters
     ----------
     axes_instruments :
-        Dictionary linking all the :class:`ins.Instrument` to the Axe they
+        Dictionary linking all the :class:`.Instrument` to the Axe they
         should be plotted onto.
     instruments_to_ignore_for_limits :
         Instruments that should not modify the limits.

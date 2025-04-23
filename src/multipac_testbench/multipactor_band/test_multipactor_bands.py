@@ -80,7 +80,7 @@ class TestMultipactorBands(list):
         info_test: str = "",
         several_bands_politics: POLISHER_T = "merge",
     ) -> InstrumentMultipactorBands:
-        """Merge the :class:`InstrumentMultipactorBands` in ``self``.
+        """Merge the :class:`.InstrumentMultipactorBands` in ``self``.
 
         For that, we merge their ``multipactor`` boolean numpy array and
         recreate a :class:`.InstrumentMultipactorBands` with its own
@@ -99,7 +99,7 @@ ion: bool``.
             happened. If 'relaxed', only one instrument suffices.
         name :
             Name that will be given to the returned
-            :class:`InstrumentMultipactorBands`. The default is an empty
+            :class:`.InstrumentMultipactorBands`. The default is an empty
             string, in which case a default meaningful name will be given.
         filter_out_none :
             To remove the ``None`` in ``self``. The default is True.

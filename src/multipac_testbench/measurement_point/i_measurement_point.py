@@ -18,7 +18,7 @@ from numpy.typing import NDArray
 class IMeasurementPoint(ABC):
     """Hold several related measurements.
 
-    In particular, gather :class:`Instrument` which have the same position.
+    In particular, gather :class:`.Instrument` which have the same position.
 
     """
 
@@ -54,6 +54,7 @@ class IMeasurementPoint(ABC):
         self.name = name
         self.position = position
         self.color = color
+        #: Holds all :class:`.Instrument` instances at this location
         self.instruments = [
             instrument_factory.run(
                 instr_name, df_data, color=color, **instr_kw
@@ -67,7 +68,7 @@ class IMeasurementPoint(ABC):
         self.add_instrument(*virtual_instruments)
 
     def add_instrument(self, *instruments: Instrument) -> None:
-        """Add a new instrument :attr:`.instruments`.
+        """Add a new :class:`.Instrument` to :attr:`instruments`.
 
         A priori, useful only for :class:`.VirtualInstrument`, when they rely
         on other :class:`.Instrument` objects to be fully initialized.

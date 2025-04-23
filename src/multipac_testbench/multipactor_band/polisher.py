@@ -16,7 +16,7 @@ from multipac_testbench.multipactor_band.multipactor_band import (
 def group_by_power_cycle(
     input_list: list[IMultipactorBand],
 ) -> list[list[MultipactorBand] | NoMultipactorBand]:
-    """Put in sublists the :class:`IMultipactorBand` of same power cycle.
+    """Put in sublists the :class:`.IMultipactorBand` of same power cycle.
 
     :class:`.NoMultipactorBand` are not put in a sublist.
 

@@ -78,6 +78,7 @@ nitpick_ignore = [
     ("py:class", "numpy.float64"),
     # Temporary fix, see https://github.com/sphinx-doc/sphinx/issues/13178
     ("py:class", "pathlib._local.Path"),
+    ("py:class", "ins.Instrument"),
 ]
 
 # Link to other libraries

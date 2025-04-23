@@ -25,7 +25,7 @@ class ReflectionCoefficient(VirtualInstrument):
 
     where :math:`P_r` is the reflected power and :math:`P_f` is the forward
     power.
-    This object is created by :meth:`InstrumentFactory.run_virtual` when there
+    This object is created by :meth:`.InstrumentFactory.run_virtual` when there
     is one :class:`.ForwardPower` and one :class:`.ReflectedPower` in its
     ``instruments`` argument.
 

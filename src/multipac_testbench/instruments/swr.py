@@ -27,7 +27,7 @@ class SWR(VirtualInstrument):
 
     where :math:`R` is the reflection coefficient.
 
-    This object is created by :meth:`InstrumentFactory.run_virtual` when there
+    This object is created by :meth:`.InstrumentFactory.run_virtual` when there
     is one :class:`.ForwardPower` and one :class:`.ReflectedPower` in its
     ``instruments`` argument.
 

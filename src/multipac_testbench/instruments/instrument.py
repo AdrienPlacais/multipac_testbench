@@ -40,7 +40,7 @@ class Instrument(ABC):
             ``x`` and ``y`` data as saved in the ``CSV`` produced by LabVIEW.
         position :
             The position of the instrument. If irrelevant (global diagnostic),
-            must be set to np.nan.
+            must be set to ``np.nan``.
         is_2d :
             To make the difference between instruments holding a single array
             of data (e.g. current vs time) and those holding several columns
@@ -56,6 +56,8 @@ class Instrument(ABC):
         """
         self.name = name
 
+        #: The position of the instrument. If irrelevant (global diagnostic),
+        #: must be set to ``np.nan``.
         self.position = position
 
         self.is_2d = is_2d
@@ -466,7 +468,7 @@ class Instrument(ABC):
             True where there is multipactor, False elsewhere.
         xdata :
             x position of the data. The default is None, in which case we take
-            :attr:`self._position`.
+            :attr:`position`.
 
         """
         data = self.data

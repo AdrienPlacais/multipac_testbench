@@ -470,13 +470,13 @@ class TestCampaign(list):
         png_path :
             If provided, the resulting figure will be saved at this location.
         png_kwargs :
-            Other keyword arguments passed to the :func:`plot.save_figure`
+            Other keyword arguments passed to the :func:`.save_figure`
             function.
         csv_path :
             If provided, the data to produce the figure will be saved in this
             location.
         csv_kwargs :
-            Other keyword arguments passed to the :func:`plot.save_dataframe`
+            Other keyword arguments passed to the :func:`.save_dataframe`
             function.
         fig_kw :
             Other keyword arguments passed to Figure.
@@ -555,16 +555,16 @@ class TestCampaign(list):
             If provided, the resulting figure will be saved at this location.
             The default is None.
         png_kwargs :
-            Other keyword arguments passed to the :func:`plot.save_figure`
+            Other keyword arguments passed to the :func:`.save_figure`
             function. The default is None.
         csv_path :
             If provided, the data to produce the figure will be saved in this
             location. The default is None.
         csv_kwargs :
-            Other keyword arguments passed to the :func:`plot.save_dataframe`
+            Other keyword arguments passed to the :func:`.save_dataframe`
             function.
         fig_kw :
-            Other keyword arguments passed to the :meth:`pd.DataFrame.plot`
+            Other keyword arguments passed to the :meth:`pandas.DataFrame.plot`
             method.
 
         Returns
@@ -647,16 +647,16 @@ class TestCampaign(list):
         png_path :
             If provided, the resulting figure will be saved at this location.
         png_kwargs :
-            Other keyword arguments passed to the :func:`plot.save_figure`
+            Other keyword arguments passed to the :func:`.save_figure`
             function.
         csv_path :
             If provided, the data to produce the figure will be saved in this
             location.
         csv_kwargs :
-            Other keyword arguments passed to the :func:`plot.save_dataframe`
+            Other keyword arguments passed to the :func:`.save_dataframe`
             function.
         fig_kw :
-            Other keyword arguments passed to the :meth:`pd.DataFrame.plot`
+            Other keyword arguments passed to the :meth:`pandas.DataFrame.plot`
             method.
 
         Returns

@@ -164,7 +164,7 @@ def create(
     power_is_growing: NDArray[np.bool],
     info: str = "",
 ) -> list[MultipactorBand | None]:
-    """Create the different :class:`MultipactorBand`.
+    """Create the different :class:`.MultipactorBand`.
 
     Parameters
     ----------
@@ -178,12 +178,12 @@ def create(
         What to to when several multipactor bands are found in the same
         half-power cycle:
 
-        - ``'keep_first'``: we keep first :class:`MultipactorBand`
-        - ``'keep_last'``: we keep last :class:`MultipactorBand`
-        - ``'keep_all'``: we keep all :class:`MultipactorBand` (currently not
+        - ``'keep_first'``: we keep first :class:`.MultipactorBand`
+        - ``'keep_last'``: we keep last :class:`.MultipactorBand`
+        - ``'keep_all'``: we keep all :class:`.MultipactorBand` (currently not
           implemented)
-        - ``'merge'``: the final :class:`MultipactorBand` spans from start
-          of first :class:`MultipactorBand` to end of last.
+        - ``'merge'``: the final :class:`.MultipactorBand` spans from start
+          of first :class:`.MultipactorBand` to end of last.
 
     Returns
     -------

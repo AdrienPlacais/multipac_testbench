@@ -104,7 +104,7 @@ class IMeasurementPointFactory:
         measurement_points: list[IMeasurementPoint],
         verbose: bool = False,
     ) -> GlobalDiagnostics | None:
-        """Ensure that we have only one :class:`GlobalDiagnostics` object."""
+        """Ensure that we have only one :class:`.GlobalDiagnostics` object."""
         global_diagnostics = [
             x for x in measurement_points if isinstance(x, GlobalDiagnostics)
         ]
@@ -122,8 +122,8 @@ class IMeasurementPointFactory:
 
         raise OSError(
             "Several global diagnostics were found! It means that several "
-            "entries in the .toml file have the word 'global' in their "
-            "entries. Please gather them."
+            "entries in the ``TOML`` file have the word 'global' in their "
+            "entry. Please gather them."
         )
 
     def _filter_pick_ups(

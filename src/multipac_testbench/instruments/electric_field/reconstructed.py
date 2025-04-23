@@ -39,13 +39,13 @@ class Reconstructed(IElectricField):
         forward_power: ForwardPower,
         reflection: ReflectionCoefficient,
         freq_mhz: float,
-        position: NDArray[np.float64] = np.linspace(
-            0.0, 1.3, 201, dtype=np.float64
-        ),
+        position: NDArray[np.float64] | None = None,
         z_ohm: float = 50.0,
         **kwargs,
     ) -> None:
         """Just instantiate."""
+        if position is None:
+            position = np.linspace(0.0, 1.3, 201, dtype=np.float64)
         # from_array maybe
         super().__init__(
             name, raw_data, position=position, is_2d=True, **kwargs
@@ -71,7 +71,7 @@ class Reconstructed(IElectricField):
         """Give the calculated voltage at every pos and sample index.
 
         .. note::
-            In contrary to most :class:`Instrument` objects, here ``data`` is
+            In contrary to most :class:`.Instrument` objects, here ``data`` is
             2D. Axis are the following: ``data[sample_index, position_index]``
 
         """
