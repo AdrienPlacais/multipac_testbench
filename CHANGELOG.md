@@ -5,9 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.1] 2025-04-23
+
+### Changed
+
+- Better overall documentation.
+- Documentation is now hosted on [ReadTheDocs](https://multipac-testbench.readthedocs.io/en/latest/)
+
+### Fixed
+
+- All the links in documentation are resolved.
+
 ## [1.6.0] 2024-09-17
 
 ### Modified
+
 - Proper packaging, local installation with pip.
  - You shall remove the `.src` in the `multipac_testbench` imports.
 
@@ -47,6 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.5.0] 2024-03-02
 
 ### Added
+
 - Instruments: `ForwardPower`, `ReflectedPower`, `SWR`, `ReflectionCoefficient`, `Frequency`
 - `TestMultipactorBands`, `CampaignMultipactorBands` to handle when/where multipactor is detected in a more consistent way. Multipactor conditioned during test properly handled.
 - `sweet_plot`, `plot_thresholds`, `at_last_threshold`, `susceptiblity` methods
