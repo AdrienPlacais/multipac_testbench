@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 title: "MULTIPAC testbench"
 abstract: Treat the signals produced by the MULTIPAC test bench.
-version: 1.6.0
-date-released: "2024-09-17"
+version: 1.6.3
+date-released: '2025-04-23'
 authors:
   - family-names: Plaçais
     given-names: Adrien
