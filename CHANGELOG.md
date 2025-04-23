@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Examples in documentation.
+- Package is available on PyPI and can be installed with `pip install multipac_testbench`.
 
 ## [1.6.2] 2025-04-23
 
