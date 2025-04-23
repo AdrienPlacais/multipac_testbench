@@ -615,7 +615,10 @@ class MultipactorTest:
 
         """
         forward_power = self.get_instrument(ins.ForwardPower)
-        assert isinstance(forward_power, ins.ForwardPower)
+        assert isinstance(forward_power, ins.ForwardPower), (
+            f"{forward_power} is a {type(forward_power)} instead of a "
+            "ForwardPower."
+        )
         if power_is_growing_kw is None:
             power_is_growing_kw = {}
         power_is_growing = forward_power.where_is_growing(
