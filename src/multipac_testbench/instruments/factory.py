@@ -159,7 +159,7 @@ class InstrumentFactory:
     def _constant_values_defined_by_user(
         self,
         n_points: int,
-    ) -> Sequence[ins.VirtualInstrument]:
+    ) -> list[ins.VirtualInstrument]:
         """Define a fake frequency probe. Maybe a fake SWR, fake R later."""
         constants = []
         if self.freq_mhz is not None:
