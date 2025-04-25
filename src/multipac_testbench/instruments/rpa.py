@@ -1,13 +1,38 @@
-"""Define the actual RPA."""
+"""Define the RPA."""
 
 from typing import Self
 
 import numpy as np
 import pandas as pd
-from multipac_testbench.instruments.rpa_current import RPACurrent
-from multipac_testbench.instruments.rpa_grid import RPAPotential
+from multipac_testbench.instruments.instrument import Instrument
 from multipac_testbench.instruments.virtual_instrument import VirtualInstrument
 from numpy.typing import NDArray
+
+
+class RPAPotential(Instrument):
+    """A probe to measure potential on RPA grid."""
+
+    def __init__(self, *args, **kwargs) -> None:
+        """Just instantiate."""
+        return super().__init__(*args, **kwargs)
+
+    @classmethod
+    def ylabel(cls) -> str:
+        """Label used for plots."""
+        return r"Grid potential [V]"
+
+
+class RPACurrent(Instrument):
+    """A probe to measure collected current on RPA."""
+
+    def __init__(self, *args, **kwargs) -> None:
+        """Just instantiate."""
+        return super().__init__(*args, **kwargs)
+
+    @classmethod
+    def ylabel(cls) -> str:
+        """Label used for plots."""
+        return r"RPA current [$\mu$A]"
 
 
 class RPA(VirtualInstrument):
