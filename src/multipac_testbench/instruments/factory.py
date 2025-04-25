@@ -2,6 +2,7 @@
 
 import logging
 from collections.abc import Sequence
+from pprint import pformat
 from typing import Any, Literal
 
 import multipac_testbench.instruments as ins
@@ -14,6 +15,8 @@ STRING_TO_INSTRUMENT_CLASS = {
     "ForwardPower": ins.ForwardPower,
     "OpticalFibre": ins.OpticalFibre,
     "Penning": ins.Penning,
+    "RPACurrent": ins.RPACurrent,
+    "RPAPotential": ins.RPAPotential,
     "ReflectedPower": ins.ReflectedPower,
 }  #:
 INSTRUMENT_NAME_T = Literal[
@@ -23,6 +26,8 @@ INSTRUMENT_NAME_T = Literal[
     "ForwardPower",
     "OpticalFibre",
     "Penning",
+    "RPACurrent",
+    "RPAPotential",
     "ReflectedPower",
 ]
 
@@ -69,8 +74,8 @@ class InstrumentFactory:
 
         """
         assert class_name in STRING_TO_INSTRUMENT_CLASS, (
-            f"{class_name = } not recognized, check STRING_TO_INSTRUMENT_CLASS"
-            "in instrument/factory.py"
+            f"{class_name = } not recognized, allowed values are:\n"
+            f"{pformat(INSTRUMENT_NAME_T)}\nSee: instruments/factory.py"
         )
         instrument_class = STRING_TO_INSTRUMENT_CLASS[class_name]
 
