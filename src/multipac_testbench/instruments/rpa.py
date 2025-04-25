@@ -13,9 +13,9 @@ from numpy.typing import NDArray
 class RPAPotential(Instrument):
     """A probe to measure potential on RPA grid."""
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args, position: float = np.nan, **kwargs) -> None:
         """Just instantiate."""
-        return super().__init__(*args, **kwargs)
+        return super().__init__(*args, position=position, **kwargs)
 
     @classmethod
     def ylabel(cls) -> str:
@@ -27,7 +27,11 @@ class RPACurrent(Instrument):
     """A probe to measure collected current on RPA."""
 
     def __init__(
-        self, *args, caliber_mA: float | None = None, **kwargs
+        self,
+        *args,
+        caliber_mA: float | None = None,
+        position: float = np.nan,
+        **kwargs,
     ) -> None:
         """Instantiate with the caliber.
 
@@ -48,7 +52,7 @@ class RPACurrent(Instrument):
                 f"default {caliber_mA =}."
             )
         self._caliber_mA = caliber_mA
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, position=position, **kwargs)
         self._recalibrate_current()
 
     @classmethod
