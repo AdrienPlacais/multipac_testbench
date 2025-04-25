@@ -86,16 +86,42 @@ class RPA(VirtualInstrument):
         **kwargs,
     ) -> Self:
         """Compute the distribution from the current and grid potential."""
-        data = _compute_energy_distribution(
-            rpa_current.data, rpa_potential.data
+        averaged_current, corresponding_potentials = (
+            _average_points_with_same_grid_potential(
+                rpa_current.data, rpa_potential.data
+            )
         )
-        ser_data = pd.Series(data, name=name)
-        return cls(name=name, raw_data=ser_data, position=np.nan, **kwargs)
+        distribution = _compute_energy_distribution(
+            averaged_current,
+            corresponding_potentials,
+        )
+        ser_distribution = pd.Series(distribution, name=name)
+        return cls(
+            name=name, raw_data=ser_distribution, position=np.nan, **kwargs
+        )
 
     @classmethod
     def ylabel(cls) -> str:
         """Label used for plots."""
         return r"Energy distribution [$\mu$A/V]"
+
+
+def _average_points_with_same_grid_potential(
+    current: NDArray[np.float64], potential: NDArray[np.float64]
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    """Average the current.
+
+    .. todo::
+        Sometimes, you measure the RPA current several times with the same grid
+        potential to improve accuracy. This method will average this RPA
+        currents.
+        Note: I will have to make a difference between two consecutive
+        points, and points with the same grid potential but corresponding
+        to increasing and decreasing power cycles.
+
+    """
+    logging.error("RPA averaging not implemented yet.")
+    return current, potential
 
 
 def _compute_energy_distribution(
