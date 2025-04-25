@@ -7,6 +7,7 @@ from typing import Any, Literal
 
 import multipac_testbench.instruments as ins
 import pandas as pd
+from multipac_testbench.instruments.rpa import RPA
 
 STRING_TO_INSTRUMENT_CLASS = {
     "CurrentProbe": ins.CurrentProbe,
@@ -102,8 +103,7 @@ class InstrumentFactory:
         ----------
         instruments :
             The :class:`.Instrument` that were already created. They are used
-            to compute derived quantities, in particular :math:`SWR` and
-            :math:`R`.
+            to compute derived quantities, eg :math:`SWR` and :math:`R`.
         is_global :
             Tells if the :class:`.IMeasurementPoint` from which this method is
             called is global. It allows to forbid creation of one
@@ -133,11 +133,15 @@ class InstrumentFactory:
         if len(constants) > 0:
             virtuals += constants
 
+        rpa = self._rpa_related(instruments, **kwargs)
+        if rpa is not None:
+            virtuals.append(rpa)
+
         return virtuals
 
     def _power_related(
         self, instruments: Sequence[ins.Instrument], **kwargs
-    ) -> Sequence[ins.VirtualInstrument]:
+    ) -> list[ins.VirtualInstrument]:
         """Create :class:`.ReflectionCoefficient` and :class:`.SWR`."""
         forwards = [x for x in instruments if isinstance(x, ins.ForwardPower)]
         reflecteds = [
@@ -149,7 +153,7 @@ class InstrumentFactory:
                 "instruments. Skipping SWR and R, this may create problems in "
                 "the future."
             )
-            return ()
+            return []
 
         forward = forwards[0]
         reflected = reflecteds[0]
@@ -159,7 +163,34 @@ class InstrumentFactory:
         swr = ins.SWR.from_reflection_coefficient(
             reflection_coefficient, **kwargs
         )
-        return reflection_coefficient, swr
+        return [reflection_coefficient, swr]
+
+    def _rpa_related(
+        self, instruments: Sequence[ins.Instrument], **kwargs
+    ) -> RPA | None:
+        """Create :class:`.RPA`."""
+        rpa_potentials = [
+            x for x in instruments if isinstance(x, ins.RPAPotential)
+        ]
+        rpa_currents = [
+            x for x in instruments if isinstance(x, ins.RPACurrent)
+        ]
+        if len(rpa_currents) == 0 and len(rpa_currents) == 0:
+            logging.debug("No RPA defined. Skipping.")
+            return
+        if len(rpa_potentials) != 1 or len(rpa_currents) != 1:
+            logging.error(
+                "Should have exactly one RPAPotential and one RPAPotential "
+                "instruments. Skipping."
+            )
+            return
+
+        potential = rpa_potentials[0]
+        current = rpa_currents[0]
+        rpa = ins.RPA.from_current_and_potential(
+            rpa_current=current, rpa_potential=potential, **kwargs
+        )
+        return rpa
 
     def _constant_values_defined_by_user(
         self,
