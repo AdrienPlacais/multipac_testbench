@@ -133,6 +133,11 @@ def _average_points_with_same_grid_potential(
 def _compute_energy_distribution(
     averaged_current: NDArray[np.float64],
     corresponding_potentials: NDArray[np.float64],
+    tol: float = 1e-6,
 ) -> NDArray[np.float64]:
     """Derivate signal to obtain distribution."""
-    return np.diff(averaged_current) / np.diff(corresponding_potentials)
+    diff_i = np.diff(averaged_current)
+    diff_pot = np.diff(corresponding_potentials)
+    invalid_indexes = np.where(np.abs(diff_pot) < tol)
+    diff_pot[invalid_indexes] = np.nan
+    return diff_i / diff_pot
