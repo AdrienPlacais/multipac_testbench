@@ -120,6 +120,7 @@ def _average_points_with_same_grid_potential(
         to increasing and decreasing power cycles.
 
     """
+    logging.debug("Averaging RPA currents on same grid potential.")
     logging.error("RPA averaging not implemented yet.")
     return current, potential
 
