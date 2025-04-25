@@ -126,7 +126,8 @@ def _average_points_with_same_grid_potential(
 
 
 def _compute_energy_distribution(
-    current: NDArray[np.float64], potential: NDArray[np.float64]
+    averaged_current: NDArray[np.float64],
+    corresponding_potentials: NDArray[np.float64],
 ) -> NDArray[np.float64]:
     """Derivate signal to obtain distribution."""
-    return np.diff(current) / np.diff(potential)
+    return np.diff(averaged_current) / np.diff(corresponding_potentials)
