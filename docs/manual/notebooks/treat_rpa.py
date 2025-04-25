@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
-"""Define a classic workflow to study the RPA signals.
-
-.. todo::
-    Argument in sweet_plot to plot increasing and decreasing values differently
-
-"""
+"""Define a classic workflow to study the RPA signals."""
 import tomllib
 from pathlib import Path
 from pprint import pformat, pprint
@@ -26,4 +21,6 @@ if __name__ == "__main__":
     )
 
     # Plot RPA current vs RPA potential
-    _, _ = multipactor_test.sweet_plot(ins.RPACurrent, xdata=ins.RPAPotential)
+    _, _ = multipactor_test.sweet_plot(
+        ins.RPACurrent, xdata=ins.RPAPotential, tail=1200
+    )

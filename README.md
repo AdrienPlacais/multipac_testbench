@@ -35,3 +35,7 @@ Then, add `multipac_testbench.src` to your `$PYTHONPATH` environment variable.
 
 - [ ] Calibration of new field probes.
 - [ ] Implementation of Retarding Field Analyzer.
+    - [ ] RPA grid in V instead of kV.
+- [ ] `sweet_plot` updates for better RPA treatment:
+    - [ ] Allow for `head` argument, working similarly to `tail`.
+    - [ ] Argument to plot increasing and decreasing values differently. Useful when plotting RPA current against RPA grid voltage.
