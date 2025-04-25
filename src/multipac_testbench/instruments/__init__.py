@@ -22,6 +22,7 @@ from multipac_testbench.instruments.power import (
 from multipac_testbench.instruments.reflection_coefficient import (
     ReflectionCoefficient,
 )
+from multipac_testbench.instruments.rpa import RPA, RPACurrent, RPAPotential
 from multipac_testbench.instruments.swr import SWR
 from multipac_testbench.instruments.virtual_instrument import VirtualInstrument
 
@@ -39,6 +40,9 @@ __all__ = [
     "Reconstructed",
     "ReflectedPower",
     "ReflectionCoefficient",
+    "RPA",
+    "RPACurrent",
+    "RPAPotential",
     "SWR",
     "VirtualInstrument",
 ]
