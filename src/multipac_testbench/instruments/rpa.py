@@ -14,13 +14,14 @@ class RPAPotential(Instrument):
     """A probe to measure potential on RPA grid."""
 
     def __init__(self, *args, position: float = np.nan, **kwargs) -> None:
-        """Just instantiate."""
-        return super().__init__(*args, position=position, **kwargs)
+        """Instantiate object and convert signal to :unit:`V`."""
+        super().__init__(*args, position=position, **kwargs)
+        self._raw_data *= 1e3
 
     @classmethod
     def ylabel(cls) -> str:
         """Label used for plots."""
-        return r"Grid potential [kV]"
+        return r"Grid potential [V]"
 
 
 class RPACurrent(Instrument):
@@ -107,7 +108,7 @@ class RPA(VirtualInstrument):
     @classmethod
     def ylabel(cls) -> str:
         """Label used for plots."""
-        return r"Energy distribution [$\mu$A/kV]"
+        return r"Energy distribution [$\mu$A/V]"
 
 
 def _average_points_with_same_grid_potential(
