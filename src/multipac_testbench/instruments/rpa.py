@@ -1,5 +1,6 @@
 """Define the RPA."""
 
+import logging
 from typing import Self
 
 import numpy as np
@@ -25,14 +26,46 @@ class RPAPotential(Instrument):
 class RPACurrent(Instrument):
     """A probe to measure collected current on RPA."""
 
-    def __init__(self, *args, **kwargs) -> None:
-        """Just instantiate."""
-        return super().__init__(*args, **kwargs)
+    def __init__(
+        self, *args, caliber_mA: float | None = None, **kwargs
+    ) -> None:
+        """Instantiate with the caliber.
+
+        .. note::
+            The current is automatically re-scaled to ``caliber_mA`` when this
+            object is instantiated.
+
+        Parameters
+        ----------
+        caliber_mA :
+            Caliber in :unit:`mA`.
+
+        """
+        if caliber_mA is None:
+            caliber_mA = 20.0
+            logging.error(
+                "The RPA current caliber was not given. Falling back on "
+                f"default {caliber_mA =}."
+            )
+        self._caliber_mA = caliber_mA
+        super().__init__(*args, **kwargs)
+        self._recalibrate_current()
 
     @classmethod
     def ylabel(cls) -> str:
         """Label used for plots."""
         return r"RPA current [$\mu$A]"
+
+    def _recalibrate_current(self) -> None:
+        r"""Rescale the measured data using the caliber.
+
+        .. math::
+
+            i_{real\,in\,mA} = i_{LabVIEW} * ``caliber_mA`` / 2
+
+        """
+        logging.debug(f"Rescaling RPA current with {self._caliber_mA = }")
+        self._raw_data *= self._caliber_mA * 0.5
 
 
 class RPA(VirtualInstrument):
