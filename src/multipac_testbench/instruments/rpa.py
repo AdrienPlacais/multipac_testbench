@@ -20,7 +20,7 @@ class RPAPotential(Instrument):
     @classmethod
     def ylabel(cls) -> str:
         """Label used for plots."""
-        return r"Grid potential [V]"
+        return r"Grid potential [kV]"
 
 
 class RPACurrent(Instrument):
@@ -103,7 +103,7 @@ class RPA(VirtualInstrument):
     @classmethod
     def ylabel(cls) -> str:
         """Label used for plots."""
-        return r"Energy distribution [$\mu$A/V]"
+        return r"Energy distribution [$\mu$A/kV]"
 
 
 def _average_points_with_same_grid_potential(
