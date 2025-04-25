@@ -1,0 +1,84 @@
+# ==================================
+[global]
+[global.instruments_kw]
+
+[global.instruments_kw.NI9205_Power1]
+class_name = "ForwardPower"
+
+[global.instruments_kw.NI9205_Power2]
+class_name = "ReflectedPower"
+
+[global.instruments_kw.NI9205_ERPA]
+caliber_mA = 20.0
+class_name = "RPACurrent"
+
+[global.instruments_kw.NI9205_Spellman]
+class_name = "RPAPotential"
+
+# ==================================
+[V1]
+position = 0.130
+
+[V1.instruments_kw]
+[V1.instruments_kw.NI9205_Penning1]
+class_name = "Penning"
+
+# ==================================
+[V2]
+position = 0.611
+
+[V2.instruments_kw]
+[V2.instruments_kw.NI9205_Penning]
+class_name = "Penning"
+
+# ==================================
+[E4]
+position = 0.611
+
+[E4.instruments_kw]
+[E4.instruments_kw.NI9205_MP4l]
+class_name = "CurrentProbe"
+
+[E4.instruments_kw.NI9205_E4]
+calibration_file = "../data/calibration/E4_fit_calibration.csv"
+class_name = "ElectricFieldProbe"
+g_probe = -74.6
+patch = true
+
+# ==================================
+[E8]
+position = 0.611
+
+[E8.instruments_kw]
+[E8.instruments_kw.NI9205_MP8l]
+class_name = "CurrentProbe"
+
+# ==================================
+# [OF]
+# position = 0.656
+#
+# [OF.instruments_kw]
+# [OF.instruments_kw.NI9205_Arc1]
+# class_name = "OpticalFibre"
+
+# ==================================
+[V3]
+position = 1.092
+
+[V3.instruments_kw]
+[V3.instruments_kw.NI9205_Penning2]
+class_name = "Penning"
+
+# ==================================
+[E7]
+position = 1.222
+
+[E7.instruments_kw]
+[E7.instruments_kw.NI9205_MP7l]
+class_name = "CurrentProbe"
+
+[E7.instruments_kw.NI9205_E7]
+calibration_file = "../data/calibration/E7_fit_calibration.csv"
+class_name = "ElectricFieldProbe"
+g_probe = -74.9
+patch = true
