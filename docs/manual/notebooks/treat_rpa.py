@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Define a classic workflow to study the RPA signals."""
+"""Define a classic workflow to study the RPA signals.
+
+.. todo::
+    Argument in sweet_plot to plot increasing and decreasing values differently
+
+"""
 import tomllib
 from pathlib import Path
 from pprint import pformat, pprint
