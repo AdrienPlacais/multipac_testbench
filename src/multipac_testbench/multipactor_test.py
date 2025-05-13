@@ -581,7 +581,7 @@ class MultipactorTest:
         self,
         multipac_detector: Callable[[NDArray[np.float64]], NDArray[np.bool]],
         instrument_class: ABCMeta,
-        power_is_growing_kw: dict[str, int | float] | None = None,
+        power_is_growing_kw: dict[str, Any] | None = None,
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
         debug: bool = False,
         **kwargs,
@@ -598,8 +598,7 @@ class MultipactorTest:
             Type of instrument on which ``multipac_detector`` should be
             applied.
         power_is_growing_kw :
-            Keyword arguments passed to the function that determines when power
-            is increasing, when it is decreasing. The default is None.
+            Keyword arguments passed to :meth:`.ForwardPower.where_is_growing`.
         measurement_points_to_exclude :
             Some measurement points that should not be considered. The default
             is an empty tuple.
@@ -615,16 +614,7 @@ class MultipactorTest:
             :class:`.Instrument` of type ``instrument_class``.
 
         """
-        forward_power = self.get_instrument(ins.ForwardPower)
-        assert isinstance(forward_power, ins.ForwardPower), (
-            f"{forward_power} is a {type(forward_power)} instead of a "
-            "ForwardPower."
-        )
-        if power_is_growing_kw is None:
-            power_is_growing_kw = {}
-        power_is_growing = forward_power.where_is_growing(
-            **power_is_growing_kw
-        )
+        power_is_growing = self._where_is_growing(power_is_growing_kw)
 
         measurement_points = self.get_measurement_points(
             to_exclude=measurement_points_to_exclude
