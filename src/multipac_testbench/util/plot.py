@@ -103,8 +103,8 @@ def finish_fig(
 
 
 def create_df_to_plot(
-    data_to_plot: list[pd.Series],
-    tail: int = -1,
+    data_to_plot: list[pd.Series | pd.DataFrame],
+    tail: int | None = None,
     column_names: str | list[str] = "",
     **kwargs,
 ) -> pd.DataFrame:
@@ -115,13 +115,12 @@ def create_df_to_plot(
     data_to_plot :
         List of the data that will be plotted.
     tail :
-        The number of points to plot, starting from the end of the test
-        (fully conditioned). The default is ``-1``, in which case the full
-        test is plotted.
+        The number of points to plot, starting from the end of the test (fully
+        conditioned).
     column_names :
-        To override the default column names. The default is an empty string,
-        in which we keep default names. This is used in particular with the
-        method :meth:`.TestCampaign.sweet_plot` when ``all_on_same_plot=True``.
+        To override the default column names. This is used in particular with
+        the method :meth:`.TestCampaign.sweet_plot` when
+        ``all_on_same_plot=True``.
     kwargs :
         Other keyword arguments.
 
@@ -131,20 +130,28 @@ def create_df_to_plot(
         Contains x and y data that will be plotted.
 
     """
+    lengths = [len(item) for item in data_to_plot]
+    if len(set(lengths)) > 1:
+        logging.warning(
+            f"Not all data sources have the same length: {lengths}"
+        )
     df_to_plot = pd.concat(data_to_plot, axis=1)
-    df_to_plot = df_to_plot.tail(tail)
+    if tail is not None:
+        df_to_plot = df_to_plot.tail(tail)
     # Remove duplicate columns
     df_to_plot = df_to_plot.loc[:, ~df_to_plot.columns.duplicated()].copy()
 
-    if column_names:
-        if isinstance(column_names, str):
-            column_names = [column_names]
-            old_column_names = df_to_plot.columns.values
-            assert len(column_names) == len(old_column_names)
-            columns_mapper = {
-                old: new for old, new in zip(old_column_names, column_names)
-            }
-            df_to_plot.rename(columns=columns_mapper, inplace=True)
+    if not column_names:
+        return df_to_plot
+
+    if isinstance(column_names, str):
+        column_names = [column_names]
+    old_column_names = df_to_plot.columns.values
+    assert len(column_names) == len(old_column_names)
+    columns_mapper = {
+        old: new for old, new in zip(old_column_names, column_names)
+    }
+    df_to_plot.rename(columns=columns_mapper, inplace=True)
 
     return df_to_plot
 
