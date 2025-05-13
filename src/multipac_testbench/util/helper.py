@@ -1,5 +1,6 @@
 """Define general usage functions."""
 
+from collections.abc import Iterable, Iterator
 from pathlib import Path
 from typing import TypeVar
 
@@ -13,6 +14,15 @@ T = TypeVar("T")
 def is_nested_list(obj: list[T] | list[list[T]]) -> bool:
     """Tell if ``obj`` is a nested list."""
     return bool(obj) and isinstance(obj[0], list)
+
+
+def flatten[T](nest: Iterable[T]) -> Iterator[T]:
+    """Flatten nested list of lists of..."""
+    for _in in nest:
+        if isinstance(_in, Iterable) and not isinstance(_in, (str, bytes)):
+            yield from flatten(_in)
+        else:
+            yield _in
 
 
 def split_rows_by_mask(

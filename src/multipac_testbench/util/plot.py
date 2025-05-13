@@ -255,6 +255,7 @@ def actual_plot(
         x_columns = [x_columns for _ in y_columns]
 
     assert isinstance(x_columns, list)
+
     if len(x_columns) != len(y_columns):
         logging.error(
             f"Mismatch between the length of {x_columns = } and {y_columns = }"

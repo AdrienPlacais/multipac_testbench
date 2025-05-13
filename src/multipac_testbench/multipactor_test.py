@@ -44,7 +44,11 @@ from multipac_testbench.multipactor_band.test_multipactor_bands import (
 )
 from multipac_testbench.util import plot
 from multipac_testbench.util.animate import get_limits
-from multipac_testbench.util.helper import output_filepath, split_rows_by_mask
+from multipac_testbench.util.helper import (
+    flatten,
+    output_filepath,
+    split_rows_by_mask,
+)
 from numpy.typing import NDArray
 
 
@@ -252,9 +256,11 @@ class MultipactorTest:
 
         if not xlabel:
             xlabel = xdata.name if isinstance(xdata, Instrument) else ""
+
         if axes is None:
             if not title:
                 title = str(self)
+
             _, dic_axes = plot.create_fig(
                 title=title if isinstance(title, str) else title[0],
                 instruments_to_plot=ydata,
@@ -387,8 +393,6 @@ class MultipactorTest:
         color: dict[str, str] = {}
 
         for sublist in instruments:
-            # In this sublist, we should have only Instruments of the same
-            # nature. They will be plotted on the same Axes
             sub_ycols = []
 
             for instrument in sublist:
@@ -410,8 +414,11 @@ class MultipactorTest:
                     continue
 
                 names = df.columns.to_list()
+                if power_is_growing is not None:
+                    names = [names]
                 sub_ycols.extend(names)
-                for name in names:
+
+                for name in flatten(names):
                     color[name] = instrument.color
 
             y_columns.append(sub_ycols)
