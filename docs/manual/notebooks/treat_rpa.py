@@ -2,10 +2,8 @@
 """Define a classic workflow to study the RPA signals."""
 import tomllib
 from pathlib import Path
-from pprint import pformat, pprint
 
-import matplotlib.pyplot as plt
-import multipac_testbench.instruments as ins
+from multipac_testbench.instruments import RPA, RPACurrent, RPAPotential
 from multipac_testbench.multipactor_test import MultipactorTest
 
 if __name__ == "__main__":
@@ -20,7 +18,18 @@ if __name__ == "__main__":
         results_path, config, freq_mhz=120.0, swr=1.0, sep=","
     )
 
+    power_is_growing_kw = {
+        "minimum_number_of_points": 10,
+        "n_trailing_points_to_check": 5,
+    }
+
     # Plot RPA current vs RPA potential
-    _, _ = multipactor_test.sweet_plot(
-        ins.RPACurrent, xdata=ins.RPAPotential, tail=1200
+    fig, axes = multipactor_test.sweet_plot(
+        RPACurrent,
+        xdata=RPAPotential,
+        # power_is_growing_kw=power_is_growing_kw,
+        tail=-16,
     )
+
+    # Plot distribution
+    # fig, axes = multipactor_test.sweet_plot(RPA, xdata=RPAPotential)
