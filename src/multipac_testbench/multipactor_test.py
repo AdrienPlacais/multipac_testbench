@@ -20,6 +20,7 @@ import logging
 from abc import ABCMeta
 from collections.abc import Callable, Iterable, Sequence
 from pathlib import Path
+from typing import Any
 
 import multipac_testbench.instruments as ins
 import numpy as np
@@ -643,6 +644,34 @@ class MultipactorTest:
             instrument_multipactor_bands, power_is_growing
         )
         return test_multipactor_bands
+
+    def _where_is_growing(
+        self, power_is_growing_kw: dict[str, Any] | None = None
+    ) -> NDArray[np.bool]:
+        """Determine where the power is growing.
+
+        Parameters
+        ----------
+        power_is_growing_kw :
+            Keyword arguments passed to :meth:`.ForwardPower.where_is_growing`.
+
+        Returns
+        -------
+        power_is_growing :
+            ``True`` where power grows, ``False`` where it decreases.
+
+        """
+        forward_power = self.get_instrument(ins.ForwardPower)
+        assert isinstance(forward_power, ins.ForwardPower), (
+            f"{forward_power} is a {type(forward_power)} instead of a "
+            "ForwardPower."
+        )
+        if power_is_growing_kw is None:
+            power_is_growing_kw = {}
+        power_is_growing = forward_power.where_is_growing(
+            **power_is_growing_kw
+        )
+        return power_is_growing
 
     def animate_instruments_vs_position(
         self,
