@@ -111,10 +111,10 @@ class TestCampaign(list):
         csv_folder: str | None = None,
         all_on_same_plot: bool = False,
         **kwargs,
-    ) -> tuple[
-        list[Axes] | list[NDArray[Axes]] | Axes | NDArray[Axes],
-        list[pd.DataFrame] | pd.DataFrame,
-    ]:
+    ) -> (
+        tuple[list[Axes], pd.DataFrame]
+        | tuple[list[list[Axes]], list[pd.DataFrame]]
+    ):
         """Recursively call :meth:`.MultipactorTest.sweet_plot`.
 
         Parameters
@@ -182,13 +182,12 @@ class TestCampaign(list):
         csv_path: Path | None = None,
         csv_kwargs: dict | None = None,
         **kwargs,
-    ) -> tuple[Axes | NDArray[Axes], pd.DataFrame]:
+    ) -> tuple[list[Axes], pd.DataFrame]:
         """Plot the various signals on the same Axes."""
         if len(args) > 1:
             logging.warning(
-                "I am not sure how the interaction of "
-                "all_on_same_plot with several instruments plotted"
-                " will go."
+                "I am not sure how the interaction of all_on_same_plot with "
+                "several instruments plotted will go."
             )
         axes = None
         all_df = []
@@ -197,7 +196,7 @@ class TestCampaign(list):
             axes, df_plot = test.sweet_plot(
                 *args,
                 test_multipactor_bands=band,
-                ax=axes,
+                axes=axes,
                 column_names=str(test),
                 title=" ",
                 test_color=colors[i],
@@ -226,7 +225,7 @@ class TestCampaign(list):
         png_folder: str | None = None,
         csv_folder: str | None = None,
         **kwargs,
-    ) -> tuple[list[Axes] | list[NDArray[Axes]], list[pd.DataFrame]]:
+    ) -> tuple[list[list[Axes]], list[pd.DataFrame]]:
         """Recursively call :meth:`.MultipactorTest.plot_thresholds`."""
         all_axes = []
         all_df = []

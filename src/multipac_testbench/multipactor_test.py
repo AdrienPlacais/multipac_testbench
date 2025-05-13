@@ -29,6 +29,7 @@ from matplotlib import animation
 from matplotlib.artist import Artist
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+from multipac_testbench.instruments.instrument import Instrument
 from multipac_testbench.measurement_point.factory import (
     IMeasurementPointFactory,
 )
@@ -43,7 +44,7 @@ from multipac_testbench.multipactor_band.test_multipactor_bands import (
 )
 from multipac_testbench.util import plot
 from multipac_testbench.util.animate import get_limits
-from multipac_testbench.util.helper import output_filepath
+from multipac_testbench.util.helper import output_filepath, split_rows_by_mask
 from numpy.typing import NDArray
 
 
@@ -158,9 +159,10 @@ class MultipactorTest:
         png_kwargs: dict | None = None,
         csv_path: Path | None = None,
         csv_kwargs: dict | None = None,
-        ax: Axes | NDArray[Axes] | None = None,
+        axes: list[Axes] | None = None,
+        power_is_growing_kw: dict[str, Any] | None = None,
         **kwargs,
-    ) -> tuple[Axes | NDArray[Axes], pd.DataFrame]:
+    ) -> tuple[list[Axes], pd.DataFrame]:
         """Plot ``ydata`` versus ``xdata``.
 
         .. todo::
@@ -192,8 +194,7 @@ class MultipactorTest:
             If provided, information is added to the plot to show where
             multipactor happens.
         column_names :
-            To override the default column names. The default is an empty
-            string, in which we keep default names. This is used in particular
+            To override the default column names. This is used in particular
             with the method :meth:`.TestCampaign.sweet_plot` when
             ``all_on_same_plot=True``.
         test_color :
@@ -206,6 +207,10 @@ class MultipactorTest:
         csv_path :
             If specified, save the data used to produce the plot in
             ``csv_path``.
+        power_is_growing_kw :
+            Keyword arguments passed to :meth:`.ForwardPower.where_is_growing`.
+            If provided, the linestyle will be solid for increasing powers,
+            dashed for decreasing.
         **kwargs :
             Other keyword arguments passed to :meth:`pandas.DataFrame.plot`,
             :meth:`._set_y_data`, :func:`.create_df_to_plot`,
@@ -219,12 +224,19 @@ class MultipactorTest:
             DataFrame holding the data that is plotted.
 
         """
+        power_is_growing = (
+            self._where_is_growing(power_is_growing_kw)
+            if power_is_growing_kw is not None
+            else None
+        )
+
         data_to_plot, x_columns = self._set_x_data(xdata, exclude=exclude)
         data_to_plot, y_columns, color = self._set_y_data(
             data_to_plot,
             *ydata,
             exclude=exclude,
             column_names=column_names,
+            power_is_growing=power_is_growing,
             **kwargs,
         )
         if test_color is not None:
@@ -234,42 +246,50 @@ class MultipactorTest:
             data_to_plot, tail=tail, column_names=column_names, **kwargs
         )
 
-        if not title:
-            title = str(self)
-
         x_column, y_column = plot.match_x_and_y_column_names(
             x_columns, y_columns
         )
 
-        ax = plot.actual_plot(
+        if not xlabel:
+            xlabel = xdata.name if isinstance(xdata, Instrument) else ""
+        if axes is None:
+            if not title:
+                title = str(self)
+            _, dic_axes = plot.create_fig(
+                title=title if isinstance(title, str) else title[0],
+                instruments_to_plot=ydata,
+                xlabel=xlabel,
+            )
+            axes = list(dic_axes.values())
+
+        axes = plot.actual_plot(
             df_to_plot,
             x_column,
             y_column,
+            axes=axes,
             grid=grid,
-            title=title,
-            ax=ax,
             color=color,
             **kwargs,
         )
 
         plot.set_labels(
-            ax, *ydata, xdata=xdata, xlabel=xlabel, ylabel=ylabel, **kwargs
+            axes, *ydata, xdata=xdata, xlabel=xlabel, ylabel=ylabel, **kwargs
         )
 
         if test_multipactor_bands is not None:
             plot.add_instrument_multipactor_bands(
-                test_multipactor_bands, ax, twinx=True
+                test_multipactor_bands, axes, twinx=True
             )
 
         if png_path is not None:
             if png_kwargs is None:
                 png_kwargs = {}
-            plot.save_figure(ax, png_path, **png_kwargs)
+            plot.save_figure(axes, png_path, **png_kwargs)
         if csv_path is not None:
             if csv_kwargs is None:
                 csv_kwargs = {}
             plot.save_dataframe(df_to_plot, csv_path, **csv_kwargs)
-        return ax, df_to_plot
+        return axes, df_to_plot
 
     def _set_x_data(
         self,
@@ -283,7 +303,7 @@ class MultipactorTest:
         xdata :
             Class of an instrument, or None (in this case, use default index).
         exclude :
-            Name of instruments to exclude. The default is an empty tuple.
+            Name of instruments to exclude.
 
         Returns
         -------
@@ -309,8 +329,8 @@ class MultipactorTest:
         for instrument in instruments:
             if isinstance(instrument.data_as_pd, pd.DataFrame):
                 logging.error(
-                    f"You want to plot {instrument}, which data is "
-                    "2D. Not supported."
+                    f"You want to plot {instrument}, which data is 2D. Not "
+                    "supported."
                 )
                 continue
             data_to_plot.append(instrument.data_as_pd)
@@ -323,6 +343,7 @@ class MultipactorTest:
         *ydata: ABCMeta,
         exclude: Sequence[str] = (),
         column_names: str | list[str] = "",
+        power_is_growing: NDArray[np.bool] | None = None,
         **kwargs,
     ) -> tuple[list[pd.Series], list[list[str]], dict[str, str]]:
         """Set the y-data that will be plotted.
@@ -335,11 +356,15 @@ class MultipactorTest:
         *ydata :
             The class of the instruments to plot.
         exclude :
-            Name of some instruments to exclude. The default is an empty tuple.
+            Name of some instruments to exclude.
         column_names :
-            To override the default column names. The default is an empty
-            string, in which we keep default names. This is used in particular
-            with the method :meth:`.TestCampaign.sweet_plot` when
+            To override the default column names. This is used in particular
+            with the method :meth:`.TestCampaign.sweet_plot`, when
+            ``all_on_same_plot=True``.
+         power_is_growing :
+            Boolean array of same length as the data, indicating whether
+            forward power is increasing. If provided, each y column will be
+            split into increasing and decreasing subsets.
         kwargs :
             Other keyword arguments.
 
@@ -348,7 +373,7 @@ class MultipactorTest:
         data_to_plot :
             List containing all the series that will be plotted.
         y_columns :
-            Containts, for every subplot, the name of the columns to plot.
+            Contains, for every subplot, the name of the columns to plot.
             If ``column_names`` is provided, it overrides the given
             ``y_columns``.
         color :
@@ -362,26 +387,34 @@ class MultipactorTest:
         color: dict[str, str] = {}
 
         for sublist in instruments:
-            y_columns.append(
-                [
-                    instrument.name
-                    for instrument in sublist
-                    if instrument.name not in exclude
-                ]
-            )
+            # In this sublist, we should have only Instruments of the same
+            # nature. They will be plotted on the same Axes
+            sub_ycols = []
 
             for instrument in sublist:
                 if instrument.name in exclude:
-                    continue
-                if isinstance(instrument.data_as_pd, pd.DataFrame):
-                    logging.error(
-                        f"You want to plot {instrument}, which data is 2D. Not"
-                        " supported."
+                    logging.debug(
+                        f"Skipping {instrument} because it is excluded."
                     )
                     continue
 
-                data_to_plot.append(instrument.data_as_pd)
-                color[instrument.name] = instrument.color
+                df = instrument.data_as_pd
+                if power_is_growing is not None:
+                    df = split_rows_by_mask(df, mask=power_is_growing)
+
+                data_to_plot.append(df)
+
+                if isinstance(ser := df, pd.Series):
+                    sub_ycols.append(ser.name)
+                    color[ser.name] = instrument.color
+                    continue
+
+                names = df.columns.to_list()
+                sub_ycols.extend(names)
+                for name in names:
+                    color[name] = instrument.color
+
+            y_columns.append(sub_ycols)
 
         if column_names:
             logging.info("Instrument.color attribute will not be used.")
@@ -513,16 +546,14 @@ class MultipactorTest:
         raise_no_match_error :
             If an error should be raised when no
             :class:`.InstrumentMultipactorBands` match an
-            :class:`.Instrument`. The default is True.
+            :class:`.Instrument`.
         global_diagnostics :
             If :class:`.InstrumentMultipactorBands` that were obtained from a
-            global diagnostic should be matched. The default is True.
+            global diagnostic should be matched.
         measurement_points_to_exclude :
-            :class:`.Instrument` at this pick-ups are skipped. The default
-            is an empty tuple.
+            :class:`.Instrument` at this pick-ups are skipped.
         instruments_to_ignore :
-            :class:`.Instrument` in this sequence are skipped. The default
-            is an empty tuple.
+            :class:`.Instrument` in this sequence are skipped.
 
         Returns
         -------
@@ -600,11 +631,10 @@ class MultipactorTest:
         power_is_growing_kw :
             Keyword arguments passed to :meth:`.ForwardPower.where_is_growing`.
         measurement_points_to_exclude :
-            Some measurement points that should not be considered. The default
-            is an empty tuple.
+            Some measurement points that should not be considered.
         debug :
             To plot the data used for multipactor detection, where power grows,
-            where multipactor is detected. The default is False.
+            where multipactor is detected.
 
         Returns
         -------
@@ -902,8 +932,6 @@ class MultipactorTest:
             :class:`.IMeasurementPoint` attribute of self.
         instruments_to_ignore :
             The :class:`.Instrument` or instrument names you do not want.
-            The default is an empty tuple, in which case no instrument is
-            ignored.
 
         Returns
         -------
@@ -1182,7 +1210,7 @@ class MultipactorTest:
             take its last :class:`.MultipactorBand`.
         use_theoretical_r :
             If set to True, we return the :math:`R` corresponding to the
-            user-defined :math:`SWR`. The default is False.
+            user-defined :math:`SWR`.
         kwargs :
             Other keyword arguments passed to :meth:`.at_last_threshold`.
 

@@ -2,8 +2,9 @@
 
 import logging
 from abc import ABCMeta
-from collections.abc import Iterable, Sequence
+from collections.abc import Collection, Iterable, Sequence
 from pathlib import Path
+from typing import cast
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -13,6 +14,7 @@ from matplotlib.figure import Figure
 from multipac_testbench.multipactor_band.test_multipactor_bands import (
     TestMultipactorBands,
 )
+from multipac_testbench.util.helper import is_nested_list
 from multipac_testbench.util.multipactor_detectors import (
     start_and_end_of_contiguous_true_zones,
 )
@@ -103,7 +105,7 @@ def finish_fig(
 
 
 def create_df_to_plot(
-    data_to_plot: list[pd.Series | pd.DataFrame],
+    data_to_plot: Sequence[pd.Series | pd.DataFrame],
     tail: int | None = None,
     column_names: str | list[str] = "",
     **kwargs,
@@ -202,13 +204,12 @@ def actual_plot(
     df_to_plot: pd.DataFrame,
     x_columns: list[str] | str | None,
     y_columns: list[list[str]] | list[str],
+    axes: list[Axes],
     grid: bool = True,
-    title: list[str] | str = "",
     sharex: bool | None = True,
-    ax: Axes | NDArray[Axes] | None = None,
     color: dict[str, str] | None = None,
     **kwargs,
-) -> Axes | NDArray[Axes]:
+) -> list[Axes]:
     """Plot the data, adapting to what is given.
 
     Parameters
@@ -218,16 +219,15 @@ def actual_plot(
     x_columns :
         Name of the column(s) used for x axis.
     y_columns :
-        Name of the column(s) for y plot.
+        Name of the column(s) for y plot. If ``list`` of ``list``, each sublist
+        is a subplot.
+    axes :
+        Axes to plot on.
     grid :
         If the grid should be plotted.
-    title :
-        A title for the figure or every subplot if it is a list.
     sharex :
         To let the different subplots share the same x-axis. It is set to None
         when we re-use already existing Axes.
-    ax :
-        To re-use already existing Axes.
     color :
         Dictionary linking column names in ``df_to_plot`` to HTML colors. Used
         to keep the same color between different instruments at the same
@@ -237,43 +237,53 @@ def actual_plot(
 
     Returns
     -------
-    Axes | NDArray[Axes]
+    list[Axes]
         Plotted axes, or an array containing them.
 
     """
-    if ax is not None:
-        sharex = None
+    if is_nested_list(y_columns):
+        y_columns_nested = cast(list[list[str]], y_columns)
+        styles = [
+            [style_from_column(col) for col in ylist]
+            for ylist in y_columns_nested
+        ]
+    else:
+        y_columns_flat = cast(list[str], y_columns)
+        styles = [style_from_column(col) for col in y_columns_flat]
+
     if not isinstance(x_columns, list):
-        ax = df_to_plot.plot(
-            x=x_columns,
-            subplots=y_columns,
+        x_columns = [x_columns for _ in y_columns]
+
+    assert isinstance(x_columns, list)
+    if len(x_columns) != len(y_columns):
+        logging.error(
+            f"Mismatch between the length of {x_columns = } and {y_columns = }"
+        )
+
+    if len(axes) == 1:
+        axes = [axes[0] for _ in y_columns]
+
+    for x, y, ax, style in zip(
+        x_columns, y_columns, axes, styles, strict=True
+    ):
+        if not isinstance(y, list):
+            y = [y]
+
+        df_to_plot.plot(
+            x=x,
+            y=y,
             sharex=sharex,
             grid=grid,
-            title=title,
             ax=ax,
             color=color,
+            style=style,
             **kwargs,
         )
-        assert ax is not None
-        return ax
-
-    zipper = zip(x_columns, y_columns, strict=True)
-    for x_col, y_col in zipper:
-        ax = df_to_plot.plot(
-            x=x_col,
-            y=y_col,
-            ax=ax,
-            grid=grid,
-            title=title,
-            color=color,
-            **kwargs,
-        )
-    assert ax is not None
-    return ax
+    return axes
 
 
 def set_labels(
-    axes: Axes | NDArray[Axes],
+    axes: Collection[Axes] | Axes,
     *ydata: ABCMeta,
     xdata: ABCMeta | None = None,
     xlabel: str = "",
@@ -285,7 +295,7 @@ def set_labels(
     Parameters
     ----------
     axes :
-        Axes or numpy array containing them.
+        Axes.
     *ydata :
         Class of the plotted instruments.
     xdata :
@@ -306,22 +316,27 @@ def set_labels(
         else:
             xlabel = "Sample index"
 
-    if not ylabel:
-        ylabel = (obj.ylabel() for obj in ydata)
-
-    if isinstance(ylabel, str):
-        ylabel = (ylabel,)
     if isinstance(axes, Axes):
         axes = (axes,)
-    for axe, ylab in zip(axes, ylabel):
-        axe.set_ylabel(ylab)
-        if not xlabel:
-            continue
-        axe.set_xlabel(xlabel)
+
+    if not ylabel:
+        ylabel = (obj.ylabel() for obj in ydata)
+    if isinstance(ylabel, str):
+        ylabel = (ylabel,)
+
+    for ax, ylab in zip(axes, ylabel):
+        if isinstance(ylab, tuple) and len(ylab) == 2:
+            # Directional labels: plot both with arrows
+            ax.set_ylabel(f"{ylab[0]} (↑)\n{ylab[1]} (↓)")
+        else:
+            ax.set_ylabel(str(ylab))
+
+        if xlabel:
+            ax.set_xlabel(xlabel)
 
 
 def save_figure(
-    axes: Axes | NDArray[Axes] | list[Axes],
+    axes: Axes | list[Axes],
     png_path: Path,
     verbose: bool = False,
     **png_kwargs,
@@ -467,15 +482,15 @@ def _add_single_bg_color(
 
 def add_instrument_multipactor_bands(
     test_multipactor_bands: TestMultipactorBands,
-    axes: NDArray[Axes] | Axes | None = None,
+    axes: list[Axes] | Axes | None = None,
     scale: float = 1.0,
     alpha: float = 0.5,
     legend: bool = True,
     twinx: bool = False,
     **kwargs,
-) -> Axes | NDArray[Axes]:
+) -> Axes | list[Axes]:
     """Add the multipactor bands to a pre-existing plot."""
-    if isinstance(axes, np.ndarray):
+    if isinstance(axes, list):
         axes_aslist = [
             add_instrument_multipactor_bands(
                 test_multipactor_bands,
@@ -488,8 +503,7 @@ def add_instrument_multipactor_bands(
             )
             for axe in axes
         ]
-        axes = np.array(axes_aslist, dtype=object)
-        return axes
+        return axes_aslist
 
     mp_axes = axes
     if twinx:
@@ -513,3 +527,12 @@ def _merge_legends(ax1: Axes, ax2: Axes) -> None:
     labels = labels1 + labels2
     ax1.legend().remove()
     ax2.legend(handles, labels)
+
+
+def style_from_column(col: str) -> str:
+    """Give proper linestyle, discriminating increasing/decreasing values."""
+    if col.endswith("__increasing"):
+        return "-"
+    if col.endswith("__decreasing"):
+        return "--"
+    return "-"

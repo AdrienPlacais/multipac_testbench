@@ -67,7 +67,7 @@ class Instrument(ABC):
 
         self._raw_data: pd.Series = data
         self._data: NDArray[np.float64]
-        self._data_as_pd: pd.Series
+        self._data_as_pd: pd.Series | pd.DataFrame
 
         self._post_treaters: list[
             Callable[[NDArray[np.float64]], NDArray[np.float64]]
