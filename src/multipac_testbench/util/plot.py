@@ -106,6 +106,7 @@ def finish_fig(
 
 def create_df_to_plot(
     data_to_plot: Sequence[pd.Series | pd.DataFrame],
+    head: int | None = None,
     tail: int | None = None,
     column_names: str | list[str] = "",
     **kwargs,
@@ -116,9 +117,10 @@ def create_df_to_plot(
     ----------
     data_to_plot :
         List of the data that will be plotted.
+    head :
+        Plot only the first ``head`` rows.
     tail :
-        The number of points to plot, starting from the end of the test (fully
-        conditioned).
+        Plot only the last ``tail`` rows.
     column_names :
         To override the default column names. This is used in particular with
         the method :meth:`.TestCampaign.sweet_plot` when
@@ -138,6 +140,8 @@ def create_df_to_plot(
             f"Not all data sources have the same length: {lengths}"
         )
     df_to_plot = pd.concat(data_to_plot, axis=1)
+    if head is not None:
+        df_to_plot = df_to_plot.head(head)
     if tail is not None:
         df_to_plot = df_to_plot.tail(tail)
     # Remove duplicate columns
@@ -160,7 +164,7 @@ def create_df_to_plot(
 
 def match_x_and_y_column_names(
     x_columns: list[str] | None,
-    y_columns: list[list[str]],
+    y_columns: list[list[str]] | list[list[list[str]]],
 ) -> tuple[list[str] | str | None, list[list[str]] | list[str]]:
     """Match name of x columns with y columns, remove duplicate columns.
 
@@ -169,18 +173,27 @@ def match_x_and_y_column_names(
     x_columns :
         Name of the instrument(s) used as x-axis.
     y_columns :
-        Name of the instruments for y-axis, sorted by suplot.
+        Name of the instruments for y-axis, sorted by subplot. It can be
+        3-level nested list, in particular when we separate data between
+        increasing and decreasing power values.
 
     Returns
     -------
     x_columns :
-        Name of the instrument(s) used as x-axis.
+        Name of the instrument(s) used as x-axis. Three possibilities:
+        - If it is None, we plot again sample index.
+        - If it is a single :class:`.Instrument` name, it will be used as
+          x-data for every plot.
+        - If it is a list of names, its length matches the length of
+          ``y_columns``. This is typically what happens when we plot an
+          instrument vs another.
     y_columns :
         Name of the instruments for y-axis.
 
     """
     # One or several instrument types plotted vs Sample index
     if x_columns is None:
+        # None, list[str]
         return x_columns, y_columns
 
     # One or several instruments types plotted vs another single instrument
@@ -190,13 +203,15 @@ def match_x_and_y_column_names(
         for y_column in y_columns:
             if x_column in y_column:
                 y_column.remove(x_column)
-
-        return x_column, y_columns
+        # str, list[str] | list[list[str]]
+        return x_column, y_column
 
     # One instrument type plotted vs another instrument type
     # number of instruments should match
     x_column = x_columns
     y_column = y_columns[0]
+    assert len(x_column) == len(y_column)
+    # list[str], list[list[str]]
     return x_column, y_column
 
 
