@@ -60,6 +60,10 @@ class Instrument(ABC):
 
         """
         self.name = name
+        logging.debug(
+            f"Creating a {self.__class__.__name__} named {name} at "
+            f"{position = }. It has {len(data)} points."
+        )
 
         #: The position of the instrument. If irrelevant (global diagnostic),
         #: must be set to ``np.nan``.
