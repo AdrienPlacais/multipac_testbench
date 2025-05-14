@@ -11,6 +11,12 @@ class_name = "ReflectedPower"
 [global.instruments_kw.NI9205_ERPA]
 caliber_mA = 20.0
 class_name = "RPACurrent"
+# keyword arguments for the `average_y_for_nearby_x_within_distance` function
+# it is used to average RPACurrent values measured at the same RPAPotential
+average = true
+keep_shape = true
+max_index_distance = 1
+tol = 1e-6
 
 [global.instruments_kw.NI9205_Spellman]
 class_name = "RPAPotential"
