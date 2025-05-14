@@ -1,12 +1,17 @@
 """Define the RPA."""
 
 import logging
-from typing import Self
+from functools import partial
+from typing import Any, Self
 
 import numpy as np
 import pandas as pd
 from multipac_testbench.instruments.instrument import Instrument
 from multipac_testbench.instruments.virtual_instrument import VirtualInstrument
+from multipac_testbench.util.post_treaters import (
+    average_y_for_nearby_x_within_distance,
+    drop_x_where_y_is_nan,
+)
 from numpy.typing import NDArray
 
 
@@ -32,6 +37,10 @@ class RPACurrent(Instrument):
         *args,
         caliber_mA: float | None = None,
         position: float = np.nan,
+        average: bool = False,
+        max_index_distance: int | None = None,
+        tol: float | None = None,
+        keep_shape: bool | None = None,
         **kwargs,
     ) -> None:
         """Instantiate with the caliber.
@@ -44,6 +53,22 @@ class RPACurrent(Instrument):
         ----------
         caliber_mA :
             Caliber in :unit:`mA`.
+        average :
+            If current should be averaged at nearly identical potentials. If
+            set to ``True``, averaging will be performed with ``tol`` and
+            ``max_index_distance`` ``kwargs`` using
+            :func:`.average_y_for_nearby_x_within_distance`.
+        tol :
+            Maximum absolute difference under which potential values are
+            considered equal.
+        max_index_distance :
+            Maximum index separation allowed when grouping similar potentials.
+            Prevents averaging across distant, unrelated measurements.
+        keep_shape :
+            If ``True``, the returned array has the same shape as the input,
+            with only the first element of each group containing the average
+            and others filled with ``np.nan``. If ``False``, returns a compact
+            array with only the averaged values.
 
         """
         if caliber_mA is None:
@@ -55,6 +80,15 @@ class RPACurrent(Instrument):
         self._caliber_mA = caliber_mA
         super().__init__(*args, position=position, **kwargs)
         self._recalibrate_current()
+
+        self.avg_kwargs: dict[str, Any]
+        if not average:
+            return
+        self.avg_kwargs = self._averaging_kwargs(
+            max_index_distance=max_index_distance,
+            tol=tol,
+            keep_shape=keep_shape,
+        )
 
     @classmethod
     def ylabel(cls) -> str:
@@ -71,6 +105,41 @@ class RPACurrent(Instrument):
         """
         logging.debug(f"Rescaling RPA current with {self._caliber_mA = }")
         self._raw_data *= self._caliber_mA * 0.5
+
+    def _averaging_kwargs(
+        self,
+        max_index_distance: int | None = None,
+        tol: float | None = None,
+        keep_shape: bool | None = None,
+    ) -> dict[str, Any]:
+        """Set the ``kwargs`` for the averaging function.
+
+        The post-treater function performing the average is created at the
+        instantiation of :class:`RPA`.
+
+        Parameters
+        ----------
+        tol :
+            Maximum absolute difference under which potential values are
+            considered equal.
+        max_index_distance :
+            Maximum index separation allowed when grouping similar potentials.
+            Prevents averaging across distant, unrelated measurements.
+        keep_shape :
+            If ``True``, the returned array has the same shape as the input,
+            with only the first element of each group containing the average
+            and others filled with ``np.nan``. If ``False``, returns a compact
+            array with only the averaged values.
+
+        """
+        avg_kwargs = {}
+        if max_index_distance is not None:
+            avg_kwargs["max_index_distance"] = max_index_distance
+        if tol is not None:
+            avg_kwargs["tol"] = tol
+        if keep_shape is not None:
+            avg_kwargs["keep_shape"] = keep_shape
+        return avg_kwargs
 
 
 class RPA(VirtualInstrument):
@@ -91,11 +160,11 @@ class RPA(VirtualInstrument):
         **kwargs,
     ) -> Self:
         """Compute the distribution from the current and grid potential."""
-        averaged_current, corresponding_potentials = (
-            _average_points_with_same_grid_potential(
-                rpa_current.data, rpa_potential.data
-            )
-        )
+        if hasattr(rpa_current, "avg_kwargs"):
+            _set_up_current_averaging(rpa_current, rpa_potential)
+
+        averaged_current = rpa_current.data
+        corresponding_potentials = rpa_potential.data
         distribution = _compute_energy_distribution(
             averaged_current,
             corresponding_potentials,
@@ -111,23 +180,36 @@ class RPA(VirtualInstrument):
         return r"Energy distribution [$\mu$A/V]"
 
 
-def _average_points_with_same_grid_potential(
-    current: NDArray[np.float64], potential: NDArray[np.float64]
-) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
-    """Average the current.
+def _set_up_current_averaging(
+    rpa_current: RPACurrent, rpa_potential: RPAPotential
+) -> None:
+    """Average RPA current at nearly identical RPA potentials.
 
-    .. todo::
-        Sometimes, you measure the RPA current several times with the same grid
-        potential to improve accuracy. This method will average this RPA
-        currents.
-        Note: I will have to make a difference between two consecutive
-        points, and points with the same grid potential but corresponding
-        to increasing and decreasing power cycles.
+    Also remove duplicate ``rpa_potential`` data to enforce both instruments to
+    hae same shape.
 
     """
-    logging.debug("Averaging RPA currents on same grid potential.")
-    logging.error("RPA averaging not implemented yet.")
-    return current, potential
+    averager = partial(
+        average_y_for_nearby_x_within_distance,
+        x_values=rpa_potential.data,
+        **rpa_current.avg_kwargs,
+    )
+    rpa_current.add_post_treater(averager)
+
+    keep_shape = averager.keywords.get("keep_shape", True)
+    if keep_shape:
+        return
+
+    logging.warning(
+        "The RPA current averager will alter the shape of data, which may "
+        "cause issues. I will try to adapt, but you may have to go back to "
+        "keep_shape = False."
+    )
+    shape_consistency_enforcer = partial(
+        drop_x_where_y_is_nan, y_values=rpa_current.data
+    )
+    rpa_potential.add_post_treater(shape_consistency_enforcer)
+    return
 
 
 def _compute_energy_distribution(

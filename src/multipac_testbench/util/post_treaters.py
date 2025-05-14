@@ -161,8 +161,8 @@ def average_y_for_nearby_x_within_distance(
     keep_shape :
         If ``True``, the returned array has the same shape as the input, with
         only the first element of each group containing the average and others
-        filled with ``np.nan``. If ``False``, returns a compact array with only
-        the averaged values.
+        filled with ``np.nan``. If ``False`` (not recommended), returns a
+        compact array with only the averaged values.
 
     Returns
     -------
@@ -224,3 +224,16 @@ def average_y_for_nearby_x_within_distance(
         averaged = averaged[~np.isnan(averaged)]
 
     return averaged
+
+
+def drop_x_where_y_is_nan(
+    x_values: NDArray[np.float64], y_values: NDArray[np.float64]
+) -> NDArray[np.float64]:
+    """Return ``x_values`` without indexes where ``y_values`` is ``np.nan``.
+
+    This can be used in for :class:`.RPA` when some current data is dropped
+    (``keep_shape = False``) but we still want the same shape for potential.
+
+    """
+    indexes = ~np.isnan(y_values)
+    return x_values[indexes]

@@ -212,6 +212,7 @@ class Instrument(ABC):
             delattr(self, "_data")
         if hasattr(self, "_data_as_pd"):
             delattr(self, "_data_as_pd")
+        logging.info(f"Adding {post_treater = } to {self}")
         self._post_treaters.append(post_treater)
 
     def at_thresholds(
@@ -343,10 +344,11 @@ class Instrument(ABC):
         original_data_shape = data.shape
         for post_treater in self.post_treaters:
             data = post_treater(data)
-            assert original_data_shape == data.shape, (
-                "The post treater "
-                f"{post_treater} modified the shape of the array."
-            )
+            if original_data_shape != data.shape:
+                logging.error(
+                    f"The post treater {post_treater} modified the shape of "
+                    "the array."
+                )
         return data
 
     def _plot_vs_position_for_1d(
