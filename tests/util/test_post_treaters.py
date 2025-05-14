@@ -93,3 +93,12 @@ def test_average_y_at_same_x_tol_behavior() -> None:
     expected = np.array([1.0, 3.0])
     result = average_y_for_nearby_x_within_distance(y, x, tol=1e-10)
     assert_array_almost_equal(expected, result)
+
+
+def test_average_y_at_same_x_on_different_numbers_of_points() -> None:
+    """Test that tolerance affects grouping of x values."""
+    y = np.array([1.0, 2.0, 3.0, 4.0, 10.0, 20.0, 21.0])
+    x = np.array([100.0, 100.0, 100.0, 100.0, 200.0, 300.0, 300.0])
+    expected = np.array([2.5, np.nan, np.nan, np.nan, 10.0, 20.5, np.nan])
+    result = average_y_for_nearby_x_within_distance(y, x)
+    assert_array_almost_equal(expected, result)
