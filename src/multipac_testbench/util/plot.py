@@ -16,7 +16,7 @@ from matplotlib.figure import Figure
 from multipac_testbench.multipactor_band.test_multipactor_bands import (
     TestMultipactorBands,
 )
-from multipac_testbench.util.helper import is_nested_list
+from multipac_testbench.util.helper import drop_repeated_col, is_nested_list
 from multipac_testbench.util.multipactor_detectors import (
     start_and_end_of_contiguous_true_zones,
 )
@@ -111,6 +111,7 @@ def create_df_to_plot(
     head: int | None = None,
     tail: int | None = None,
     column_names: str | list[str] = "",
+    drop_repeated_x: bool = False,
     **kwargs,
 ) -> pd.DataFrame:
     """Merge the series into a single dataframe.
@@ -127,6 +128,8 @@ def create_df_to_plot(
         To override the default column names. This is used in particular with
         the method :meth:`.TestCampaign.sweet_plot` when
         ``all_on_same_plot=True``.
+    drop_repeated_x :
+        If True, remove consecutive rows with identical x values.
     kwargs :
         Other keyword arguments.
 
@@ -150,6 +153,9 @@ def create_df_to_plot(
 
     # Remove duplicate columns
     df_to_plot = df_to_plot.loc[:, ~df_to_plot.columns.duplicated()].copy()
+
+    if drop_repeated_x:
+        df_to_plot = drop_repeated_col(df_to_plot)
 
     if not column_names:
         return df_to_plot

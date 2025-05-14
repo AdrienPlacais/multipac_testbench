@@ -167,6 +167,7 @@ class MultipactorTest:
         csv_kwargs: dict | None = None,
         axes: list[Axes] | None = None,
         masks: dict[str, NDArray[np.bool]] | None = None,
+        drop_repeated_x: bool = False,
         **kwargs,
     ) -> tuple[list[Axes], pd.DataFrame]:
         """Plot ``ydata`` versus ``xdata``.
@@ -221,6 +222,8 @@ class MultipactorTest:
             logic (e.g., grouping lines by base column in plots). If multiple
             masks are ``True`` at the same row index, a ``ValueError`` is
             raised.
+        drop_repeated_x :
+            If True, remove consecutive rows with identical x values.
         **kwargs :
             Other keyword arguments passed to :meth:`pandas.DataFrame.plot`,
             :meth:`._set_y_data`, :func:`.create_df_to_plot`,
@@ -247,7 +250,11 @@ class MultipactorTest:
             color = test_color
 
         df_to_plot = plot.create_df_to_plot(
-            data_to_plot, tail=tail, column_names=column_names, **kwargs
+            data_to_plot,
+            tail=tail,
+            column_names=column_names,
+            drop_repeated_x=drop_repeated_x,
+            **kwargs,
         )
 
         x_column, y_column = plot.match_x_and_y_column_names(

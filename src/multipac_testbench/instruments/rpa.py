@@ -2,17 +2,17 @@
 
 import logging
 from functools import partial
-from typing import Any, Self
+from typing import Any, Self, cast
 
 import numpy as np
 import pandas as pd
 from multipac_testbench.instruments.instrument import Instrument
 from multipac_testbench.instruments.virtual_instrument import VirtualInstrument
+from multipac_testbench.util.helper import drop_repeated_col
 from multipac_testbench.util.post_treaters import (
     average_y_for_nearby_x_within_distance,
     drop_x_where_y_is_nan,
 )
-from numpy.typing import NDArray
 
 
 class RPAPotential(Instrument):
@@ -163,15 +163,15 @@ class RPA(VirtualInstrument):
         if hasattr(rpa_current, "avg_kwargs"):
             _set_up_current_averaging(rpa_current, rpa_potential)
 
-        averaged_current = rpa_current.data
-        corresponding_potentials = rpa_potential.data
         distribution = _compute_energy_distribution(
-            averaged_current,
-            corresponding_potentials,
+            rpa_potential.data_as_pd, rpa_current.data_as_pd
         )
-        ser_distribution = pd.Series(distribution, name=name)
         return cls(
-            name=name, raw_data=ser_distribution, position=np.nan, **kwargs
+            name=name,
+            raw_data=distribution,
+            position=np.nan,
+            is_2d=True,
+            **kwargs,
         )
 
     @classmethod
@@ -213,13 +213,18 @@ def _set_up_current_averaging(
 
 
 def _compute_energy_distribution(
-    averaged_current: NDArray[np.float64],
-    corresponding_potentials: NDArray[np.float64],
-    tol: float = 1e-6,
-) -> NDArray[np.float64]:
-    """Derivate signal to obtain distribution."""
-    diff_i = np.diff(averaged_current)
-    diff_pot = np.diff(corresponding_potentials)
-    invalid_indexes = np.where(np.abs(diff_pot) < tol)
-    diff_pot[invalid_indexes] = np.nan
-    return diff_i / diff_pot
+    potential: pd.Series | pd.DataFrame, current: pd.Series | pd.DataFrame
+) -> pd.DataFrame:
+    """Derive signal to obtain distribution."""
+    df = pd.concat([potential, current], axis=1)
+    assert isinstance(df, pd.DataFrame)
+    df = drop_repeated_col(df)
+
+    dropped_potential = df.iloc[:, 0]
+    dropped_current = df.iloc[:, 1]
+
+    distribution = dropped_current.diff() / dropped_potential.diff()
+    distribution.name = "Energy distribution"
+
+    out = pd.concat([dropped_potential, distribution], axis=1)
+    return out

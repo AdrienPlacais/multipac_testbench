@@ -194,3 +194,20 @@ def types(my_list: Sequence) -> set[type]:
 def types_match(my_list: Sequence, to_match: type) -> bool:
     """Check if all elements of ``my_list`` have type ``type``."""
     return types(my_list) == {to_match}
+
+
+def drop_repeated_col(
+    df: pd.DataFrame, col: pd.Index | str | None = None
+) -> pd.DataFrame:
+    """Remove consecutive rows with the same ``col`` value.
+
+    If ``x_column`` is not provided, we take the first column in the dataframe.
+
+    This function is used with :class:`.RPACurrent` and :class:`.RPAPotential`
+    data.
+
+    """
+    if col is None:
+        col = df.columns[0]
+    df = df.loc[df[col] != df[col].shift()]
+    return df
