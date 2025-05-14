@@ -20,9 +20,13 @@ if __name__ == "__main__":
 
     results_path = Path(project, "MVE5-120MHz-50Ohm-BDTcomp-ERPA1_1dBm.csv")
     multipactor_test = MultipactorTest(
-        results_path, config, freq_mhz=120.0, swr=1.0, sep=","
+        results_path,
+        config,
+        freq_mhz=120.0,
+        swr=1.0,
+        sep=",",
+        info="1dBm (175W)",
     )
-    rpa = multipactor_test.get_instrument(RPA)
 
     rpa_potential = multipactor_test.get_instrument(RPAPotential)
     assert isinstance(rpa_potential, RPAPotential)
@@ -36,12 +40,17 @@ if __name__ == "__main__":
 
     # Plot RPA current vs RPA potential
     fig, axes = multipactor_test.sweet_plot(
-        RPACurrent,
-        xdata=RPAPotential,
-        masks=masks,
-        drop_repeated_x=True,
-        marker="o",
+        RPACurrent, xdata=RPAPotential, masks=masks, drop_repeated_x=True
     )
 
     # Plot distribution
-    # fig, axes = multipactor_test.sweet_plot(RPA, xdata=RPAPotential)
+    rpa = multipactor_test.get_instrument(RPA)
+    assert isinstance(rpa, RPA)
+    rpa.data_as_pd.plot(
+        x=0,
+        y=1,
+        grid=True,
+        xlabel="Electrons energy [eV]",
+        ylabel="Distribution",
+        title=str(multipactor_test),
+    )
