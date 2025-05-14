@@ -28,10 +28,44 @@ class Power(Instrument):
         n_trailing_points_to_check: int = 40,
         **kwargs,
     ) -> NDArray[np.bool]:
-        """Determine where power is growing (``True``) and where it is not.
+        """Identify regions where the signal is increasing ("growing").
+
+        This method analyzes a signal to determine where it exhibits a growing
+        trend. It returns a boolean array of the same length as the input
+        signal, where ``True`` indicates a region of growth and ``False``
+        otherwise.
+
+        The method performs three main operations:
+        1. It uses a sliding-window heuristic (*via* :func:`.array_is_growing`)
+           to detect growth.
+        2. It removes short, isolated ``False`` segments, enforcing a minimum
+           number of consecutive ``True`` values to be considered valid.
+        3. It clears any trailing ``True`` values near the end of the array to
+           prevent spurious detections due to edge effects.
+
+        Parameters
+        ----------
+        minimum_number_of_points :
+            The minimum number of consecutive ``True`` values required to
+            consider a region as growing. Shorter segments are suppressed.
+        n_trailing_points_to_check :
+            The number of points at the end of the signal to check and force to
+            ``False`` if they form an isolated or uncertain growth pattern.
+        **kwargs :
+            Additional keyword arguments passed to :func:`.array_is_growing`.
+
+        Returns
+        -------
+            Boolean array indicating where the signal is growing.
+
+        Notes
+        -----
+        - The detection is influenced by the choice of parameters and the
+          behavior of :func:`.array_is_growing`.
+        - Trailing regions and short noise-like fluctuations are filtered out.
 
         .. todo::
-            May be necessary to also remove isolated True
+           Consider adding post-processing to remove isolated ``True`` values.
 
         """
         n_points = len(self._raw_data)
