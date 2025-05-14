@@ -1,7 +1,7 @@
 """Define general usage functions."""
 
 import logging
-from collections.abc import Iterable, Iterator
+from collections.abc import Iterable, Iterator, Sequence
 from pathlib import Path
 from typing import TypeVar
 
@@ -184,3 +184,13 @@ def r_squared(
     ss_tot = np.sum((expected - expected.mean()) ** 2)
     r_squared = 1.0 - ss_err / ss_tot
     return r_squared
+
+
+def types(my_list: Sequence) -> set[type]:
+    """Get all different types in given list."""
+    return {type(x) for x in my_list}
+
+
+def types_match(my_list: Sequence, to_match: type) -> bool:
+    """Check if all elements of ``my_list`` have type ``type``."""
+    return types(my_list) == {to_match}

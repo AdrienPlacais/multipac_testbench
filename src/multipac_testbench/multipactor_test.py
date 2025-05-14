@@ -48,6 +48,7 @@ from multipac_testbench.util.helper import (
     flatten,
     output_filepath,
     split_rows_by_masks,
+    types_match,
 )
 from numpy.typing import NDArray
 
@@ -1258,13 +1259,3 @@ class MultipactorTest:
             self.filepath, self.swr, self.freq_mhz, out_folder, extension
         )
         return filepath
-
-
-def types(my_list: Sequence) -> set[type]:
-    """Get all different types in given list."""
-    return {type(x) for x in my_list}
-
-
-def types_match(my_list: Sequence, to_match: type) -> bool:
-    """Check if all elements of ``my_list`` have type ``type``."""
-    return types(my_list) == {to_match}
