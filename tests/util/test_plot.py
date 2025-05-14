@@ -5,7 +5,10 @@ import logging
 import numpy as np
 import pandas as pd
 import pytest
-from multipac_testbench.util.plot import create_df_to_plot
+from multipac_testbench.util.plot import (
+    create_df_to_plot,
+    styles_from_column_cycle,
+)
 from pandas.testing import assert_frame_equal
 
 
@@ -98,3 +101,51 @@ def test_create_df_to_plot_warning_and_padding(
     assert df.shape == (3, 2)
     assert np.isnan(df.iloc[2, 0])
     assert df.iloc[2, 1] == 30
+
+
+def test_styles_from_column_cycle_basic() -> None:
+    """Test that line styles are correctly assigned and cycled."""
+    columns = ["col__a", "col__b", "col__c"]
+    linestyles = ["-", "--"]
+    result = styles_from_column_cycle(columns, linestyles)
+
+    expected = {
+        "col__a": {"linestyle": "-"},
+        "col__b": {"linestyle": "--"},
+        "col__c": {"linestyle": "-"},  # cycles back
+    }
+    assert result == expected
+
+
+def test_styles_from_column_cycle_multiple_bases() -> None:
+    """Test cycling styles independently for different base column names."""
+    columns = ["x__1", "x__2", "y__1", "y__2", "y__3"]
+    linestyles = [":", "-."]
+    result = styles_from_column_cycle(columns, linestyles)
+
+    expected = {
+        "x__1": {"linestyle": ":"},
+        "x__2": {"linestyle": "-."},
+        "y__1": {"linestyle": ":"},
+        "y__2": {"linestyle": "-."},
+        "y__3": {"linestyle": ":"},  # cycles back for 'y'
+    }
+    assert result == expected
+
+
+def test_styles_from_column_cycle_empty() -> None:
+    """Test that an empty column list returns an empty dictionary."""
+    result = styles_from_column_cycle([], ["-"])
+    assert result == {}
+
+
+def test_styles_from_column_cycle_single_style() -> None:
+    """Test with only one style, all columns get the same style."""
+    columns = ["col__a", "col__b", "col__c"]
+    result = styles_from_column_cycle(columns, ["--"])
+    expected = {
+        "col__a": {"linestyle": "--"},
+        "col__b": {"linestyle": "--"},
+        "col__c": {"linestyle": "--"},
+    }
+    assert result == expected

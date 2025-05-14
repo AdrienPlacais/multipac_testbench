@@ -1,6 +1,8 @@
 """Define helper functions for plots."""
 
+import itertools
 import logging
+import re
 from abc import ABCMeta
 from collections.abc import Collection, Iterable, Sequence
 from pathlib import Path
@@ -552,3 +554,49 @@ def style_from_column(col: str) -> str:
     if col.endswith("__decreasing"):
         return "--"
     return "-"
+def styles_from_column_cycle(
+    columns: Iterable[str],
+    linestyles: list[str] | None = None,
+) -> dict[str, dict[str, str]]:
+    """Assign line styles to columns based on their suffixes for plotting.
+
+    Columns are expected to follow the naming convention produced by masking
+    with suffixes, where each column name has the form
+    ``"<base_name>__<suffix>"``. The part after the double underscore is used
+    to distinguish the masked variants of the same base column.
+
+    Line styles are cycled through for each unique suffix across columns
+    sharing the same base name.
+
+    Parameters
+    ----------
+    columns :
+        The column names to assign styles to. Must follow the
+        ``"<base_name>__<suffix>"`` convention.
+    linestyles :
+        The list of line styles to cycle through (e.g.,
+        ``['-', '--', ':', '-.']``).
+
+    Returns
+    -------
+        A dictionary mapping each column name to a dictionary with a
+        ``"linestyle"`` key, e.g.,
+        ``{'col__a': {'linestyle': '-'}, 'col__b': {'linestyle': '--'}}``.
+
+    """
+
+    if linestyles is None:
+        linestyles = ["-", "--", "-.", ":"]
+
+    base_to_columns: dict[str, list[str]] = {}
+    for col in columns:
+        base = re.split(r"__|\(|\[", col)[0]
+        base_to_columns.setdefault(base, []).append(col)
+
+    style_map = {}
+    for base, cols in base_to_columns.items():
+        cycle = itertools.cycle(linestyles)
+        for col in sorted(cols):  # Sort for consistent ordering
+            style_map[col] = {"linestyle": next(cycle)}
+
+    return style_map
