@@ -2,7 +2,7 @@
 
 import logging
 from abc import ABCMeta
-from collections.abc import Callable, Sequence
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Self
 
@@ -30,7 +30,7 @@ from multipac_testbench.theoretical.somersalo import (
     somersalo_base_plot,
 )
 from multipac_testbench.util import log_manager, plot
-from numpy.typing import NDArray
+from multipac_testbench.util.types import MULTIPAC_DETECTOR_T
 
 
 class TestCampaign(list):
@@ -268,7 +268,7 @@ class TestCampaign(list):
 
     def detect_multipactor(
         self,
-        multipac_detector: Callable[[NDArray[np.float64]], NDArray[np.bool]],
+        multipac_detector: MULTIPAC_DETECTOR_T,
         instrument_class: ABCMeta,
         *args,
         power_growth_mask_kw: dict[str, int | float] | None = None,

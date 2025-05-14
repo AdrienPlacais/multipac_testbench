@@ -2,7 +2,7 @@
 
 import logging
 from abc import ABC, ABCMeta
-from typing import Any, Callable, Sequence
+from typing import Any, Sequence
 
 import numpy as np
 import pandas as pd
@@ -12,6 +12,7 @@ from multipac_testbench.instruments.instrument import Instrument
 from multipac_testbench.multipactor_band.instrument_multipactor_bands import (
     InstrumentMultipactorBands,
 )
+from multipac_testbench.util.types import MULTIPAC_DETECTOR_T, POST_TREATER_T
 from numpy.typing import NDArray
 
 
@@ -116,7 +117,7 @@ class IMeasurementPoint(ABC):
 
     def add_post_treater(
         self,
-        post_treater: Callable[[NDArray[np.float64]], NDArray[np.float64]],
+        post_treater: POST_TREATER_T,
         instrument_class: ABCMeta = Instrument,
         verbose: bool = False,
     ) -> None:
@@ -130,7 +131,7 @@ class IMeasurementPoint(ABC):
 
     def detect_multipactor(
         self,
-        multipac_detector: Callable[[NDArray[np.float64]], NDArray[np.bool]],
+        multipac_detector: MULTIPAC_DETECTOR_T,
         instrument_class: ABCMeta,
         growth_mask: NDArray[np.bool],
         debug: bool = False,

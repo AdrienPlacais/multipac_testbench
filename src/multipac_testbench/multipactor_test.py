@@ -18,7 +18,7 @@
 import itertools
 import logging
 from abc import ABCMeta
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Iterable, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -50,6 +50,7 @@ from multipac_testbench.util.helper import (
     split_rows_by_masks,
     types_match,
 )
+from multipac_testbench.util.types import MULTIPAC_DETECTOR_T
 from numpy.typing import NDArray
 
 
@@ -620,7 +621,7 @@ class MultipactorTest:
 
     def detect_multipactor(
         self,
-        multipac_detector: Callable[[NDArray[np.float64]], NDArray[np.bool]],
+        multipac_detector: MULTIPAC_DETECTOR_T,
         instrument_class: ABCMeta,
         power_growth_mask_kw: dict[str, Any] | None = None,
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),

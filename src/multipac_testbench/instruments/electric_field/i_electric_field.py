@@ -10,7 +10,7 @@ class IElectricField(Instrument):
     def __init__(
         self,
         name: str,
-        raw_data: pd.Series,
+        raw_data: pd.Series | None,
         **kwargs,
     ) -> None:
         """Instantiate the class."""

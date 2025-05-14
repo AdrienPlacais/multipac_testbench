@@ -20,6 +20,7 @@ from multipac_testbench.util.filtering import (
     remove_isolated_false,
     remove_trailing_true,
 )
+from multipac_testbench.util.types import POST_TREATER_T
 from numpy.typing import NDArray
 
 
@@ -29,7 +30,7 @@ class Instrument(ABC):
     def __init__(
         self,
         name: str,
-        data: pd.Series,
+        data: pd.Series | None,
         position: NDArray[np.float64] | float,
         is_2d: bool = False,
         color: tuple[float, float, float] | None = None,
@@ -43,6 +44,7 @@ class Instrument(ABC):
             Name of the instrument.
         data :
             ``x`` and ``y`` data as saved in the ``CSV`` produced by LabVIEW.
+            Can be ``None`` in specific cases, e.g. :class:`.Reconstructed`.
         position :
             The position of the instrument. If irrelevant (global diagnostic),
             must be set to ``np.nan``.
@@ -62,7 +64,8 @@ class Instrument(ABC):
         self.name = name
         logging.debug(
             f"Creating a {self.__class__.__name__} named {name} at "
-            f"{position = }. It has {len(data)} points."
+            f"{position = }. It has {len(data) if data is not None else 0}"
+            " points."
         )
 
         #: The position of the instrument. If irrelevant (global diagnostic),
@@ -74,13 +77,13 @@ class Instrument(ABC):
         plotters = self._get_plot_methods(is_2d)
         self.plot_vs_position, self.scatter_data = plotters
 
-        self._raw_data: pd.Series = data
+        self._raw_data: pd.Series
+        if data is not None:
+            self._raw_data = data
         self._data: NDArray[np.float64]
         self._data_as_pd: pd.Series | pd.DataFrame
 
-        self._post_treaters: list[
-            Callable[[NDArray[np.float64]], NDArray[np.float64]]
-        ] = []
+        self._post_treaters: list[POST_TREATER_T] = []
 
     def __str__(self) -> str:
         """Give concise information on instrument."""
@@ -177,19 +180,12 @@ class Instrument(ABC):
         return plotters
 
     @property
-    def post_treaters(
-        self,
-    ) -> list[Callable[[NDArray[np.float64]], NDArray[np.float64]]]:
+    def post_treaters(self) -> list[POST_TREATER_T]:
         """Get the list of the post-treating functions."""
         return self._post_treaters
 
     @post_treaters.setter
-    def post_treaters(
-        self,
-        post_treaters: list[
-            Callable[[NDArray[np.float64]], NDArray[np.float64]]
-        ],
-    ) -> None:
+    def post_treaters(self, post_treaters: list[POST_TREATER_T]) -> None:
         """Set the full list of post-treating functions at once.
 
         Parameters
@@ -202,10 +198,7 @@ class Instrument(ABC):
         delattr(self, "_data_as_pd")
         self._post_treaters = post_treaters
 
-    def add_post_treater(
-        self,
-        post_treater: Callable[[NDArray[np.float64]], NDArray[np.float64]],
-    ) -> None:
+    def add_post_treater(self, post_treater: POST_TREATER_T) -> None:
         """Append a single post-treating function.
 
         Parameters
