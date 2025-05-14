@@ -92,6 +92,89 @@ def split_rows_by_mask(
     return pd.DataFrame(new_cols, index=df.index)
 
 
+def split_rows_by_masks(
+    df: pd.Series | pd.DataFrame,
+    masks: dict[str, NDArray[np.bool]],
+) -> pd.DataFrame:
+    """
+    Split the rows of a Series or DataFrame into new columns based on a boolean mask.
+
+    For each column in the original data, one new column per mask is created
+    with the corresponding suffix. Rows not selected by a mask are filled with
+    NaN.
+
+    Examples
+    --------
+    >>> mask = np.array([True, False, True])
+    >>> masks = {"__(grows)": mask, "__(decreases)": ~mask}
+    >>> ser = pd.Series([1, 2, 3], name=data)
+    >>> print(split_rows_by_masks(ser, masks))
+       data__(grows) data__(decreases)
+    0  1.0           NaN
+    1  NaN           2.0
+    2  3.0           NaN
+
+    >>> df = pd.DataFrame({"col1": [1, 2, 3], "col2": [4, 5, 6]})
+    >>> print(split_rows_by_masks(df, masks))
+       col1__(grows)  col1__(decreases)  col2__(grows)  col2__(decreases)
+    0  1.0            NaN                4.0            NaN
+    1  NaN            2.0                NaN            5.0
+    2  3.0            NaN                6.0            NaN
+
+
+    Raises
+    ------
+    ValueError
+        If any row is matched by more than one mask or if mask lengths do not
+        match the input.
+
+    Parameters
+    ----------
+    df :
+        The input data to split row-wise.
+    masks :
+        A dictionary where each key is a suffix used to label the split
+        columns, and each value is a boolean mask of the same length as the
+        input data. Keys must start with two underscores `(`__``) to enable
+        consistent column naming and compatibility with downstream styling
+        logic (e.g., grouping lines by base column in plots). If multiple masks
+        are ``True`` at the same row index, a ``ValueError`` is raised.
+
+    Returns
+    -------
+        A new DataFrame with columns split according to the masks.
+
+    """
+    if not masks:
+        raise ValueError("At least one mask must be provided.")
+
+    length = len(df)
+    for name, mask in masks.items():
+        if len(mask) != length:
+            raise ValueError(
+                f"Mask '{name}' has incorrect length ({len(mask)} != {length})"
+            )
+
+    # Ensure disjoint masks
+    combined = np.zeros(length, dtype=int)
+    for mask in masks.values():
+        combined += mask.astype(int)
+    if (combined > 1).any():
+        raise ValueError(
+            "Masks must be disjoint: multiple masks are True at the same "
+            "position."
+        )
+    df = df.to_frame() if isinstance(df, pd.Series) else df
+    result = {}
+
+    for col in df.columns:
+        for suffix, mask in masks.items():
+            col_name = f"{col}{suffix}"
+            result[col_name] = df[col].where(mask)
+
+    return pd.DataFrame(result)
+
+
 def output_filepath(
     filepath: Path,
     swr: float,
