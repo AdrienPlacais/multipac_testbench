@@ -417,7 +417,7 @@ def save_dataframe(
 
 def add_background_color_according_to_power_growth(
     axe: Axes | Sequence[Axes] | NDArray[Axes],
-    where_is_growing: list[bool | float],
+    growth_mask: NDArray[np.bool],
     grow_kw: dict | None = None,
     decrease_kw: dict | None = None,
     legend: bool = True,
@@ -429,10 +429,10 @@ def add_background_color_according_to_power_growth(
     axe :
         The Axes on which to plot. If several are given, we sequentially call
         this function.
-    where_is_growing :
+    growth_mask :
         A list containing True where power grows, False where decreases, np.nan
         when undetermined. Typical return value from
-        :meth:`.ForwardPower.where_is_growing`.
+        :meth:`.ForwardPower.growth_mask`.
     grow_kw :
         How zones where power grows are colored. Default is a semi-transparent
         blue.
@@ -446,10 +446,10 @@ def add_background_color_according_to_power_growth(
     if isinstance(axe, (Sequence, np.ndarray)):
         for ax in axe:
             add_background_color_according_to_power_growth(
-                ax, where_is_growing, grow_kw, decrease_kw, legend
+                ax, growth_mask, grow_kw, decrease_kw, legend
             )
         return
-    as_array = np.array(where_is_growing)
+    as_array = np.array(growth_mask)
 
     if grow_kw is None:
         grow_kw = {"color": "b", "alpha": 0.2}
@@ -468,7 +468,7 @@ def add_background_color_according_to_power_growth(
 
 
 def _add_single_bg_color(
-    where_is_growing: NDArray[np.bool],
+    growth_mask: NDArray[np.bool],
     axe: Axes,
     label: str | None,
     invert_array: bool,
@@ -478,7 +478,7 @@ def _add_single_bg_color(
 
     Parameters
     ----------
-    where_is_growing :
+    growth_mask :
         Array where 1. means power grows, 0. means it decreases, np.nan is
         undetermined.
     axe :
@@ -492,8 +492,8 @@ def _add_single_bg_color(
         Keyword arguments given to axvspan.
 
     """
-    where_is_growing[np.isnan(where_is_growing)] = invert_array
-    data = where_is_growing.astype(np.bool_)
+    growth_mask[np.isnan(growth_mask)] = invert_array
+    data = growth_mask.astype(np.bool_)
     if invert_array:
         data = ~data
     zones = start_and_end_of_contiguous_true_zones(data)

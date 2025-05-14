@@ -43,11 +43,11 @@ class TestMultipactorBands(list):
     def __init__(
         self,
         instruments_multipactor_bands: list[InstrumentMultipactorBands | None],
-        power_is_growing: NDArray[np.bool],
+        power_growth_mask: NDArray[np.bool],
     ) -> None:
         """Instantiate the object."""
         super().__init__(instruments_multipactor_bands)
-        self.power_is_growing = power_is_growing
+        self.power_growth_mask = power_growth_mask
 
     def plot_as_bool(
         self,
@@ -144,7 +144,7 @@ ion: bool``.
 
         instrument_multipactor_bands = InstrumentMultipactorBands(
             multipactor,
-            self.power_is_growing,
+            self.power_growth_mask,
             instrument_name=name,
             measurement_point_name=name,
             position=position,

@@ -271,7 +271,7 @@ class TestCampaign(list):
         multipac_detector: Callable[[NDArray[np.float64]], NDArray[np.bool]],
         instrument_class: ABCMeta,
         *args,
-        power_is_growing_kw: dict[str, int | float] | None = None,
+        power_growth_mask_kw: dict[str, int | float] | None = None,
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
         debug: bool = False,
         **kwargs,
@@ -287,9 +287,10 @@ class TestCampaign(list):
         instrument_class :
             Type of instrument on which ``multipac_detector`` should be
             applied.
-        power_is_growing_kw :
+        power_growth_mask_kw :
             Keyword arguments passed to the function that determines when power
-            is increasing, when it is decreasing.
+            is increasing, when it is decreasing
+            (:meth:`.ForwardPower.growth_mask`).
         measurement_points_to_exclude :
             :class:`.IMeasurementPoint` where you do not want to know if there
             is multipacting.
@@ -311,7 +312,7 @@ class TestCampaign(list):
                 multipac_detector=multipac_detector,
                 instrument_class=instrument_class,
                 *args,
-                power_is_growing_kw=power_is_growing_kw,
+                power_growth_mask_kw=power_growth_mask_kw,
                 measurement_points_to_exclude=measurement_points_to_exclude,
                 debug=debug,
                 **kwargs,

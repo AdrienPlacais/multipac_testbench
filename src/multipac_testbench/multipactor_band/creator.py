@@ -161,7 +161,7 @@ def _end_half_power_cycle(
 # =============================================================================
 def create(
     multipactor: NDArray[np.bool],
-    power_is_growing: NDArray[np.bool],
+    power_growth_mask: NDArray[np.bool],
     info: str = "",
 ) -> list[MultipactorBand | None]:
     """Create the different :class:`.MultipactorBand`.
@@ -170,7 +170,7 @@ def create(
     ----------
     multipactor :
         True means multipactor, False no multipactor.
-    power_is_growing :
+    power_growth_mask :
         True means power is growing, False it is decreasing.
     info :
         To give more meaning to the error messages.
@@ -193,10 +193,10 @@ def create(
 
     """
     delta_multipactor = np.diff(multipactor)
-    delta_power_is_growing = np.diff(power_is_growing)
-    zip_enum = enumerate(zip(delta_multipactor, delta_power_is_growing))
+    delta_power_growth_mask = np.diff(power_growth_mask)
+    zip_enum = enumerate(zip(delta_multipactor, delta_power_growth_mask))
 
-    i_max = len(delta_power_is_growing)
+    i_max = len(delta_power_growth_mask)
 
     all_bands = []
     first_index, last_index, pow_index, band = _init_half_power_cycle(info)
@@ -213,7 +213,7 @@ def create(
                 first_index,
                 last_index,
                 i,
-                bool(power_is_growing[i]),
+                bool(power_growth_mask[i]),
                 pow_index,
                 info,
             )
@@ -238,7 +238,7 @@ def create(
         first_index, last_index, band = _exit_a_mp_zone(
             first_index,
             last_index=i,
-            power_grows=bool(power_is_growing[i]),
+            power_grows=bool(power_growth_mask[i]),
             pow_index=pow_index,
             info=info,
         )

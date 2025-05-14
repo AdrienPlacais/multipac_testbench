@@ -4,6 +4,7 @@ import tomllib
 from pathlib import Path
 
 from multipac_testbench.instruments import RPA, RPACurrent, RPAPotential
+from multipac_testbench.instruments.power import ForwardPower
 from multipac_testbench.multipactor_test import MultipactorTest
 
 if __name__ == "__main__":
@@ -18,17 +19,19 @@ if __name__ == "__main__":
         results_path, config, freq_mhz=120.0, swr=1.0, sep=","
     )
 
-    power_is_growing_kw = {
-        "minimum_number_of_points": 10,
-        "n_trailing_points_to_check": 5,
-    }
+    forward_power = multipactor_test.get_instrument(ForwardPower)
+    assert isinstance(forward_power, ForwardPower)
+    is_growing = forward_power.growth_mask(
+        minimum_number_of_points=10, n_trailing_points_to_check=5
+    )
+    masks = {"__(power grows)": is_growing, "__(power decreases)": ~is_growing}
 
     # Plot RPA current vs RPA potential
     fig, axes = multipactor_test.sweet_plot(
         RPACurrent,
         xdata=RPAPotential,
-        # power_is_growing_kw=power_is_growing_kw,
-        tail=-16,
+        masks=masks,
+        # tail=-16,
     )
 
     # Plot distribution

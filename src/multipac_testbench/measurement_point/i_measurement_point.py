@@ -132,7 +132,7 @@ class IMeasurementPoint(ABC):
         self,
         multipac_detector: Callable[[NDArray[np.float64]], NDArray[np.bool]],
         instrument_class: ABCMeta,
-        power_is_growing: NDArray[np.bool],
+        growth_mask: NDArray[np.bool],
         debug: bool = False,
         info: str = "",
     ) -> InstrumentMultipactorBands | None:
@@ -143,7 +143,7 @@ class IMeasurementPoint(ABC):
         multipactor = multipac_detector(instrument.data)
         instrument_multipactor_bands = InstrumentMultipactorBands(
             multipactor,
-            power_is_growing,
+            growth_mask,
             instrument.name,
             self.name,
             instrument.position,
@@ -155,7 +155,7 @@ class IMeasurementPoint(ABC):
             axes = axes.twinx()
             df_float = pd.DataFrame(
                 {
-                    "Power grows?": power_is_growing,
+                    "Power grows?": growth_mask,
                     "Multipactor?": multipactor[1:],
                 }
             ).astype(float)

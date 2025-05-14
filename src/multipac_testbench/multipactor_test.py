@@ -622,7 +622,7 @@ class MultipactorTest:
         self,
         multipac_detector: Callable[[NDArray[np.float64]], NDArray[np.bool]],
         instrument_class: ABCMeta,
-        power_is_growing_kw: dict[str, Any] | None = None,
+        power_growth_mask_kw: dict[str, Any] | None = None,
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
         debug: bool = False,
         **kwargs,
@@ -638,8 +638,8 @@ class MultipactorTest:
         instrument_class :
             Type of instrument on which ``multipac_detector`` should be
             applied.
-        power_is_growing_kw :
-            Keyword arguments passed to :meth:`.ForwardPower.where_is_growing`.
+        power_growth_mask_kw :
+            Keyword arguments passed to :meth:`.ForwardPower.growth_mask`.
         measurement_points_to_exclude :
             Some measurement points that should not be considered.
         debug :
@@ -654,7 +654,7 @@ class MultipactorTest:
             :class:`.Instrument` of type ``instrument_class``.
 
         """
-        power_is_growing = self._where_is_growing(power_is_growing_kw)
+        growth_mask = self._power_growth_mask(power_growth_mask_kw)
 
         measurement_points = self.get_measurement_points(
             to_exclude=measurement_points_to_exclude
@@ -664,31 +664,30 @@ class MultipactorTest:
             measurement_point.detect_multipactor(
                 multipac_detector,
                 instrument_class,
-                power_is_growing,
+                growth_mask,
                 debug,
                 info=f" {self}",
             )
             for measurement_point in measurement_points
         ]
         test_multipactor_bands = TestMultipactorBands(
-            instrument_multipactor_bands, power_is_growing
+            instrument_multipactor_bands, growth_mask
         )
         return test_multipactor_bands
 
-    def _where_is_growing(
-        self, power_is_growing_kw: dict[str, Any] | None = None
+    def _power_growth_mask(
+        self, growth_mask_kw: dict[str, Any] | None = None
     ) -> NDArray[np.bool]:
         """Determine where the power is growing.
 
         Parameters
         ----------
-        power_is_growing_kw :
-            Keyword arguments passed to :meth:`.ForwardPower.where_is_growing`.
+        growth_mask_kw :
+            Keyword arguments passed to :meth:`.ForwardPower.growth_mask`.
 
         Returns
         -------
-        power_is_growing :
-            ``True`` where power grows, ``False`` where it decreases.
+            ``True`` where power increases, ``False`` where it decreases.
 
         """
         forward_power = self.get_instrument(ins.ForwardPower)
@@ -696,12 +695,10 @@ class MultipactorTest:
             f"{forward_power} is a {type(forward_power)} instead of a "
             "ForwardPower."
         )
-        if power_is_growing_kw is None:
-            power_is_growing_kw = {}
-        power_is_growing = forward_power.where_is_growing(
-            **power_is_growing_kw
-        )
-        return power_is_growing
+        if growth_mask_kw is None:
+            growth_mask_kw = {}
+        mask = forward_power.growth_mask(**growth_mask_kw)
+        return mask
 
     def animate_instruments_vs_position(
         self,

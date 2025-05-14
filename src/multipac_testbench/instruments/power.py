@@ -22,7 +22,16 @@ class Power(Instrument):
         """Label used for plots."""
         return r"Power [W]"
 
-    def where_is_growing(
+    def where_is_growing(self, *args, **kwargs) -> NDArray[np.bool]:
+        """Identify regions where the signal is increasing ("growing").
+
+        .. deprecated:: 1.7.0
+           Alias to :meth:`.Power.growth_mask`, consider calling it directly.
+
+        """
+        return self.growth_mask(*args, **kwargs)
+
+    def growth_mask(
         self,
         minimum_number_of_points: int = 50,
         n_trailing_points_to_check: int = 40,
@@ -80,23 +89,23 @@ class Power(Instrument):
             is_growing.append(local_is_growing)
             previous_value = local_is_growing
 
-        arr_growing = np.array(is_growing, dtype=np.bool_)
+        growth_mask = np.array(is_growing, dtype=np.bool_)
 
         # Remove isolated False
         if minimum_number_of_points > 0:
-            arr_growing = remove_isolated_false(
-                arr_growing, minimum_number_of_points
+            growth_mask = remove_isolated_false(
+                growth_mask, minimum_number_of_points
             )
 
         # Also ensure that last power growth is False
         if n_trailing_points_to_check > 0:
-            arr_growing = remove_trailing_true(
-                arr_growing,
+            growth_mask = remove_trailing_true(
+                growth_mask,
                 n_trailing_points_to_check,
                 array_name_for_warning="power growth",
             )
 
-        return arr_growing
+        return growth_mask
 
 
 class ForwardPower(Power):
