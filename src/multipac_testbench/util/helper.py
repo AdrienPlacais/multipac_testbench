@@ -1,5 +1,6 @@
 """Define general usage functions."""
 
+import logging
 from collections.abc import Iterable, Iterator
 from pathlib import Path
 from typing import TypeVar
@@ -96,12 +97,16 @@ def split_rows_by_masks(
     df: pd.Series | pd.DataFrame,
     masks: dict[str, NDArray[np.bool]],
 ) -> pd.DataFrame:
-    """
-    Split the rows of a Series or DataFrame into new columns based on a boolean mask.
+    """Split the rows of ``df`` into new columns based on a boolean mask.
 
     For each column in the original data, one new column per mask is created
     with the corresponding suffix. Rows not selected by a mask are filled with
-    NaN.
+    ``np.nan``.
+
+    .. important::
+        Functions using the splitted ``df`` such as
+        :func:`.styles_from_column_cycle` expect every key of ``masks`` to
+        start with a double underscore (``__``).
 
     Examples
     --------
@@ -154,6 +159,14 @@ def split_rows_by_masks(
             raise ValueError(
                 f"Mask '{name}' has incorrect length ({len(mask)} != {length})"
             )
+
+    for key in masks.keys():
+        if key[:2] == "__":
+            continue
+        logging.warning(
+            f"{key = } does not start with a double underscore. Splitted "
+            "columns may not be recognized."
+        )
 
     # Ensure disjoint masks
     combined = np.zeros(length, dtype=int)

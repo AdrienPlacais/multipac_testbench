@@ -1,5 +1,7 @@
 """Provide tests for the helper functions."""
 
+from unittest.mock import patch
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -238,3 +240,21 @@ def test_split_rows_by_masks_overlapping_masks_raises() -> None:
     }
     with pytest.raises(ValueError, match="Masks must be disjoint"):
         split_rows_by_masks(df, masks)
+
+
+def test_split_rows_by_masks_no_double_underscore() -> None:
+    ser = pd.Series([1, 2, 3], name="data")
+    masks = {
+        "__a": np.array([True, False, True]),
+        "b": np.array([False, True, False]),
+    }
+    with patch("logging.warning") as mock_warning:
+        result = split_rows_by_masks(ser, masks)
+        expected = pd.DataFrame(
+            {
+                "data__a": [1.0, np.nan, 3.0],
+                "datab": [np.nan, 2.0, np.nan],
+            }
+        )
+        assert_frame_equal(result, expected)
+        mock_warning.assert_called_once()
