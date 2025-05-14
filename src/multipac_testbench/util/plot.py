@@ -142,10 +142,12 @@ def create_df_to_plot(
             f"Not all data sources have the same length: {lengths}"
         )
     df_to_plot = pd.concat(data_to_plot, axis=1)
+
     if head is not None:
         df_to_plot = df_to_plot.head(head)
     if tail is not None:
         df_to_plot = df_to_plot.tail(tail)
+
     # Remove duplicate columns
     df_to_plot = df_to_plot.loc[:, ~df_to_plot.columns.duplicated()].copy()
 
@@ -154,6 +156,7 @@ def create_df_to_plot(
 
     if isinstance(column_names, str):
         column_names = [column_names]
+
     old_column_names = df_to_plot.columns.values
     assert len(column_names) == len(old_column_names)
     columns_mapper = {
@@ -260,13 +263,10 @@ def actual_plot(
     """
     if is_nested_list(y_columns):
         y_columns_nested = cast(list[list[str]], y_columns)
-        styles = [
-            [style_from_column(col) for col in ylist]
-            for ylist in y_columns_nested
-        ]
+        styles = [styles_from_column_cycle(y) for y in y_columns_nested]
     else:
         y_columns_flat = cast(list[str], y_columns)
-        styles = [style_from_column(col) for col in y_columns_flat]
+        styles = [styles_from_column_cycle(col) for col in y_columns_flat]
 
     if not isinstance(x_columns, list):
         x_columns = [x_columns for _ in y_columns]
@@ -281,11 +281,15 @@ def actual_plot(
     if len(axes) == 1:
         axes = [axes[0] for _ in y_columns]
 
-    for x, y, ax, style in zip(
+    for x, y, ax, style_dict in zip(
         x_columns, y_columns, axes, styles, strict=True
     ):
         if not isinstance(y, list):
             y = [y]
+        style_list = [
+            style_dict.get(col, {"linestyle": "-"}).get("linestyle", "-")
+            for col in y
+        ]
 
         df_to_plot.plot(
             x=x,
@@ -294,7 +298,7 @@ def actual_plot(
             grid=grid,
             ax=ax,
             color=color,
-            style=style,
+            style=style_list,
             **kwargs,
         )
     return axes
@@ -547,13 +551,6 @@ def _merge_legends(ax1: Axes, ax2: Axes) -> None:
     ax2.legend(handles, labels)
 
 
-def style_from_column(col: str) -> str:
-    """Give proper linestyle, discriminating increasing/decreasing values."""
-    if col.endswith("__increasing"):
-        return "-"
-    if col.endswith("__decreasing"):
-        return "--"
-    return "-"
 def styles_from_column_cycle(
     columns: Iterable[str],
     linestyles: list[str] | None = None,

@@ -47,7 +47,7 @@ from multipac_testbench.util.animate import get_limits
 from multipac_testbench.util.helper import (
     flatten,
     output_filepath,
-    split_rows_by_mask,
+    split_rows_by_masks,
 )
 from numpy.typing import NDArray
 
@@ -151,7 +151,7 @@ class MultipactorTest:
         *ydata: ABCMeta,
         xdata: ABCMeta | None = None,
         exclude: Sequence[str] = (),
-        tail: int = -1,
+        tail: int | None = None,
         xlabel: str = "",
         ylabel: str | Iterable = "",
         grid: bool = True,
@@ -164,7 +164,7 @@ class MultipactorTest:
         csv_path: Path | None = None,
         csv_kwargs: dict | None = None,
         axes: list[Axes] | None = None,
-        power_is_growing_kw: dict[str, Any] | None = None,
+        masks: dict[str, NDArray[np.bool]] | None = None,
         **kwargs,
     ) -> tuple[list[Axes], pd.DataFrame]:
         """Plot ``ydata`` versus ``xdata``.
@@ -211,10 +211,14 @@ class MultipactorTest:
         csv_path :
             If specified, save the data used to produce the plot in
             ``csv_path``.
-        power_is_growing_kw :
-            Keyword arguments passed to :meth:`.ForwardPower.where_is_growing`.
-            If provided, the linestyle will be solid for increasing powers,
-            dashed for decreasing.
+        masks :
+            A dictionary where each key is a suffix used to label the split
+            columns, and each value is a boolean mask of the same length as the
+            input data. Keys must start with two underscores (``__``) to enable
+            consistent column naming and compatibility with downstream styling
+            logic (e.g., grouping lines by base column in plots). If multiple
+            masks are ``True`` at the same row index, a ``ValueError`` is
+            raised.
         **kwargs :
             Other keyword arguments passed to :meth:`pandas.DataFrame.plot`,
             :meth:`._set_y_data`, :func:`.create_df_to_plot`,
@@ -228,19 +232,13 @@ class MultipactorTest:
             DataFrame holding the data that is plotted.
 
         """
-        power_is_growing = (
-            self._where_is_growing(power_is_growing_kw)
-            if power_is_growing_kw is not None
-            else None
-        )
-
         data_to_plot, x_columns = self._set_x_data(xdata, exclude=exclude)
         data_to_plot, y_columns, color = self._set_y_data(
             data_to_plot,
             *ydata,
             exclude=exclude,
             column_names=column_names,
-            power_is_growing=power_is_growing,
+            masks=masks,
             **kwargs,
         )
         if test_color is not None:
@@ -345,11 +343,11 @@ class MultipactorTest:
 
     def _set_y_data(
         self,
-        data_to_plot: list[pd.Series],
+        data_to_plot: list[pd.Series | pd.DataFrame],
         *ydata: ABCMeta,
         exclude: Sequence[str] = (),
         column_names: str | list[str] = "",
-        power_is_growing: NDArray[np.bool] | None = None,
+        masks: dict[str, NDArray[np.bool]] | None = None,
         **kwargs,
     ) -> tuple[list[pd.Series], list[list[str]], dict[str, str]]:
         """Set the y-data that will be plotted.
@@ -367,10 +365,14 @@ class MultipactorTest:
             To override the default column names. This is used in particular
             with the method :meth:`.TestCampaign.sweet_plot`, when
             ``all_on_same_plot=True``.
-         power_is_growing :
-            Boolean array of same length as the data, indicating whether
-            forward power is increasing. If provided, each y column will be
-            split into increasing and decreasing subsets.
+        masks :
+            A dictionary where each key is a suffix used to label the split
+            columns, and each value is a boolean mask of the same length as the
+            input data. Keys must start with two underscores (``__``) to enable
+            consistent column naming and compatibility with downstream styling
+            logic (e.g., grouping lines by base column in plots). If multiple
+            masks are ``True`` at the same row index, a ``ValueError`` is
+            raised.
         kwargs :
             Other keyword arguments.
 
@@ -403,8 +405,8 @@ class MultipactorTest:
                     continue
 
                 df = instrument.data_as_pd
-                if power_is_growing is not None:
-                    df = split_rows_by_mask(df, mask=power_is_growing)
+                if masks is not None:
+                    df = split_rows_by_masks(df, masks=masks)
 
                 data_to_plot.append(df)
 
@@ -414,7 +416,7 @@ class MultipactorTest:
                     continue
 
                 names = df.columns.to_list()
-                if power_is_growing is not None:
+                if masks is not None:
                     names = [names]
                 sub_ycols.extend(names)
 
