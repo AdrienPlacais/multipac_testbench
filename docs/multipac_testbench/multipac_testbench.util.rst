@@ -19,3 +19,4 @@ Submodules
    multipac_testbench.util.multipactor_detectors
    multipac_testbench.util.plot
    multipac_testbench.util.post_treaters
+   multipac_testbench.util.types

@@ -21,3 +21,4 @@ Just know that every useful method from :py:class:`.MultipactorTest` has its equ
    notebooks/plot_voltage_thresholds.ipynb
    notebooks/compare_several_tests.ipynb
    notebooks/animate_multipactor_test.ipynb
+   notebooks/plot_rpa_data.ipynb
