@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for the Retarding Field Analyzer
 - `MultipactorTest.sweet_plot` method accepts a `masks` argument to show data with different linestyles.
 
+### Changed
+
+- Links to the `multipac_testbench` in the notebook tutorials should be clickable.
+
 ## [1.6.3] 2025-04-23
 
 ### Added
