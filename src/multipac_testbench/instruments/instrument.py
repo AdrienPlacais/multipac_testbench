@@ -212,7 +212,7 @@ class Instrument(ABC):
             delattr(self, "_data")
         if hasattr(self, "_data_as_pd"):
             delattr(self, "_data_as_pd")
-        logging.info(f"Adding {post_treater = } to {self}")
+        logging.debug(f"Adding {post_treater = } to {self}")
         self._post_treaters.append(post_treater)
 
     def at_thresholds(
