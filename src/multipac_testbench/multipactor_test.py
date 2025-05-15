@@ -120,7 +120,12 @@ class MultipactorTest:
             df_data,
             verbose,
         )
-        self.global_diagnostics, self.pick_ups = imeasurement_points
+        #: Where all diagnostics at a specific pick-up are defined (e.g.
+        #: current probe)
+        self.pick_ups = imeasurement_points[1]
+        #: Where all diagnostics which are not a specific position are stored
+        #: (e.g. forward/reflected power)
+        self.global_diagnostics = imeasurement_points[0]
 
         self.freq_mhz = freq_mhz
         self.swr = swr
