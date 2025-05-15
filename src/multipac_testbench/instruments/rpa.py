@@ -223,7 +223,7 @@ def _compute_energy_distribution(
     dropped_potential = df.iloc[:, 0]
     dropped_current = df.iloc[:, 1]
 
-    distribution = dropped_current.diff() / dropped_potential.diff()
+    distribution = -dropped_current.diff() / dropped_potential.diff()
     distribution.name = "Energy distribution"
 
     out = pd.concat([dropped_potential, distribution], axis=1)
