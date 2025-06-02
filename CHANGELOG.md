@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.7.0] 2025-05-15
+## [1.7.0] - 2025-05-15
 
 ### Added
 
@@ -16,20 +16,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Links to the `multipac_testbench` in the notebook tutorials should be clickable.
 
-## [1.6.3] 2025-04-23
+## [1.6.3] - 2025-04-23
 
 ### Added
 
 - Examples in documentation.
 - Package is available on PyPI and can be installed with `pip install multipac_testbench`.
 
-## [1.6.2] 2025-04-23
+## [1.6.2] - 2025-04-23
 
 ### Fixed
 
 - Pre-commit hooks
 
-## [1.6.1] 2025-04-23
+## [1.6.1] - 2025-04-23
 
 ### Changed
 
@@ -40,14 +40,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - All the links in documentation are resolved.
 
-## [1.6.0] 2024-09-17
+## [1.6.0] - 2024-09-17
 
 ### Modified
 
 - Proper packaging, local installation with pip.
  - You shall remove the `.src` in the `multipac_testbench` imports.
 
-## [1.5.2] 2024-03-06
+## [1.5.2] - 2024-03-06
 
 ### Added
 
@@ -63,7 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Last `MultipactorBand` was not added
 - Sometimes, a `MultipactorBand` was incorrectly created because the previous multipactor starting index was not properly reinitialized
 
-## [1.5.1] 2024-03-02
+## [1.5.1] - 2024-03-02
 
 ### Removed
 
@@ -80,7 +80,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Powers`
 
 
-## [1.5.0] 2024-03-02
+## [1.5.0] - 2024-03-02
 
 ### Added
 
@@ -105,7 +105,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Now, use the dedicated instruments: `ForwardPower`, `ReflectedPower` (both are `Power`), `SWR`, `ReflectionCoefficient`
 
 
-## [1.4.1] 2024-02-19
+## [1.4.1] - 2024-02-19
 
 ### Removed
 
@@ -120,7 +120,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Instruments.SWR`
 
 
-## [1.4.0] 2024-02-14
+## [1.4.0] - 2024-02-14
 
 ### Added
 
@@ -152,13 +152,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - The fitting of the electric field over the probes now work correctly.
 
-## [1.3.3] 2024-02-10
+## [1.3.3] - 2024-02-10
 
 ### Added
 
 - FieldProbe data can be reconstructed to avoid wrong G probe. Set `patch = True` and give a `calibration_file` in corresponding `.toml` entry.
 
-## [1.3.2] 2024-02-09
+## [1.3.2] - 2024-02-09
 
 ### Added
 
@@ -166,7 +166,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `MultipactorTest.get_instruments` handles more use cases.
 - `MultipactorTest.plot_instruments_y_vs_instrument_x` method.
 
-## [1.3.1] 2024-02-04
+## [1.3.1] - 2024-02-04
 
 ### Added
 
