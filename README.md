@@ -39,3 +39,5 @@ Then, add `multipac_testbench.src` to your `$PYTHONPATH` environment variable.
 - [ ] `sweet_plot` updates for better RPA treatment:
     - [ ] Allow for `head` argument, working similarly to `tail`.
     - [x] Argument to plot increasing and decreasing values differently. Useful when plotting RPA current against RPA grid voltage.
+- [ ] Option to plot maximum of a signal per power cycle.
+- [ ] Bugfix: Upper threshold is given even when we did not exit the multipactor zone.
