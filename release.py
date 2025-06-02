@@ -126,7 +126,7 @@ def _update_citation(version: str, today: str) -> None:
     with path.open("w") as f:
         yaml.dump(data, f, sort_keys=False, allow_unicode=True)
 
-    # run(["git", "add", str(path)])
+    run(["git", "add", str(path)])
 
 
 def _extract_changelog_section(
@@ -224,7 +224,7 @@ def _update_changelog(version: str, today: str) -> None:
     lines[index] = f"## [{version}] - {today}"
 
     path.write_text("\n".join(lines) + "\n")
-    # run(["git", "add", str(path)])
+    run(["git", "add", str(path)])
 
 
 def ask_user_to_continue(
@@ -284,7 +284,6 @@ def main() -> None:
         sys.exit(1)
     ask_user_to_continue()
     update_files(version)
-    sys.exit(1)
 
     run(["git", "commit", "-m", f"Prepare release {tag}"])
     run(["git", "tag", tag])
