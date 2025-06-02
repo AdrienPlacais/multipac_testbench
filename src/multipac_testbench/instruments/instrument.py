@@ -523,11 +523,12 @@ class Instrument(ABC):
         :class:`.RPA`.
 
         The method performs three main operations:
-        1. It uses a sliding-window heuristic (*via* :func:`.array_is_growing`)
+
+        #. It uses a sliding-window heuristic (*via* :func:`.array_is_growing`)
            to detect growth.
-        2. It removes short, isolated ``False`` segments, enforcing a minimum
+        #. It removes short, isolated ``False`` segments, enforcing a minimum
            number of consecutive ``True`` values to be considered valid.
-        3. It clears any trailing ``True`` values near the end of the array to
+        #. It clears any trailing ``True`` values near the end of the array to
            prevent spurious detections due to edge effects.
 
         Parameters
