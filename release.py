@@ -126,25 +126,36 @@ def _update_citation(version: str, today: str) -> None:
     with path.open("w") as f:
         yaml.dump(data, f, sort_keys=False, allow_unicode=True)
 
-    run(["git", "add", str(path)])
+    # run(["git", "add", str(path)])
 
 
 def _extract_changelog_section(
     version: str, content: str
-) -> tuple[str, int, str | None] | None:
-    """Find the changelog section for a version and return its text, line index, and date if any."""
-    pattern = (
-        rf"^## \[{re.escape(version)}\](?: - (\d{{4}}-\d{{2}}-\d{{2}}))?$"
-    )
+) -> tuple[str, int, re.Match[str]] | None:
+    """Find the changelog section for a version and return its text, line index, and match.
+
+    Parameters
+    ----------
+    version :
+        The version string (e.g., ``"1.8.0"``).
+    content :
+        The full text content of CHANGELOG.md.
+
+    Returns
+    -------
+    tuple[str, int, re.Match[str]] | None
+        A tuple of (matched section string, line index, match object) or None if not found.
+    """
+    pattern = rf"^## \[{re.escape(version)}\](?: - (unreleased|\d{{4}}-\d{{2}}-\d{{2}}))?$"
     lines = content.splitlines()
     for i, line in enumerate(lines):
-        if match := re.match(pattern, line):
+        if match := re.match(pattern, line, re.IGNORECASE):
             section_lines = [line]
             for j in range(i + 1, len(lines)):
                 if lines[j].startswith("## "):
                     break
                 section_lines.append(lines[j])
-            return "\n".join(section_lines), i, match.group(1)
+            return ("\n".join(section_lines), i, match)
     return None
 
 
@@ -176,7 +187,7 @@ def changelog_is_ok(version: str) -> bool:
         )
         return False
 
-    section = result[0]
+    section, _, _ = result
     print(f"\nThe CHANGELOG section corresponding to {version} reads:")
     print(
         "   (note that the current date will be automatically appended to the "
@@ -194,6 +205,13 @@ def _update_changelog(version: str, today: str) -> None:
     Date is appended to the line containing `## [X.Y.Z]`. If the date is
     already present, check that it matches ``today``.
 
+    Parameters
+    ----------
+    version :
+        The version string to set in the CHANGELOG.md file.
+    today :
+        Today's date.
+
     """
     path = Path("CHANGELOG.md")
     if not path.exists():
@@ -206,25 +224,29 @@ def _update_changelog(version: str, today: str) -> None:
         print(f"No section '## [{version}]' found in CHANGELOG.md.")
         sys.exit(1)
 
-    _, index, found_date = result
-    if found_date == today:
+    _, index, match = result
+    matched_date_or_flag = match.group(1)
+    if matched_date_or_flag is None:
+        print(f"No date yet, appending today's date to version {version}.")
+    elif matched_date_or_flag.lower() == "unreleased":
+        print(f"'unreleased' found, replacing it with today's date.")
+    elif matched_date_or_flag != today:
+        print(
+            f"Version {version} already has date {matched_date_or_flag}, but "
+            f"today is {today}. I will write today's date in CHANGELOG."
+        )
+        ask_user_to_continue()
+    else:
         print(
             f"CHANGELOG.md already contains correct date for version {version}."
         )
         return
 
-    elif found_date:
-        print(
-            f"Version {version} already has date {found_date}, but today is "
-            f"{today}. I will write today's date in CHANGELOG."
-        )
-        ask_user_to_continue()
-
     lines = content.splitlines()
     lines[index] = f"## [{version}] - {today}"
 
     path.write_text("\n".join(lines) + "\n")
-    run(["git", "add", str(path)])
+    # run(["git", "add", str(path)])
 
 
 def ask_user_to_continue(
@@ -285,6 +307,7 @@ def main() -> None:
     ask_user_to_continue()
     update_files(version)
 
+    return
     run(["git", "commit", "-m", f"Prepare release {tag}"])
     run(["git", "tag", tag])
     run(["git", "push"])
