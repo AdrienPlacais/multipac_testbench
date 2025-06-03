@@ -48,6 +48,13 @@ def git_clean() -> bool:
     return result.stdout.strip() == ""
 
 
+def current_branch() -> str:
+    """Give branch we are on."""
+    return run(
+        ["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True
+    ).stdout.strip()
+
+
 def on_appropriate_branch(version: str) -> bool:
     """Verify that the version number is consistent with current branch.
 
@@ -65,10 +72,7 @@ def on_appropriate_branch(version: str) -> bool:
 
     """
     try:
-        result = run(
-            ["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True
-        )
-        current_branch = result.stdout.strip()
+        branch = current_branch()
     except subprocess.CalledProcessError:
         print("Failed to get current Git branch.")
         return False
@@ -76,14 +80,14 @@ def on_appropriate_branch(version: str) -> bool:
     major, minor, _ = version.split(".")
     expected_branch = f"{major}.{minor}.x"
 
-    if current_branch != expected_branch:
+    if branch != expected_branch:
         print(
-            f"You are on branch '{current_branch}', but version {version} "
+            f"You are on branch '{branch}', but version {version} "
             f"suggests you should be on '{expected_branch}'."
         )
         return False
 
-    print(f"Branch '{current_branch}' matches version {version}.")
+    print(f"Branch '{branch}' matches version {version}.")
     return True
 
 
@@ -313,7 +317,7 @@ def main() -> None:
 
     run(["git", "commit", "-m", f"Prepare release {tag}"])
     run(["git", "tag", tag])
-    run(["git", "push"])
+    run(["git", "push", "--set-upstream", "origin", current_branch()])
     run(["git", "push", "origin", tag])
 
     print(f"Release {tag} tagged and pushed!")
