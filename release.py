@@ -90,7 +90,6 @@ def on_appropriate_branch(version: str) -> bool:
 def update_files(version: str) -> None:
     """Update :file:`CITATION.cff` and :file:`CHANGELOG.md`.
 
-
     Parameters
     ----------
     version :
@@ -132,21 +131,25 @@ def _update_citation(version: str, today: str) -> None:
 def _extract_changelog_section(
     version: str, content: str
 ) -> tuple[str, int, re.Match[str]] | None:
-    """Find the changelog section for a version and return its text, line index, and match.
+    """Find the changelog section for a version.
 
     Parameters
     ----------
     version :
         The version string (e.g., ``"1.8.0"``).
     content :
-        The full text content of CHANGELOG.md.
+        The full text content of :file:`CHANGELOG.md`.
 
     Returns
     -------
     tuple[str, int, re.Match[str]] | None
-        A tuple of (matched section string, line index, match object) or None if not found.
+        A tuple of (matched section string, line index, match object) or None
+        if not found.
+
     """
-    pattern = rf"^## \[{re.escape(version)}\](?: - (unreleased|\d{{4}}-\d{{2}}-\d{{2}}))?$"
+    pattern = rf"^## \[{re.escape(
+        version
+    )}\](?: - (unreleased|\d{{4}}-\d{{2}}-\d{{2}}))?$"
     lines = content.splitlines()
     for i, line in enumerate(lines):
         if match := re.match(pattern, line, re.IGNORECASE):
@@ -208,7 +211,7 @@ def _update_changelog(version: str, today: str) -> None:
     Parameters
     ----------
     version :
-        The version string to set in the CHANGELOG.md file.
+        The version string to set in the :file:`CHANGELOG.md` file.
     today :
         Today's date.
 
@@ -238,7 +241,8 @@ def _update_changelog(version: str, today: str) -> None:
         ask_user_to_continue()
     else:
         print(
-            f"CHANGELOG.md already contains correct date for version {version}."
+            "CHANGELOG.md already contains correct date for version "
+            f"{version}."
         )
         return
 
