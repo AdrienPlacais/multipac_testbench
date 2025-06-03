@@ -25,11 +25,12 @@ Note that you will need Python 3.11 or higher to use the library.
 If you want to use `conda`, you must manually install the required packages defined in `pyproject.toml`.
 Then, add `multipac_testbench.src` to your `$PYTHONPATH` environment variable.
 
-## Documentation
+## Project info
 
-- Documentation is available on [ReadTheDocs](https://multipac-testbench.readthedocs.io/en/stable/).
-- Examples are provided in the [Tutorials](https://multipac-testbench.readthedocs.io/en/stable/manual/tutorials.html) section.
-  They all use the same `testbench_configuration.toml` and `120MHz-SWR4.csv` files that I can send upon request.
+- 📚 [Documentation](https://multipac-testbench.readthedocs.io/en/stable/)
+- 📋 [Changelog](./CHANGELOG.md)
+- 🤝 [Contributing](./CONTRIBUTING.md)
+- 🚀 [Tutorials/examples](https://multipac-testbench.readthedocs.io/en/stable/manual/tutorials.html)
 
 ## Future updates
 
