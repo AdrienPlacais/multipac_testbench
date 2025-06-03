@@ -18,7 +18,9 @@ from pathlib import Path
 import yaml
 
 
-def run(cmd: Sequence[str], **kwargs) -> subprocess.CompletedProcess:
+def run(
+    cmd: Sequence[str], check: bool = True, text: bool = True, **kwargs
+) -> subprocess.CompletedProcess:
     """Run a shell command and ensure it completes successfully.
 
     Parameters
@@ -32,7 +34,7 @@ def run(cmd: Sequence[str], **kwargs) -> subprocess.CompletedProcess:
         The result of the completed subprocess.
 
     """
-    return subprocess.run(cmd, check=True, text=True, **kwargs)
+    return subprocess.run(cmd, check=check, text=text, **kwargs)
 
 
 def git_clean() -> bool:
@@ -89,6 +91,12 @@ def on_appropriate_branch(version: str) -> bool:
 
     print(f"Branch '{branch}' matches version {version}.")
     return True
+
+
+def has_staged_changes() -> bool:
+    """Tell if there are changes to commit to avoid errors."""
+    result = run(["git", "diff", "--cached", "--quiet"], check=False)
+    return result.returncode != 0
 
 
 def update_files(version: str) -> None:
@@ -315,7 +323,10 @@ def main() -> None:
     ask_user_to_continue()
     update_files(version)
 
-    run(["git", "commit", "-m", f"Prepare release {tag}"])
+    if has_staged_changes():
+        run(["git", "commit", "-m", f"Prepare release {tag}"])
+    else:
+        print("Nothing to commit.")
     run(["git", "tag", tag])
     run(["git", "push", "--set-upstream", "origin", current_branch()])
     run(["git", "push", "origin", tag])
