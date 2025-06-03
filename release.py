@@ -266,6 +266,7 @@ def _update_changelog(version: str, today: str) -> None:
 
 
 def ask_user_to_continue(
+    question: str = "Is it ok for you? (y/n) ",
     error_msg: str = "Operation aborted by user.",
     count: int = 0,
 ) -> None:
@@ -273,7 +274,7 @@ def ask_user_to_continue(
     if count >= 3:
         print("Too many unsuccessful attempts.")
         sys.exit(1)
-    answer = input("Is it ok for you? (y/[n]) ")
+    answer = input(question)
     if answer.lower() == "y":
         return
     if answer.lower() == "n":
@@ -291,9 +292,8 @@ def main() -> None:
     #. Checking the Git status
     #. Checking the corresponding section in :file:`CHANGELOG.md`
     #. Updating :file:`CITATION.cff` and :file:`CHANGELOG.md`
-    #. Committing changes
-    #. Tagging the release
-    #. Pushing to origin
+    #. Committing changes, tagging the release, pushing to origin
+    #. Switching to main, merging, pushing
 
     """
     if len(sys.argv) != 2:
@@ -327,11 +327,18 @@ def main() -> None:
         run(["git", "commit", "-m", f"Prepare release {tag}"])
     else:
         print("Nothing to commit.")
+
     run(["git", "tag", tag])
     run(["git", "push", "--set-upstream", "origin", current_branch()])
     run(["git", "push", "origin", tag])
 
     print(f"Release {tag} tagged and pushed!")
+
+    print("I will merge release branch into main and push.")
+    ask_user_to_continue()
+    run(["git", "checkout", "main"])
+    run(["git", "merge", "--no-ff", tag])
+    run(["git", "push", "origin", "main"])
 
 
 if __name__ == "__main__":

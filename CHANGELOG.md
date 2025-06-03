@@ -7,11 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # [1.7.x]
 
-## [1.7.2] - unreleased
+## [1.7.3] - unreleased
 
 ### Changed
 
 - The `main` branch is protected. (Github only, maybe a release is unnecessary?)
+
+## [1.7.2] - unreleased
+
+### Added
+
+- `release.py` handles post-release steps related to `main` branch.
 
 ## [1.7.1] - 2025-06-03
 
