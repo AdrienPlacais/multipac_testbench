@@ -3,7 +3,7 @@ message: If you use this software, please cite it as below.
 title: MULTIPAC testbench
 abstract: Treat the signals produced by the MULTIPAC test bench.
 version: 1.7.1
-date-released: '2025-06-02'
+date-released: '2025-06-03'
 authors:
 - family-names: Plaçais
   given-names: Adrien
