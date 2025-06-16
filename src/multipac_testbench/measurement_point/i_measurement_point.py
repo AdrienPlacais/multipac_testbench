@@ -130,15 +130,12 @@ class IMeasurementPoint(ABC):
         self,
         post_treater: POST_TREATER_T,
         instrument_class: ABCMeta = Instrument,
-        verbose: bool = False,
     ) -> None:
         """Add post-treatment functions to instruments."""
         instruments = self.get_instruments(instrument_class)
         for instrument in instruments:
             instrument.add_post_treater(post_treater)
-
-            if verbose:
-                logging.info(f"A post-treater was added to {str(instrument)}.")
+            logging.info(f"A post-treater was added to {str(instrument)}.")
 
     def detect_multipactor(
         self,

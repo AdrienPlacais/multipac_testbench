@@ -89,10 +89,9 @@ class TestCampaign(list):
                 swr,
                 info,
                 sep=sep,
-                verbose=i == 0,
                 **kwargs,
             )
-            for i, (filepath, freq_mhz, swr, info) in enumerate(args)
+            for _, (filepath, freq_mhz, swr, info) in enumerate(args)
         ]
         return cls(multipactor_tests)
 
