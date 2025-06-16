@@ -113,3 +113,13 @@ def test_replace_data_under_threshold():
         input, threshold=1.0, replace_value=0.0
     )
     assert_array_equal(expected, result)
+
+
+def test_replace_data_under_threshold_with_min_consecutive():
+    """Check simple replacing."""
+    input = np.array([4.0, 0.8, 4.1, 0.1, 0.2, 0.3, 4.3])
+    expected = np.array([4.0, 0.8, 4.1, 0.0, 0.0, 0.0, 4.3])
+    result = replace_data_under_threshold(
+        input, threshold=1.0, replace_value=0.0, min_consecutive=3
+    )
+    assert_array_equal(expected, result)

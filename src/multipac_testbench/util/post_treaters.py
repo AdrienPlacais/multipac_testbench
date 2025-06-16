@@ -240,23 +240,46 @@ def drop_x_where_y_is_nan(
 
 
 def replace_data_under_threshold(
-    input_data: NDArray[np.float64], threshold: float, replace_value: float
+    input_data: NDArray[np.float64],
+    threshold: float,
+    replace_value: float,
+    min_consecutive: int = 1,
 ) -> NDArray[np.float64]:
-    """Replace data by ``replace_value`` where below ``input_data``.
+    """Replace data where ``min_consecutive`` values are below ``threshold``.
 
-    First used to force reflected power measurements to be ``0.0`` when it is
-    in the noise.
+    Data is replaced by ``replace_value``.
 
     Parameters
     ----------
     input_data :
         Data to filter.
     threshold :
-        Threshold under which data is replaced by ``replace_value``.
+        Threshold under which data is considered noise.
     replace_value :
-        Data to put in ``input_data``.
+        Value to replace the data with.
+    min_consecutive :
+        Minimum number of consecutive values below the threshold required for
+        replacement.
+
+    Returns
+    -------
+    NDArray[np.float64]
+        Modified data array.
 
     """
-    idx = np.where(input_data < threshold)
-    input_data[idx] = replace_value
-    return input_data
+    data = input_data.copy()
+    mask = data < threshold
+
+    i = 0
+    while i < len(mask):
+        if mask[i]:
+            start = i
+            while i < len(mask) and mask[i]:
+                i += 1
+            end = i
+            if end - start >= min_consecutive:
+                data[start:end] = replace_value
+        else:
+            i += 1
+
+    return data
