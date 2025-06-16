@@ -131,11 +131,11 @@ class FieldProbe(IElectricField):
         calibration_file :
             Path to the ``CSV`` calibration file.
         freq_mhz :
-            euh
+            RF frequency for this test in :unit:`MHz`.
         freq_col :
             Name of the column holding the measure frequency in :unit:`MHz`.
         a_col :
-            Name of the column holding the measured slope in :unit:`V/dBm`.
+            Name of the column holding the measured slope in :unit:`dBm/V`.
         b_col :
             Name of the column holding the measured bias in :unit:`dBm`.
 
