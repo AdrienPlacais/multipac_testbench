@@ -142,16 +142,19 @@ class MultipactorTest:
         self, *args, only_pick_up_which_name_is: tuple[str, ...] = (), **kwargs
     ) -> None:
         """Add post-treatment functions to instruments."""
-        pick_ups = self.pick_ups
+        measurement_points: list[IMeasurementPoint] = self.pick_ups
+        if self.global_diagnostics is not None:
+            measurement_points.append(self.global_diagnostics)
+
         if len(only_pick_up_which_name_is) > 0:
-            pick_ups = [
-                pick_up
-                for pick_up in self.pick_ups
-                if pick_up.name in only_pick_up_which_name_is
+            measurement_points = [
+                point
+                for point in measurement_points
+                if point.name in only_pick_up_which_name_is
             ]
 
-        for pick_up in pick_ups:
-            pick_up.add_post_treater(*args, **kwargs)
+        for point in measurement_points:
+            point.add_post_treater(*args, **kwargs)
 
     def sweet_plot(
         self,
