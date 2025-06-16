@@ -16,7 +16,6 @@ https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
 """
 
 import logging
-import os
 import sys
 from pathlib import Path
 
@@ -53,7 +52,7 @@ def set_up_logging(
     console_log_level="INFO",
     console_log_color=True,
     console_log_line_template="%(color_on)s[%(levelname)-8s] [%(filename)-20s]%(color_off)s %(message)s",
-    logfile_file=Path("lightwin.log"),
+    logfile_file=Path("multipac_testbench.log"),
     logfile_log_level="INFO",
     logfile_log_color=False,
     logfile_line_template="%(color_on)s[%(asctime)s] [%(levelname)-8s] [%(filename)-20s]%(color_off)s %(message)s",
@@ -128,29 +127,16 @@ def set_up_logging(
     logfile_handler.setFormatter(logfile_formatter)
     logger.addHandler(logfile_handler)
 
-    # Success
     return True
 
 
 def main():
     """Main function."""
 
-    # Set up logging
-    script_name = os.path.splitext(os.path.basename(sys.argv[0]))[0]
-    if not set_up_logging(
-        console_log_output="stdout",
-        console_log_level="warning",
-        console_log_color=True,
-        console_log_line_template="%(color_on)s[%(levelname)-8s] [%(filename)-20s]%(color_off)s %(message)s",
-        logfile_file="lightwin.log",
-        logfile_log_level="INFO",
-        logfile_log_color=False,
-        logfile_line_template="%(color_on)s[%(asctime)s] [%(levelname)-8s] [%(filename)-20s]%(color_off)s %(message)s",
-    ):
+    if not set_up_logging():
         print("Failed to set up logging, aborting.")
         return 1
 
-    # Log some messages
     logging.debug("Debug message")
     logging.info("Info message")
     logging.warning("Warning message")
@@ -158,6 +144,5 @@ def main():
     logging.critical("Critical message")
 
 
-# Call main function
 if __name__ == "__main__":
     sys.exit(main())
