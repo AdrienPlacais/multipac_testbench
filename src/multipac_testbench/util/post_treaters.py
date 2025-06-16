@@ -237,3 +237,26 @@ def drop_x_where_y_is_nan(
     """
     indexes = ~np.isnan(y_values)
     return x_values[indexes]
+
+
+def replace_data_under_threshold(
+    input_data: NDArray[np.float64], threshold: float, replace_value: float
+) -> NDArray[np.float64]:
+    """Replace data by ``replace_value`` where below ``input_data``.
+
+    First used to force reflected power measurements to be ``0.0`` when it is
+    in the noise.
+
+    Parameters
+    ----------
+    input_data :
+        Data to filter.
+    threshold :
+        Threshold under which data is replaced by ``replace_value``.
+    replace_value :
+        Data to put in ``input_data``.
+
+    """
+    idx = np.where(input_data < threshold)
+    input_data[idx] = replace_value
+    return input_data

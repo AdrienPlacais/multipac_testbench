@@ -78,6 +78,17 @@ class IMeasurementPoint(ABC):
         for instrument in instruments:
             self.instruments.append(instrument)
 
+    def remove_instrument(self, *instruments: Instrument) -> None:
+        """Remove instruments from the list."""
+        for instrument in instruments:
+            if instrument not in self.instruments:
+                logging.warning(
+                    f"{instrument = } not found in {self = }.\n"
+                    f"{self.instruments = }"
+                )
+                continue
+            self.instruments.remove(instrument)
+
     def get_instruments(
         self,
         instrument_class: ABCMeta,
@@ -119,15 +130,11 @@ class IMeasurementPoint(ABC):
         self,
         post_treater: POST_TREATER_T,
         instrument_class: ABCMeta = Instrument,
-        verbose: bool = False,
     ) -> None:
         """Add post-treatment functions to instruments."""
         instruments = self.get_instruments(instrument_class)
         for instrument in instruments:
             instrument.add_post_treater(post_treater)
-
-            if verbose:
-                logging.info(f"A post-treater was added to {str(instrument)}.")
 
     def detect_multipactor(
         self,

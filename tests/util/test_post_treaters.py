@@ -4,8 +4,9 @@ import numpy as np
 import pytest
 from multipac_testbench.util.post_treaters import (
     average_y_for_nearby_x_within_distance,
+    replace_data_under_threshold,
 )
-from numpy.testing import assert_array_almost_equal
+from numpy.testing import assert_array_almost_equal, assert_array_equal
 
 
 def test_average_y_at_same_x_classic() -> None:
@@ -102,3 +103,13 @@ def test_average_y_at_same_x_on_different_numbers_of_points() -> None:
     expected = np.array([2.5, np.nan, np.nan, np.nan, 10.0, 20.5, np.nan])
     result = average_y_for_nearby_x_within_distance(y, x)
     assert_array_almost_equal(expected, result)
+
+
+def test_replace_data_under_threshold():
+    """Check simple replacing."""
+    input = np.array([0.1, 0.8, 4.0])
+    expected = np.array([0.0, 0.0, 4.0])
+    result = replace_data_under_threshold(
+        input, threshold=1.0, replace_value=0.0
+    )
+    assert_array_equal(expected, result)

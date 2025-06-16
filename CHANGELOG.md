@@ -7,11 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # [1.7.x]
 
-## [1.7.3] - unreleased
+## [1.7.3] - 2025-06-16
 
-### Changed
+### Added
 
-- The `main` branch is protected. (Github only, maybe a release is unnecessary?)
+- New post-treater to set data to a constant value where under a threshold.
+- Updating `ForwardPower` or `ReflectedPower` automatically updates `SWR` and `ReflectionCoefficient`.
+  - Used `Observer` design pattern.
 
 ## [1.7.2] - 2025-06-03
 

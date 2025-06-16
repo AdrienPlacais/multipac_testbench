@@ -1,5 +1,6 @@
 """Define object to keep a single instrument measurements."""
 
+import inspect
 import logging
 from abc import ABC
 from typing import Callable, Literal, Self, overload
@@ -23,9 +24,18 @@ from multipac_testbench.util.filtering import (
 from multipac_testbench.util.types import POST_TREATER_T
 from numpy.typing import NDArray
 
+#: Function/method to call when a post-treater is added
+#:
+#: .. seealso::
+#:    :meth:`.Instrument.register_callback`
+#:
+CALLBACK_T = Callable[[], pd.Series]
+
 
 class Instrument(ABC):
     """Hold measurements of a single instrument."""
+
+    _raw_data_can_change = False
 
     def __init__(
         self,
@@ -77,13 +87,20 @@ class Instrument(ABC):
         plotters = self._get_plot_methods(is_2d)
         self.plot_vs_position, self.scatter_data = plotters
 
-        self._raw_data: pd.Series
+        self.__raw_data: pd.Series
         if data is not None:
-            self._raw_data = data
+            self.__raw_data = data
         self._data: NDArray[np.float64]
         self._data_as_pd: pd.Series | pd.DataFrame
 
         self._post_treaters: list[POST_TREATER_T] = []
+
+        #: Functions to call when a post-treater is added to current object.
+        #:
+        #: .. seealso::
+        #:    :meth:`register_callback`
+        #:
+        self._callbacks: list[CALLBACK_T] = []
 
     def __str__(self) -> str:
         """Give concise information on instrument."""
@@ -134,6 +151,33 @@ class Instrument(ABC):
         return self.__class__.__name__
 
     @property
+    def _raw_data(self) -> pd.Series:
+        """Raw data as measured by the instrument.
+
+        For classic :class:`.Instrument`, it should not change. For
+        :class:`.VirtualInstrument`, it may change when the data it is
+        calculated changes.
+
+        """
+        return self.__raw_data
+
+    @_raw_data.setter
+    def _raw_data(self, new_value: pd.Series) -> None:
+        """Updates the :property:`_raw_data` value.
+
+        This method will raise an error for classic :class:`.Instrument`, as
+        `raw_data` is a column in the data file. It may however be changed for
+        :class:`.VirtualInstrument`.
+
+        """
+        if not self._raw_data_can_change:
+            raise ValueError("raw_data should not be updated.")
+        self.__raw_data = new_value
+        for dependent in ("_data", "_data_as_pd"):
+            if hasattr(self, dependent):
+                delattr(self, dependent)
+
+    @property
     def data(self) -> NDArray[np.float64]:
         """Get the treated data.
 
@@ -146,6 +190,13 @@ class Instrument(ABC):
         if not hasattr(self, "_data"):
             self._data = self._post_treat(self._raw_data.to_numpy())
         return self._data
+
+    @data.setter
+    def data(self, new_data: NDArray[np.float64]) -> None:
+        """Set ``data``, clean previous ``_data_as_pd``."""
+        self._data = new_data
+        if hasattr(self, "_data_as_pd"):
+            delattr(self, "_data_as_pd")
 
     @property
     def data_as_pd(self) -> pd.Series | pd.DataFrame:
@@ -165,12 +216,37 @@ class Instrument(ABC):
         self._data_as_pd = pd.Series(self.data, index=index, name=self.name)
         return self._data_as_pd
 
-    @data.setter
-    def data(self, new_data: NDArray[np.float64]) -> None:
-        """Set ``data``, clean previous ``_data_as_pd``."""
-        self._data = new_data
-        if hasattr(self, "_data_as_pd"):
-            delattr(self, "_data_as_pd")
+    def register_callback(self, cb: CALLBACK_T) -> None:
+        """Register the callback function.
+
+        Callback functions are called when a post-treater is added to ``Self``.
+        This is used when :class:`.VirtualInstrument` data depends on some
+        other :class:`.Instrument` data.
+        Currently used for:
+
+        - :class:`.ForwardPower` (updates :class:`.ReflectionCoefficient`)
+        - :class:`.ReflectedPower` (updates :class:`.ReflectionCoefficient`)
+        - :class:`.ReflectionCoefficient` (updates :class:`.SWR`)
+
+        """
+        self._callbacks.append(cb)
+        logging.debug(f"Registered callback {cb} in {self}.")
+
+    def _notify_callbacks(self) -> None:
+        """Call all callback functions."""
+        if len(self._callbacks) == 0:
+            return
+
+        for cb in self._callbacks:
+            if inspect.ismethod(cb):
+                owner = cb.__self__.__class__.__name__
+            else:
+                owner = repr(cb)
+
+            logging.info(
+                f"Using new data from {self} to recompute data in {owner}."
+            )
+            cb()
 
     def _get_plot_methods(self, is_2d: bool) -> tuple[Callable, Callable]:
         """Give the proper plotting functions according to ``is_2d``."""
@@ -208,12 +284,13 @@ class Instrument(ABC):
             return an array with the same size as output.
 
         """
+        logging.info(f"Adding a post_treater to {self}.")
         if hasattr(self, "_data"):
             delattr(self, "_data")
         if hasattr(self, "_data_as_pd"):
             delattr(self, "_data_as_pd")
-        logging.debug(f"Adding {post_treater = } to {self}")
         self._post_treaters.append(post_treater)
+        self._notify_callbacks()
 
     def at_thresholds(
         self, instrument_multipactor_bands: InstrumentMultipactorBands

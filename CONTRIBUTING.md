@@ -70,17 +70,14 @@ pre-commit run --all-files
    git checkout -b fix/some-bug 1.7.x
    ```
 3. Make your changes.
-4. Ensure your code is formatted:
-   ```bash
-   black .
-   ```
+4. Ensure pre-commit hooks pass.
 5. Add tests if applicable.
 6. Commit and push:
    ```bash
    git commit -m "Fix: correct bug in XYZ"
    git push origin fix/some-bug
    ```
-7. Open a **pull request** into the `X.Y.x` branch.
+7. Open a **pull request** into the corresponding `X.Y.x` branch.
 
 ---
 
