@@ -27,7 +27,7 @@ from numpy.typing import NDArray
 #: Function/method to call when a post-treater is added
 #:
 #: .. seealso::
-#:    :meth:`.register_callback`
+#:    :meth:`.Instrument.register_callback`
 #:
 CALLBACK_T = Callable[[], pd.Series]
 
@@ -98,7 +98,7 @@ class Instrument(ABC):
         #: Functions to call when a post-treater is added to current object.
         #:
         #: .. seealso::
-        #:    :meth:`.register_callback`
+        #:    :meth:`register_callback`
         #:
         self._callbacks: list[CALLBACK_T] = []
 
@@ -154,9 +154,10 @@ class Instrument(ABC):
     def _raw_data(self) -> pd.Series:
         """Raw data as measured by the instrument.
 
-        For classic :class:`Instrument`, it should not change. For
+        For classic :class:`.Instrument`, it should not change. For
         :class:`.VirtualInstrument`, it may change when the data it is
         calculated changes.
+
         """
         return self.__raw_data
 
@@ -220,8 +221,9 @@ class Instrument(ABC):
 
         Callback functions are called when a post-treater is added to ``Self``.
         This is used when :class:`.VirtualInstrument` data depends on some
-        other :class:`Instrument` data.
+        other :class:`.Instrument` data.
         Currently used for:
+
         - :class:`.ForwardPower` (updates :class:`.ReflectionCoefficient`)
         - :class:`.ReflectedPower` (updates :class:`.ReflectionCoefficient`)
         - :class:`.ReflectionCoefficient` (updates :class:`.SWR`)
