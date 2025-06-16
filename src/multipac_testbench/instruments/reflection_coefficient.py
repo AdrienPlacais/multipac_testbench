@@ -31,6 +31,41 @@ class ReflectionCoefficient(VirtualInstrument):
 
     """
 
+    def __init__(
+        self,
+        name: str,
+        raw_data: pd.Series,
+        forward: ForwardPower,
+        reflected: ReflectedPower,
+        **kwargs,
+    ) -> None:
+        """Create object, save :class:`.Power` objects."""
+        super().__init__(name, raw_data, **kwargs)
+
+        self._forward = forward
+        self._forward.register_callback(self.recompute)
+        self._reflected = reflected
+        self._reflected.register_callback(self.recompute)
+
+    def recompute(self) -> pd.Series:
+        """Recompute reflection coefficient.
+
+        This method is called when one of the stored :class:`.Power` attributes
+        data is changed.
+
+        Note
+        ----
+        Also triggers the recalculation of :class:`.SWR`.
+
+        """
+        self._raw_data = _compute_reflection_coef(
+            self._forward.data,
+            self._reflected.data,
+            self.name,
+        )
+        self._notify_callbacks()
+        return self._raw_data
+
     @classmethod
     def from_powers(
         cls,
@@ -40,9 +75,16 @@ class ReflectionCoefficient(VirtualInstrument):
         **kwargs,
     ) -> Self:
         """Compute the reflection coefficient from given :class:`.Power`."""
-        data = _compute_reflection_coef(forward.data, reflected.data)
-        ser_data = pd.Series(data, name=name)
-        return cls(name=name, raw_data=ser_data, position=np.nan, **kwargs)
+        return cls(
+            name=name,
+            raw_data=_compute_reflection_coef(
+                forward.data, reflected.data, name
+            ),
+            position=np.nan,
+            forward=forward,
+            reflected=reflected,
+            **kwargs,
+        )
 
     @classmethod
     def ylabel(cls) -> str:
@@ -53,10 +95,11 @@ class ReflectionCoefficient(VirtualInstrument):
 def _compute_reflection_coef(
     forward_data: NDArray[np.float64],
     reflected_data: NDArray[np.float64],
+    name: str,
     warn_reflected_higher_than_forward: bool = True,
     warn_gamma_too_close_to_unity: bool = True,
     tol: float = 5e-2,
-) -> NDArray[np.float64]:
+) -> pd.Series:
     r"""Compute the reflection coefficient :math:`R`."""
     reflection_coefficient = np.abs(np.sqrt(reflected_data / forward_data))
 
@@ -80,4 +123,4 @@ def _compute_reflection_coef(
                 "reflected power was too close to forward power. Tolerance "
                 f"was: {tol = }."
             )
-    return reflection_coefficient
+    return pd.Series(reflection_coefficient, name=name)

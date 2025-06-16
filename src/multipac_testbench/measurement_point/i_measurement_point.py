@@ -135,7 +135,6 @@ class IMeasurementPoint(ABC):
         instruments = self.get_instruments(instrument_class)
         for instrument in instruments:
             instrument.add_post_treater(post_treater)
-            logging.info(f"A post-treater was added to {str(instrument)}.")
 
     def detect_multipactor(
         self,

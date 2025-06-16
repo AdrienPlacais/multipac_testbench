@@ -13,6 +13,8 @@ class VirtualInstrument(Instrument):
 
     """
 
+    _raw_data_can_change = True
+
     def __init__(self, name: str, raw_data: pd.Series, **kwargs) -> None:
         """Instantiate object."""
         super().__init__(name, raw_data, **kwargs)

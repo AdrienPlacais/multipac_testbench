@@ -34,15 +34,12 @@ Then, add `multipac_testbench.src` to your `$PYTHONPATH` environment variable.
 
 ## Future updates
 
-- [x] Calibration of new field probes.
-- [x] Implementation of Retarding Field Analyzer.
-    - [x] RPA grid in V instead of kV.
+- [X] Calibration of new field probes.
+- [X] Implementation of Retarding Field Analyzer.
+    - [X] RPA grid in V instead of kV.
 - [ ] `sweet_plot` updates for better RPA treatment:
     - [ ] Allow for `head` argument, working similarly to `tail`.
-    - [x] Argument to plot increasing and decreasing values differently. Useful when plotting RPA current against RPA grid voltage.
+    - [X] Argument to plot increasing and decreasing values differently. Useful when plotting RPA current against RPA grid voltage.
 - [ ] Option to plot maximum of a signal per power cycle.
-- [ ] Bugfix: Upper threshold is given even when we did not exit the multipactor zone.
-- [ ] Adding a post-treater to `Power` instruments should be reflected in `SWR` and `ReflectionCoefficient` calculations.
-  - The latter should keep the `Power` instruments attributes.
-  - `Power.add_post_treater` should remove `(dependent instruments).data` attribute
-  - `(dependent instruments).data` should not be computed from `(dependent instruments)._raw_data`, but from `Power.data`
+- [ ] Bug fix: Upper threshold is given even when we did not exit the multipactor zone.
+- [X] Adding a post-treater to `Power` instruments should be reflected in `SWR` and `ReflectionCoefficient` calculations.
