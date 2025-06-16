@@ -11,7 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- The `main` branch is protected. (Github only, maybe a release is unnecessary?)
+<!-- - The `main` branch is protected. (Github only, maybe a release is unnecessary?) -->
+
+### Added
+
+- New post-treater to set data to a constant value where under a threshold.
 
 ## [1.7.2] - 2025-06-03
 
