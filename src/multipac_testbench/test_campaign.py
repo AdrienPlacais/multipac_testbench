@@ -33,7 +33,7 @@ from multipac_testbench.util import log_manager, plot
 from multipac_testbench.util.types import MULTIPAC_DETECTOR_T
 
 
-class TestCampaign(list):
+class TestCampaign(list[MultipactorTest]):
     """Hold several multipactor tests together."""
 
     def __init__(self, multipactor_tests: list[MultipactorTest]) -> None:
