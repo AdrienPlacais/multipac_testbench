@@ -362,7 +362,7 @@ class Instrument(ABC):
         """Get the multipactor that was measured at the same position.
 
         This is useful to easily match the data from a field probe to the
-        multipactor bands measured by the curret probe at the same position.
+        multipactor bands measured by the current probe at the same position.
 
         Parameters
         ----------
@@ -377,11 +377,11 @@ class Instrument(ABC):
         raise_no_match_error :
             If True, method always return an object.
         kwargs :
-            Other keyword arguments.
+            Other keyword arguments, currently unused.
 
         Returns
         -------
-        matching_multipactor_bands :
+        InstrumentMultipactorBands | None
 
         """
         if isinstance(multipactor_bands, InstrumentMultipactorBands):
