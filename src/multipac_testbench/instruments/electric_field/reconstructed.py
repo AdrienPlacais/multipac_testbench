@@ -124,12 +124,20 @@ class Reconstructed(IElectricField):
         bounds = ([-2.0 * np.pi], [2.0 * np.pi])
         xdata = []
         data = []
+        _prev = 0.0
         for e_probe in self._e_field_probes:
             for p_f, reflection, e_field in zip(
                 self._forward_power.data, self._reflection.data, e_probe.data
             ):
+                if np.isnan(reflection):
+                    logging.warning(
+                        "NaN value found in Reflection. Dirty patch: setting "
+                        "Reflection to it's value in previous time step."
+                    )
+                    reflection = _prev
                 xdata.append([p_f, reflection, e_probe.position])
                 data.append(e_field)
+                _prev = reflection
 
         to_fit = partial(_model, beta=self._beta, z_ohm=self._z_ohm)
         result = optimize.curve_fit(
