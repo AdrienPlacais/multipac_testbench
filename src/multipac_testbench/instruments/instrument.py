@@ -21,15 +21,8 @@ from multipac_testbench.util.filtering import (
     remove_isolated_false,
     remove_trailing_true,
 )
-from multipac_testbench.util.types import POST_TREATER_T
+from multipac_testbench.util.types import CALLBACK_T, POST_TREATER_T
 from numpy.typing import NDArray
-
-#: Function/method to call when a post-treater is added
-#:
-#: .. seealso::
-#:    :meth:`.Instrument.register_callback`
-#:
-CALLBACK_T = Callable[[], pd.Series]
 
 
 class Instrument(ABC):
