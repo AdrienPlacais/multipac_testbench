@@ -71,17 +71,25 @@ def load(
     return filtered
 
 
-def _load_file(filepath: Path, sep: str = ",", **kwargs) -> pd.DataFrame:
+def _load_file(filepath: Path, **kwargs) -> pd.DataFrame:
     """Load the data file.
 
     .. todo::
         Allow for ``TXT`` or ``XLSX`` input files.
 
     """
+    ext = filepath.suffix
+    if ext == ".csv":
+        pandas_reader = pd.read_csv
+    elif ext == ".xlsx":
+        pandas_reader = pd.read_excel
+        if "sep" in kwargs:
+            del kwargs["sep"]
+    else:
+        logging.error(f"{filepath} extension not supported.")
+        raise RuntimeError
     try:
-        data = pd.read_csv(
-            filepath, sep=sep, index_col="Sample index", **kwargs
-        )
+        data = pandas_reader(filepath, index_col="Sample index", **kwargs)
     except Exception as e:
         logging.error(
             f"There was a mismatch is the number of columns in {filepath}"
