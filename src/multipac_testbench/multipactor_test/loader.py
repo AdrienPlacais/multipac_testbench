@@ -6,7 +6,6 @@ from typing import Literal
 
 import numpy as np
 import pandas as pd
-from multipac_testbench.util.filtering import retrieve_power_sweep
 from numpy.typing import NDArray
 
 #: How consecutive-same power points should be treated.
@@ -94,25 +93,6 @@ def _load_file(filepath: Path, sep: str = ",", **kwargs) -> pd.DataFrame:
         raise e
 
     return data
-
-
-def _get_power_sweep(power: NDArray[np.float64]) -> tuple[int, int, int]:
-    """Get power sweep parameters with fallback options."""
-    try:
-        start, stop, repetitions, _ = retrieve_power_sweep(power)
-    except ValueError as e:
-        logging.error(
-            f"An error ocurred during automatic power sweep guessing: {e}. "
-            "Enter them manually:"
-        )
-        try:
-            start = int(input("Start index of power sweep: "))
-            stop = int(input("End index of power sweep (exclusive): "))
-            repetitions = int(input("Number of times each measure is done: "))
-            logging.info(f"{start = }, {stop = }, {repetitions = }")
-        except Exception as input_error:
-            raise RuntimeError("Invalid manual input.") from input_error
-    return start, stop, repetitions
 
 
 def _apply_trigger_filtering(
