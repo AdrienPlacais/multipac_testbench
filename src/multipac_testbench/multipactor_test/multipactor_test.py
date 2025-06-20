@@ -42,6 +42,7 @@ from multipac_testbench.multipactor_band.instrument_multipactor_bands import (
 from multipac_testbench.multipactor_band.test_multipactor_bands import (
     TestMultipactorBands,
 )
+from multipac_testbench.multipactor_test.loader import TRIGGER_POLICIES, load
 from multipac_testbench.util import plot
 from multipac_testbench.util.animate import get_limits
 from multipac_testbench.util.helper import (
@@ -65,6 +66,7 @@ class MultipactorTest:
         swr: float,
         info: str = "",
         sep: str = "\t",
+        trigger_policy: TRIGGER_POLICIES = "keep_all",
         **kwargs,
     ) -> None:
         r"""Create all the pick-ups.
@@ -83,22 +85,16 @@ class MultipactorTest:
             An additional string to identify this test in plots.
         sep :
             Delimiter between two columns in ``filepath``.
+        trigger_policy :
+            How consecutive measures at the same power should be treated.
+        kwargs :
+            Other kwargs passed to :func:`.load`.
 
         """
         self.filepath = filepath
-        try:
-            df_data = pd.read_csv(
-                filepath, sep=sep, index_col="Sample index", **kwargs
-            )
-        except Exception as e:
-            logging.error(
-                f"There was a mismatch is the number of columns in {filepath}"
-                ". Check that the number of column header match the number of "
-                "columns, and that the trailing comments in the first lines "
-                "were removed."
-            )
-            logging.exception(e)
-            raise e
+        df_data = load(
+            filepath, sep=sep, trigger_policy=trigger_policy, **kwargs
+        )
         self._n_points = len(df_data)
         self.df_data = df_data
 
