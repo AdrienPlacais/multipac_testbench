@@ -47,7 +47,7 @@ class InstrumentFactory:
         class_name: INSTRUMENT_NAME_T,
         column_header: str | list[str] | None = None,
         **instruments_kw: Any,
-    ) -> ins.Instrument:
+    ) -> ins.Instrument | None:
         """Take the proper subclass, instantiate it and return it.
 
         Parameters
@@ -82,6 +82,13 @@ class InstrumentFactory:
 
         if column_header is None:
             column_header = name
+
+        if column_header not in df_data:
+            logging.error(
+                f"{column_header = } not present in provided file. Skipping "
+                "associated instrument."
+            )
+            return
 
         raw_data = df_data[column_header]
 

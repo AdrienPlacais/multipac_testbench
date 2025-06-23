@@ -57,10 +57,14 @@ class IMeasurementPoint(ABC):
         self.color = color
         #: Holds all :class:`.Instrument` instances at this location
         self.instruments = [
-            instrument_factory.run(
-                instr_name, df_data, color=color, **instr_kw
-            )
+            instrument
             for instr_name, instr_kw in instruments_kw.items()
+            if (
+                instrument := instrument_factory.run(
+                    instr_name, df_data, color=color, **instr_kw
+                )
+            )
+            is not None
         ]
         virtual_instruments = instrument_factory.run_virtual(
             self.instruments,
