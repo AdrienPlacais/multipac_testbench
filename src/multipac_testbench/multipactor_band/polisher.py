@@ -1,5 +1,6 @@
 """Handle post-treatment of the :class:`.MultipactorBand`."""
 
+from collections.abc import Sequence
 from itertools import groupby
 from typing import Literal
 
@@ -14,7 +15,7 @@ from multipac_testbench.multipactor_band.multipactor_band import (
 # Helpers
 # =============================================================================
 def group_by_power_cycle(
-    input_list: list[IMultipactorBand],
+    input_list: Sequence[IMultipactorBand],
 ) -> list[list[MultipactorBand] | NoMultipactorBand]:
     """Put in sublists the :class:`.IMultipactorBand` of same power cycle.
 
@@ -34,12 +35,14 @@ def group_by_power_cycle(
 # =============================================================================
 # Actual workers
 # =============================================================================
-def _keep_all_bands(bands: list[IMultipactorBand]) -> list[IMultipactorBand]:
+def _keep_all_bands(
+    bands: Sequence[IMultipactorBand],
+) -> list[IMultipactorBand]:
     """Allow several :class:`.MultipactorBand` in same power cycle."""
-    return bands
+    return list(bands)
 
 
-def _keep_largest(bands: list[IMultipactorBand]) -> list[IMultipactorBand]:
+def _keep_largest(bands: Sequence[IMultipactorBand]) -> list[IMultipactorBand]:
     """Return :class:`.MultipactorBand` spanning on most points."""
     grouped = group_by_power_cycle(bands)
     largest_bands = []
@@ -55,7 +58,7 @@ def _keep_largest(bands: list[IMultipactorBand]) -> list[IMultipactorBand]:
     return largest_bands
 
 
-def _keep_lowest(bands: list[IMultipactorBand]) -> list[IMultipactorBand]:
+def _keep_lowest(bands: Sequence[IMultipactorBand]) -> list[IMultipactorBand]:
     """Return :class:`.MultipactorBand` at lowest power."""
     grouped = group_by_power_cycle(bands)
     lowest_thresholds = []
@@ -72,7 +75,7 @@ def _keep_lowest(bands: list[IMultipactorBand]) -> list[IMultipactorBand]:
     return lowest_thresholds
 
 
-def _keep_highest(bands: list[IMultipactorBand]) -> list[IMultipactorBand]:
+def _keep_highest(bands: Sequence[IMultipactorBand]) -> list[IMultipactorBand]:
     """Return :class:`.MultipactorBand` at highest power."""
     grouped = group_by_power_cycle(bands)
     highest_thresholds = []
@@ -89,7 +92,7 @@ def _keep_highest(bands: list[IMultipactorBand]) -> list[IMultipactorBand]:
     return highest_thresholds
 
 
-def _merge(bands: list[IMultipactorBand]) -> list[IMultipactorBand]:
+def _merge(bands: Sequence[IMultipactorBand]) -> list[IMultipactorBand]:
     """Merge the provided :class:`.IMultipactorBand` in same half-power cycle.
 
     With this method, we keep only one :class:`.IMultipactorBand` per half
@@ -144,7 +147,7 @@ POLISHER_T = Literal[
 # Main function
 # =============================================================================
 def polish(
-    bands: list[IMultipactorBand], politics: POLISHER_T
+    bands: Sequence[IMultipactorBand], politics: POLISHER_T
 ) -> list[IMultipactorBand]:
     """
     Clean the given ``bands`` when there is a power cycle with several bands.

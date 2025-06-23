@@ -5,13 +5,14 @@ import pandas as pd
 from matplotlib.axes import Axes
 from multipac_testbench.multipactor_band.creator import create
 from multipac_testbench.multipactor_band.multipactor_band import (
+    IMultipactorBand,
     MultipactorBand,
 )
 from multipac_testbench.multipactor_band.polisher import POLISHER_T, polish
 from numpy.typing import NDArray
 
 
-class InstrumentMultipactorBands(list):
+class InstrumentMultipactorBands(list[IMultipactorBand]):
     """All :class:`.IMultipactorBand` of a test, by a given instrument."""
 
     def __init__(
@@ -67,7 +68,9 @@ class InstrumentMultipactorBands(list):
             power_is_growing,
             info=info_test + f" {instrument_name}",
         )
-        bands = polish(bands, several_bands_politics)
+        bands = polish(
+            [b for b in bands if b is not None], several_bands_politics
+        )
         super().__init__(bands)
 
         self.multipactor = multipactor
