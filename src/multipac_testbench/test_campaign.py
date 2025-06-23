@@ -23,6 +23,7 @@ from multipac_testbench.multipactor_band.instrument_multipactor_bands import (
     InstrumentMultipactorBands,
 )
 from multipac_testbench.multipactor_test import MultipactorTest
+from multipac_testbench.multipactor_test.loader import TRIGGER_POLICIES
 from multipac_testbench.theoretical.somersalo import (
     fit_somersalo_scaling,
     plot_somersalo_analytical,
@@ -33,7 +34,7 @@ from multipac_testbench.util import log_manager, plot
 from multipac_testbench.util.types import MULTIPAC_DETECTOR_T
 
 
-class TestCampaign(list):
+class TestCampaign(list[MultipactorTest]):
     """Hold several multipactor tests together."""
 
     def __init__(self, multipactor_tests: list[MultipactorTest]) -> None:
@@ -49,6 +50,7 @@ class TestCampaign(list):
         config: dict,
         info: Sequence[str] = (),
         sep: str = ";",
+        trigger_policy: TRIGGER_POLICIES = "keep_all",
         **kwargs,
     ) -> Self:
         """Instantiate the :class:`.MultipactorTest` and :class:`TestCampaign`.
@@ -67,6 +69,8 @@ class TestCampaign(list):
             Other information string to identify each multipactor test.
         sep :
             Delimiter between the columns.
+        trigger_policy :
+            How consecutive measures at the same power should be treated.
 
         Returns
         -------
@@ -89,6 +93,7 @@ class TestCampaign(list):
                 swr,
                 info,
                 sep=sep,
+                trigger_policy=trigger_policy,
                 **kwargs,
             )
             for _, (filepath, freq_mhz, swr, info) in enumerate(args)

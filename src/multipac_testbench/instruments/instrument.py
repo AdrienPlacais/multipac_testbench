@@ -21,15 +21,8 @@ from multipac_testbench.util.filtering import (
     remove_isolated_false,
     remove_trailing_true,
 )
-from multipac_testbench.util.types import POST_TREATER_T
+from multipac_testbench.util.types import CALLBACK_T, POST_TREATER_T
 from numpy.typing import NDArray
-
-#: Function/method to call when a post-treater is added
-#:
-#: .. seealso::
-#:    :meth:`.Instrument.register_callback`
-#:
-CALLBACK_T = Callable[[], pd.Series]
 
 
 class Instrument(ABC):
@@ -362,7 +355,7 @@ class Instrument(ABC):
         """Get the multipactor that was measured at the same position.
 
         This is useful to easily match the data from a field probe to the
-        multipactor bands measured by the curret probe at the same position.
+        multipactor bands measured by the current probe at the same position.
 
         Parameters
         ----------
@@ -377,11 +370,11 @@ class Instrument(ABC):
         raise_no_match_error :
             If True, method always return an object.
         kwargs :
-            Other keyword arguments.
+            Other keyword arguments, currently unused.
 
         Returns
         -------
-        matching_multipactor_bands :
+        InstrumentMultipactorBands | None
 
         """
         if isinstance(multipactor_bands, InstrumentMultipactorBands):
