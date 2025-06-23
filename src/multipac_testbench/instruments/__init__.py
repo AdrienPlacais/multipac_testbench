@@ -17,6 +17,7 @@ from multipac_testbench.instruments.penning import Penning
 from multipac_testbench.instruments.power import (
     ForwardPower,
     Power,
+    PowerSetpoint,
     ReflectedPower,
 )
 from multipac_testbench.instruments.reflection_coefficient import (
@@ -37,6 +38,7 @@ __all__ = [
     "OpticalFibre",
     "Penning",
     "Power",
+    "PowerSetpoint",
     "Reconstructed",
     "ReflectedPower",
     "ReflectionCoefficient",
