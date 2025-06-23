@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # [1.7.x]
 
+## [1.7.4]
+
+### Added
+
+- `trigger_policy` keyword at creation of `TestCampaign` or `MultipactorTest`, to handle several contiguous same power measurement points.
+
 ## [1.7.3] - 2025-06-16
 
 ### Added
