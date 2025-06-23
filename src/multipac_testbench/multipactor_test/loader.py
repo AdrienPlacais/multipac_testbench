@@ -174,3 +174,15 @@ def _group_consecutive_equal_power(
             group += 1
         labels.append(group)
     return np.array(labels)
+
+
+def save(filepath: Path, data: pd.DataFrame, **kwargs) -> None:
+    """Save the dataframe as a new LabViewer results file."""
+    save_meth = data.to_csv
+    if filepath.suffix == ".xlsx":
+        save_meth = data.to_excel
+        if "sep" in kwargs:
+            del kwargs["sep"]
+
+    logging.info(f"Saving new LabViewer file to {filepath}")
+    save_meth(filepath, **kwargs)
