@@ -8,7 +8,7 @@ import pandas as pd
 from multipac_testbench.instruments.electric_field.i_electric_field import (
     IElectricField,
 )
-from multipac_testbench.util.post_treaters import (
+from multipac_testbench.util.transfer_functions import (
     v_acquisition_to_v_coax,
     v_coax_to_v_acquisition,
 )
@@ -60,7 +60,7 @@ class FieldProbe(IElectricField):
         #: Rack calibration constant in :unit:`dBm`.
         self._b_rack: float
         if calibration_file is not None:
-            self._a_rack, self._b_rack = self._load_calibration_file(
+            self._a_rack, self._b_rack = self._rf_rack_calibration_constants(
                 Path(calibration_file)
             )
         if patch:
@@ -97,7 +97,7 @@ class FieldProbe(IElectricField):
         self._raw_data = fun1(self._raw_data)
         self._raw_data = fun2(self._raw_data)
 
-    def _load_calibration_file(
+    def _rf_rack_calibration_constants(
         self,
         calibration_file: Path,
         freq_mhz: float = 120.0,
@@ -106,6 +106,10 @@ class FieldProbe(IElectricField):
         b_col: str = "b [dBm]",
     ) -> tuple[float, float]:
         """Load calibration file, interpolate proper calibration data.
+
+        .. todo::
+            To refactor so that it takes ``calibration_folder`` as argument
+            instead of ``calibration_file``. Idea is to be more DRY.
 
         The given file must look like:
 
