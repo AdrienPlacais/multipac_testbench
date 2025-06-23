@@ -469,7 +469,7 @@ class MultipactorTest:
         csv_kwargs: dict | None = None,
         **kwargs,
     ) -> tuple[Axes | NDArray[Axes], pd.DataFrame]:
-        """Plot instrument ``to_plot`` at every multipactor threshold.
+        """Plot ``instrument_id`` data at every multipactor threshold.
 
         When ``to_plot`` is :class:`.ForwardPower` or :class:`.FieldProbe`,
         the output is the threshold. But this method works with any instrument
