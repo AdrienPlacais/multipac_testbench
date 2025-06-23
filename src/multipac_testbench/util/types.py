@@ -1,6 +1,6 @@
 """Define specific and reusable types."""
 
-from typing import Callable
+from typing import Callable, Literal
 
 import numpy as np
 import pandas as pd
@@ -21,3 +21,7 @@ MULTIPAC_DETECTOR_T = Callable[[NDArray[np.float64]], NDArray[np.bool]]
 #:    :meth:`.Instrument.register_callback`
 #:
 CALLBACK_T = Callable[[], pd.Series]
+
+#: Electric field probes names
+FIELD_PROBES = ("E1", "E2", "E3", "E4", "E5", "E6", "E7")
+FIELD_PROBES_T = Literal["E1", "E2", "E3", "E4", "E5", "E6", "E7"]
