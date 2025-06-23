@@ -51,9 +51,11 @@ def load(
     """
     data = _load_file(filepath, sep=sep, **kwargs)
 
-    filtered = _apply_trigger_filtering(
-        trigger_policy, data, dbm_column=dbm_column
-    ).reset_index()
+    filtered = (
+        _apply_trigger_filtering(trigger_policy, data, dbm_column=dbm_column)
+        .reset_index()
+        .set_index("Sample index")
+    )
 
     printer = logging.info
     if trigger_policy in ("average", "keep_all"):
