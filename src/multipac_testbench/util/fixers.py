@@ -87,7 +87,6 @@ def fix_wrong_e_field_calibration(
         if col not in data:
             continue
 
-        pdb.set_trace()
         v_acqui = v_coax_to_v_acquisition(
             data[col].to_numpy(),
             g_probe_bad[probe],
