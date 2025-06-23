@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # [1.7.x]
 
+## [1.7.5]
+
+### Added
+
+- Function to fix the voltage columns when rf rack calibration or probe attenuation was not updated in LabView.
+
 ## [1.7.4] - 2025-06-23
 
 ### Added
