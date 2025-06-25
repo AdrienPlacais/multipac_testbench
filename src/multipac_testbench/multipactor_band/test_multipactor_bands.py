@@ -17,7 +17,9 @@ def _and(multipactor_in: list[NDArray[np.bool]]) -> NDArray[np.bool]:
     In other words: "Multipactor happens if all given instruments agree on it."
 
     """
-    return np.array(multipactor_in).all(axis=0)
+    mp = np.array(multipactor_in).all(axis=0)
+    assert isinstance(mp, np.ndarray)
+    return mp
 
 
 def _or(multipactor_in: list[NDArray[np.bool]]) -> NDArray[np.bool]:
@@ -27,7 +29,9 @@ def _or(multipactor_in: list[NDArray[np.bool]]) -> NDArray[np.bool]:
     that there is multipactor."
 
     """
-    return np.array(multipactor_in).any(axis=0)
+    mp = np.array(multipactor_in).any(axis=0)
+    assert isinstance(mp, np.ndarray)
+    return mp
 
 
 MULTIPACTOR_ARRAY_MERGERS = {
@@ -37,7 +41,7 @@ MULTIPACTOR_ARRAY_MERGERS = {
 MULTIPACTOR_ARRAY_MERGER_T = Literal["strict", "relaxed"]
 
 
-class TestMultipactorBands(list):
+class TestMultipactorBands(list[InstrumentMultipactorBands | None]):
     """Hold multipactor bands measured by all instruments during a test."""
 
     def __init__(

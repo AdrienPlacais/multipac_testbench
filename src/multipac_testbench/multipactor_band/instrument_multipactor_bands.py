@@ -13,7 +13,7 @@ from numpy.typing import NDArray
 
 
 class InstrumentMultipactorBands(list[IMultipactorBand]):
-    """All :class:`.IMultipactorBand` of a test, by a given instrument."""
+    """All multipactor events detected by a single instrument during a test."""
 
     def __init__(
         self,
@@ -45,7 +45,7 @@ class InstrumentMultipactorBands(list[IMultipactorBand]):
             the object represents multipactor anywhere in the testbench, it
             will be np.nan.
         info_test :
-            TODO
+            Information on current test for more explicit error messages.
         several_bands_politics :
             What to to when several multipactor bands are found in the same
             half power cycle:

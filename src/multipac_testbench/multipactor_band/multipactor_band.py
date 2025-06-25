@@ -1,6 +1,6 @@
 """Keep track of a single multipactor band.
 
-A multipactor band a sequence of consecutive measurement points where
+A multipactor band is a sequence of consecutive measurement points where
 multipactor happens. A :class:`MultipactorBand` is defined on half a power
 cycle.
 

@@ -7,7 +7,7 @@ from multipac_testbench.multipactor_band.test_multipactor_bands import (
 )
 
 
-class CampaignMultipactorBands(list):
+class CampaignMultipactorBands(list[TestMultipactorBands | None]):
     """Hold multipactor bands measured during several tests."""
 
     def __init__(
