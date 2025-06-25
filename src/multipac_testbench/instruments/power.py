@@ -81,7 +81,7 @@ class PowerSetpoint(Instrument):
     def growth_mask(
         self,
         minimum_number_of_points: int = 0,
-        n_trailing_points_to_check: int = 40,
+        n_trailing_points_to_check: int = 0,
         **kwargs,
     ) -> NDArray[np.bool]:
         return super().growth_mask(
