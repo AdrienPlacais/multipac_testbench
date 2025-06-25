@@ -709,14 +709,23 @@ class MultipactorTest:
             ``True`` where power increases, ``False`` where it decreases.
 
         """
-        forward_power = self.get_instrument(ins.ForwardPower)
-        assert isinstance(forward_power, ins.ForwardPower), (
-            f"{forward_power} is a {type(forward_power)} instead of a "
-            "ForwardPower."
-        )
+        power_instrument = self.get_instrument(ins.PowerSetpoint)
+        if power_instrument is None:
+            logging.warning(
+                "The power cycles will be determined using the ForwardPower "
+                "(NI9205_Power1) instead of the PowerSetpoint (NI9205_dBm). "
+                "This is more error-prone, in particular if consecutive Sample"
+                " index corresond to different powers. In this case, you may "
+                "see that all MultipactorBands are merged. You can fix this by"
+                "setting ``consecutive_criterions`` to 0."
+            )
+            power_instrument = self.get_instrument(ins.ForwardPower)
+
+        assert power_instrument is not None
+
         if growth_mask_kw is None:
             growth_mask_kw = {}
-        mask = forward_power.growth_mask(**growth_mask_kw)
+        mask = power_instrument.growth_mask(**growth_mask_kw)
         return mask
 
     def animate_instruments_vs_position(
