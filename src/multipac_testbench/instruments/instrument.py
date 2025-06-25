@@ -589,8 +589,11 @@ class Instrument(ABC):
         trend. It returns a boolean array of the same length as the input
         signal, where ``True`` indicates a region of growth and ``False``
         otherwise.
-        *A priori*, will be useful for :class:`.ForwardPower` and
-        :class:`.RPA`.
+        *A priori*, will be useful for:
+
+        - :class:`.PowerSetpoint` to determine power cycles. A fallback is
+          :class:`.ForwardPower`.
+        - :class:`.RPA`.
 
         The method performs three main operations:
 
