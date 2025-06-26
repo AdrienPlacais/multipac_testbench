@@ -2,7 +2,6 @@
 
 import inspect
 import logging
-from abc import ABC
 from typing import Callable, Literal, Self, overload
 
 import numpy as np
@@ -25,7 +24,7 @@ from multipac_testbench.util.types import CALLBACK_T, POST_TREATER_T
 from numpy.typing import NDArray
 
 
-class Instrument(ABC):
+class Instrument:
     """Hold measurements of a single instrument."""
 
     _raw_data_can_change = False
