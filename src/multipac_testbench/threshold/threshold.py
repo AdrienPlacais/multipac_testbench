@@ -7,32 +7,104 @@ reached.
 
 import logging
 from dataclasses import dataclass
-from typing import Literal, Self
+from typing import Literal
 
 import numpy as np
-from multipac_testbench.instruments import Instrument
 from numpy.typing import NDArray
 
 THRESHOLD_NATURE_T = Literal["upper", "lower"]
+THRESHOLD_WAY_T = Literal["enter", "exit"]
 THRESHOLD_DETECTOR_T = Literal["any", "all"]
 POWER_EXTREMUM_T = Literal["minimum", "maximum"]
 
 
 @dataclass
 class Threshold:
-    """Holds a single multipactor threshold."""
+    """Holds a single multipactor threshold.
 
+    .. todo::
+        Handle isolated mp zones? Characterized by two Threshold objects at
+        same position, same indexes. One is upper, other is lower. One is
+        enter, other is exit
+
+    """
+
+    #: At which sample index the threshold was detected.
     sample_index: int
+    #: If the threshold is a lower threshold or an upper threshold.
     nature: THRESHOLD_NATURE_T
-    detecting_instrument: Instrument | THRESHOLD_DETECTOR_T
+    #: If the threshold was measured during an entry or an exit of the
+    #: multipator band
+    way: THRESHOLD_WAY_T
+    #: Name of the instrument that detected this threshold.
+    detecting_instrument: str | THRESHOLD_DETECTOR_T
+    #: Position of the object that detected this threshold.
+    position: float
 
-    def __post_init__(self) -> None:
-        """Add some info."""
-        self.position = (
-            self.detecting_instrument.position
-            if isinstance(self.detecting_instrument, Instrument)
-            else np.nan
+
+def create_thresholds(
+    multipactor: NDArray[np.bool],
+    growth_array: NDArray[np.float64],
+    detecting_instrument: str,
+    position: float,
+) -> list[Threshold]:
+    """Create all threshold objects.
+
+    Parameters
+    ----------
+    multipactor :
+        Array where True means multipactor and False no multipactor, according
+        to ``detecting_instrument``.
+    growth_array :
+        Holds ``1.0`` where power grows, ``-1.0`` where it decreases, and
+        ``0.0`` at transition points. Used to determine threshold nature
+        (lower/upper).
+    detecting_instrument :
+        Name of :class:`.Instrument` that created the ``multipactor`` array.
+    position :
+        Position of :class:`.Instrument` that created the ``multipactor``
+        array.
+
+    Returns
+    -------
+    list[Threshold]
+        All multipactor thresholds detected by the :class:`.Instrument` named
+        ``detecting_instrument``.
+
+    """
+    thresholds: list[Threshold] = []
+
+    if multipactor[0]:
+        logging.warning(
+            "Multipactor detected at the start of the test. May cause "
+            "instabilities."
         )
+        thresholds.append(
+            Threshold(0, "lower", "enter", detecting_instrument, position)
+        )
+
+    delta_mp = np.diff(multipactor.astype(np.float64))
+    for i, delta in enumerate(delta_mp, start=1):
+        if delta == 0.0:
+            continue
+
+        if delta > 0.0:
+            way = "enter"
+            # Transition: No MP [i - 1] -> MP [i]
+            # so we enter multipactor at [i]
+            i_threshold = i
+            nature = "lower" if growth_array[i_threshold] > 0 else "upper"
+        else:
+            way = "exit"
+            # Transition: MP [i - 1] -> no MP [i]
+            # so last detected multipactor was at [i - 1]
+            i_threshold = i - 1
+            nature = "upper" if growth_array[i_threshold] > 0 else "lower"
+
+        thresholds.append(
+            Threshold(i_threshold, nature, way, detecting_instrument, position)
+        )
+    return thresholds
 
 
 @dataclass
@@ -52,12 +124,14 @@ class PowerExtremum:
         )
 
 
-def power_extrema(growth_array: NDArray[np.float64]) -> list[PowerExtremum]:
+def create_power_extrema(
+    growth_array: NDArray[np.float64],
+) -> list[PowerExtremum]:
     """Create power extrema.
 
     Parameters
     ----------
-    power_growth_mask :
+    growth_array :
         Holds ``1.0`` where it grows, ``-1.0`` where it decreases, and ``0.0``
         where it changes. We use the position of those np.nan to determine
         power extrema.
