@@ -641,7 +641,7 @@ class Instrument:
             local_is_growing = array_is_growing(
                 self.data,
                 i,
-                undetermined_value=local_is_growing,
+                no_change_value=local_is_growing,
                 width=width,
                 **kwargs,
             )
@@ -663,5 +663,53 @@ class Instrument:
                 n_trailing_points_to_check,
                 array_name_for_warning=str(self.__class__.__name__),
             )
+
+        return growth_mask
+
+    def growth_array(
+        self,
+        **kwargs,
+    ) -> NDArray[np.float64]:
+        """Identify regions where the signal is increasing ("growing").
+
+        This method analyzes a signal to determine where it exhibits a growing
+        trend. It returns a float array of the same length as the input
+        signal, where ``1.0`` indicates a region of growth and ``-1.0``
+        otherwise. ``0.0`` means constant signal.
+        *A priori*, will be useful for:
+
+        - :class:`.PowerSetpoint` to determine power cycles
+
+        Notes
+        -----
+        Designed for non-noisy instruments such as :class:`.PowerSetpoint`.
+
+        Parameters
+        ----------
+        width :
+            Width of the sample to determine increase.
+        no_change_value :
+            Value to put in growth mask when we did not manage to find whether
+            measured signal increased or not.
+        **kwargs :
+            Additional keyword arguments passed to :func:`.array_is_growing`.
+
+        Returns
+        -------
+            Array where +1 means growing, -1 decreasing, 0 means constant.
+
+        """
+        n_points = len(self._raw_data)
+
+        is_growing = [
+            x if x is not None else np.nan
+            for i in range(n_points)
+            for x in [
+                array_is_growing(
+                    self.data, i, width=2, no_change_value=None, **kwargs
+                )
+            ]
+        ]
+        growth_mask = np.array(is_growing, dtype=np.float64)
 
         return growth_mask

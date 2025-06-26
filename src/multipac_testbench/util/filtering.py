@@ -55,8 +55,8 @@ def array_is_growing(
     index: int,
     width: int = 10,
     tol: float = 1e-5,
-    undetermined_value: bool = True,
-    default_first_value: bool = True,
+    no_change_value: bool = True,
+    default_first_value: bool | None = True,
 ) -> bool: ...
 
 
@@ -66,9 +66,9 @@ def array_is_growing(
     index: int,
     width: int = 10,
     tol: float = 1e-5,
-    undetermined_value: None = None,
-    default_first_value: bool = True,
-) -> None: ...
+    no_change_value: None = None,
+    default_first_value: bool | None = True,
+) -> bool | None: ...
 
 
 def array_is_growing(
@@ -76,8 +76,8 @@ def array_is_growing(
     index: int,
     width: int = 10,
     tol: float = 1e-5,
-    undetermined_value: bool | None = None,
-    default_first_value: bool = True,
+    no_change_value: bool | None = None,
+    default_first_value: bool | None = True,
 ) -> bool | None:
     """Tell if ``array`` is locally increasing at ``index``.
 
@@ -91,29 +91,30 @@ def array_is_growing(
         Width of the sample to determine increase.
     tol :
         If absolute value of variation between ``array[idx-width/2]`` and
-        ``array[idx+width/2]`` is lower than ``tol``, we return a ``NaN``.
+        ``array[idx+width/2]`` is lower than ``tol``, we return
+        ``no_change_value``.
     default_first_value :
         Default return for the first values. The default is True, which means
         that we suppose that power increases at the start.
-    undetermined_value :
-        Default value for when the output is undetermined.
+    no_change_value :
+        Default value for when no change in array was detected.
 
     Returns
     -------
     is_growing :
-        If the array is locally increasing, ``undetermined_value`` if
-        undetermined.
+        If the array is locally increasing, ``no_change_value`` if array is
+        locally constant.
 
     """
     semi_width = width // 2
     if index < semi_width:
         return default_first_value
     if index >= len(array) - semi_width:
-        return undetermined_value
+        return no_change_value
 
     local_diff = array[index + semi_width] - array[index - semi_width]
     if abs(local_diff) < tol:
-        return undetermined_value
+        return no_change_value
     if local_diff < 0.0:
         return False
     return True

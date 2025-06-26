@@ -20,7 +20,7 @@ def test_array_is_growing_classic() -> None:
             i,
             width=2,
             default_first_value=default_first_value,
-            undetermined_value=undetermined_value,
+            no_change_value=undetermined_value,
         )
         for i in range(len(array))
     ]
