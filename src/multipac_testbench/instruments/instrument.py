@@ -580,6 +580,7 @@ class Instrument:
         self,
         minimum_number_of_points: int = 0,
         n_trailing_points_to_check: int = 0,
+        width: int = 10,
         **kwargs,
     ) -> NDArray[np.bool]:
         """Identify regions where the signal is increasing ("growing").
@@ -613,6 +614,8 @@ class Instrument:
             ``False`` if they form an isolated or uncertain growth pattern.
             Particulatly useful for :class:`.ForwardPower` to avoid detection
             of a new power cycle at the end of the test.
+        width :
+            Width of the sample to determine increase.
         **kwargs :
             Additional keyword arguments passed to :func:`.array_is_growing`.
 
@@ -633,18 +636,21 @@ class Instrument:
         n_points = len(self._raw_data)
         is_growing: list[bool] = []
 
-        previous_value = True
+        local_is_growing = True
         for i in range(n_points):
             local_is_growing = array_is_growing(
-                self.data, i, undetermined_value=previous_value, **kwargs
+                self.data,
+                i,
+                undetermined_value=local_is_growing,
+                width=width,
+                **kwargs,
             )
 
             is_growing.append(local_is_growing)
-            previous_value = local_is_growing
 
         growth_mask = np.array(is_growing, dtype=np.bool)
 
-        # Remove isolated False
+        # Remove isolated False (useful for noisy instruments)
         if minimum_number_of_points > 0:
             growth_mask = remove_isolated_false(
                 growth_mask, minimum_number_of_points
