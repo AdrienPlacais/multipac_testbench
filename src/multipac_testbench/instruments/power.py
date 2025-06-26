@@ -30,11 +30,13 @@ class Power(Instrument):
         self,
         minimum_number_of_points: int = 50,
         n_trailing_points_to_check: int = 40,
+        width: int = 10,
         **kwargs,
     ) -> NDArray[np.bool]:
         return super().growth_mask(
             minimum_number_of_points=minimum_number_of_points,
             n_trailing_points_to_check=n_trailing_points_to_check,
+            width=width,
             **kwargs,
         )
 
@@ -82,10 +84,12 @@ class PowerSetpoint(Instrument):
         self,
         minimum_number_of_points: int = 0,
         n_trailing_points_to_check: int = 0,
+        width: int = 2,
         **kwargs,
     ) -> NDArray[np.bool]:
         return super().growth_mask(
             minimum_number_of_points=minimum_number_of_points,
             n_trailing_points_to_check=n_trailing_points_to_check,
+            width=width,
             **kwargs,
         )
