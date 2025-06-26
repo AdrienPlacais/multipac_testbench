@@ -19,7 +19,7 @@ def test_growth_mask_classic() -> None:
     assert (expected == returned).all()
 
 
-def test_growth_mask_for_power_extrema() -> None:
+def test_growth_array() -> None:
     """Check that :func:`.power_extrema` will have correct args."""
     # fmt: off
     data = pd.Series([
@@ -30,13 +30,13 @@ def test_growth_mask_for_power_extrema() -> None:
         -10,
     ])
     expected = np.array(
-        [np.nan, True, True, True,
-         np.nan, False, False, False,
-         np.nan, True, True, True,
-         np.nan, False, False, False,
-         np.nan
+        [0.0, 1.0, 1.0, 1.0,
+         0.0, -1.0, -1.0, -1.0,
+         0.0, 1.0, 1.0, 1.0,
+         0.0, -1.0, -1.0, -1.0,
+         0.0
     ])
     # fmt: on
     i = Instrument("test instrument", data, np.nan)
-    returned = i.growth_mask(width=2)
+    returned = i.growth_array()
     assert (expected == returned).all()

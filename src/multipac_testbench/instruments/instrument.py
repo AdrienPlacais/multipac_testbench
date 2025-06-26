@@ -699,17 +699,19 @@ class Instrument:
             Array where +1 means growing, -1 decreasing, 0 means constant.
 
         """
-        n_points = len(self._raw_data)
-
+        bool_to_float = {True: 1.0, False: -1.0, None: 0.0}
         is_growing = [
-            x if x is not None else np.nan
-            for i in range(n_points)
-            for x in [
+            bool_to_float[
                 array_is_growing(
-                    self.data, i, width=2, no_change_value=None, **kwargs
+                    self.data,
+                    i,
+                    width=2,
+                    no_change_value=None,
+                    default_first_value=None,
+                    **kwargs,
                 )
             ]
+            for i in range(len(self._raw_data))
         ]
-        growth_mask = np.array(is_growing, dtype=np.float64)
-
-        return growth_mask
+        is_growing[-1] = 0.0
+        return np.array(is_growing, dtype=np.float64)
