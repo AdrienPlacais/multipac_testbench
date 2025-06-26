@@ -5,7 +5,6 @@
 """
 
 import logging
-from collections import Counter
 from typing import overload
 
 import numpy as np
@@ -107,7 +106,7 @@ def array_is_growing(
 
     """
     semi_width = width // 2
-    if index <= semi_width:
+    if index < semi_width:
         return default_first_value
     if index >= len(array) - semi_width:
         return undetermined_value
