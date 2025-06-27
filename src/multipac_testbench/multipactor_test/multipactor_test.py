@@ -568,6 +568,12 @@ def delegate_to_test_plotter(method_name: str) -> Callable[[T], T]:
     return wrapper
 
 
+class MissingInstrumentError(ValueError):
+    """Custom exception raised when an :class:`.Instrument` is missing."""
+
+    pass
+
+
 class MultipactorTest:
     """Holds a mp test with several probes."""
 
@@ -971,7 +977,9 @@ class MultipactorTest:
             ``True`` where power increases, ``False`` where it decreases.
 
         """
-        power_instrument = self.get_instrument(ins.PowerSetpoint)
+        power_instrument = self.get_instrument(
+            ins.PowerSetpoint, raise_missing_intrument_error=False
+        )
         if power_instrument is None:
             logging.warning(
                 "The power cycles will be determined using the ForwardPower "
@@ -1188,6 +1196,7 @@ class MultipactorTest:
         instrument_id: ABCMeta | str | ins.Instrument,
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
         instruments_to_ignore: Sequence[ins.Instrument | str] = (),
+        raise_missing_intrument_error: bool = True,
     ) -> ins.Instrument | None:
         """Get a single instrument matching ``instrument_id``."""
         match (instrument_id):
@@ -1203,7 +1212,9 @@ class MultipactorTest:
                 )
 
         if len(instruments) == 0:
-            raise OSError("No instrument found.")
+            if raise_missing_intrument_error:
+                raise MissingInstrumentError(f"No {instrument_id} found.")
+            return None
         if len(instruments) > 1:
             logging.warning("Several instruments found. Returning first one.")
         return instruments[0]
