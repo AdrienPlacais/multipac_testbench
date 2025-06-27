@@ -51,7 +51,10 @@ src_paths = ["./multipac_testbench/"]
 [tool.pytest.ini_options]
 addopts = ["--import-mode=importlib", "--strict-markers"]
 filterwarnings = ["ignore:.*cKDTree.*:DeprecationWarning"]
-markers = []
+markers = [
+   "notebook: mark tests that rely on the execution of notebook without error",
+   "slow: mark slow tests (typically > 5s)",
+]
 minversion = "6.0"
 testpaths = ["tests"]
 
@@ -65,7 +68,7 @@ find = { where = ["src"] }
 
 [tool.cibuildwheel]
 build-verbosity = 1
-test-command = 'pytest {project}/tests -m "not implementation and not slow"'
+test-command = 'pytest {project}/tests -m "not slow and not notebook"'
 test-extras = "test"
 
 [build-system]
