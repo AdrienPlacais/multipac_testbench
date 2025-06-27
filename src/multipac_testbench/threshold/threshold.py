@@ -40,6 +40,8 @@ class Threshold:
     detecting_instrument: str | THRESHOLD_DETECTOR_T
     #: Position of the object that detected this threshold.
     position: float
+    #: Color of the :class:`.Instrument` that detected this threshold.
+    color: tuple[float, float, float]
 
 
 def create_thresholds(
@@ -47,6 +49,7 @@ def create_thresholds(
     growth_array: NDArray[np.float64],
     detecting_instrument: str,
     position: float,
+    color: tuple[float, float, float] | None = None,
 ) -> list[Threshold]:
     """Create all threshold objects.
 
@@ -64,6 +67,8 @@ def create_thresholds(
     position :
         Position of :class:`.Instrument` that created the ``multipactor``
         array.
+    color :
+        Color of the detecting instrument.
 
     Returns
     -------
@@ -73,6 +78,7 @@ def create_thresholds(
 
     """
     thresholds: list[Threshold] = []
+    actual_color = color if color is not None else (1.0, 1.0, 1.0)
 
     if multipactor[0]:
         logging.warning(
@@ -80,7 +86,14 @@ def create_thresholds(
             "instabilities."
         )
         thresholds.append(
-            Threshold(0, "lower", "enter", detecting_instrument, position)
+            Threshold(
+                0,
+                "lower",
+                "enter",
+                detecting_instrument,
+                position,
+                color=actual_color,
+            )
         )
 
     delta_mp = np.diff(multipactor.astype(np.float64))
@@ -102,7 +115,14 @@ def create_thresholds(
             nature = "upper" if growth_array[i_threshold] > 0 else "lower"
 
         thresholds.append(
-            Threshold(i_threshold, nature, way, detecting_instrument, position)
+            Threshold(
+                i_threshold,
+                nature,
+                way,
+                detecting_instrument,
+                position,
+                color=actual_color,
+            )
         )
     return thresholds
 
