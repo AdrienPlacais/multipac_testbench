@@ -64,6 +64,7 @@ class FieldProbe(IElectricField):
                 Path(calibration_file)
             )
         if patch:
+            self._raw_data_can_change = True
             self._patch_data()
 
     @classmethod
