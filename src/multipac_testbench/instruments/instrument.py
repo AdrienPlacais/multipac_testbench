@@ -240,13 +240,6 @@ class Instrument:
             )
             cb()
 
-    def _get_plot_methods(self, is_2d: bool) -> tuple[Callable, Callable]:
-        """Give the proper plotting functions according to ``is_2d``."""
-        plotters = (self._plot_vs_position_for_1d, self._scatter_data_1d)
-        if is_2d:
-            plotters = (self._plot_vs_position_for_2d, self._scatter_data_2d)
-        return plotters
-
     @property
     def post_treaters(self) -> list[POST_TREATER_T]:
         """Get the list of the post-treating functions."""
@@ -419,6 +412,13 @@ class Instrument:
                     "the array."
                 )
         return data
+
+    def _get_plot_methods(self, is_2d: bool) -> tuple[Callable, Callable]:
+        """Give the proper plotting functions according to ``is_2d``."""
+        plotters = (self._plot_vs_position_for_1d, self._scatter_data_1d)
+        if is_2d:
+            plotters = (self._plot_vs_position_for_2d, self._scatter_data_2d)
+        return plotters
 
     def _plot_vs_position_for_1d(
         self,
