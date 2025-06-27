@@ -2,7 +2,7 @@
 
 import logging
 from functools import partial
-from typing import Any, Self, cast
+from typing import Any, Self
 
 import numpy as np
 import pandas as pd
@@ -21,7 +21,10 @@ class RPAPotential(Instrument):
     def __init__(self, *args, position: float = np.nan, **kwargs) -> None:
         """Instantiate object and convert signal to :unit:`V`."""
         super().__init__(*args, position=position, **kwargs)
+
+        self._raw_data_can_change = True
         self._raw_data *= 1e3
+        self._raw_data_can_change = False
 
     @classmethod
     def ylabel(cls) -> str:
@@ -79,7 +82,9 @@ class RPACurrent(Instrument):
             )
         self._caliber_mA = caliber_mA
         super().__init__(*args, position=position, **kwargs)
+        self._raw_data_can_change = True
         self._recalibrate_current()
+        self._raw_data_can_change = False
 
         self.avg_kwargs: dict[str, Any]
         if not average:

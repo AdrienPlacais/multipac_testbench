@@ -48,6 +48,7 @@ class FieldProbe(IElectricField):
             LabViewer. This was a bug that is now fixed, so this option should
             be useless now. See also :meth:`._patch_data`. The actual
             ``g_probe``, as well as the ``calibration_file`` argument.
+            Note that it overrides a ``_raw_data`` protection mechanism.
 
         """
         super().__init__(*args, **kwargs)
@@ -66,6 +67,7 @@ class FieldProbe(IElectricField):
         if patch:
             self._raw_data_can_change = True
             self._patch_data()
+            self._raw_data_can_change = False
 
     @classmethod
     def ylabel(cls) -> str:
