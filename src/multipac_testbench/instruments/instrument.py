@@ -164,7 +164,10 @@ class Instrument(ABC):
 
         """
         if not self._raw_data_can_change:
-            raise ValueError("raw_data should not be updated.")
+            raise ValueError(
+                "._raw_data should not be updated. If you need to do so "
+                "anyway, set ._raw_data_can_change to True."
+            )
         self.__raw_data = new_value
         for dependent in ("_data", "_data_as_pd"):
             if hasattr(self, dependent):
