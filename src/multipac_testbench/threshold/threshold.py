@@ -111,7 +111,9 @@ def create_thresholds(
 class PowerExtremum:
     """Place-holder for reaching a minimum or maximum of power."""
 
+    #: At which sample index the power reached an extremum
     sample_index: int
+    #: If the extremum is mini/maxi
     nature: POWER_EXTREMUM_T
 
     def __eq__(self, other: object) -> bool:
