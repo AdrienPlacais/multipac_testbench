@@ -46,7 +46,7 @@ from multipac_testbench.multipactor_band.test_multipactor_bands import (
     TestMultipactorBands,
 )
 from multipac_testbench.multipactor_test.loader import TRIGGER_POLICIES, load
-from multipac_testbench.threshold.threshold import Threshold, create_thresholds
+from multipac_testbench.threshold.threshold import create_thresholds
 from multipac_testbench.threshold.threshold_set import ThresholdSet
 from multipac_testbench.util import plot
 from multipac_testbench.util.animate import get_limits
@@ -320,6 +320,88 @@ class TestPlotter:
                 csv_kwargs = {}
             plot.save_dataframe(df_thresholds, csv_path, **csv_kwargs)
         return axes, df_thresholds
+
+    def new_plot_thresholds(
+        self,
+        to_plot: ABCMeta,
+        threshold_set: ThresholdSet,
+        title: str = "",
+        png_path: Path | None = None,
+        png_kwargs: dict | None = None,
+        csv_path: Path | None = None,
+        csv_kwargs: dict | None = None,
+        **kwargs,
+    ) -> tuple[Axes | NDArray[Axes], pd.DataFrame]:
+        """Plot ``to_plot`` data at multipactor threshold.
+
+        When ``to_plot`` is :class:`.ForwardPower` or :class:`.FieldProbe`,
+        the output is the threshold. But this method works with any instrument
+        type.
+
+        .. todo::
+            Add a way to fit exponential (?) law on the thresholds. Will need
+            to change the x-axis.
+
+        Parameters
+        ----------
+        to_plot :
+            Class of instrument to plot. Makes most sense with
+            :class:`.ForwardPower` or :class:`.FieldProbe`.
+        threshold_set :
+            Object containing the indexes of thresholds, as well as the
+            position of multipactor.
+        title :
+            If provided, overrides automatic title.
+        png_path :
+            If provided, figure will be saved there.
+        png_kwargs :
+            Keyword arguments for the :meth:`matplotlib.figure.Figure.savefig`
+            method.
+        csv_path :
+            If provided, plotted data will be saved there.
+        csv_kwargs :
+            Keyword arguments for the :meth:`pandas.DataFrame.to_csv` method.
+
+        Returns
+        -------
+        axes :
+            Hold plotted axes.
+        df_thresholds :
+            The data used to produce the plot.
+
+        """
+        title = str(self.test) if not title else title
+
+        instruments = self.test.get_instruments(to_plot)
+        df = threshold_set.data_at_thresholds(instruments)
+        label_to_color = threshold_set.get_threshold_label_color_map()
+        axes = df.filter(like="Lower").plot(
+            marker="o",
+            ms=10,
+            title=title,
+            color=[
+                label_to_color[col] for col in df.filter(like="Lower").columns
+            ],
+            **kwargs,
+        )
+        df.filter(like="Upper").plot(
+            ax=axes,
+            marker="^",
+            ms=10,
+            grid=True,
+            ylabel=to_plot.ylabel(),
+            color=[
+                label_to_color[col] for col in df.filter(like="Lower").columns
+            ],
+            **kwargs,
+        )
+        if png_path:
+            plot.save_figure(axes, png_path, **(png_kwargs or {}))
+
+        if csv_path:
+            plot.save_dataframe(df, csv_path, **(csv_kwargs or {}))
+
+        return axes, df
 
     def animate_instruments_vs_position(
         self,
@@ -1000,6 +1082,7 @@ class MultipactorTest:
                 growth_array,
                 str(instrument),
                 instrument.position,
+                instrument.color,
             )
             for instrument in instruments
             if isinstance(instrument.position, float)

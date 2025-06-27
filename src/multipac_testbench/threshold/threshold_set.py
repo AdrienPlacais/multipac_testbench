@@ -85,7 +85,7 @@ class ThresholdSet:
             and (np.isnan(x.position) or np.isnan(position))
         ]
 
-    def data_at_threshold(
+    def data_at_thresholds(
         self,
         instruments: Sequence[Instrument],
         tol: float = 1e-10,
@@ -155,6 +155,26 @@ class ThresholdSet:
     # def uppers(self) -> list[Threshold]:
     #     """Get upper thresholds."""
     #     return [x for x in self if x.nature == "upper"]
+
+    def get_threshold_label_color_map(
+        self,
+    ) -> dict[str, tuple[float, float, float] | None]:
+        """Return a mapping from threshold label to color.
+
+        Assumes :attr:`.Threshold.color` is already set to the corresponding
+        :class:`.Instrument` color.
+
+        Returns
+        -------
+        dict[str, str]
+            Mapping from ``"<detecting_instrument> <nature>"`` to the threshold
+            color.
+
+        """
+        return {
+            f"{th.detecting_instrument} {th.nature.capitalize()}": th.color
+            for th in self
+        }
 
 
 class ThresholdsFactory:
