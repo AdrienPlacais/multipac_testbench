@@ -1,8 +1,10 @@
 """Define an object to hold all thresholds of a multipactor test."""
 
-from collections.abc import Callable, Iterable, Iterator
+from collections import defaultdict
+from collections.abc import Callable, Collection, Iterable, Iterator, Sequence
 
 import numpy as np
+import pandas as pd
 from multipac_testbench.instruments.instrument import Instrument
 from multipac_testbench.threshold.threshold import PowerExtremum, Threshold
 from numpy.typing import NDArray
@@ -82,6 +84,60 @@ class ThresholdSet:
             or return_global
             and (np.isnan(x.position) or np.isnan(position))
         ]
+
+    def data_at_threshold(
+        self,
+        instruments: Sequence[Instrument],
+        tol: float = 1e-10,
+        global_instruments: bool = False,
+        global_multipactor: bool = False,
+    ):
+        """Return instrument values at threshold sample indices.
+
+        Parameters
+        ----------
+        instruments :
+            Instruments to search from. Must have ``.position`` and ``.data``
+            attributes.
+        tol :
+            Tolerance for position matching.
+        global_instruments :
+            If instruments not position-specific (eg :class:`.ForwardPower`)
+            should be returned.
+        global_multipactor :
+            If multipactor not position-specific (eg thresholds created by
+            merging several other multipactor arrays) should be returned.
+
+        Returns
+        -------
+        pd.DataFrame
+            Columns are named by detecting instrument + threshold nature.
+            Indexes are the corresponding sample indices.
+
+        """
+        result: dict[str, dict[int, float]] = defaultdict(dict)
+
+        for threshold in self:
+            for instrument in instruments:
+                far_away = abs(instrument.position - threshold.position) < tol
+                if far_away:
+                    continue
+
+                if not global_instruments and np.isnan(instrument.position):
+                    continue
+
+                if not global_multipactor and np.isnan(threshold.position):
+                    continue
+
+                label = (
+                    f"{threshold.detecting_instrument} "
+                    f"{threshold.nature.capitalize()}"
+                )
+                idx = threshold.sample_index
+                result[label][idx] = instrument.data[idx]
+                break  # Assume one match is enough
+
+        return pd.DataFrame({k: pd.Series(v) for k, v in result.items()})
 
     #
     # def according_to(
