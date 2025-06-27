@@ -32,6 +32,10 @@ Then, add `multipac_testbench.src` to your `$PYTHONPATH` environment variable.
 - 🤝 [Contributing](./CONTRIBUTING.md)
 - 🚀 [Tutorials/examples](https://multipac-testbench.readthedocs.io/en/stable/manual/tutorials.html)
 
+TODO:
+- [ ] Add notebook execution to normal test workflow.
+  - [ ] Add jupyter installation to `pip` deps for test
+
 ## Future updates
 
 - [X] Calibration of new field probes.
