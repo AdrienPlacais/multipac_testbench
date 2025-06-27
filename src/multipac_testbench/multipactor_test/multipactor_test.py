@@ -46,6 +46,8 @@ from multipac_testbench.multipactor_band.test_multipactor_bands import (
     TestMultipactorBands,
 )
 from multipac_testbench.multipactor_test.loader import TRIGGER_POLICIES, load
+from multipac_testbench.threshold.threshold import Threshold, create_thresholds
+from multipac_testbench.threshold.threshold_set import ThresholdSet
 from multipac_testbench.util import plot
 from multipac_testbench.util.animate import get_limits
 from multipac_testbench.util.helper import (
@@ -962,6 +964,48 @@ class MultipactorTest:
         )
         return test_multipactor_bands
 
+    def determine_thresholds(
+        self,
+        multipac_detector: MULTIPAC_DETECTOR_T,
+        instrument_class: ABCMeta,
+        power_growth_array_kw: dict[str, Any] | None = None,
+        **kwargs,
+    ) -> ThresholdSet:
+        """Create the :class:`.TestMultipactorBands` object.
+
+        Parameters
+        ----------
+        multipac_detector :
+            Function that takes in the ``data`` of an :class:`.Instrument`
+            and returns an array, where True means multipactor and False no
+            multipactor.
+        instrument_class :
+            Type of instrument on which ``multipac_detector`` should be
+            applied.
+        power_growth_array_kw :
+            Keyword arguments passed to :meth:`.PowerSetpoint.growth_array`.
+
+        Returns
+        -------
+            Object holding all lower and upper thresholds, detected by
+            ``multipac_detector`` applied on every instance of
+            ``instrument_class``.
+
+        """
+        instruments = self.get_instruments(instrument_class)
+        growth_array = self._power_growth_array(power_growth_array_kw)
+        thresholds = [
+            create_thresholds(
+                multipac_detector(instrument.data),
+                growth_array,
+                str(instrument),
+                instrument.position,
+            )
+            for instrument in instruments
+            if isinstance(instrument.position, float)
+        ]
+        return ThresholdSet(itertools.chain(*thresholds))
+
     def _power_growth_mask(
         self, growth_mask_kw: dict[str, Any] | None = None
     ) -> NDArray[np.bool]:
@@ -997,6 +1041,29 @@ class MultipactorTest:
             growth_mask_kw = {}
         mask = power_instrument.growth_mask(**growth_mask_kw)
         return mask
+
+    def _power_growth_array(
+        self, growth_array_kw: dict[str, Any] | None = None
+    ) -> NDArray[np.float64]:
+        """Determine where power grows, decreases, is stable."""
+        power_instrument = self.get_instrument(
+            ins.PowerSetpoint, raise_missing_intrument_error=False
+        )
+        if power_instrument is None:
+            logging.warning(
+                "The power cycles will be determined using the ForwardPower "
+                "(NI9205_Power1) instead of the PowerSetpoint (NI9205_dBm). "
+                "This is more error-prone, in particular if consecutive Sample"
+                " index corresond to different powers. In this case, you may "
+                "see that all MultipactorBands are merged. You can fix this by"
+                "setting ``consecutive_criterions`` to 0."
+            )
+            power_instrument = self.get_instrument(ins.ForwardPower)
+
+        assert power_instrument is not None
+
+        growth_array = power_instrument.growth_array(**(growth_array_kw or {}))
+        return growth_array
 
     def _instruments_by_class(
         self,
