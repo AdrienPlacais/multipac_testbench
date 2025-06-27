@@ -1,15 +1,10 @@
 """Define an object to hold all thresholds of a multipactor test."""
 
-from collections.abc import Callable, Iterable, Iterator, Sequence
+from collections.abc import Callable, Iterable, Iterator
 
 import numpy as np
 from multipac_testbench.instruments.instrument import Instrument
-from multipac_testbench.threshold.threshold import (
-    THRESHOLD_DETECTOR_T,
-    THRESHOLD_NATURE_T,
-    PowerExtremum,
-    Threshold,
-)
+from multipac_testbench.threshold.threshold import PowerExtremum, Threshold
 from numpy.typing import NDArray
 
 THRESHOLD_FILTER_T = Callable[[Threshold], bool]
@@ -56,9 +51,38 @@ class ThresholdSet:
         idx = self.sample_indexes()
         return instrument.data[idx]
 
-    # def at(self, position: float, tol: float = 1e-10) -> list[Threshold]:
-    #     """Give thresholds measured at a given position."""
-    #     return [x for x in self if abs(x.position - position) < tol]
+    def at(
+        self, position: float, tol: float = 1e-10, return_global: bool = False
+    ) -> list[Threshold]:
+        """Give thresholds measured at a given position.
+
+        Parameters
+        ----------
+        position :
+            Where you want the thresholds.
+        tol :
+            Tolerance over the position.
+        return_global :
+            To return global multipactors, and also return all thresholds when
+            ``position`` is ``np.nan``. ``np.nan`` position are associated with
+            "global" instruments, such as :class:`.ForwardPower`, and with
+            "global" multipactors, such as obtained by crossing several
+            :class:`.Instrument` data.
+
+        Returns
+        -------
+        list[Threshold]
+            All multipactor thresholds detected at this position.
+
+        """
+        return [
+            x
+            for x in self._thresholds
+            if abs(x.position - position) < tol
+            or return_global
+            and (np.isnan(x.position) or np.isnan(position))
+        ]
+
     #
     # def according_to(
     #     self, instrument: Instrument | str | THRESHOLD_DETECTOR_T
