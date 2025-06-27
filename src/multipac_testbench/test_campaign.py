@@ -1,10 +1,13 @@
 """Define an object to store data from several :class:`.MultipactorTest`."""
 
+from __future__ import annotations
+
+import functools
 import logging
 from abc import ABCMeta
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Self
+from typing import Any, Callable, Self, TypeVar, cast
 
 import matplotlib.pyplot as plt
 import multipac_testbench.instruments as ins
@@ -33,77 +36,12 @@ from multipac_testbench.theoretical.somersalo import (
 from multipac_testbench.util import log_manager, plot
 from multipac_testbench.util.types import MULTIPAC_DETECTOR_T
 
+T = TypeVar("T", bound=Callable[..., Any])
 
-class TestCampaign(list[MultipactorTest]):
-    """Hold several multipactor tests together."""
 
-    def __init__(self, multipactor_tests: list[MultipactorTest]) -> None:
-        """Create the object from the list of :class:`.MultipactorTest`."""
-        super().__init__(multipactor_tests)
-
-    @classmethod
-    def from_filepaths(
-        cls,
-        filepaths: Sequence[Path],
-        frequencies: Sequence[float],
-        swrs: Sequence[float],
-        config: dict,
-        info: Sequence[str] = (),
-        sep: str = ";",
-        trigger_policy: TRIGGER_POLICIES = "keep_all",
-        **kwargs,
-    ) -> Self:
-        """Instantiate the :class:`.MultipactorTest` and :class:`TestCampaign`.
-
-        Parameters
-        ----------
-        filepaths :
-           Filepaths to the LabViewer files.
-        frequencies :
-            Frequencies matching the filepaths.
-        swrs :
-            SWRs matching the filepaths.
-        config :
-            Configuration of the test bench.
-        info :
-            Other information string to identify each multipactor test.
-        sep :
-            Delimiter between the columns.
-        trigger_policy :
-            How consecutive measures at the same power should be treated.
-
-        Returns
-        -------
-        test_campaign :
-            List of :class:`.MultipactorTest`.
-
-        """
-        if len(info) == 0:
-            info = ["" for _ in filepaths]
-        args = zip(filepaths, frequencies, swrs, info, strict=True)
-
-        logfile = Path(filepaths[0].parent / "multipac_testbench.log")
-        log_manager.set_up_logging(logfile_file=logfile)
-
-        multipactor_tests = [
-            MultipactorTest(
-                filepath,
-                config,
-                freq_mhz,
-                swr,
-                info,
-                sep=sep,
-                trigger_policy=trigger_policy,
-                **kwargs,
-            )
-            for _, (filepath, freq_mhz, swr, info) in enumerate(args)
-        ]
-        return cls(multipactor_tests)
-
-    def add_post_treater(self, *args, **kwargs) -> None:
-        """Add post-treatment functions to instruments."""
-        for test in self:
-            test.add_post_treater(*args, **kwargs)
+class CampaignPlotter:
+    def __init__(self, campaign: TestCampaign) -> None:
+        self.campaign = campaign
 
     def sweet_plot(
         self,
@@ -151,22 +89,27 @@ class TestCampaign(list[MultipactorTest]):
         all_axes = []
         all_df = []
         if campaign_multipactor_bands is None:
-            campaign_multipactor_bands = [None for _ in self]
-        zipper = zip(self, campaign_multipactor_bands, strict=True)
+            campaign_multipactor_bands = [None for _ in self.campaign]
+
+        zipper = zip(self.campaign, campaign_multipactor_bands, strict=True)
 
         if all_on_same_plot:
             return self._sweet_plot_same_plot(zipper, *args, **kwargs)
 
         for test, band in zipper:
-            png_path = None
-            if png_folder is not None:
-                png_path = test.output_filepath(png_folder, ".png")
+            png_path = (
+                test.output_filepath(png_folder, ".png")
+                if png_folder
+                else None
+            )
 
-            csv_path = None
-            if csv_folder is not None:
-                csv_path = test.output_filepath(csv_folder, ".csv")
+            csv_path = (
+                test.output_filepath(csv_folder, ".csv")
+                if csv_folder
+                else None
+            )
 
-            axes, df_plot = test.sweet_plot(
+            axes, df_plot = test.plotter.sweet_plot(
                 *args,
                 png_path=png_path,
                 test_multipactor_bands=band,
@@ -197,7 +140,7 @@ class TestCampaign(list[MultipactorTest]):
         all_df = []
         colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
         for i, (test, band) in enumerate(zipper):
-            axes, df_plot = test.sweet_plot(
+            axes, df_plot = test.plotter.sweet_plot(
                 *args,
                 test_multipactor_bands=band,
                 axes=axes,
@@ -210,14 +153,10 @@ class TestCampaign(list[MultipactorTest]):
         assert axes is not None
         df_to_plot = pd.concat(all_df, axis=1)
 
-        if png_path is not None:
-            if png_kwargs is None:
-                png_kwargs = {}
-            plot.save_figure(axes, png_path, **png_kwargs)
-        if csv_path is not None:
-            if csv_kwargs is None:
-                csv_kwargs = {}
-            plot.save_dataframe(df_to_plot, csv_path, **csv_kwargs)
+        if png_path:
+            plot.save_figure(axes, png_path, **(png_kwargs or {}))
+        if csv_path:
+            plot.save_dataframe(df_to_plot, csv_path, **(csv_kwargs or {}))
 
         return axes, df_to_plot
 
@@ -233,7 +172,7 @@ class TestCampaign(list[MultipactorTest]):
         """Recursively call :meth:`.MultipactorTest.plot_thresholds`."""
         all_axes = []
         all_df = []
-        zipper = zip(self, campaign_multipactor_bands, strict=True)
+        zipper = zip(self.campaign, campaign_multipactor_bands, strict=True)
         for test, multipactor_bands in zipper:
             png_path = None
             if png_folder is not None:
@@ -254,79 +193,6 @@ class TestCampaign(list[MultipactorTest]):
             all_axes.append(axes)
             all_df.append(df_plot)
         return all_axes, all_df
-
-    def at_last_threshold(
-        self,
-        instrument_id: ABCMeta | Sequence[ABCMeta],
-        campaign_multipactor_bands: CampaignMultipactorBands,
-        *args,
-        **kwargs,
-    ) -> pd.DataFrame:
-        """Make a resume of data measured at last thresholds."""
-        zipper = zip(self, campaign_multipactor_bands, strict=True)
-        df_thresholds = [
-            test.at_last_threshold(instrument_id, band, *args, **kwargs)
-            for test, band in zipper
-        ]
-        return pd.concat(df_thresholds)
-
-    def detect_multipactor(
-        self,
-        multipac_detector: MULTIPAC_DETECTOR_T,
-        instrument_class: ABCMeta,
-        *args,
-        power_growth_mask_kw: dict[str, int | float] | None = None,
-        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
-        debug: bool = False,
-        **kwargs,
-    ) -> CampaignMultipactorBands:
-        """Create the :class:`.InstrumentMultipactorBands` objects.
-
-        Parameters
-        ----------
-        multipac_detector :
-            Function that takes in the ``data`` of an :class:`.Instrument` and
-            returns an array, where True means multipactor and False no
-            multipactor.
-        instrument_class :
-            Type of instrument on which ``multipac_detector`` should be
-            applied.
-        power_growth_mask_kw :
-            Keyword arguments passed to the function that determines when power
-            is increasing, when it is decreasing
-            (:meth:`.ForwardPower.growth_mask`).
-        measurement_points_to_exclude :
-            :class:`.IMeasurementPoint` where you do not want to know if there
-            is multipacting.
-        debug :
-            To plot the data used for multipactor detection, where power grows,
-            where multipactor is detected.
-
-        Returns
-        -------
-        nested_instrument_multipactor_bands :
-            :class:`.InstrumentMultipactorBands` objects holding when multipactor
-            happens. They are sorted first by :class:`.MultipactorTest` (outer
-            level), then per :class:`.Instrument` of class ``instrument_class``
-            (inner level).
-
-        """
-        tests_multipactor_bands = [
-            test.detect_multipactor(
-                multipac_detector=multipac_detector,
-                instrument_class=instrument_class,
-                *args,
-                power_growth_mask_kw=power_growth_mask_kw,
-                measurement_points_to_exclude=measurement_points_to_exclude,
-                debug=debug,
-                **kwargs,
-            )
-            for test in self
-        ]
-        campaign_multipactor_bands = CampaignMultipactorBands(
-            tests_multipactor_bands
-        )
-        return campaign_multipactor_bands
 
     def somersalo_chart(
         self,
@@ -411,7 +277,7 @@ class TestCampaign(list[MultipactorTest]):
             cycle, or every power that led to multipacting during whole test.
 
         """
-        zipper = zip(self, multipactor_bands, strict=True)
+        zipper = zip(self.campaign, multipactor_bands, strict=True)
         for test, bands in zipper:
             somersalo_data = test.data_for_somersalo(bands)
             plot_somersalo_measured(
@@ -493,11 +359,11 @@ class TestCampaign(list[MultipactorTest]):
             Holds the data that was plotted.
 
         """
-        frequencies = {test.freq_mhz for test in self}
+        frequencies = {test.freq_mhz for test in self.campaign}
         if len(frequencies) != 1:
             raise NotImplementedError("Plot over several freqs to implement")
 
-        zipper = zip(self, multipactor_bands, strict=True)
+        zipper = zip(self.campaign, multipactor_bands, strict=True)
         data_for_somersalo = [
             test.data_for_somersalo_scaling_law(band, use_theoretical_r)
             for (test, band) in zipper
@@ -580,11 +446,11 @@ class TestCampaign(list[MultipactorTest]):
             Corresponding data.
 
         """
-        frequencies = {test.freq_mhz for test in self}
+        frequencies = {test.freq_mhz for test in self.campaign}
         if len(frequencies) != 1:
             raise NotImplementedError("Plot over several freqs to implement")
 
-        voltages = self.at_last_threshold(
+        voltages = self.campaign.at_last_threshold(
             ins.FieldProbe,
             campaign_multipactor_bands,
             measurement_points_to_exclude=measurement_points_to_exclude,
@@ -630,7 +496,7 @@ class TestCampaign(list[MultipactorTest]):
         csv_kwargs: dict | None = None,
         **fig_kw,
     ) -> tuple[Axes, pd.DataFrame]:
-        """Create a susceptiblity chart.
+        """Create a susceptibility chart.
 
         Parameters
         ----------
@@ -671,13 +537,13 @@ class TestCampaign(list[MultipactorTest]):
             Corresponding data.
 
         """
-        df_susceptibility = self.at_last_threshold(
+        df_susceptibility = self.campaign.at_last_threshold(
             ins.FieldProbe,
             campaign_multipactor_bands,
             measurement_points_to_exclude=measurement_points_to_exclude,
         )
 
-        frequencies = np.array([test.freq_mhz for test in self])
+        frequencies = np.array([test.freq_mhz for test in self.campaign])
         if gap_in_cm is None:
             gap_in_cm = 0.5 * (3.878 - 1.687)
             logging.info(f"Used default {gap_in_cm = }")
@@ -686,7 +552,7 @@ class TestCampaign(list[MultipactorTest]):
         df_susceptibility.set_index(xlabel, inplace=True)
 
         if keep_only_travelling:
-            swr = [test.swr for test in self]
+            swr = [test.swr for test in self.campaign]
             is_travelling = [abs(x - 1.0) < tol for x in swr]
             df_susceptibility = df_susceptibility[is_travelling]
 
@@ -723,7 +589,7 @@ class TestCampaign(list[MultipactorTest]):
     ) -> list[animation.FuncAnimation]:
         """Call all :meth:`.MultipactorTest.animate_instruments_vs_position`"""
         animations = []
-        for i, test in enumerate(self):
+        for i, test in enumerate(self.campaign):
             gif_path = None
             if out_folder is not None:
                 gif_path = test.output_filepath(out_folder, ".gif")
@@ -733,11 +599,6 @@ class TestCampaign(list[MultipactorTest]):
             animations.append(animation)
         return animations
 
-    def reconstruct_voltage_along_line(self, *args, **kwargs) -> None:
-        """Call all :meth:`.MultipactorTest.reconstruct_voltage_along_line`."""
-        for test in self:
-            test.reconstruct_voltage_along_line(*args, **kwargs)
-
     def scatter_instruments_data(
         self,
         *args,
@@ -746,7 +607,7 @@ class TestCampaign(list[MultipactorTest]):
         **kwargs,
     ) -> None:
         """Call all :meth:`.MultipactorTest.scatter_instruments_data`."""
-        for i, test in enumerate(self):
+        for i, test in enumerate(self.campaign):
             png_path = None
             if out_folder is not None:
                 png_path = test.output_filepath(out_folder, ".png")
@@ -754,3 +615,207 @@ class TestCampaign(list[MultipactorTest]):
                 *args, num=iternum + i, png_path=png_path, **kwargs
             )
         return
+
+
+def delegate_to_campaign_plotter(method_name: str) -> Callable[[T], T]:
+    """Delegate a method call to the corresponding method of ``self.plotter``.
+
+    Allows preserving the original method's docstring and signature.
+
+    Parameters
+    ----------
+    method_name :
+        The name of the method in the :class:`.CampaignPlotter` class to
+        delegate to.
+
+    Returns
+    -------
+    Callable
+        A method that forwards its call to ``self.plotter.method_name``, with
+        the docstring and signature of the original method.
+
+    """
+
+    def wrapper(func: T) -> T:
+        @functools.wraps(getattr(CampaignPlotter, method_name))
+        def inner(self, *args, **kwargs):
+            return getattr(self.plotter, method_name)(*args, **kwargs)
+
+        return cast(T, inner)
+
+    return wrapper
+
+
+class TestCampaign(list[MultipactorTest]):
+    """Hold several multipactor tests together."""
+
+    def __init__(self, multipactor_tests: list[MultipactorTest]) -> None:
+        """Create the object from the list of :class:`.MultipactorTest`."""
+        super().__init__(multipactor_tests)
+        self.plotter = CampaignPlotter(self)
+
+    @classmethod
+    def from_filepaths(
+        cls,
+        filepaths: Sequence[Path],
+        frequencies: Sequence[float],
+        swrs: Sequence[float],
+        config: dict,
+        info: Sequence[str] = (),
+        sep: str = ";",
+        trigger_policy: TRIGGER_POLICIES = "keep_all",
+        **kwargs,
+    ) -> Self:
+        """Instantiate the :class:`.MultipactorTest` and :class:`TestCampaign`.
+
+        Parameters
+        ----------
+        filepaths :
+           Filepaths to the LabViewer files.
+        frequencies :
+            Frequencies matching the filepaths.
+        swrs :
+            SWRs matching the filepaths.
+        config :
+            Configuration of the test bench.
+        info :
+            Other information string to identify each multipactor test.
+        sep :
+            Delimiter between the columns.
+        trigger_policy :
+            How consecutive measures at the same power should be treated.
+
+        Returns
+        -------
+        test_campaign :
+            List of :class:`.MultipactorTest`.
+
+        """
+        if len(info) == 0:
+            info = ["" for _ in filepaths]
+        args = zip(filepaths, frequencies, swrs, info, strict=True)
+
+        logfile = Path(filepaths[0].parent / "multipac_testbench.log")
+        log_manager.set_up_logging(logfile_file=logfile)
+
+        multipactor_tests = [
+            MultipactorTest(
+                filepath,
+                config,
+                freq_mhz,
+                swr,
+                info,
+                sep=sep,
+                trigger_policy=trigger_policy,
+                **kwargs,
+            )
+            for _, (filepath, freq_mhz, swr, info) in enumerate(args)
+        ]
+        return cls(multipactor_tests)
+
+    def add_post_treater(self, *args, **kwargs) -> None:
+        """Add post-treatment functions to instruments."""
+        for test in self:
+            test.add_post_treater(*args, **kwargs)
+
+    def at_last_threshold(
+        self,
+        instrument_id: ABCMeta | Sequence[ABCMeta],
+        campaign_multipactor_bands: CampaignMultipactorBands,
+        *args,
+        **kwargs,
+    ) -> pd.DataFrame:
+        """Make a resume of data measured at last thresholds."""
+        zipper = zip(self, campaign_multipactor_bands, strict=True)
+        df_thresholds = [
+            test.at_last_threshold(instrument_id, band, *args, **kwargs)
+            for test, band in zipper
+        ]
+        return pd.concat(df_thresholds)
+
+    def detect_multipactor(
+        self,
+        multipac_detector: MULTIPAC_DETECTOR_T,
+        instrument_class: ABCMeta,
+        *args,
+        power_growth_mask_kw: dict[str, int | float] | None = None,
+        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
+        debug: bool = False,
+        **kwargs,
+    ) -> CampaignMultipactorBands:
+        """Create the :class:`.InstrumentMultipactorBands` objects.
+
+        Parameters
+        ----------
+        multipac_detector :
+            Function that takes in the ``data`` of an :class:`.Instrument` and
+            returns an array, where True means multipactor and False no
+            multipactor.
+        instrument_class :
+            Type of instrument on which ``multipac_detector`` should be
+            applied.
+        power_growth_mask_kw :
+            Keyword arguments passed to the function that determines when power
+            is increasing, when it is decreasing
+            (:meth:`.ForwardPower.growth_mask`).
+        measurement_points_to_exclude :
+            :class:`.IMeasurementPoint` where you do not want to know if there
+            is multipacting.
+        debug :
+            To plot the data used for multipactor detection, where power grows,
+            where multipactor is detected.
+
+        Returns
+        -------
+        nested_instrument_multipactor_bands :
+            :class:`.InstrumentMultipactorBands` objects holding when multipactor
+            happens. They are sorted first by :class:`.MultipactorTest` (outer
+            level), then per :class:`.Instrument` of class ``instrument_class``
+            (inner level).
+
+        """
+        tests_multipactor_bands = [
+            test.detect_multipactor(
+                multipac_detector=multipac_detector,
+                instrument_class=instrument_class,
+                *args,
+                power_growth_mask_kw=power_growth_mask_kw,
+                measurement_points_to_exclude=measurement_points_to_exclude,
+                debug=debug,
+                **kwargs,
+            )
+            for test in self
+        ]
+        campaign_multipactor_bands = CampaignMultipactorBands(
+            tests_multipactor_bands
+        )
+        return campaign_multipactor_bands
+
+    def reconstruct_voltage_along_line(self, *args, **kwargs) -> None:
+        """Call all :meth:`.MultipactorTest.reconstruct_voltage_along_line`."""
+        for test in self:
+            test.reconstruct_voltage_along_line(*args, **kwargs)
+
+    @delegate_to_campaign_plotter("sweet_plot")
+    def sweet_plot(self, *args, **kwargs): ...
+
+    @delegate_to_campaign_plotter("plot_thresholds")
+    def plot_thresholds(self, *args, **kwargs): ...
+
+    @delegate_to_campaign_plotter("somersalo_chart")
+    def somersalo_chart(self, *args, **kwargs): ...
+
+    @delegate_to_campaign_plotter("check_somersalo_scaling_law")
+    def check_somersalo_scaling_law(self, *args, **kwargs): ...
+
+    @delegate_to_campaign_plotter("voltage_thresholds")
+    def voltage_thresholds(self, *args, **kwargs): ...
+
+    @delegate_to_campaign_plotter("susceptibility")
+    def susceptibility(self, *args, **kwargs): ...
+
+    @delegate_to_campaign_plotter("animate_instruments_vs_position")
+    def animate_instruments_vs_position(self, *args, **kwargs): ...
+
+    @delegate_to_campaign_plotter("scatter_instruments_data")
+    def scatter_instruments_data(self, *args, **kwargs): ...

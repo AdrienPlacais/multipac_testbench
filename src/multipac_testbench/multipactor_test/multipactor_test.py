@@ -539,7 +539,7 @@ class TestPlotter:
         return fig, axes
 
 
-def delegate_to_plotter(method_name: str) -> Callable[[T], T]:
+def delegate_to_test_plotter(method_name: str) -> Callable[[T], T]:
     """Delegate a method call to the corresponding method of ``self.plotter``.
 
     Allows preserving the original method's docstring and signature.
@@ -1328,14 +1328,14 @@ class MultipactorTest:
         )
         return filepath
 
-    @delegate_to_plotter("sweet_plot")
+    @delegate_to_test_plotter("sweet_plot")
     def sweet_plot(self, *args, **kwargs): ...
 
-    @delegate_to_plotter("plot_thresholds")
+    @delegate_to_test_plotter("plot_thresholds")
     def plot_thresholds(self, *args, **kwargs): ...
 
-    @delegate_to_plotter("animate_instruments_vs_position")
+    @delegate_to_test_plotter("animate_instruments_vs_position")
     def animate_instruments_vs_position(self, *args, **kwargs): ...
 
-    @delegate_to_plotter("scatter_instruments_data")
+    @delegate_to_test_plotter("scatter_instruments_data")
     def scatter_instruments_data(self, *args, **kwargs): ...
