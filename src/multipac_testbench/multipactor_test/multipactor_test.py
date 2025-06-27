@@ -1328,8 +1328,8 @@ class MultipactorTest:
         )
         return filepath
 
-    def sweet_plot(self, *args, **kwargs) -> tuple[list[Axes], pd.DataFrame]:
-        return self.plotter.sweet_plot(*args, **kwargs)
+    @delegate_to_plotter("sweet_plot")
+    def sweet_plot(self, *args, **kwargs): ...
 
     @delegate_to_plotter("plot_thresholds")
     def plot_thresholds(self, *args, **kwargs): ...
