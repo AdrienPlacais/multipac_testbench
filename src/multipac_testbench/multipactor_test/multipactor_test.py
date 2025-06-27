@@ -60,6 +60,485 @@ from numpy.typing import NDArray
 T = TypeVar("T", bound=Callable[..., Any])
 
 
+class TestPlotter:
+    """Handles plotting logic."""
+
+    def __init__(self, test: MultipactorTest) -> None:
+        """Create object with it's associated test."""
+        self.test = test
+
+    def sweet_plot(
+        self,
+        *ydata: ABCMeta,
+        xdata: ABCMeta | None = None,
+        exclude: Sequence[str] = (),
+        tail: int | None = None,
+        xlabel: str = "",
+        ylabel: str | Iterable = "",
+        grid: bool = True,
+        title: str | list[str] = "",
+        test_multipactor_bands: TestMultipactorBands | None = None,
+        column_names: str | list[str] = "",
+        test_color: str | None = None,
+        png_path: Path | None = None,
+        png_kwargs: dict | None = None,
+        csv_path: Path | None = None,
+        csv_kwargs: dict | None = None,
+        axes: list[Axes] | None = None,
+        masks: dict[str, NDArray[np.bool]] | None = None,
+        drop_repeated_x: bool = False,
+        **kwargs,
+    ) -> tuple[list[Axes], pd.DataFrame]:
+        """Plot ``ydata`` versus ``xdata``.
+
+        .. todo::
+            Kwargs mixed up between the different methods.
+
+        Parameters
+        ----------
+        *ydata :
+            Class of the instruments to plot.
+        xdata :
+            Class of instrument to use as x-data. If there is several
+            instruments which have this class, only one ``ydata`` is allowed
+            and number of ``x`` and ``y`` instruments must match. The default
+            is None, in which case data is plotted vs sample index.
+        exclude :
+            Name of the instruments that you do not want to see plotted.
+        tail :
+            Specify this to only plot the last ``tail`` points. Useful to
+            select only the last power cycle.
+        xlabel :
+            Label of x axis.
+        ylabel :
+            Label of y axis.
+        grid :
+            To show the grid.
+        title :
+            Title of the plot or of the subplots.
+        test_multipactor_bands :
+            If provided, information is added to the plot to show where
+            multipactor happens.
+        column_names :
+            To override the default column names. This is used in particular
+            with the method :meth:`.TestCampaign.sweet_plot` when
+            ``all_on_same_plot=True``.
+        test_color :
+            Color used by :meth:`.TestCampaign.sweet_plot` when
+            ``all_on_same_plot=True``. It overrides the :class:`.Instrument`
+            color and is used to discriminate every :class:`.MultipactorTest`
+            from another.
+        png_path :
+            If specified, save the figure at ``png_path``.
+        csv_path :
+            If specified, save the data used to produce the plot in
+            ``csv_path``.
+        masks :
+            A dictionary where each key is a suffix used to label the split
+            columns, and each value is a boolean mask of the same length as the
+            input data. Keys must start with two underscores (``__``) to enable
+            consistent column naming and compatibility with downstream styling
+            logic (e.g., grouping lines by base column in plots). If multiple
+            masks are ``True`` at the same row index, a ``ValueError`` is
+            raised.
+        drop_repeated_x :
+            If True, remove consecutive rows with identical x values.
+        **kwargs :
+            Other keyword arguments passed to :meth:`pandas.DataFrame.plot`,
+            :meth:`._set_y_data`, :func:`.create_df_to_plot`,
+            :func:`.set_labels`.
+
+        Returns
+        -------
+        axes :
+            Objects holding the plot.
+        df_to_plot :
+            DataFrame holding the data that is plotted.
+
+        """
+        data_to_plot, x_columns = self.test._set_x_data(xdata, exclude=exclude)
+        data_to_plot, y_columns, color = self.test._set_y_data(
+            data_to_plot,
+            *ydata,
+            exclude=exclude,
+            column_names=column_names,
+            masks=masks,
+            **kwargs,
+        )
+        if test_color is not None:
+            color = test_color
+
+        df_to_plot = plot.create_df_to_plot(
+            data_to_plot,
+            tail=tail,
+            column_names=column_names,
+            drop_repeated_x=drop_repeated_x,
+            **kwargs,
+        )
+
+        x_column, y_column = plot.match_x_and_y_column_names(
+            x_columns, y_columns
+        )
+
+        if not xlabel:
+            xlabel = xdata.name if isinstance(xdata, Instrument) else ""
+
+        if axes is None:
+            if not title:
+                title = str(self)
+
+            _, dic_axes = plot.create_fig(
+                title=title if isinstance(title, str) else title[0],
+                instruments_to_plot=ydata,
+                xlabel=xlabel,
+            )
+            axes = list(dic_axes.values())
+
+        axes = plot.actual_plot(
+            df_to_plot,
+            x_column,
+            y_column,
+            axes=axes,
+            grid=grid,
+            color=color,
+            **kwargs,
+        )
+
+        plot.set_labels(
+            axes, *ydata, xdata=xdata, xlabel=xlabel, ylabel=ylabel, **kwargs
+        )
+
+        if test_multipactor_bands is not None:
+            plot.add_instrument_multipactor_bands(
+                test_multipactor_bands, axes, twinx=True
+            )
+
+        if png_path is not None:
+            if png_kwargs is None:
+                png_kwargs = {}
+            plot.save_figure(axes, png_path, **png_kwargs)
+        if csv_path is not None:
+            if csv_kwargs is None:
+                csv_kwargs = {}
+            plot.save_dataframe(df_to_plot, csv_path, **csv_kwargs)
+        return axes, df_to_plot
+
+    def plot_thresholds(
+        self,
+        instrument_id: ABCMeta,
+        multipactor_bands: TestMultipactorBands | InstrumentMultipactorBands,
+        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
+        instruments_to_ignore: Sequence[ins.Instrument | str] = (),
+        title: str = "",
+        png_path: Path | None = None,
+        png_kwargs: dict | None = None,
+        csv_path: Path | None = None,
+        csv_kwargs: dict | None = None,
+        **kwargs,
+    ) -> tuple[Axes | NDArray[Axes], pd.DataFrame]:
+        """Plot ``instrument_id`` data at every multipactor threshold.
+
+        When ``to_plot`` is :class:`.ForwardPower` or :class:`.FieldProbe`,
+        the output is the threshold. But this method works with any instrument
+        type.
+
+        .. todo::
+            Add a way to fit exponential (?) law on the thresholds. Will need
+            to change the x-axis.
+
+        Parameters
+        ----------
+        instrument_id :
+            Class of instrument to plot. Makes most sense with
+            :class:`.ForwardPower` or :class:`.FieldProbe`.
+        multipactor_bands :
+            Object containing the indexes of multipacting. If only a
+            :class:`.InstrumentMultipactorBands` is given, all plotted
+            instruments will use it.
+        measurement_points_to_exclude :
+            To exclude some pick-ups.
+        instruments_to_ignore :
+            To exclude some instruments.
+        png_path :
+            If provided, figure will be saved there.
+        png_kwargs :
+            Keyword arguments for the :meth:`matplotlib.figure.Figure.savefig`
+            method.
+        csv_path :
+            If provided, plotted data will be saved there.
+        csv_kwargs :
+            Keyword arguments for the :meth:`pandas.DataFrame.to_csv` method.
+
+        Returns
+        -------
+        axes :
+            Hold plotted axes.
+        df_thresholds :
+            The data used to produce the plot.
+
+        """
+        zipper = self.test.instruments_and_multipactor_bands(
+            instrument_id,
+            multipactor_bands,
+            raise_no_match_error=True,
+            global_diagnostics=True,
+            measurement_points_to_exclude=measurement_points_to_exclude,
+            instruments_to_ignore=instruments_to_ignore,
+        )
+        if not title:
+            title = str(self)
+
+        thresholds = [
+            instrument.at_thresholds(multipactor_band)
+            for instrument, multipactor_band in zipper
+        ]
+        df_thresholds = pd.concat(thresholds, axis=1)
+        axes = df_thresholds.filter(like="Lower").plot(
+            marker="o",
+            ms=10,
+            title=title,
+            **kwargs,
+        )
+        axes.set_prop_cycle(None)
+        axes = df_thresholds.filter(like="Upper").plot(
+            ax=axes,
+            grid=True,
+            marker="^",
+            ms=10,
+            xlabel="Half-power cycle #",
+            ylabel=instrument_id.ylabel(),
+            **kwargs,
+        )
+        if png_path is not None:
+            if png_kwargs is None:
+                png_kwargs = {}
+            plot.save_figure(axes, png_path, **png_kwargs)
+        if csv_path is not None:
+            if csv_kwargs is None:
+                csv_kwargs = {}
+            plot.save_dataframe(df_thresholds, csv_path, **csv_kwargs)
+        return axes, df_thresholds
+
+    def animate_instruments_vs_position(
+        self,
+        instruments_to_plot: Sequence[ABCMeta],
+        gif_path: Path | None = None,
+        fps: int = 50,
+        keep_one_frame_over: int = 1,
+        interval: int | None = None,
+        only_first_frame: bool = False,
+        last_frame: int | None = None,
+        **fig_kw,
+    ) -> animation.FuncAnimation | list[Axes]:
+        """Represent measured signals with probe position.
+
+        .. todo::
+            ``last_frame`` badly handled: gif will be as long as if the
+            ``last_frame`` was not set, except that images won't be updated
+            after the last frame.
+
+        """
+        fig, axes_instruments = self._prepare_animation_fig(
+            instruments_to_plot, **fig_kw
+        )
+
+        frames = self.test._n_points - 1
+        artists = self._plot_instruments_single_time_step(
+            0,
+            keep_one_frame_over=keep_one_frame_over,
+            axes_instruments=axes_instruments,
+            artists=None,
+        )
+        if only_first_frame:
+            return list(axes_instruments.keys())
+
+        def update(step_idx: int) -> Sequence[Artist]:
+            """Update the ``artists`` defined in outer scope.
+
+            Parameters
+            ----------
+            step_idx :
+                Step that shall be plotted.
+
+            Returns
+            -------
+            artists :
+                Updated artists.
+
+            """
+            self._plot_instruments_single_time_step(
+                step_idx,
+                keep_one_frame_over=keep_one_frame_over,
+                axes_instruments=axes_instruments,
+                artists=artists,
+                last_frame=last_frame,
+            )
+            assert artists is not None
+            return artists
+
+        if interval is None:
+            interval = int(200 / keep_one_frame_over)
+
+        ani = animation.FuncAnimation(
+            fig, update, frames=frames, interval=interval, repeat=True
+        )
+
+        if gif_path is not None:
+            writergif = animation.PillowWriter(fps=fps)
+            ani.save(gif_path, writer=writergif)
+        return ani
+
+    def _prepare_animation_fig(
+        self,
+        to_plot: Sequence[ABCMeta],
+        measurement_points_to_exclude: tuple[str, ...] = (),
+        instruments_to_ignore_for_limits: tuple[str, ...] = (),
+        instruments_to_ignore: Sequence[ins.Instrument | str] = (),
+        **fig_kw,
+    ) -> tuple[Figure, dict[Axes, list[ins.Instrument]]]:
+        """Create the figure and axes for the animation.
+
+        Parameters
+        ----------
+        to_plot :
+            Classes of instruments you want to see.
+        measurement_points_to_exclude :
+            Measurement points that should not appear.
+        instruments_to_ignore_for_limits :
+            Instruments to plot, but that can go off limits.
+        instruments_to_ignore :
+            Instruments that will not even be plotted.
+        fig_kw :
+            Other keyword arguments for Figure.
+
+        Returns
+        -------
+        fig :
+         Figure holding the axes.
+        axes_instruments :
+            Links the instruments to plot with the Axes they should be plotted
+            on.
+
+        """
+        fig, instrument_class_axes = plot.create_fig(
+            str(self), to_plot, xlabel="Position [m]", **fig_kw
+        )
+
+        for instrument_class, axe in instrument_class_axes.items():
+            axe.set_ylabel(instrument_class.ylabel())
+
+        measurement_points = self.test.get_measurement_points(
+            to_exclude=measurement_points_to_exclude
+        )
+
+        axes_instruments = {
+            axe: self.test._instruments_by_class(
+                instrument_class,
+                measurement_points,
+                instruments_to_ignore=instruments_to_ignore,
+            )
+            for instrument_class, axe in instrument_class_axes.items()
+        }
+
+        y_limits = get_limits(
+            axes_instruments, instruments_to_ignore_for_limits
+        )
+        axe = None
+        for axe, y_lim in y_limits.items():
+            axe.set_ylim(y_lim)
+
+        return fig, axes_instruments
+
+    def _plot_instruments_single_time_step(
+        self,
+        step_idx: int,
+        keep_one_frame_over: int,
+        axes_instruments: dict[Axes, list[ins.Instrument]],
+        artists: Sequence[Artist] | None = None,
+        last_frame: int | None = None,
+    ) -> Sequence[Artist] | None:
+        """Plot all instruments signal at proper axe and time step."""
+        if step_idx % keep_one_frame_over != 0:
+            return
+
+        if last_frame is not None and step_idx > last_frame:
+            return
+
+        sample_index = step_idx + 1
+
+        if artists is None:
+            artists = [
+                instrument.plot_vs_position(sample_index, axe=axe)
+                for axe, instruments in axes_instruments.items()
+                for instrument in instruments
+            ]
+            return artists
+
+        i = 0
+        for instruments in axes_instruments.values():
+            for instrument in instruments:
+                instrument.plot_vs_position(sample_index, artist=artists[i])
+                i += 1
+        return artists
+
+    def scatter_instruments_data(
+        self,
+        instruments_to_plot: Sequence[ABCMeta],
+        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
+        instrument_multipactor_bands: (
+            Sequence[InstrumentMultipactorBands] | None
+        ) = None,
+        png_path: Path | None = None,
+        **fig_kw,
+    ) -> tuple[Figure, list[Axes]]:
+        """Plot the data measured by instruments.
+
+        This plot results in important amount of points. It becomes interesting
+        when setting different colors for multipactor/no multipactor points and
+        can help see trends.
+
+        .. todo::
+            Also show from global diagnostic
+
+        .. todo::
+            User should be able to select: reconstructed or measured electric
+            field.
+
+        .. todo::
+            Fix this. Or not? This is not the most explicit way to display
+            data...
+
+        """
+        raise NotImplementedError("currently broken")
+        if fig_kw is None:
+            fig_kw = {}
+        fig, instrument_class_axes = plot.create_fig(
+            str(self), instruments_to_plot, xlabel="Probe index", **fig_kw
+        )
+        measurement_points = self.get_measurement_points(
+            to_exclude=measurement_points_to_exclude
+        )
+
+        instrument_multipactor_bands = (
+            self._get_proper_instrument_multipactor_bands(
+                multipactor_measured_at=measurement_points,
+                instrument_multipactor_bands=instrument_multipactor_bands,
+                measurement_points_to_exclude=measurement_points_to_exclude,
+            )
+        )
+
+        for i, measurement_point in enumerate(measurement_points):
+            measurement_point.scatter_instruments_data(
+                instrument_class_axes,
+                xdata=float(i),
+            )
+
+        fig, axes = plot.finish_fig(
+            fig, instrument_class_axes.values(), png_path
+        )
+        return fig, axes
+
+
 def delegate_to_plotter(method_name: str) -> Callable[[T], T]:
     """Delegate a method call to the corresponding method of ``self.plotter``.
 
@@ -67,7 +546,7 @@ def delegate_to_plotter(method_name: str) -> Callable[[T], T]:
 
     Parameters
     ----------
-    method_name : str
+    method_name :
         The name of the method in the :class:`.TestPlotter` class to delegate
         to.
 
@@ -699,7 +1178,7 @@ class MultipactorTest:
                 )
             case _:
                 raise OSError(
-                    f"instruments is {type(instruments_id)} which ",
+                    f"``instruments`` is {type(instruments_id)} which ",
                     "is not supported.",
                 )
         return out
@@ -858,484 +1337,5 @@ class MultipactorTest:
     @delegate_to_plotter("animate_instruments_vs_position")
     def animate_instruments_vs_position(self, *args, **kwargs): ...
 
-    @delegate_to_plotter("scatter_instrument_data")
-    def scatter_instrument_data(self, *args, **kwargs): ...
-
-
-class TestPlotter:
-    """Handles plotting logic."""
-
-    def __init__(self, test: MultipactorTest) -> None:
-        """Create object with it's associated test."""
-        self.test = test
-
-    def sweet_plot(
-        self,
-        *ydata: ABCMeta,
-        xdata: ABCMeta | None = None,
-        exclude: Sequence[str] = (),
-        tail: int | None = None,
-        xlabel: str = "",
-        ylabel: str | Iterable = "",
-        grid: bool = True,
-        title: str | list[str] = "",
-        test_multipactor_bands: TestMultipactorBands | None = None,
-        column_names: str | list[str] = "",
-        test_color: str | None = None,
-        png_path: Path | None = None,
-        png_kwargs: dict | None = None,
-        csv_path: Path | None = None,
-        csv_kwargs: dict | None = None,
-        axes: list[Axes] | None = None,
-        masks: dict[str, NDArray[np.bool]] | None = None,
-        drop_repeated_x: bool = False,
-        **kwargs,
-    ) -> tuple[list[Axes], pd.DataFrame]:
-        """Plot ``ydata`` versus ``xdata``.
-
-        .. todo::
-            Kwargs mixed up between the different methods.
-
-        Parameters
-        ----------
-        *ydata :
-            Class of the instruments to plot.
-        xdata :
-            Class of instrument to use as x-data. If there is several
-            instruments which have this class, only one ``ydata`` is allowed
-            and number of ``x`` and ``y`` instruments must match. The default
-            is None, in which case data is plotted vs sample index.
-        exclude :
-            Name of the instruments that you do not want to see plotted.
-        tail :
-            Specify this to only plot the last ``tail`` points. Useful to
-            select only the last power cycle.
-        xlabel :
-            Label of x axis.
-        ylabel :
-            Label of y axis.
-        grid :
-            To show the grid.
-        title :
-            Title of the plot or of the subplots.
-        test_multipactor_bands :
-            If provided, information is added to the plot to show where
-            multipactor happens.
-        column_names :
-            To override the default column names. This is used in particular
-            with the method :meth:`.TestCampaign.sweet_plot` when
-            ``all_on_same_plot=True``.
-        test_color :
-            Color used by :meth:`.TestCampaign.sweet_plot` when
-            ``all_on_same_plot=True``. It overrides the :class:`.Instrument`
-            color and is used to discriminate every :class:`.MultipactorTest`
-            from another.
-        png_path :
-            If specified, save the figure at ``png_path``.
-        csv_path :
-            If specified, save the data used to produce the plot in
-            ``csv_path``.
-        masks :
-            A dictionary where each key is a suffix used to label the split
-            columns, and each value is a boolean mask of the same length as the
-            input data. Keys must start with two underscores (``__``) to enable
-            consistent column naming and compatibility with downstream styling
-            logic (e.g., grouping lines by base column in plots). If multiple
-            masks are ``True`` at the same row index, a ``ValueError`` is
-            raised.
-        drop_repeated_x :
-            If True, remove consecutive rows with identical x values.
-        **kwargs :
-            Other keyword arguments passed to :meth:`pandas.DataFrame.plot`,
-            :meth:`._set_y_data`, :func:`.create_df_to_plot`,
-            :func:`.set_labels`.
-
-        Returns
-        -------
-        axes :
-            Objects holding the plot.
-        df_to_plot :
-            DataFrame holding the data that is plotted.
-
-        """
-        data_to_plot, x_columns = self.test._set_x_data(xdata, exclude=exclude)
-        data_to_plot, y_columns, color = self.test._set_y_data(
-            data_to_plot,
-            *ydata,
-            exclude=exclude,
-            column_names=column_names,
-            masks=masks,
-            **kwargs,
-        )
-        if test_color is not None:
-            color = test_color
-
-        df_to_plot = plot.create_df_to_plot(
-            data_to_plot,
-            tail=tail,
-            column_names=column_names,
-            drop_repeated_x=drop_repeated_x,
-            **kwargs,
-        )
-
-        x_column, y_column = plot.match_x_and_y_column_names(
-            x_columns, y_columns
-        )
-
-        if not xlabel:
-            xlabel = xdata.name if isinstance(xdata, Instrument) else ""
-
-        if axes is None:
-            if not title:
-                title = str(self)
-
-            _, dic_axes = plot.create_fig(
-                title=title if isinstance(title, str) else title[0],
-                instruments_to_plot=ydata,
-                xlabel=xlabel,
-            )
-            axes = list(dic_axes.values())
-
-        axes = plot.actual_plot(
-            df_to_plot,
-            x_column,
-            y_column,
-            axes=axes,
-            grid=grid,
-            color=color,
-            **kwargs,
-        )
-
-        plot.set_labels(
-            axes, *ydata, xdata=xdata, xlabel=xlabel, ylabel=ylabel, **kwargs
-        )
-
-        if test_multipactor_bands is not None:
-            plot.add_instrument_multipactor_bands(
-                test_multipactor_bands, axes, twinx=True
-            )
-
-        if png_path is not None:
-            if png_kwargs is None:
-                png_kwargs = {}
-            plot.save_figure(axes, png_path, **png_kwargs)
-        if csv_path is not None:
-            if csv_kwargs is None:
-                csv_kwargs = {}
-            plot.save_dataframe(df_to_plot, csv_path, **csv_kwargs)
-        return axes, df_to_plot
-
-    def plot_thresholds(
-        self,
-        instrument_id: ABCMeta,
-        multipactor_bands: TestMultipactorBands | InstrumentMultipactorBands,
-        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
-        instruments_to_ignore: Sequence[ins.Instrument | str] = (),
-        title: str = "",
-        png_path: Path | None = None,
-        png_kwargs: dict | None = None,
-        csv_path: Path | None = None,
-        csv_kwargs: dict | None = None,
-        **kwargs,
-    ) -> tuple[Axes | NDArray[Axes], pd.DataFrame]:
-        """Plot ``instrument_id`` data at every multipactor threshold.
-
-        When ``to_plot`` is :class:`.ForwardPower` or :class:`.FieldProbe`,
-        the output is the threshold. But this method works with any instrument
-        type.
-
-        .. todo::
-            Add a way to fit exponential (?) law on the thresholds. Will need
-            to change the x-axis.
-
-        Parameters
-        ----------
-        instrument_id :
-            Class of instrument to plot. Makes most sense with
-            :class:`.ForwardPower` or :class:`.FieldProbe`.
-        multipactor_bands :
-            Object containing the indexes of multipacting. If only a
-            :class:`.InstrumentMultipactorBands` is given, all plotted
-            instruments will use it.
-        measurement_points_to_exclude :
-            To exclude some pick-ups.
-        instruments_to_ignore :
-            To exclude some instruments.
-        png_path :
-            If provided, figure will be saved there.
-        png_kwargs :
-            Keyword arguments for the :meth:`matplotlib.figure.Figure.savefig`
-            method.
-        csv_path :
-            If provided, plotted data will be saved there.
-        csv_kwargs :
-            Keyword arguments for the :meth:`pandas.DataFrame.to_csv` method.
-
-        Returns
-        -------
-        axes :
-            Hold plotted axes.
-        df_thresholds :
-            The data used to produce the plot.
-
-        """
-        zipper = self.test.instruments_and_multipactor_bands(
-            instrument_id,
-            multipactor_bands,
-            raise_no_match_error=True,
-            global_diagnostics=True,
-            measurement_points_to_exclude=measurement_points_to_exclude,
-            instruments_to_ignore=instruments_to_ignore,
-        )
-        if not title:
-            title = str(self)
-
-        thresholds = [
-            instrument.at_thresholds(multipactor_band)
-            for instrument, multipactor_band in zipper
-        ]
-        df_thresholds = pd.concat(thresholds, axis=1)
-        axes = df_thresholds.filter(like="Lower").plot(
-            marker="o",
-            ms=10,
-            title=title,
-            **kwargs,
-        )
-        axes.set_prop_cycle(None)
-        axes = df_thresholds.filter(like="Upper").plot(
-            ax=axes,
-            grid=True,
-            marker="^",
-            ms=10,
-            xlabel="Half-power cycle #",
-            ylabel=instrument_id.ylabel(),
-            **kwargs,
-        )
-        if png_path is not None:
-            if png_kwargs is None:
-                png_kwargs = {}
-            plot.save_figure(axes, png_path, **png_kwargs)
-        if csv_path is not None:
-            if csv_kwargs is None:
-                csv_kwargs = {}
-            plot.save_dataframe(df_thresholds, csv_path, **csv_kwargs)
-        return axes, df_thresholds
-
-    def animate_instruments_vs_position(
-        self,
-        instruments_to_plot: Sequence[ABCMeta],
-        gif_path: Path | None = None,
-        fps: int = 50,
-        keep_one_frame_over: int = 1,
-        interval: int | None = None,
-        only_first_frame: bool = False,
-        last_frame: int | None = None,
-        **fig_kw,
-    ) -> animation.FuncAnimation | list[Axes]:
-        """Represent measured signals with probe position.
-
-        .. todo::
-            ``last_frame`` badly handled: gif will be as long as if the
-            ``last_frame`` was not set, except that images won't be updated
-            after the last frame.
-
-        """
-        fig, axes_instruments = self._prepare_animation_fig(
-            instruments_to_plot, **fig_kw
-        )
-
-        frames = self.test._n_points - 1
-        artists = self._plot_instruments_single_time_step(
-            0,
-            keep_one_frame_over=keep_one_frame_over,
-            axes_instruments=axes_instruments,
-            artists=None,
-        )
-        if only_first_frame:
-            return list(axes_instruments.keys())
-
-        def update(step_idx: int) -> Sequence[Artist]:
-            """Update the ``artists`` defined in outer scope.
-
-            Parameters
-            ----------
-            step_idx :
-                Step that shall be plotted.
-
-            Returns
-            -------
-            artists :
-                Updated artists.
-
-            """
-            self._plot_instruments_single_time_step(
-                step_idx,
-                keep_one_frame_over=keep_one_frame_over,
-                axes_instruments=axes_instruments,
-                artists=artists,
-                last_frame=last_frame,
-            )
-            assert artists is not None
-            return artists
-
-        if interval is None:
-            interval = int(200 / keep_one_frame_over)
-
-        ani = animation.FuncAnimation(
-            fig, update, frames=frames, interval=interval, repeat=True
-        )
-
-        if gif_path is not None:
-            writergif = animation.PillowWriter(fps=fps)
-            ani.save(gif_path, writer=writergif)
-        return ani
-
-    def _prepare_animation_fig(
-        self,
-        to_plot: Sequence[ABCMeta],
-        measurement_points_to_exclude: tuple[str, ...] = (),
-        instruments_to_ignore_for_limits: tuple[str, ...] = (),
-        instruments_to_ignore: Sequence[ins.Instrument | str] = (),
-        **fig_kw,
-    ) -> tuple[Figure, dict[Axes, list[ins.Instrument]]]:
-        """Create the figure and axes for the animation.
-
-        Parameters
-        ----------
-        to_plot :
-            Classes of instruments you want to see.
-        measurement_points_to_exclude :
-            Measurement points that should not appear.
-        instruments_to_ignore_for_limits :
-            Instruments to plot, but that can go off limits.
-        instruments_to_ignore :
-            Instruments that will not even be plotted.
-        fig_kw :
-            Other keyword arguments for Figure.
-
-        Returns
-        -------
-        fig :
-         Figure holding the axes.
-        axes_instruments :
-            Links the instruments to plot with the Axes they should be plotted
-            on.
-
-        """
-        fig, instrument_class_axes = plot.create_fig(
-            str(self), to_plot, xlabel="Position [m]", **fig_kw
-        )
-
-        for instrument_class, axe in instrument_class_axes.items():
-            axe.set_ylabel(instrument_class.ylabel())
-
-        measurement_points = self.test.get_measurement_points(
-            to_exclude=measurement_points_to_exclude
-        )
-
-        axes_instruments = {
-            axe: self.test._instruments_by_class(
-                instrument_class,
-                measurement_points,
-                instruments_to_ignore=instruments_to_ignore,
-            )
-            for instrument_class, axe in instrument_class_axes.items()
-        }
-
-        y_limits = get_limits(
-            axes_instruments, instruments_to_ignore_for_limits
-        )
-        axe = None
-        for axe, y_lim in y_limits.items():
-            axe.set_ylim(y_lim)
-
-        return fig, axes_instruments
-
-    def _plot_instruments_single_time_step(
-        self,
-        step_idx: int,
-        keep_one_frame_over: int,
-        axes_instruments: dict[Axes, list[ins.Instrument]],
-        artists: Sequence[Artist] | None = None,
-        last_frame: int | None = None,
-    ) -> Sequence[Artist] | None:
-        """Plot all instruments signal at proper axe and time step."""
-        if step_idx % keep_one_frame_over != 0:
-            return
-
-        if last_frame is not None and step_idx > last_frame:
-            return
-
-        sample_index = step_idx + 1
-
-        if artists is None:
-            artists = [
-                instrument.plot_vs_position(sample_index, axe=axe)
-                for axe, instruments in axes_instruments.items()
-                for instrument in instruments
-            ]
-            return artists
-
-        i = 0
-        for instruments in axes_instruments.values():
-            for instrument in instruments:
-                instrument.plot_vs_position(sample_index, artist=artists[i])
-                i += 1
-        return artists
-
-    def scatter_instruments_data(
-        self,
-        instruments_to_plot: Sequence[ABCMeta],
-        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
-        instrument_multipactor_bands: (
-            Sequence[InstrumentMultipactorBands] | None
-        ) = None,
-        png_path: Path | None = None,
-        **fig_kw,
-    ) -> tuple[Figure, list[Axes]]:
-        """Plot the data measured by instruments.
-
-        This plot results in important amount of points. It becomes interesting
-        when setting different colors for multipactor/no multipactor points and
-        can help see trends.
-
-        .. todo::
-            Also show from global diagnostic
-
-        .. todo::
-            User should be able to select: reconstructed or measured electric
-            field.
-
-        .. todo::
-            Fix this. Or not? This is not the most explicit way to display
-            data...
-
-        """
-        raise NotImplementedError("currently broken")
-        if fig_kw is None:
-            fig_kw = {}
-        fig, instrument_class_axes = plot.create_fig(
-            str(self), instruments_to_plot, xlabel="Probe index", **fig_kw
-        )
-        measurement_points = self.get_measurement_points(
-            to_exclude=measurement_points_to_exclude
-        )
-
-        instrument_multipactor_bands = (
-            self._get_proper_instrument_multipactor_bands(
-                multipactor_measured_at=measurement_points,
-                instrument_multipactor_bands=instrument_multipactor_bands,
-                measurement_points_to_exclude=measurement_points_to_exclude,
-            )
-        )
-
-        for i, measurement_point in enumerate(measurement_points):
-            measurement_point.scatter_instruments_data(
-                instrument_class_axes,
-                xdata=float(i),
-            )
-
-        fig, axes = plot.finish_fig(
-            fig, instrument_class_axes.values(), png_path
-        )
-        return fig, axes
+    @delegate_to_plotter("scatter_instruments_data")
+    def scatter_instruments_data(self, *args, **kwargs): ...
