@@ -60,6 +60,7 @@ from multipac_testbench.util.animate import get_limits
 from multipac_testbench.util.helper import (
     flatten,
     output_filepath,
+    save_by_position,
     split_rows_by_masks,
     types_match,
 )
@@ -416,7 +417,6 @@ class TestPlotter:
                 **kwargs,
             )
             axes.set_prop_cycle(None)
-            __import__("pdb").set_trace()
             axes = df.filter(like="upper").plot(
                 ax=axes,
                 marker="^",
@@ -446,26 +446,22 @@ class TestPlotter:
         ]
 
         if png_path:
-            stem = png_path.stem
-            suffix = png_path.suffix
-            pos_paths = [
-                png_path.with_name(f"{stem}_pos{pos:.3f}{suffix}")
-                for pos in pos_to_cols
-            ]
-            for axes, pos_path in zip(axes_list, pos_paths):
-                plot.save_figure(axes, pos_path, **(png_kwargs or {}))
+            save_by_position(
+                dict(zip(pos_to_cols, axes_list)),
+                png_path,
+                plot.save_figure,
+                png_kwargs or {},
+            )
         if csv_path:
             dfs_by_position = {
                 pos: df[cols] for pos, cols in pos_to_cols.items()
             }
-            stem = csv_path.stem
-            suffix = csv_path.suffix
-            pos_paths = [
-                csv_path.with_name(f"{stem}_pos{pos:.3f}{suffix}")
-                for pos in pos_to_cols
-            ]
-            for sub_df, pos_path in zip(dfs_by_position.values(), pos_paths):
-                plot.save_dataframe(sub_df, pos_path, **(csv_kwargs or {}))
+            save_by_position(
+                dfs_by_position,
+                csv_path,
+                plot.save_dataframe,
+                csv_kwargs or {},
+            )
 
         return np.array(axes_list), df
 
