@@ -13,14 +13,60 @@ import numpy as np
 import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+from multipac_testbench.instruments.instrument import Instrument
 from multipac_testbench.multipactor_band.test_multipactor_bands import (
     TestMultipactorBands,
 )
+from multipac_testbench.threshold.threshold import PowerExtremum
 from multipac_testbench.util.helper import drop_repeated_col, is_nested_list
 from multipac_testbench.util.multipactor_detectors import (
     start_and_end_of_contiguous_true_zones,
 )
 from numpy.typing import NDArray
+
+
+def plot_extrema_markers(
+    ax_by_position: dict[float, Axes] | Axes,
+    instruments: list[Instrument],
+    extrema: list[PowerExtremum],
+    marker_style: dict[str, dict] | None = None,
+    zorder: int = 3,
+) -> None:
+    """Plot PowerExtremum values as markers from all instruments.
+
+    Parameters
+    ----------
+    ax_by_position :
+        Axes (if same_figure=True) or dict mapping position to Axes.
+    instruments :
+        Instruments from which to extract values (must have `.data` and `.position`).
+    extrema :
+        Global PowerExtremum instances (with `.sample_index` and `.nature`).
+    marker_style :
+        Optional dict mapping nature ("minimum", "maximum") to plot kwargs
+        (like color, marker shape, etc.).
+    zorder :
+        Layer order.
+    """
+    if isinstance(ax_by_position, dict):
+        get_ax = lambda pos: ax_by_position[pos]
+    else:
+        get_ax = lambda pos: ax_by_position  # same figure
+
+    marker_style = marker_style or {
+        "minimum": dict(marker="v", linestyle="none", label="Minimum"),
+        "maximum": dict(marker="^", linestyle="none", label="Maximum"),
+    }
+
+    for extremum in extrema:
+        style = marker_style.get(extremum.nature, {})
+        for instr in instruments:
+            if extremum.sample_index >= len(instr.data):
+                continue  # Skip if sample index is out of bounds
+            x_val = extremum.sample_index
+            y_val = instr.data[extremum.sample_index]
+            ax = get_ax(instr.position)
+            ax.plot(x_val, y_val, color=instr.color, **style, zorder=zorder)
 
 
 def create_fig(

@@ -335,6 +335,7 @@ class TestPlotter:
         threshold_set: ThresholdSet,
         title: str = "",
         same_figure: bool = True,
+        plot_extrema: bool = False,
         png_path: Path | None = None,
         png_kwargs: dict | None = None,
         csv_path: Path | None = None,
@@ -364,6 +365,10 @@ class TestPlotter:
         same_figure :
             If :class:`.Instrument` at different positions should be kept on
             the same plot.
+        plot_extrema :
+            Add ``to_plot`` values at the power minima and maxima. Makes most
+            sense with voltage/power instruments. Resulting plot may be very
+            crowded if ``same_figure == True``.
         png_path :
             If provided, figure will be saved there.
         png_kwargs :
@@ -419,7 +424,7 @@ class TestPlotter:
             axes.set_prop_cycle(None)
             axes = df.filter(like="upper").plot(
                 ax=axes,
-                marker="^",
+                marker="*",
                 ms=ms,
                 grid=True,
                 ylabel=getattr(to_plot, "ylabel", lambda: "???")(),
@@ -431,19 +436,39 @@ class TestPlotter:
             )
             return axes
 
+        pos_to_cols = group_columns_by_detector_position(df, self.test)
         if same_figure:
             axes = plot_df_threshold(df, title)
+            if plot_extrema:
+                plot.plot_extrema_markers(
+                    ax_by_position=axes,
+                    instruments=instruments,
+                    extrema=threshold_set._extrema,
+                )
             if png_path:
                 plot.save_figure(axes, png_path, **(png_kwargs or {}))
             if csv_path:
                 plot.save_dataframe(df, csv_path, **(csv_kwargs or {}))
             return axes, df
 
-        pos_to_cols = group_columns_by_detector_position(df, self.test)
         axes_list = [
             plot_df_threshold(df[cols], f"{title} - Position {pos}")
             for (pos, cols) in sorted(pos_to_cols.items())
         ]
+        if plot_extrema:
+            axes_for_extrema = (
+                {
+                    instr.position: ax
+                    for instr, ax in zip(instruments, axes_list)
+                }
+                if not same_figure
+                else axes and isinstance(instr.position, float)
+            )
+            plot.plot_extrema_markers(
+                ax_by_position=axes_for_extrema,
+                instruments=instruments,
+                extrema=threshold_set._extrema,
+            )
 
         if png_path:
             save_by_position(
