@@ -34,6 +34,9 @@ def plot_extrema_markers(
 ) -> None:
     """Plot PowerExtremum values as markers from all instruments.
 
+    .. todo::
+        Fill above/below the extrema.
+
     Parameters
     ----------
     ax_by_position :
@@ -47,6 +50,7 @@ def plot_extrema_markers(
         (like color, marker shape, etc.).
     zorder :
         Layer order.
+
     """
     if isinstance(ax_by_position, dict):
         get_ax = lambda pos: ax_by_position[pos]
