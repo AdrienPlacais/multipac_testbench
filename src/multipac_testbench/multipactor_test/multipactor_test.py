@@ -87,7 +87,7 @@ class TestPlotter:
         ylabel: str | Iterable = "",
         grid: bool = True,
         title: str | list[str] = "",
-        test_multipactor_bands: TestMultipactorBands | None = None,
+        threshold_set: ThresholdSet | None = None,
         column_names: str | list[str] = "",
         test_color: str | None = None,
         png_path: Path | None = None,
@@ -126,7 +126,7 @@ class TestPlotter:
             To show the grid.
         title :
             Title of the plot or of the subplots.
-        test_multipactor_bands :
+        threshold_set :
             If provided, information is added to the plot to show where
             multipactor happens.
         column_names :
@@ -218,19 +218,13 @@ class TestPlotter:
             axes, *ydata, xdata=xdata, xlabel=xlabel, ylabel=ylabel, **kwargs
         )
 
-        if test_multipactor_bands is not None:
-            plot.add_instrument_multipactor_bands(
-                test_multipactor_bands, axes, twinx=True
-            )
+        if threshold_set is not None:
+            raise NotImplementedError
 
         if png_path is not None:
-            if png_kwargs is None:
-                png_kwargs = {}
-            plot.save_figure(axes, png_path, **png_kwargs)
+            plot.save_figure(axes, png_path, **(png_kwargs or {}))
         if csv_path is not None:
-            if csv_kwargs is None:
-                csv_kwargs = {}
-            plot.save_dataframe(df_to_plot, csv_path, **csv_kwargs)
+            plot.save_dataframe(df_to_plot, csv_path, **(csv_kwargs or {}))
         return axes, df_to_plot
 
     def plot_thresholds(
@@ -293,56 +287,20 @@ class TestPlotter:
         """
         instruments = self.test.get_instruments(to_plot)
         label_to_color = threshold_set.get_threshold_label_color_map()
-        title = str(self.test) if not title else title
+        assert label_to_color is not None
 
         df = threshold_set.data_at_thresholds(instruments)
-
-        def plot_df_threshold(
-            df: pd.DataFrame,
-            fig_title: str,
-            ms: int = 10,
-        ) -> Axes:
-            """Plot a threshold dataframe, separating lower/upper thresholds.
-
-            Parameters
-            ----------
-            df :
-                Holds ``"{Instrument.name} lower"`` and ``"{Instrument.name}
-                upper"`` columns.
-            fig_title :
-                Figure title.
-            ms :
-                Markers size.
-
-            """
-            axes = df.filter(like="lower").plot(
-                marker="o",
-                ms=ms,
-                title=fig_title,
-                color=[
-                    label_to_color[col]
-                    for col in df.filter(like="lower").columns
-                ],
-                **kwargs,
-            )
-            axes.set_prop_cycle(None)
-            axes = df.filter(like="upper").plot(
-                ax=axes,
-                marker="*",
-                ms=ms,
-                grid=True,
-                ylabel=getattr(to_plot, "ylabel", lambda: "???")(),
-                color=[
-                    label_to_color[col]
-                    for col in df.filter(like="lower").columns
-                ],
-                **kwargs,
-            )
-            return axes
+        title = str(self.test) if not title else title
+        ylabel = getattr(to_plot, "ylabel", lambda: "???")()
 
         pos_to_cols = group_columns_by_detector_position(df, self.test)
         if same_figure:
-            axes = plot_df_threshold(df, title)
+            axes = plot.plot_df_threshold(
+                df,
+                ylabel=ylabel,
+                label_to_color=label_to_color,
+                fig_title=title,
+            )
             if plot_extrema:
                 plot.plot_extrema_markers(
                     ax_by_position=axes,
@@ -356,7 +314,12 @@ class TestPlotter:
             return axes, df
 
         axes_list = [
-            plot_df_threshold(df[cols], f"{title} - Position {pos}")
+            plot.plot_df_threshold(
+                df[cols],
+                ylabel=ylabel,
+                label_to_color=label_to_color,
+                fig_title=f"{title} - Position {pos}",
+            )
             for (pos, cols) in sorted(pos_to_cols.items())
         ]
         if plot_extrema:

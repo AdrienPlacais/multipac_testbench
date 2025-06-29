@@ -18,6 +18,7 @@ from multipac_testbench.multipactor_band.test_multipactor_bands import (
     TestMultipactorBands,
 )
 from multipac_testbench.threshold.threshold import PowerExtremum
+from multipac_testbench.threshold.threshold_set import ThresholdSet
 from multipac_testbench.util.helper import drop_repeated_col, is_nested_list
 from multipac_testbench.util.multipactor_detectors import (
     start_and_end_of_contiguous_true_zones,
@@ -556,6 +557,94 @@ def _add_single_bg_color(
     for zone in zones:
         axe.axvspan(zone[0], zone[1], label=label, **color_kw)
         label = None
+
+
+def add_thresholds(
+    threshold_set: ThresholdSet,
+    axes: list[Axes] | Axes | None = None,
+    scale: float = 1.0,
+    alpha: float = 0.5,
+    legend: bool = True,
+    twinx: bool = False,
+    **kwargs,
+) -> Axes | list[Axes]:
+    """Add the thresholds position to a pre-existing plot."""
+    if isinstance(axes, list):
+        axes_aslist = [
+            add_instrument_multipactor_bands(
+                test_multipactor_bands,
+                axe,
+                scale=scale,
+                alpha=alpha,
+                legend=legend,
+                twinx=twinx,
+                **kwargs,
+            )
+            for axe in axes
+        ]
+        return axes_aslist
+
+    mp_axes = axes
+    if twinx:
+        assert axes is not None
+        mp_axes = axes.twinx()
+
+    mp_axes = test_multipactor_bands.plot_as_bool(
+        mp_axes, scale, alpha, legend, **kwargs
+    )
+    if legend:
+        assert axes is not None
+        _merge_legends(axes, mp_axes)
+    return mp_axes
+
+
+def plot_df_threshold(
+    df: pd.DataFrame,
+    ylabel: str,
+    label_to_color: dict[str, tuple[float, float, float]],
+    fig_title: str,
+    ms: int = 10,
+    axes: Axes | None = None,
+    **kwargs,
+) -> Axes:
+    """Plot a threshold dataframe, separating lower/upper thresholds.
+
+    Parameters
+    ----------
+    df :
+        Holds ``"{Instrument.name} lower"`` and ``"{Instrument.name}
+        upper"`` columns.
+    ylabel :
+        Y label.
+    fig_title :
+        Figure title.
+    ms :
+        Markers size.
+    axes :
+        To re-use pre-existing axis.
+
+    """
+    axes = df.filter(like="lower").plot(
+        marker="o",
+        ms=ms,
+        title=fig_title,
+        color=[label_to_color[col] for col in df.filter(like="lower").columns],
+        ax=axes,
+        **kwargs,
+    )
+    assert axes is not None
+    axes.set_prop_cycle(None)
+    axes = df.filter(like="upper").plot(
+        ax=axes,
+        marker="*",
+        ms=ms,
+        grid=True,
+        ylabel=ylabel,
+        color=[label_to_color[col] for col in df.filter(like="lower").columns],
+        **kwargs,
+    )
+    assert axes is not None
+    return axes
 
 
 def add_instrument_multipactor_bands(
