@@ -25,14 +25,20 @@ from collections.abc import Collection, Iterable, Sequence
 from pathlib import Path
 from typing import Any, Callable, TypeVar, cast
 
-import multipac_testbench.instruments as ins
 import numpy as np
 import pandas as pd
 from matplotlib import animation
 from matplotlib.artist import Artist
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from multipac_testbench.instruments.instrument import Instrument
+from multipac_testbench.instruments import (
+    FieldProbe,
+    ForwardPower,
+    Instrument,
+    PowerSetpoint,
+    Reconstructed,
+    ReflectionCoefficient,
+)
 from multipac_testbench.measurement_point.factory import (
     IMeasurementPointFactory,
 )
@@ -229,7 +235,7 @@ class TestPlotter:
         instrument_id: ABCMeta,
         multipactor_bands: TestMultipactorBands | InstrumentMultipactorBands,
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
-        instruments_to_ignore: Sequence[ins.Instrument | str] = (),
+        instruments_to_ignore: Sequence[Instrument | str] = (),
         title: str = "",
         png_path: Path | None = None,
         png_kwargs: dict | None = None,
@@ -476,9 +482,9 @@ class TestPlotter:
         to_plot: Sequence[ABCMeta],
         measurement_points_to_exclude: tuple[str, ...] = (),
         instruments_to_ignore_for_limits: tuple[str, ...] = (),
-        instruments_to_ignore: Sequence[ins.Instrument | str] = (),
+        instruments_to_ignore: Sequence[Instrument | str] = (),
         **fig_kw,
-    ) -> tuple[Figure, dict[Axes, list[ins.Instrument]]]:
+    ) -> tuple[Figure, dict[Axes, list[Instrument]]]:
         """Create the figure and axes for the animation.
 
         Parameters
@@ -536,7 +542,7 @@ class TestPlotter:
         self,
         step_idx: int,
         keep_one_frame_over: int,
-        axes_instruments: dict[Axes, list[ins.Instrument]],
+        axes_instruments: dict[Axes, list[Instrument]],
         artists: Sequence[Artist] | None = None,
         last_frame: int | None = None,
     ) -> Sequence[Artist] | None:
@@ -910,7 +916,7 @@ class MultipactorTest:
         raise_no_match_error: bool = True,
         global_diagnostics: bool = True,
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
-        instruments_to_ignore: Sequence[ins.Instrument | str] = (),
+        instruments_to_ignore: Sequence[Instrument | str] = (),
     ) -> zip:
         """Match the instruments with their multipactor bands.
 
@@ -1096,7 +1102,7 @@ class MultipactorTest:
 
         """
         power_instrument = self.get_instrument(
-            ins.PowerSetpoint, raise_missing_intrument_error=False
+            PowerSetpoint, raise_missing_intrument_error=False
         )
         if power_instrument is None:
             logging.warning(
@@ -1107,7 +1113,7 @@ class MultipactorTest:
                 "see that all MultipactorBands are merged. You can fix this by"
                 "setting ``consecutive_criterions`` to 0."
             )
-            power_instrument = self.get_instrument(ins.ForwardPower)
+            power_instrument = self.get_instrument(ForwardPower)
 
         assert power_instrument is not None
 
@@ -1121,7 +1127,7 @@ class MultipactorTest:
     ) -> NDArray[np.float64]:
         """Determine where power grows, decreases, is stable."""
         power_instrument = self.get_instrument(
-            ins.PowerSetpoint, raise_missing_intrument_error=False
+            PowerSetpoint, raise_missing_intrument_error=False
         )
         if power_instrument is None:
             logging.warning(
@@ -1132,7 +1138,7 @@ class MultipactorTest:
                 "see that all MultipactorBands are merged. You can fix this by"
                 "setting ``consecutive_criterions`` to 0."
             )
-            power_instrument = self.get_instrument(ins.ForwardPower)
+            power_instrument = self.get_instrument(ForwardPower)
 
         assert power_instrument is not None
 
@@ -1143,8 +1149,8 @@ class MultipactorTest:
         self,
         instrument_class: ABCMeta,
         measurement_points: Sequence[IMeasurementPoint] | None = None,
-        instruments_to_ignore: Sequence[ins.Instrument | str] = (),
-    ) -> list[ins.Instrument]:
+        instruments_to_ignore: Sequence[Instrument | str] = (),
+    ) -> list[Instrument]:
         """Get all instruments of desired class from ``measurement_points``.
 
         But remove the instruments to ignore.
@@ -1184,12 +1190,9 @@ class MultipactorTest:
         return instruments
 
     def _instruments_by_name(
-        self,
-        instrument_names: Sequence[str],
-    ) -> list[ins.Instrument]:
+        self, instrument_names: Sequence[str]
+    ) -> list[Instrument]:
         """Get all instruments of desired name from ``measurement_points``.
-
-        But remove the instruments to ignore.
 
         Parameters
         ----------
@@ -1287,7 +1290,7 @@ class MultipactorTest:
             ABCMeta
             | Sequence[ABCMeta]
             | Sequence[str]
-            | Sequence[ins.Instrument]
+            | Sequence[Instrument]
             | None
         ) = None,
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
@@ -1342,11 +1345,11 @@ class MultipactorTest:
 
     def get_instrument(
         self,
-        instrument_id: ABCMeta | str | ins.Instrument,
+        instrument_id: ABCMeta | str | Instrument,
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
-        instruments_to_ignore: Sequence[ins.Instrument | str] = (),
+        instruments_to_ignore: Sequence[Instrument | str] = (),
         raise_missing_intrument_error: bool = True,
-    ) -> ins.Instrument | None:
+    ) -> Instrument | None:
         """Get a single instrument matching ``instrument_id``."""
         match (instrument_id):
             case Instrument():
@@ -1371,18 +1374,18 @@ class MultipactorTest:
     def reconstruct_voltage_along_line(
         self,
         name: str,
-        probes_to_ignore: Sequence[str | ins.FieldProbe] = (),
+        probes_to_ignore: Sequence[str | FieldProbe] = (),
     ) -> None:
         """Reconstruct the voltage profile from the e field probes."""
         e_field_probes = self._instruments_by_class(
-            ins.FieldProbe, self.pick_ups, probes_to_ignore
+            FieldProbe, self.pick_ups, probes_to_ignore
         )
         assert self.global_diagnostics is not None
 
-        forward_power = self.get_instrument(ins.ForwardPower)
-        reflection = self.get_instrument(ins.ReflectionCoefficient)
+        forward_power = self.get_instrument(ForwardPower)
+        reflection = self.get_instrument(ReflectionCoefficient)
 
-        reconstructed = ins.Reconstructed(
+        reconstructed = Reconstructed(
             name=name,
             raw_data=None,
             e_field_probes=e_field_probes,
@@ -1407,7 +1410,7 @@ class MultipactorTest:
 
         """
         last_powers = self.at_last_threshold(
-            ins.ForwardPower, test_multipactor_bands
+            ForwardPower, test_multipactor_bands
         ).iloc[0]
         z_ohm = 50.0
         d_mm = 0.5 * (38.78 - 16.87)
@@ -1466,7 +1469,7 @@ class MultipactorTest:
                 several_bands_politics="keep_lowest",
             )
 
-        instruments = ins.ForwardPower, ins.ReflectionCoefficient
+        instruments = ForwardPower, ReflectionCoefficient
         df_somersalo = self.at_last_threshold(
             instruments, multipactor_bands, **kwargs
         )
