@@ -53,6 +53,7 @@ from multipac_testbench.multipactor_band.test_multipactor_bands import (
     TestMultipactorBands,
 )
 from multipac_testbench.multipactor_test.loader import TRIGGER_POLICIES, load
+from multipac_testbench.threshold.helper import extract_detecting_name
 from multipac_testbench.threshold.threshold_set import ThresholdSet
 from multipac_testbench.util import plot
 from multipac_testbench.util.animate import get_limits
@@ -415,12 +416,13 @@ class TestPlotter:
                 **kwargs,
             )
             axes.set_prop_cycle(None)
+            __import__("pdb").set_trace()
             axes = df.filter(like="upper").plot(
                 ax=axes,
                 marker="^",
                 ms=ms,
                 grid=True,
-                ylabel=to_plot.ylabel(),
+                ylabel=getattr(to_plot, "ylabel", lambda: "???")(),
                 color=[
                     label_to_color[col]
                     for col in df.filter(like="lower").columns
@@ -437,19 +439,7 @@ class TestPlotter:
                 plot.save_dataframe(df, csv_path, **(csv_kwargs or {}))
             return axes, df
 
-        # Map each column to the position of the instrument that detected it
-        col_to_position = {}
-        for col in df.columns:
-            detecting_name = col.split()[1][1:-1]
-            detecting_instrument = self.test.get_instrument(detecting_name)
-            assert isinstance(detecting_instrument, Instrument)
-            col_to_position[col] = detecting_instrument.position
-
-        # Group columns by position
-        pos_to_cols = {}
-        for col, pos in col_to_position.items():
-            pos_to_cols.setdefault(pos, []).append(col)
-
+        pos_to_cols = group_columns_by_detector_position(df, self.test)
         axes_list = [
             plot_df_threshold(df[cols], f"{title} - Position {pos}")
             for (pos, cols) in sorted(pos_to_cols.items())
@@ -1610,3 +1600,31 @@ class MultipactorTest:
 
     @delegate_to_test_plotter("scatter_instruments_data")
     def scatter_instruments_data(self, *args, **kwargs): ...
+
+
+def group_columns_by_detector_position(
+    df: pd.DataFrame, test: MultipactorTest
+) -> dict[float, list[str]]:
+    """Group :class:`.ThresholdSet` df columns by detecting instrument pos.
+
+    Parameters
+    ----------
+    df :
+        Dataframe as returned by :meth:`.ThresholdSet.data_at_thresholds`.
+    test :
+        Object containing all the :class:`.Instrument`.
+
+    Returns
+    -------
+        Maps every position corresponding to a detecting instrument in ``df``,
+        to the list of detecting instruments at the same position.
+
+    """
+    pos_to_cols = {}
+    for col in df.columns:
+        detecting_name = extract_detecting_name(col)
+        detecting_instrument = test.get_instrument(detecting_name)
+        assert detecting_instrument is not None
+        pos = detecting_instrument.position
+        pos_to_cols.setdefault(pos, []).append(col)
+    return pos_to_cols
