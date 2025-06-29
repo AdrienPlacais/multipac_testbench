@@ -20,6 +20,7 @@ from __future__ import annotations
 import functools
 import itertools
 import logging
+import math
 from abc import ABCMeta
 from collections.abc import Collection, Iterable, Sequence
 from pathlib import Path
@@ -1370,6 +1371,43 @@ class MultipactorTest:
         if len(instruments) > 1:
             logging.warning("Several instruments found. Returning first one.")
         return instruments[0]
+
+    def get_instruments_at(
+        self,
+        position: float,
+        instrument_id: ABCMeta | str | Instrument | None = None,
+        tol: float = 1e-10,
+        **kwargs,
+    ):
+        """Return all instruments located at a given position.
+
+        Parameters
+        ----------
+        position :
+            The position in meter to match. If it is ``np.nan``, we return
+            global instruments (their ``position`` is also ``np.nan``).
+        instrument_id :
+            Filter instruments by class, name, or instance. If not provided, we
+            look for all stored instruments.
+        tol :
+            Absolute tolerance used when comparing positions.
+        **kwargs :
+            Passed to :meth:`MultipactorTest.get_instruments`.
+
+        Returns
+        -------
+            Matching instruments.
+
+        """
+        instruments = self.get_instruments(instrument_id, **kwargs)
+        if np.isnan(position):
+            return [i for i in instruments if np.isnan(i.position)]
+
+        return [
+            i
+            for i in instruments
+            if math.isclose(i.position, position, abs_tol=tol)
+        ]
 
     def reconstruct_voltage_along_line(
         self,
