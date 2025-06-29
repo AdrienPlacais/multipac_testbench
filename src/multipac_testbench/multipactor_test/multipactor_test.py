@@ -1288,14 +1288,22 @@ class MultipactorTest:
             | Sequence[ABCMeta]
             | Sequence[str]
             | Sequence[ins.Instrument]
-        ),
+            | None
+        ) = None,
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
-        instruments_to_ignore: Sequence[ins.Instrument | str] = (),
-    ) -> list[ins.Instrument]:
+        instruments_to_ignore: Sequence[Instrument | str] = (),
+    ) -> list[Instrument]:
         """Get all instruments matching ``instrument_id``."""
         match (instruments_id):
+            case None:
+                points: Collection[IMeasurementPoint] = self.pick_ups
+                if self.global_diagnostics is not None:
+                    points.append(self.global_diagnostics)
+                instruments = [point.instruments for point in points]
+                return list(itertools.chain(*instruments))
+
             case list() | tuple() as instruments if types_match(
-                instruments, ins.Instrument
+                instruments, Instrument
             ):
                 return instruments
 
@@ -1341,7 +1349,7 @@ class MultipactorTest:
     ) -> ins.Instrument | None:
         """Get a single instrument matching ``instrument_id``."""
         match (instrument_id):
-            case ins.Instrument():
+            case Instrument():
                 return instrument_id
             case str() as instrument_name:
                 instruments = self.get_instruments((instrument_name,))
