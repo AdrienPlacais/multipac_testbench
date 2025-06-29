@@ -112,7 +112,7 @@ class CampaignPlotter:
             axes, df_plot = test.plotter.sweet_plot(
                 *args,
                 png_path=png_path,
-                test_multipactor_bands=band,
+                # test_multipactor_bands=band,
                 csv_path=csv_path,
                 **kwargs,
             )
