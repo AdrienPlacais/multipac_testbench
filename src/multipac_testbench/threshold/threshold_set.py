@@ -1,7 +1,7 @@
 """Define an object to hold all thresholds of a multipactor test."""
 
 from collections import defaultdict
-from collections.abc import Callable, Collection, Iterable, Iterator, Sequence
+from collections.abc import Callable, Iterable, Iterator, Sequence
 
 import numpy as np
 import pandas as pd
@@ -175,7 +175,3 @@ class ThresholdSet:
             f"{th.detecting_instrument} {th.nature.capitalize()}": th.color
             for th in self
         }
-
-
-class ThresholdsFactory:
-    """Create a :class:`.Thresholds` object."""
