@@ -46,14 +46,7 @@ from multipac_testbench.multipactor_band.test_multipactor_bands import (
     TestMultipactorBands,
 )
 from multipac_testbench.multipactor_test.loader import TRIGGER_POLICIES, load
-from multipac_testbench.threshold.threshold import (
-    create_power_extrema,
-    create_thresholds,
-)
-from multipac_testbench.threshold.threshold_set import (
-    ThresholdSet,
-    create_threshold_set,
-)
+from multipac_testbench.threshold.threshold_set import ThresholdSet
 from multipac_testbench.util import plot
 from multipac_testbench.util.animate import get_limits
 from multipac_testbench.util.helper import (
