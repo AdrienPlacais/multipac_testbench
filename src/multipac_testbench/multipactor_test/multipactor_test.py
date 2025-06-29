@@ -332,6 +332,7 @@ class TestPlotter:
         to_plot: ABCMeta,
         threshold_set: ThresholdSet,
         title: str = "",
+        same_figure: bool = True,
         png_path: Path | None = None,
         png_kwargs: dict | None = None,
         csv_path: Path | None = None,
@@ -358,6 +359,9 @@ class TestPlotter:
             position of multipactor.
         title :
             If provided, overrides automatic title.
+        same_figure :
+            If :class:`.Instrument` at different positions should be kept on
+            the same plot.
         png_path :
             If provided, figure will be saved there.
         png_kwargs :
@@ -376,38 +380,104 @@ class TestPlotter:
             The data used to produce the plot.
 
         """
+        instruments = self.test.get_instruments(to_plot)
+        label_to_color = threshold_set.get_threshold_label_color_map()
         title = str(self.test) if not title else title
 
-        instruments = self.test.get_instruments(to_plot)
         df = threshold_set.data_at_thresholds(instruments)
-        label_to_color = threshold_set.get_threshold_label_color_map()
-        axes = df.filter(like="Lower").plot(
-            marker="o",
-            ms=10,
-            title=title,
-            color=[
-                label_to_color[col] for col in df.filter(like="Lower").columns
-            ],
-            **kwargs,
-        )
-        df.filter(like="Upper").plot(
-            ax=axes,
-            marker="^",
-            ms=10,
-            grid=True,
-            ylabel=to_plot.ylabel(),
-            color=[
-                label_to_color[col] for col in df.filter(like="Lower").columns
-            ],
-            **kwargs,
-        )
+
+        def plot_df_threshold(
+            df: pd.DataFrame,
+            fig_title: str,
+            ms: int = 10,
+        ) -> Axes:
+            """Plot a threshold dataframe, separating lower/upper thresholds.
+
+            Parameters
+            ----------
+            df :
+                Holds ``"{Instrument.name} lower"`` and ``"{Instrument.name}
+                upper"`` columns.
+            fig_title :
+                Figure title.
+            ms :
+                Markers size.
+
+            """
+            axes = df.filter(like="lower").plot(
+                marker="o",
+                ms=ms,
+                title=fig_title,
+                color=[
+                    label_to_color[col]
+                    for col in df.filter(like="lower").columns
+                ],
+                **kwargs,
+            )
+            axes.set_prop_cycle(None)
+            axes = df.filter(like="upper").plot(
+                ax=axes,
+                marker="^",
+                ms=ms,
+                grid=True,
+                ylabel=to_plot.ylabel(),
+                color=[
+                    label_to_color[col]
+                    for col in df.filter(like="lower").columns
+                ],
+                **kwargs,
+            )
+            return axes
+
+        if same_figure:
+            axes = plot_df_threshold(df, title)
+            if png_path:
+                plot.save_figure(axes, png_path, **(png_kwargs or {}))
+            if csv_path:
+                plot.save_dataframe(df, csv_path, **(csv_kwargs or {}))
+            return axes, df
+
+        # Map each column to the position of the instrument that detected it
+        col_to_position = {}
+        for col in df.columns:
+            detecting_name = col.split()[1][1:-1]
+            detecting_instrument = self.test.get_instrument(detecting_name)
+            assert isinstance(detecting_instrument, Instrument)
+            col_to_position[col] = detecting_instrument.position
+
+        # Group columns by position
+        pos_to_cols = {}
+        for col, pos in col_to_position.items():
+            pos_to_cols.setdefault(pos, []).append(col)
+
+        axes_list = [
+            plot_df_threshold(df[cols], f"{title} - Position {pos}")
+            for (pos, cols) in sorted(pos_to_cols.items())
+        ]
+
         if png_path:
-            plot.save_figure(axes, png_path, **(png_kwargs or {}))
-
+            stem = png_path.stem
+            suffix = png_path.suffix
+            pos_paths = [
+                png_path.with_name(f"{stem}_pos{pos:.3f}{suffix}")
+                for pos in pos_to_cols
+            ]
+            for axes, pos_path in zip(axes_list, pos_paths):
+                plot.save_figure(axes, pos_path, **(png_kwargs or {}))
         if csv_path:
-            plot.save_dataframe(df, csv_path, **(csv_kwargs or {}))
+            dfs_by_position = {
+                pos: df[cols] for pos, cols in pos_to_cols.items()
+            }
+            stem = csv_path.stem
+            suffix = csv_path.suffix
+            pos_paths = [
+                csv_path.with_name(f"{stem}_pos{pos:.3f}{suffix}")
+                for pos in pos_to_cols
+            ]
+            for sub_df, pos_path in zip(dfs_by_position.values(), pos_paths):
+                plot.save_dataframe(sub_df, pos_path, **(csv_kwargs or {}))
 
-        return axes, df
+        return np.array(axes_list), df
 
     def animate_instruments_vs_position(
         self,
@@ -1378,7 +1448,7 @@ class MultipactorTest:
         instrument_id: ABCMeta | str | Instrument | None = None,
         tol: float = 1e-10,
         **kwargs,
-    ):
+    ) -> list[Instrument]:
         """Return all instruments located at a given position.
 
         Parameters

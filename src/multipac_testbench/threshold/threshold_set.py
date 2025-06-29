@@ -186,10 +186,7 @@ class ThresholdSet:
                 if not global_multipactor and np.isnan(threshold.position):
                     continue
 
-                label = (
-                    f"{threshold.detecting_instrument} "
-                    f"{threshold.nature.capitalize()}"
-                )
+                label = f"{threshold.detecting_instrument} {threshold.nature}"
                 idx = threshold.sample_index
                 result[label][idx] = instrument.data[idx]
                 break  # Assume one match is enough
@@ -229,6 +226,5 @@ class ThresholdSet:
 
         """
         return {
-            f"{th.detecting_instrument} {th.nature.capitalize()}": th.color
-            for th in self
+            f"{th.detecting_instrument} {th.nature}": th.color for th in self
         }
