@@ -1,12 +1,20 @@
 """Define an object to hold all thresholds of a multipactor test."""
 
+import itertools
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Iterator, Sequence
+from typing import Self
 
 import numpy as np
 import pandas as pd
 from multipac_testbench.instruments.instrument import Instrument
-from multipac_testbench.threshold.threshold import PowerExtremum, Threshold
+from multipac_testbench.threshold.threshold import (
+    PowerExtremum,
+    Threshold,
+    create_power_extrema,
+    create_thresholds,
+)
+from multipac_testbench.util.types import MULTIPAC_DETECTOR_T
 from numpy.typing import NDArray
 
 THRESHOLD_FILTER_T = Callable[[Threshold], bool]
@@ -14,28 +22,77 @@ THRESHOLD_FILTER_T = Callable[[Threshold], bool]
 
 class ThresholdSet:
 
-    def __init__(self, events: Iterable[Threshold | PowerExtremum]) -> None:
+    def __init__(
+        self,
+        thresholds: Iterable[Threshold],
+        power_extrema: Iterable[PowerExtremum],
+    ) -> None:
         """Create object.
 
         Parameters
         ----------
-        events :
-            Objects to store.
+        thresholds :
+            Multipactor thresholds detected during a :class:`.MultipactorTest`.
+        power_extrema :
+            Power minima/maxima delimiting the different power cycles in the
+            :class:`.MultipactorTest`.
 
         """
         self._thresholds = sorted(
-            [x for x in events if isinstance(x, Threshold)],
+            thresholds,
             key=lambda t: t.sample_index,
         )
-        self._extrema = [x for x in events if isinstance(x, PowerExtremum)]
+        self._extrema = sorted(
+            power_extrema,
+            key=lambda p: p.sample_index,
+        )
+
+    @classmethod
+    def from_instruments(
+        cls,
+        multipac_detector: MULTIPAC_DETECTOR_T,
+        detecting_instruments: Iterable[Instrument],
+        growth_array: NDArray[np.float64],
+    ) -> Self:
+        """Create the :class:`.ThresholdSet` object.
+
+        This method is used in :meth:`.MultipactorTest.determine_thresholds`.
+
+        Parameters
+        ----------
+        multipac_detector :
+            Function that takes in the ``data`` of an :class:`.Instrument`
+            and returns an array, where True means multipactor and False no
+            multipactor.
+        detecting_instruments :
+            Instruments to apply ``multipac_detector`` on.
+        growth_array :
+            Holds ``1.0`` where power increases, ``0.0`` where it is stable,
+            ``-1.0`` where it decreases.
+
+        """
+        nested_thresholds = [
+            create_thresholds(
+                multipac_detector(instrument.data),
+                growth_array,
+                str(instrument),
+                instrument.position,
+                instrument.color,
+            )
+            for instrument in detecting_instruments
+            if isinstance(instrument.position, float)
+        ]
+        thresholds = itertools.chain(*nested_thresholds)
+        power_extrema = create_power_extrema(growth_array)
+        return cls(thresholds, power_extrema)
 
     def __iter__(self) -> Iterator[Threshold]:
-        """Iterate over stored Threshold objects, in order of sample index.
+        """Iterate over stored :class:`.Threshold` objects.
 
         Yields
         ------
         Threshold
-            The stored Threshold objects, sorted by sample index.
+            The stored :class:`.Threshold` objects, sorted by sample index.
 
         """
         return iter(self._thresholds)

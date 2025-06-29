@@ -46,8 +46,14 @@ from multipac_testbench.multipactor_band.test_multipactor_bands import (
     TestMultipactorBands,
 )
 from multipac_testbench.multipactor_test.loader import TRIGGER_POLICIES, load
-from multipac_testbench.threshold.threshold import create_thresholds
-from multipac_testbench.threshold.threshold_set import ThresholdSet
+from multipac_testbench.threshold.threshold import (
+    create_power_extrema,
+    create_thresholds,
+)
+from multipac_testbench.threshold.threshold_set import (
+    ThresholdSet,
+    create_threshold_set,
+)
 from multipac_testbench.util import plot
 from multipac_testbench.util.animate import get_limits
 from multipac_testbench.util.helper import (
@@ -1074,20 +1080,12 @@ class MultipactorTest:
             ``instrument_class``.
 
         """
-        instruments = self.get_instruments(instrument_class)
+        detecting_instruments = self.get_instruments(instrument_class)
         growth_array = self._power_growth_array(power_growth_array_kw)
-        thresholds = [
-            create_thresholds(
-                multipac_detector(instrument.data),
-                growth_array,
-                str(instrument),
-                instrument.position,
-                instrument.color,
-            )
-            for instrument in instruments
-            if isinstance(instrument.position, float)
-        ]
-        return ThresholdSet(itertools.chain(*thresholds))
+        threshold_set = ThresholdSet.from_instruments(
+            multipac_detector, detecting_instruments, growth_array
+        )
+        return threshold_set
 
     def _power_growth_mask(
         self, growth_mask_kw: dict[str, Any] | None = None
