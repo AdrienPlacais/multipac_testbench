@@ -164,7 +164,7 @@ class CampaignPlotter:
     def plot_thresholds(
         self,
         to_plot: ABCMeta,
-        thresholds_sets: list[ThresholdSet],
+        thresholds_sets: dict[MultipactorTest, ThresholdSet],
         *args,
         png_folder: str | None = None,
         csv_folder: str | None = None,
@@ -173,8 +173,7 @@ class CampaignPlotter:
         """Recursively call :meth:`.MultipactorTest.plot_thresholds`."""
         all_axes = []
         all_df = []
-        zipper = zip(self.campaign, thresholds_sets, strict=True)
-        for test, threshold_set in zipper:
+        for test, threshold_set in thresholds_sets.items():
             png_path = (
                 test.output_filepath(png_folder, ".png")
                 if png_folder is not None
@@ -801,7 +800,7 @@ class TestCampaign(list[MultipactorTest]):
         instrument_class: ABCMeta,
         power_growth_array_kw: dict[str, Any] | None = None,
         **kwargs,
-    ) -> list[ThresholdSet]:
+    ) -> dict[MultipactorTest, ThresholdSet]:
         """Determine every :class:`.MultipactorTest` multipactor thresholds.
 
         Parameters
@@ -823,15 +822,15 @@ class TestCampaign(list[MultipactorTest]):
             ``instrument_class`` for every :class:`.MultipactorTest`.
 
         """
-        return [
-            test.determine_thresholds(
+        return {
+            test: test.determine_thresholds(
                 multipac_detector,
                 instrument_class,
                 power_growth_array_kw,
                 **kwargs,
             )
             for test in self
-        ]
+        }
 
     def reconstruct_voltage_along_line(self, *args, **kwargs) -> None:
         """Call all :meth:`.MultipactorTest.reconstruct_voltage_along_line`."""
