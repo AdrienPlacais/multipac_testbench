@@ -295,6 +295,9 @@ class TestPlotter:
         assert label_to_color is not None
 
         df = threshold_set.data_at_thresholds(instruments)
+        if len(df) == 0:
+            logging.warning(f"No threshold to plot for {self.test}")
+            return np.array([]), df
         title = str(self.test) if not title else title
         ylabel = getattr(to_plot, "ylabel", lambda: "???")()
         xticks = [pow_ext.sample_index for pow_ext in threshold_set._extrema]
