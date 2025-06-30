@@ -604,6 +604,7 @@ def plot_df_threshold(
     label_to_color: dict[str, tuple[float, float, float]],
     fig_title: str,
     ms: int = 10,
+    lw: float = 0.0,
     axes: Axes | None = None,
     **kwargs,
 ) -> Axes:
@@ -630,6 +631,7 @@ def plot_df_threshold(
         title=fig_title,
         color=[label_to_color[col] for col in df.filter(like="lower").columns],
         ax=axes,
+        lw=lw,
         **kwargs,
     )
     assert axes is not None
@@ -641,6 +643,7 @@ def plot_df_threshold(
         grid=True,
         ylabel=ylabel,
         color=[label_to_color[col] for col in df.filter(like="upper").columns],
+        lw=lw,
         **kwargs,
     )
     assert axes is not None
