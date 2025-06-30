@@ -1007,7 +1007,7 @@ class MultipactorTest:
         power_growth_array_kw: dict[str, Any] | None = None,
         **kwargs,
     ) -> ThresholdSet:
-        """Create the :class:`.TestMultipactorBands` object.
+        """Determine lower and upper multipactor thresholds.
 
         Parameters
         ----------

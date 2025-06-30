@@ -33,6 +33,7 @@ from multipac_testbench.theoretical.somersalo import (
     plot_somersalo_measured,
     somersalo_base_plot,
 )
+from multipac_testbench.threshold.threshold_set import ThresholdSet
 from multipac_testbench.util import log_manager, plot
 from multipac_testbench.util.types import MULTIPAC_DETECTOR_T
 
@@ -790,6 +791,44 @@ class TestCampaign(list[MultipactorTest]):
             tests_multipactor_bands
         )
         return campaign_multipactor_bands
+
+    def determine_thresholds(
+        self,
+        multipac_detector: MULTIPAC_DETECTOR_T,
+        instrument_class: ABCMeta,
+        power_growth_array_kw: dict[str, Any] | None = None,
+        **kwargs,
+    ) -> list[ThresholdSet]:
+        """Determine every :class:`.MultipactorTest` multipactor thresholds.
+
+        Parameters
+        ----------
+        multipac_detector :
+            Function that takes in the ``data`` of an :class:`.Instrument`
+            and returns an array, where True means multipactor and False no
+            multipactor.
+        instrument_class :
+            Type of instrument on which ``multipac_detector`` should be
+            applied.
+        power_growth_array_kw :
+            Keyword arguments passed to :meth:`.PowerSetpoint.growth_array`.
+
+        Returns
+        -------
+            Objects holding all lower and upper thresholds, detected by
+            ``multipac_detector`` applied on every instance of
+            ``instrument_class`` for every :class:`.MultipactorTest`.
+
+        """
+        return [
+            test.determine_thresholds(
+                multipac_detector,
+                instrument_class,
+                power_growth_array_kw,
+                **kwargs,
+            )
+            for test in self
+        ]
 
     def reconstruct_voltage_along_line(self, *args, **kwargs) -> None:
         """Call all :meth:`.MultipactorTest.reconstruct_voltage_along_line`."""
