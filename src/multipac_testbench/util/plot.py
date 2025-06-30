@@ -603,6 +603,7 @@ def plot_df_threshold(
     ylabel: str,
     label_to_color: dict[str, tuple[float, float, float]],
     fig_title: str,
+    xticks: Sequence[float],
     ms: int = 10,
     lw: float = 0.0,
     axes: Axes | None = None,
@@ -619,6 +620,8 @@ def plot_df_threshold(
         Y label.
     fig_title :
         Figure title.
+    xticks :
+        Position of xticks. A common choice is the position of power extrema.
     ms :
         Markers size.
     axes :
@@ -644,6 +647,7 @@ def plot_df_threshold(
         ylabel=ylabel,
         color=[label_to_color[col] for col in df.filter(like="upper").columns],
         lw=lw,
+        xticks=xticks,
         **kwargs,
     )
     assert axes is not None

@@ -292,6 +292,7 @@ class TestPlotter:
         df = threshold_set.data_at_thresholds(instruments)
         title = str(self.test) if not title else title
         ylabel = getattr(to_plot, "ylabel", lambda: "???")()
+        xticks = [pow_ext.sample_index for pow_ext in threshold_set._extrema]
 
         pos_to_cols = group_columns_by_detector_position(df, self.test)
         if same_figure:
@@ -300,6 +301,7 @@ class TestPlotter:
                 ylabel=ylabel,
                 label_to_color=label_to_color,
                 fig_title=title,
+                xticks=xticks,
             )
             if plot_extrema:
                 plot.plot_extrema_markers(
@@ -319,6 +321,7 @@ class TestPlotter:
                 ylabel=ylabel,
                 label_to_color=label_to_color,
                 fig_title=f"{title} - Position {pos}",
+                xticks=xticks,
             )
             for (pos, cols) in sorted(pos_to_cols.items())
         ]
