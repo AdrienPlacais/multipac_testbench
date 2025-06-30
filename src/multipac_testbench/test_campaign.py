@@ -163,8 +163,8 @@ class CampaignPlotter:
 
     def plot_thresholds(
         self,
-        instrument_id_plot: ABCMeta,
-        campaign_multipactor_bands: CampaignMultipactorBands,
+        to_plot: ABCMeta,
+        thresholds_sets: list[ThresholdSet],
         *args,
         png_folder: str | None = None,
         csv_folder: str | None = None,
@@ -173,19 +173,22 @@ class CampaignPlotter:
         """Recursively call :meth:`.MultipactorTest.plot_thresholds`."""
         all_axes = []
         all_df = []
-        zipper = zip(self.campaign, campaign_multipactor_bands, strict=True)
-        for test, multipactor_bands in zipper:
-            png_path = None
-            if png_folder is not None:
-                png_path = test.output_filepath(png_folder, ".png")
-
-            csv_path = None
-            if csv_folder is not None:
-                csv_path = test.output_filepath(csv_folder, ".csv")
+        zipper = zip(self.campaign, thresholds_sets, strict=True)
+        for test, threshold_set in zipper:
+            png_path = (
+                test.output_filepath(png_folder, ".png")
+                if png_folder is not None
+                else None
+            )
+            csv_path = (
+                test.output_filepath(csv_folder, ".csv")
+                if csv_folder is not None
+                else None
+            )
 
             axes, df_plot = test.plot_thresholds(
-                instrument_id_plot,
-                multipactor_bands,
+                to_plot,
+                threshold_set,
                 *args,
                 png_path=png_path,
                 csv_path=csv_path,
