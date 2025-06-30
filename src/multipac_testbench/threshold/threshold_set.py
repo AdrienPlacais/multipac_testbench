@@ -1,6 +1,7 @@
 """Define an object to hold all thresholds of a multipactor test."""
 
 import itertools
+import logging
 import math
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Iterator, Sequence
@@ -49,6 +50,7 @@ class ThresholdSet:
             power_extrema,
             key=lambda p: p.sample_index,
         )
+        self._warn_instruments_at_same_position()
 
     @classmethod
     def from_instruments(
@@ -138,6 +140,23 @@ class ThresholdSet:
             cleaned_thresholds.extend(cleaned)
 
         self._thresholds = cleaned_thresholds
+
+    def _warn_instruments_at_same_position(self) -> None:
+        """Assert bijection between detecting instruments pos and name."""
+        pos_to_names: dict[float, str] = {}
+        warned_positions = set()
+        for threshold in self._thresholds:
+            name = threshold.detecting_instrument
+            pos = threshold.position
+            if pos in pos_to_names and pos_to_names[pos] != name:
+                if pos not in warned_positions:
+                    msg = (
+                        "Multiple instruments detected at the same position "
+                        f"{pos}:\n- {pos_to_names[pos]}\n- {name}"
+                    )
+                    logging.warning(msg)
+                    warned_positions.add(pos)
+            pos_to_names[pos] = name
 
     def sample_indexes(
         self, *, predicate: THRESHOLD_FILTER_T | None = None
@@ -248,6 +267,17 @@ class ThresholdSet:
             for x in self
             if extract_detecting_name(x.detecting_instrument) == instrument
         ]
+
+    def remove_detected_by(
+        self, instrument: Instrument | str | THRESHOLD_DETECTOR_T
+    ) -> None:
+        """Remove thresholds detected by ``instrument``."""
+        to_remove = self.according_to(instrument)
+        cleaned = [t for t in self if t not in to_remove]
+        self._thresholds = cleaned
+        logging.info(
+            f"Removed the {len(to_remove)} thresholds detected by {instrument}"
+        )
 
     #     """Get lower thresholds."""
     #     return [x for x in self if x.nature == "lower"]
