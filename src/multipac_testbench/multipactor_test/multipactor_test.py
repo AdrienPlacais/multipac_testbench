@@ -194,11 +194,16 @@ class TestPlotter:
             xlabel = xdata.name if isinstance(xdata, Instrument) else ""
 
         if axes is None:
-            if not title:
-                title = str(self)
+            match title:
+                case "":
+                    this_title = self.test.__str__()
+                case list():
+                    this_title = title[0]
+                case str():
+                    this_title = title
 
             _, dic_axes = plot.create_fig(
-                title=title if isinstance(title, str) else title[0],
+                title=this_title,
                 instruments_to_plot=ydata,
                 xlabel=xlabel,
             )
