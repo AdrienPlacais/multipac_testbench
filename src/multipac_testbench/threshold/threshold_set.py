@@ -1,6 +1,7 @@
 """Define an object to hold all thresholds of a multipactor test."""
 
 import itertools
+import math
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Iterator, Sequence
 from typing import Self
@@ -178,7 +179,7 @@ class ThresholdSet:
         return [
             x
             for x in self._thresholds
-            if abs(x.position - position) < tol
+            if math.isclose(x.position, position, abs_tol=tol)
             or return_global
             and (np.isnan(x.position) or np.isnan(position))
         ]
@@ -217,7 +218,9 @@ class ThresholdSet:
 
         for threshold in self:
             for instrument in instruments:
-                far_away = abs(instrument.position - threshold.position) < tol
+                far_away = math.isclose(
+                    instrument.position, threshold.position, abs_tol=tol
+                )
                 if far_away:
                     continue
 
