@@ -640,7 +640,7 @@ def plot_df_threshold(
         ms=ms,
         grid=True,
         ylabel=ylabel,
-        color=[label_to_color[col] for col in df.filter(like="lower").columns],
+        color=[label_to_color[col] for col in df.filter(like="upper").columns],
         **kwargs,
     )
     assert axes is not None
