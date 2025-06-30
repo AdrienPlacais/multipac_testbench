@@ -8,7 +8,9 @@ from typing import Self
 import numpy as np
 import pandas as pd
 from multipac_testbench.instruments.instrument import Instrument
+from multipac_testbench.threshold.helper import extract_detecting_name
 from multipac_testbench.threshold.threshold import (
+    THRESHOLD_DETECTOR_T,
     PowerExtremum,
     Threshold,
     create_power_extrema,
@@ -96,6 +98,45 @@ class ThresholdSet:
 
         """
         return iter(self._thresholds)
+
+    def remove_singularities(self, min_consecutive: int = 1) -> None:
+        """Remove fugitive :class:`.Threshold`.
+
+        If two :class:`.Threshold` are detected by the same
+        :class:`.Instrument` and their :attr:`.Threshold.sample_index` are
+        separated by ``0`` or less, both objects are removed.
+
+        Parameters
+        ----------
+        min_consecutive :
+            :class:`.Threshold` objects separated by less than
+            ``min_consecutive`` sample index are removed. The default
+            ``min_consecutive=1`` removes multipactor spanning over a single
+            sample index.
+
+        """
+        by_instr: dict[str, list[Threshold]] = defaultdict(list)
+        for t in self._thresholds:
+            by_instr[t.detecting_instrument].append(t)
+
+        cleaned_thresholds = []
+        for thresholds in by_instr.values():
+            thresholds.sort(key=lambda t: t.sample_index)
+            to_remove: list[Threshold] = []
+            for i in range(len(thresholds) - 1):
+                current = thresholds[i]
+                next_ = thresholds[i + 1]
+                if (
+                    abs(current.sample_index - next_.sample_index)
+                    >= min_consecutive
+                ):
+                    continue
+                to_remove.append(current)
+                to_remove.append(next_)
+            cleaned = [t for t in thresholds if t not in to_remove]
+            cleaned_thresholds.extend(cleaned)
+
+        self._thresholds = cleaned_thresholds
 
     def sample_indexes(
         self, *, predicate: THRESHOLD_FILTER_T | None = None
@@ -193,16 +234,18 @@ class ThresholdSet:
 
         return pd.DataFrame({k: pd.Series(v) for k, v in result.items()})
 
-    #
-    # def according_to(
-    #     self, instrument: Instrument | str | THRESHOLD_DETECTOR_T
-    # ) -> list[Threshold]:
-    #     """Give thresholds measured by ``instrument``."""
-    #     if isinstance(instrument, Instrument):
-    #         instrument = str(Instrument)
-    #     return [x for x in self if str(x.detecting_instrument) == instrument]
-    #
-    # def lowers(self) -> list[Threshold]:
+    def according_to(
+        self, instrument: Instrument | str | THRESHOLD_DETECTOR_T
+    ) -> list[Threshold]:
+        """Give thresholds measured by ``instrument``."""
+        if isinstance(instrument, Instrument):
+            instrument = str(Instrument)
+        return [
+            x
+            for x in self
+            if extract_detecting_name(x.detecting_instrument) == instrument
+        ]
+
     #     """Get lower thresholds."""
     #     return [x for x in self if x.nature == "lower"]
     #
