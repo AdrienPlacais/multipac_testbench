@@ -667,6 +667,7 @@ class TestCampaign(list[MultipactorTest]):
         info: Sequence[str] = (),
         sep: str = ";",
         trigger_policy: TRIGGER_POLICIES = "keep_all",
+        index_col: str = "Sample index",
         **kwargs,
     ) -> Self:
         """Instantiate the :class:`.MultipactorTest` and :class:`TestCampaign`.
@@ -687,6 +688,8 @@ class TestCampaign(list[MultipactorTest]):
             Delimiter between the columns.
         trigger_policy :
             How consecutive measures at the same power should be treated.
+        index_col :
+            Name of column holding measurement index.
 
         Returns
         -------
@@ -710,6 +713,7 @@ class TestCampaign(list[MultipactorTest]):
                 info,
                 sep=sep,
                 trigger_policy=trigger_policy,
+                index_col=index_col,
                 **kwargs,
             )
             for _, (filepath, freq_mhz, swr, info) in enumerate(args)

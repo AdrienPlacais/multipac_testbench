@@ -28,6 +28,7 @@ def load(
     sep: str = "\t",
     trigger_policy: TRIGGER_POLICIES = "keep_all",
     dbm_column: str = "NI9205_dBm",
+    index_col: str = "Sample index",
     **kwargs,
 ) -> pd.DataFrame:
     """Load the LabVIEWER file.
@@ -45,16 +46,18 @@ def load(
         How consecutive measures at the same power should be treated.
     dbm_column :
         Name of the column holding the power.
+    index_col :
+        Name of the column holding indexes.
     kwargs :
         Other kwargs passed to :func:`pandas.load`.
 
     """
-    data = _load_file(filepath, sep=sep, **kwargs)
+    data = _load_file(filepath, sep=sep, index_col=index_col, **kwargs)
 
     filtered = _apply_trigger_filtering(
         trigger_policy, data, dbm_column=dbm_column
     ).reset_index(drop=True)
-    filtered.index.name = "Sample index"
+    filtered.index.name = index_col
 
     printer = logging.info
     if trigger_policy in ("average", "keep_all"):
@@ -72,7 +75,9 @@ def load(
     return filtered
 
 
-def _load_file(filepath: Path, **kwargs) -> pd.DataFrame:
+def _load_file(
+    filepath: Path, index_col: str = "Sample index", **kwargs
+) -> pd.DataFrame:
     """Load the data file.
 
     .. todo::
@@ -90,7 +95,7 @@ def _load_file(filepath: Path, **kwargs) -> pd.DataFrame:
         logging.error(f"{filepath} extension not supported.")
         raise RuntimeError
     try:
-        data = pandas_reader(filepath, index_col="Sample index", **kwargs)
+        data = pandas_reader(filepath, index_col=index_col, **kwargs)
     except Exception as e:
         logging.error(
             f"There was a mismatch is the number of columns in {filepath}"

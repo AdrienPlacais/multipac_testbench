@@ -635,6 +635,7 @@ class MultipactorTest:
         info: str = "",
         sep: str = "\t",
         trigger_policy: TRIGGER_POLICIES = "keep_all",
+        index_col: str = "Sample index",
         **kwargs,
     ) -> None:
         r"""Create all the pick-ups.
@@ -655,13 +656,19 @@ class MultipactorTest:
             Delimiter between two columns in ``filepath``.
         trigger_policy :
             How consecutive measures at the same power should be treated.
+        index_col :
+            Name of the column holding index data.
         kwargs :
             Other kwargs passed to :func:`.load`.
 
         """
         self.filepath = filepath
         df_data = load(
-            filepath, sep=sep, trigger_policy=trigger_policy, **kwargs
+            filepath,
+            sep=sep,
+            trigger_policy=trigger_policy,
+            index_col=index_col,
+            **kwargs,
         )
         self._n_points = len(df_data)
         self.df_data = df_data
