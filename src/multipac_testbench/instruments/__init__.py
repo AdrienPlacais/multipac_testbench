@@ -35,7 +35,6 @@ __all__ = [
     "Frequency",
     "Instrument",
     "OpticalFibre",
-    "OpticalFibre",
     "Penning",
     "Power",
     "PowerSetpoint",
