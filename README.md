@@ -47,3 +47,9 @@ TODO:
 - [ ] Option to plot maximum of a signal per power cycle.
 - [ ] Bug fix: Upper threshold is given even when we did not exit the multipactor zone.
 - [X] Adding a post-treater to `Power` instruments should be reflected in `SWR` and `ReflectionCoefficient` calculations.
+
+## Labviewer to-do
+- [ ] Automatic export binary -> xlsx or csv
+- [ ] Automatic export of individual power step files
+- [ ] Allow to take last value from individual power step file rather than highest
+- [ ] Fix synxhro of dBm column
