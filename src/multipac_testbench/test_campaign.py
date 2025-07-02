@@ -699,25 +699,32 @@ class TestCampaign(list[MultipactorTest]):
         """
         if len(info) == 0:
             info = ["" for _ in filepaths]
-        args = zip(filepaths, frequencies, swrs, info, strict=True)
 
         logfile = Path(filepaths[0].parent / "multipac_testbench.log")
         log_manager.set_up_logging(logfile_file=logfile)
 
-        multipactor_tests = [
-            MultipactorTest(
-                filepath,
-                config,
-                freq_mhz,
-                swr,
-                info,
-                sep=sep,
-                trigger_policy=trigger_policy,
-                index_col=index_col,
-                **kwargs,
-            )
-            for _, (filepath, freq_mhz, swr, info) in enumerate(args)
-        ]
+        args = zip(filepaths, frequencies, swrs, info, strict=True)
+        multipactor_tests = []
+        for filepath, freq_mhz, swr, info in args:
+            try:
+                multipactor_test = MultipactorTest(
+                    filepath,
+                    config,
+                    freq_mhz,
+                    swr,
+                    info,
+                    sep=sep,
+                    trigger_policy=trigger_policy,
+                    index_col=index_col,
+                    **kwargs,
+                )
+            except Exception as e:
+                logging.error(
+                    f"Exception raised during loading of {filepath}:\n{e}"
+                    "Skipping this file."
+                )
+                continue
+            multipactor_tests.append(multipactor_test)
         return cls(multipactor_tests)
 
     def add_post_treater(self, *args, **kwargs) -> None:
