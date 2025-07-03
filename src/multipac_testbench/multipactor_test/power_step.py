@@ -14,7 +14,32 @@ REDUCER_T = Callable[[NDArray], float]
 
 def _infer_dbm(filepath: Path) -> float:
     """Determine the dBm of current step from filename."""
-    raise NotImplementedError
+    filename = filepath.name
+    left_delim = "("
+    right_delim = " dBm)"
+    for delim in (left_delim, right_delim):
+        assert (
+            delim in filename
+        ), f"Need a {delim} character in {filename = } to determine dBm."
+
+    try:
+        dbm = filename.split(left_delim)[1].split(right_delim)[0]
+    except Exception as e:
+        logging.critical(
+            f"An exception was raised trying to split {filename = }. Returning"
+            f" 0dBm and hoping for the best. Exception:\n{e}"
+        )
+        return 0.0
+
+    try:
+        value = float(dbm)
+    except Exception as e:
+        logging.critical(
+            f"An exception was raised trying to convert {dbm = } to float. "
+            f"Returning 0dBm and hoping for the best. Exception:\n{e}"
+        )
+        return 0.0
+    return value
 
 
 def take_maximum(raw_data: NDArray) -> float:
