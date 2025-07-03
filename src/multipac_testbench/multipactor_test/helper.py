@@ -107,5 +107,5 @@ def powerstep_files(
     files = sorted(
         path for f in os.listdir(folder) if file_recognizer(path := Path(f))
     )
-    file_index_mapping = {f: i for i, f in enumerate(files)}
+    file_index_mapping = {folder / f: i for i, f in enumerate(files)}
     return file_index_mapping

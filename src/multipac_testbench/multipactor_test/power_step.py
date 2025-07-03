@@ -1,8 +1,8 @@
+#!/usr/bin/env python3
 """Define an object corresponding to a power step file."""
 
 import logging
-import os
-from collections.abc import Callable, Iterator, Mapping
+from collections.abc import Iterator, Mapping
 from pathlib import Path
 
 import pandas as pd
@@ -13,6 +13,7 @@ from multipac_testbench.multipactor_test.helper import (
     default_powerstep_file_valider,
     infer_dbm,
     powerstep_files,
+    take_maximum,
 )
 
 
@@ -80,6 +81,7 @@ class PowerStep(MultipactorTest):
             sep=sep,
             index_col=index_col,
             trigger_policy="keep_all",
+            remove_metadata_columns=True,
             **kwargs,
         )
         self._sample_index = sample_index
@@ -97,6 +99,7 @@ class PowerStep(MultipactorTest):
             take the maximum.
 
         """
+        __import__("pdb").set_trace()
         series = self.df_data.apply(reducer, axis=0, raw=True)
         series[self._out_dbm_column] = self._dbm
         series[self._out_index_col] = self._sample_index
@@ -148,6 +151,7 @@ class PowerStepSet:
             :func:`.default_powerstep_file_valider`.
 
         """
+        self._folder = folder
         file_recognizer = (
             file_recognizer
             if file_recognizer
@@ -173,6 +177,8 @@ class PowerStepSet:
             )
             for filepath, sample_index in file_index_mapping.items()
         ]
+        if len(self) == 0:
+            logging.warning(f"No valid file found in {folder}")
 
     def __iter__(self) -> Iterator[PowerStep]:
         """Iterate over :class:`.PowerStep` objects.
@@ -185,10 +191,18 @@ class PowerStepSet:
         """
         return iter(self._power_steps)
 
+    def __str__(self) -> str:
+        """Print out origin folder, number of loaded files."""
+        return f"PowerStepSet holding {len(self)} files from {self._folder}"
+
+    def __len__(self) -> int:
+        """Get number of loaded files."""
+        return len(self._power_steps)
+
     def to_multipactor_test_file(
         self,
         csv_path: Path,
-        reducer: REDUCER_T,
+        reducer: REDUCER_T | None = None,
         index_col: str = "Sample index",
         **kwargs,
     ) -> None:
@@ -201,17 +215,33 @@ class PowerStepSet:
         csv_path :
             Where the resulting ``CSV`` will be stored.
         reducer :
-            Function converting array to float. The default in LabViewer is to take
-            the maximum.
+            Function converting array to float. The default in LabViewer is to
+            take the maximum. If not set, we also use this.
         index_col :
             Name of the column that will contain each power step index.
 
         """
+        __import__("pdb").set_trace()
         series = (
-            power_step.to_single_values(reducer)
+            power_step.to_single_values(
+                reducer if reducer is not None else take_maximum
+            )
             for power_step in sorted(self, key=lambda step: step._sample_index)
         )
         df = pd.concat(series, axis=1).transpose().set_index(index_col)
         df.to_csv(csv_path, **kwargs)
         logging.info(f"MultipactorTest file saved to {csv_path}")
         return
+
+
+if __name__ == "__main__":
+    import tomllib
+
+    dir = (Path(__file__).parents[1] / "data/power_step_files/").resolve()
+    config_path = Path(dir, "testbench_configuration.toml")
+
+    with open(config_path, "rb") as f:
+        config = tomllib.load(f)
+
+    power_step_set = PowerStepSet(dir, config, freq_mhz=160.0, swr=4.0)
+    power_step_set.to_multipactor_test_file(dir / "test.csv")
