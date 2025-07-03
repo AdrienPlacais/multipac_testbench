@@ -15,10 +15,21 @@ from multipac_testbench.multipactor_test.helper import (
     powerstep_files,
     take_maximum,
 )
+from multipac_testbench.util.log_manager import (
+    set_up_logging,
+    suppress_log_messages,
+)
 
 
 class PowerStep(MultipactorTest):
     """This object is basically a MultipactorTest. But for one power step."""
+
+    #: Log messages to suppress, as they are very noisy in this context.
+    log_messages_to_suppress = [
+        "points were removed in R calculation, where reflected power was ",
+        "column_header = 'NI9205_dBm' not present in provided file. Skipping",
+        "Applied trigger_policy = ",
+    ]
 
     def __init__(
         self,
@@ -41,6 +52,8 @@ class PowerStep(MultipactorTest):
         - ``index_col`` is by default ``"Index"``, like in the ``MV`` files.
         - ``trigger_policy`` is always ``"keep_all"``, as other values would be
           meaningless.
+        - ``remove_metadata_columns`` is always True, as the rightmost metadata
+          columns hold strings, messing up with the ``REDUCER_T`` funcs.
 
         Keys such as ``freq_mhz`` or ``swr`` are not used to create
         :class:`.MultipactorTest` files; however the let you perform
@@ -72,18 +85,19 @@ class PowerStep(MultipactorTest):
             Other kwargs passed to :func:`.load`.
 
         """
-        super().__init__(
-            filepath=filepath,
-            config=config,
-            freq_mhz=freq_mhz,
-            swr=swr,
-            info="",
-            sep=sep,
-            index_col=index_col,
-            trigger_policy="keep_all",
-            remove_metadata_columns=True,
-            **kwargs,
-        )
+        with suppress_log_messages("", self.log_messages_to_suppress):
+            super().__init__(
+                filepath=filepath,
+                config=config,
+                freq_mhz=freq_mhz,
+                swr=swr,
+                info="",
+                sep=sep,
+                index_col=index_col,
+                trigger_policy="keep_all",
+                remove_metadata_columns=True,
+                **kwargs,
+            )
         self._sample_index = sample_index
         self._out_index_col = out_index_col
         self._dbm = infer_dbm(filepath) if dbm is None else dbm
@@ -99,7 +113,6 @@ class PowerStep(MultipactorTest):
             take the maximum.
 
         """
-        __import__("pdb").set_trace()
         series = self.df_data.apply(reducer, axis=0, raw=True)
         series[self._out_dbm_column] = self._dbm
         series[self._out_index_col] = self._sample_index
@@ -221,7 +234,6 @@ class PowerStepSet:
             Name of the column that will contain each power step index.
 
         """
-        __import__("pdb").set_trace()
         series = (
             power_step.to_single_values(
                 reducer if reducer is not None else take_maximum
@@ -238,6 +250,8 @@ if __name__ == "__main__":
     import tomllib
 
     dir = (Path(__file__).parents[1] / "data/power_step_files/").resolve()
+    set_up_logging(console_log_level="INFO")
+
     config_path = Path(dir, "testbench_configuration.toml")
 
     with open(config_path, "rb") as f:
