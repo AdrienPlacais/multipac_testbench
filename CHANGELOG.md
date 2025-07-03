@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Function to fix the voltage columns when rf rack calibration or probe attenuation was not updated in LabView.
 - `PowerSetpoint` instrument holding the `NI9205_dBm` column.
+- `PowerStep` and `PowerStepSet` to handle power step files.
+  - Allows averaging instrument data, rather than taking the maximum!
 
 ### Changed
 
