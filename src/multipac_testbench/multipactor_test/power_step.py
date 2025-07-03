@@ -92,7 +92,7 @@ class PowerStep(MultipactorTest):
                 config=config,
                 freq_mhz=freq_mhz,
                 swr=swr,
-                info="",
+                info=f"Sample index #{sample_index}",
                 sep=sep,
                 index_col=index_col,
                 trigger_policy="keep_all",
@@ -251,7 +251,7 @@ if __name__ == "__main__":
     import tomllib
 
     import matplotlib.pyplot as plt
-    from multipac_testbench.instruments import CurrentProbe, Power
+    from multipac_testbench.instruments import CurrentProbe, FieldProbe, Power
 
     dir = (Path(__file__).parents[1] / "data/power_step_files/").resolve()
     set_up_logging(console_log_level="INFO")
@@ -261,10 +261,12 @@ if __name__ == "__main__":
         config = tomllib.load(f)
 
     power_step_set = PowerStepSet(dir, config, freq_mhz=160.0, swr=4.0)
+    for x in power_step_set._power_steps[18:20]:
+        x.sweet_plot(CurrentProbe, FieldProbe, Power)
 
     for reducer, info in zip(
         (take_maximum, take_median),
-        ("Take max (LabView)", "Take median (new)"),
+        ("Take max (LabView)", "Take median over 100 last points (new)"),
     ):
         power_step_set.to_multipactor_test_file(
             dir / "test.csv", reducer=reducer
@@ -278,6 +280,6 @@ if __name__ == "__main__":
             sep=",",
             info=info,
         )
-        multipactor_test.sweet_plot(CurrentProbe, Power)
+        multipactor_test.sweet_plot(CurrentProbe, FieldProbe, Power)
 
     plt.show()
