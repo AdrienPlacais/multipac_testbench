@@ -17,6 +17,8 @@ https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
 
 import logging
 import sys
+from collections.abc import Collection, Iterator
+from contextlib import contextmanager
 from pathlib import Path
 
 
@@ -45,6 +47,71 @@ class LogFormatter(logging.Formatter):
             record.color_on = ""
             record.color_off = ""
         return super().format(record, *args, **kwargs)
+
+
+class SuppressMessageFilter(logging.Filter):
+    """Filter to temporarily suppress some logs."""
+
+    def __init__(self, suppressed_substrings: Collection[str]) -> None:
+        """Set the list of log messages to remove.
+
+        Parameters
+        ----------
+        suppressed_substrings :
+            Substrings to match against log messages. Any log containing one of
+            these will be suppressed.
+
+        """
+        self.substrings = list(suppressed_substrings)
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        """Determine if the specified record is to be logged.
+
+        Parameters
+        ----------
+        record :
+            The log record to be evaluated.
+
+        Returns
+        -------
+        bool
+            False if the message contains one of the suppressed substrings;
+            True otherwise.
+
+        """
+        return not any(
+            substr in record.getMessage() for substr in self.substrings
+        )
+
+
+@contextmanager
+def suppress_log_messages(
+    logger_name: str, substrings: list[str]
+) -> Iterator[None]:
+    """
+    Temporarily suppress log messages that contain any of the given substrings.
+
+    Parameters
+    ----------
+    logger_name :
+        Name of the logger to apply the filter to. Use "" for the root logger.
+    substrings :
+        Substrings to match against log messages. Messages containing any of
+        these substrings will be suppressed.
+
+    Yields
+    ------
+    None
+        Yields control to the context block with the filter active.
+
+    """
+    logger = logging.getLogger(logger_name)
+    filt = SuppressMessageFilter(substrings)
+    logger.addFilter(filt)
+    try:
+        yield
+    finally:
+        logger.removeFilter(filt)
 
 
 def set_up_logging(
