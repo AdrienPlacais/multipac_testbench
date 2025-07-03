@@ -636,6 +636,7 @@ class MultipactorTest:
         sep: str = "\t",
         trigger_policy: TRIGGER_POLICIES = "keep_all",
         index_col: str = "Sample index",
+        remove_metadata_columns: bool = False,
         **kwargs,
     ) -> None:
         r"""Create all the pick-ups.
@@ -658,6 +659,8 @@ class MultipactorTest:
             How consecutive measures at the same power should be treated.
         index_col :
             Name of the column holding index data.
+        remove_metadata_columns :
+            Remove the rightmost columns holding metadata.
         kwargs :
             Other kwargs passed to :func:`.load`.
 
@@ -668,6 +671,7 @@ class MultipactorTest:
             sep=sep,
             trigger_policy=trigger_policy,
             index_col=index_col,
+            remove_metadata_columns=remove_metadata_columns,
             **kwargs,
         )
         self._n_points = len(df_data)

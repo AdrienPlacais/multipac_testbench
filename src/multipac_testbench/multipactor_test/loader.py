@@ -29,6 +29,7 @@ def load(
     trigger_policy: TRIGGER_POLICIES = "keep_all",
     dbm_column: str = "NI9205_dBm",
     index_col: str = "Sample index",
+    remove_metadata_columns: bool = False,
     **kwargs,
 ) -> pd.DataFrame:
     """Load the LabVIEWER file.
@@ -48,11 +49,16 @@ def load(
         Name of the column holding the power.
     index_col :
         Name of the column holding indexes.
+    remove_metadata_columns :
+        Remove the rightmost columns holding metadata.
     kwargs :
         Other kwargs passed to :func:`pandas.load`.
 
     """
     data = _load_file(filepath, sep=sep, index_col=index_col, **kwargs)
+
+    if remove_metadata_columns:
+        data = data.select_dtypes(include=["float", "int"])
 
     filtered = _apply_trigger_filtering(
         trigger_policy, data, dbm_column=dbm_column
