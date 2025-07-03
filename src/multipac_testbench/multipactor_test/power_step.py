@@ -14,6 +14,7 @@ from multipac_testbench.multipactor_test.helper import (
     infer_dbm,
     powerstep_files,
     take_maximum,
+    take_median,
 )
 from multipac_testbench.util.log_manager import (
     set_up_logging,
@@ -249,13 +250,34 @@ class PowerStepSet:
 if __name__ == "__main__":
     import tomllib
 
+    import matplotlib.pyplot as plt
+    from multipac_testbench.instruments import CurrentProbe, Power
+
     dir = (Path(__file__).parents[1] / "data/power_step_files/").resolve()
     set_up_logging(console_log_level="INFO")
-
     config_path = Path(dir, "testbench_configuration.toml")
 
     with open(config_path, "rb") as f:
         config = tomllib.load(f)
 
     power_step_set = PowerStepSet(dir, config, freq_mhz=160.0, swr=4.0)
-    power_step_set.to_multipactor_test_file(dir / "test.csv")
+
+    for reducer, info in zip(
+        (take_maximum, take_median),
+        ("Take max (LabView)", "Take median (new)"),
+    ):
+        power_step_set.to_multipactor_test_file(
+            dir / "test.csv", reducer=reducer
+        )
+
+        multipactor_test = MultipactorTest(
+            dir / "test.csv",
+            config,
+            freq_mhz=160.0,
+            swr=4.0,
+            sep=",",
+            info=info,
+        )
+        multipactor_test.sweet_plot(CurrentProbe, Power)
+
+    plt.show()
