@@ -1,76 +1,19 @@
 """Define an object corresponding to a power step file."""
 
 import logging
-from collections.abc import Callable, Iterable
+import os
+from collections.abc import Callable, Iterator, Mapping
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 from multipac_testbench.multipactor_test import MultipactorTest
-from numpy.typing import NDArray
-
-REDUCER_T = Callable[[NDArray], float]
-
-
-def _infer_dbm(filepath: Path) -> float:
-    """Determine the dBm of current step from filename."""
-    filename = filepath.name
-    left_delim = "("
-    right_delim = " dBm)"
-    for delim in (left_delim, right_delim):
-        assert (
-            delim in filename
-        ), f"Need a {delim} character in {filename = } to determine dBm."
-
-    try:
-        dbm = filename.split(left_delim)[1].split(right_delim)[0]
-    except Exception as e:
-        logging.critical(
-            f"An exception was raised trying to split {filename = }. Returning"
-            f" 0dBm and hoping for the best. Exception:\n{e}"
-        )
-        return 0.0
-
-    try:
-        value = float(dbm)
-    except Exception as e:
-        logging.critical(
-            f"An exception was raised trying to convert {dbm = } to float. "
-            f"Returning 0dBm and hoping for the best. Exception:\n{e}"
-        )
-        return 0.0
-    return value
-
-
-def take_maximum(raw_data: NDArray) -> float:
-    """Take the maximum of the array.
-
-    This is the default behavior for LabViewer.
-
-    """
-    value = np.max(raw_data)
-    if np.isnan(value):
-        logging.warning("NaN detected. Returning highest float instead.")
-        value = np.nanmax(raw_data)
-    return float(value)
-
-
-def take_median(
-    raw_data: NDArray, first_index: int = -100, last_index: int = -1
-) -> float:
-    """Take meian from ``first_index`` to ``last_index``."""
-    size = len(raw_data)
-    try:
-        sample = raw_data[first_index:last_index]
-    except IndexError:
-        logging.error(
-            f"raw_data has length {size}, so accessing the slice {first_index}"
-            f":{last_index} raised an error. Taking everything instead."
-        )
-        sample = raw_data
-
-    value = np.median(sample)
-    return float(value)
+from multipac_testbench.multipactor_test.helper import (
+    POWERSTEP_FILE_RECOGNIZER_T,
+    REDUCER_T,
+    default_powerstep_file_valider,
+    infer_dbm,
+    powerstep_files,
+)
 
 
 class PowerStep(MultipactorTest):
@@ -97,6 +40,10 @@ class PowerStep(MultipactorTest):
         - ``index_col`` is by default ``"Index"``, like in the ``MV`` files.
         - ``trigger_policy`` is always ``"keep_all"``, as other values would be
           meaningless.
+
+        Keys such as ``freq_mhz`` or ``swr`` are not used to create
+        :class:`.MultipactorTest` files; however the let you perform
+        :meth:`PowerStep.sweet_plot`.
 
         Parameters
         ----------
@@ -137,7 +84,7 @@ class PowerStep(MultipactorTest):
         )
         self._sample_index = sample_index
         self._out_index_col = out_index_col
-        self._dbm = _infer_dbm(filepath) if dbm is None else dbm
+        self._dbm = infer_dbm(filepath) if dbm is None else dbm
         self._out_dbm_column = out_dbm_column
 
     def to_single_values(self, reducer: REDUCER_T) -> pd.Series:
@@ -156,35 +103,115 @@ class PowerStep(MultipactorTest):
         return series
 
 
-def create_multipactor_test_file(
-    power_steps: Iterable[PowerStep],
-    csv_path: Path,
-    reducer: REDUCER_T,
-    index_col: str = "Sample index",
-    **kwargs,
-) -> None:
-    """Create a file that can be loaded by :class:`MultipactorTest`.
+class PowerStepSet:
+    """Define all the files consituting a :class:`.MultipactorTest`."""
 
-    Parameters
-    ----------
-    power_steps :
-        All the power steps of the file.
-    csv_path :
-        Where the resulting ``CSV`` will be stored.
-    reducer :
-        Function converting array to float. The default in LabViewer is to take
-        the maximum.
-    index_col :
-        Name of the column that will contain each power step index.
+    def __init__(
+        self,
+        folder: Path,
+        config: dict,
+        freq_mhz: float,
+        swr: float,
+        sep: str = "\t",
+        index_col: str = "Index",
+        dbms: Mapping[str, float] | None = None,
+        out_dbm_column: str = "NI9205_dBm",
+        out_index_col: str = "Sample index",
+        file_recognizer: POWERSTEP_FILE_RECOGNIZER_T | None = None,
+        **kwargs,
+    ) -> None:
+        """Load all ``MV`` files in ``folder``, create :class:`.PowerStep`.
 
-    """
-    series = (
-        power_step.to_single_values(reducer)
-        for power_step in sorted(
-            power_steps, key=lambda step: step._sample_index
+        Parameters
+        ----------
+        folder :
+            Directory holding all the power step files of a test.
+        config :
+            Configuration file for the test.
+        freq_mhz :
+            RF frequency in :unit:`.MHz`.
+        swr :
+            SWR of the test.
+        sep :
+            Column delimiter.
+        index_col :
+            Name of the column holding indexes in every power step file.
+        dbms :
+            Maps filenames to their :unit:`dBm`, when they are shifted.
+        out_dbm_column :
+            Name of column where power setpoint in :unit:`dBm` will be stored.
+        out_index_col :
+            Name of column where sample indexes will be stored.
+        file_recognizer :
+            Function taking in a filepath, and determining if it is a valid
+            power step file. If not provided, set to
+            :func:`.default_powerstep_file_valider`.
+
+        """
+        file_recognizer = (
+            file_recognizer
+            if file_recognizer
+            else default_powerstep_file_valider
         )
-    )
-    df = pd.concat(series, axis=1).transpose().set_index(index_col)
-    df.to_csv(csv_path, **kwargs)
-    logging.info(f"MultipactorTest file saved to {csv_path}")
-    return
+        file_index_mapping = powerstep_files(folder, file_recognizer)
+
+        self._power_steps = [
+            PowerStep(
+                filepath=filepath,
+                config=config,
+                freq_mhz=freq_mhz,
+                swr=swr,
+                sample_index=sample_index,
+                sep=sep,
+                index_col=index_col,
+                dbm=(
+                    dbms.get(filepath.name, None) if dbms is not None else None
+                ),
+                out_dbm_column=out_dbm_column,
+                out_index_col=out_index_col,
+                **kwargs,
+            )
+            for filepath, sample_index in file_index_mapping.items()
+        ]
+
+    def __iter__(self) -> Iterator[PowerStep]:
+        """Iterate over :class:`.PowerStep` objects.
+
+        Yields
+        ------
+        PowerStep
+            The stored :class:`.PowerSample` objects, sorted by sample index.
+
+        """
+        return iter(self._power_steps)
+
+    def to_multipactor_test_file(
+        self,
+        csv_path: Path,
+        reducer: REDUCER_T,
+        index_col: str = "Sample index",
+        **kwargs,
+    ) -> None:
+        """Create a file that can be loaded by :class:`MultipactorTest`.
+
+        Parameters
+        ----------
+        power_steps :
+            All the power steps of the file.
+        csv_path :
+            Where the resulting ``CSV`` will be stored.
+        reducer :
+            Function converting array to float. The default in LabViewer is to take
+            the maximum.
+        index_col :
+            Name of the column that will contain each power step index.
+
+        """
+        series = (
+            power_step.to_single_values(reducer)
+            for power_step in sorted(self, key=lambda step: step._sample_index)
+        )
+        df = pd.concat(series, axis=1).transpose().set_index(index_col)
+        df.to_csv(csv_path, **kwargs)
+        logging.info(f"MultipactorTest file saved to {csv_path}")
+        return
