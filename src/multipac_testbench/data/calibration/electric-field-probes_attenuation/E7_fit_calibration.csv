@@ -1,0 +1,15 @@
+# File created on 2023-11-21 16:49:07.782589.
+# Created with "multipac_testbench_calibrate_rf_racks" Python script, available at:
+# https://gitlab.in2p3.fr/multipactor/calibrate_rf_racks.git
+# https://github.com/AdrienPlacais/multipac_testbench_calibrate_racks
+#
+# For any question/remark: placais@lpsc.in2p3.fr
+#
+Probe	Frequency [MHz]	a [dBm / V]	b [dBm]
+E7	80.0	10.291683779575873	-51.328974179610036
+E7	88.0	10.299261153383897	-51.36043582731864
+E7	100.0	10.32685855485629	-51.486836966632524
+E7	120.0	10.35049569667612	-51.62197727000312
+E7	140.0	10.384244317533573	-51.73348662190536
+E7	160.0	10.414660244033744	-51.791320542110114
+E7	180.0	10.445056768050684	-51.785221229505055
