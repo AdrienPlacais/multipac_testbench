@@ -135,6 +135,7 @@ class PowerStepSet:
         out_dbm_column: str = "NI9205_dBm",
         out_index_col: str = "Sample index",
         file_recognizer: POWERSTEP_FILE_RECOGNIZER_T | None = None,
+        comment: str = "#",
         **kwargs,
     ) -> None:
         """Load all ``MV`` files in ``folder``, create :class:`.PowerStep`.
@@ -163,6 +164,8 @@ class PowerStepSet:
             Function taking in a filepath, and determining if it is a valid
             power step file. If not provided, set to
             :func:`.default_powerstep_file_valider`.
+        comment :
+            Comment delimiter, to skip the first lines in the source ``CSV``.
 
         """
         self._folder = folder
@@ -187,6 +190,7 @@ class PowerStepSet:
                 ),
                 out_dbm_column=out_dbm_column,
                 out_index_col=out_index_col,
+                comment=comment,
                 **kwargs,
             )
             for filepath, sample_index in file_index_mapping.items()
