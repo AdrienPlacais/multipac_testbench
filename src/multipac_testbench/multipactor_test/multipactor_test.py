@@ -127,8 +127,8 @@ class TestPlotter:
         title :
             Title of the plot or of the subplots.
         threshold_set :
-            If provided, information is added to the plot to show where
-            multipactor happens.
+            If provided, mark lower (circle) and upper (star) thresholds on top
+            of every :class:`.Instrument` data.
         column_names :
             To override the default column names. This is used in particular
             with the method :meth:`.TestCampaign.sweet_plot` when
