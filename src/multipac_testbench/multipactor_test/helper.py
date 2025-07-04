@@ -81,8 +81,8 @@ POWERSTEP_FILE_RECOGNIZER_T = Callable[[Path], bool]
 
 
 def default_powerstep_file_valider(path: Path) -> bool:
-    """Detect files ending by ``".mv.xlsx"``."""
-    if path.name[-8:] != ".mv.xlsx":
+    """Detect ``CSV`` files."""
+    if path.suffix != ".csv":
         return False
     return True
 
