@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import functools
 import logging
+import math
 from abc import ABCMeta
 from collections.abc import Sequence
 from pathlib import Path
@@ -556,7 +557,7 @@ class CampaignPlotter:
 
         if keep_only_travelling:
             swr = [test.swr for test in self.campaign]
-            is_travelling = [abs(x - 1.0) < tol for x in swr]
+            is_travelling = [math.isclose(x, 1.0, abs_tol=tol) for x in swr]
             df_susceptibility = df_susceptibility[is_travelling]
 
         axes = df_susceptibility.filter(like="Lower").plot(

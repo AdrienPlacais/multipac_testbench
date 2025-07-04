@@ -142,7 +142,7 @@ class ThresholdSet:
         self._thresholds = cleaned_thresholds
 
     def _warn_instruments_at_same_position(self) -> None:
-        """Assert bijection between detecting instruments pos and name."""
+        """Verify bijection between detecting instruments pos and name."""
         pos_to_names: dict[float, str] = {}
         warned_positions = set()
         for threshold in self._thresholds:

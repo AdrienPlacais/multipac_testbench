@@ -1,5 +1,6 @@
 """Define various smoothing/smoothing functions for measured data."""
 
+import math
 from typing import Literal
 
 import numpy as np
@@ -127,7 +128,7 @@ def average_y_for_nearby_x_within_distance(
             if used[j]:
                 continue
             if (
-                abs(x_values[j] - xi) < tol
+                math.isclose(x_values[j], xi, abs_tol=tol)
                 and (j - group_indices[-1]) <= max_index_distance
             ):
                 group_indices.append(j)

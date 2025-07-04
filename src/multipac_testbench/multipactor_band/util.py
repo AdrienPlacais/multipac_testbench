@@ -1,5 +1,6 @@
 """Ensure that :class:`.InstrumentMultipactorBands` are consistently used."""
 
+import math
 from collections.abc import Sequence
 
 import numpy as np
@@ -117,6 +118,8 @@ def positions_match(
     if obj_pos is np.nan:
         return True
 
-    if abs(instrument_multipactor_bands.position - obj_pos) > tol:
+    if math.isclose(
+        instrument_multipactor_bands.position, obj_pos, abs_tol=tol
+    ):
         return False
     return True

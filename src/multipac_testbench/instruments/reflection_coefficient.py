@@ -103,20 +103,20 @@ def _compute_reflection_coef(
     r"""Compute the reflection coefficient :math:`R`."""
     reflection_coefficient = np.abs(np.sqrt(reflected_data / forward_data))
 
-    invalid_indexes = np.where(reflection_coefficient > 1.0)[0]
-    n_invalid = len(invalid_indexes)
+    mask = reflection_coefficient > 1.0
+    n_invalid = np.count_nonzero(mask)
     if n_invalid > 0:
-        reflection_coefficient[invalid_indexes] = np.nan
+        reflection_coefficient[mask] = np.nan
         if warn_reflected_higher_than_forward:
             logging.warning(
                 f"{n_invalid} points were removed in R calculation, where "
                 "reflected power was higher than forward power."
             )
 
-    invalid_indexes = np.where(np.abs(reflection_coefficient - 1.0) < tol)[0]
-    n_invalid = len(invalid_indexes)
+    mask = np.isclose(reflection_coefficient, 1.0, atol=tol)
+    n_invalid = np.count_nonzero(mask)
     if n_invalid > 0:
-        reflection_coefficient[invalid_indexes] = np.nan
+        reflection_coefficient[mask] = np.nan
         if warn_gamma_too_close_to_unity:
             logging.warning(
                 f"{n_invalid} points were removed in R calculation, where "

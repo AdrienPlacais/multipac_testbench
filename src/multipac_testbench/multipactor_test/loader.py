@@ -1,6 +1,7 @@
 """Define functions to prepare data for :class:`.MultipactorTest.`"""
 
 import logging
+import math
 from pathlib import Path
 from typing import Literal
 
@@ -180,7 +181,7 @@ def _group_consecutive_equal_power(
     labels = [0]
     group = 0
     for i in range(1, len(power)):
-        if abs(power[i] - power[i - 1]) >= tol:
+        if not math.isclose(power[i], power[i - 1], abs_tol=tol):
             group += 1
         labels.append(group)
     return np.array(labels)
