@@ -174,7 +174,7 @@ class ThresholdSet:
     def at(
         self, position: float, tol: float = 1e-10, return_global: bool = False
     ) -> list[Threshold]:
-        """Give thresholds measured at a given position.
+        """Gather all thresholds measured at ``position``.
 
         Parameters
         ----------
@@ -212,11 +212,14 @@ class ThresholdSet:
     ):
         """Return instrument values at threshold sample indices.
 
+        We match :class:`.Threshold` and :class:`.Instrument` objects by
+        position.
+
         Parameters
         ----------
         instruments :
-            Instruments to search from. Must have ``.position`` and ``.data``
-            attributes.
+            Instruments to which data must be plotted. Must have ``.position``
+            and ``.data`` attributes.
         tol :
             Tolerance for position matching.
         global_instruments :
@@ -237,10 +240,10 @@ class ThresholdSet:
 
         for threshold in self:
             for instrument in instruments:
-                far_away = math.isclose(
+                is_close = math.isclose(
                     instrument.position, threshold.position, abs_tol=tol
                 )
-                if far_away:
+                if not is_close:
                     continue
 
                 if not global_instruments and np.isnan(instrument.position):
