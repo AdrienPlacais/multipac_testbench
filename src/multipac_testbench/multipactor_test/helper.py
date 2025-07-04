@@ -12,8 +12,8 @@ from numpy.typing import NDArray
 def infer_dbm(filepath: Path) -> float:
     """Determine the dBm of current step from filename."""
     filename = filepath.name
-    left_delim = "("
-    right_delim = " dBm)"
+    left_delim = "_"
+    right_delim = "_dBm"
     for delim in (left_delim, right_delim):
         assert (
             delim in filename
