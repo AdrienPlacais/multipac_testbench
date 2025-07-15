@@ -24,6 +24,7 @@ def fix_wrong_e_field_calibration(
     g_probe_bad: dict[str, float] | None = None,
     a_rack_bad: dict[str, float] | None = None,
     b_rack_bad: dict[str, float] | None = None,
+    sep: str = ",",
     **kwargs,
 ) -> None:
     """Recover proper electric field measurements.
@@ -60,6 +61,8 @@ def fix_wrong_e_field_calibration(
         Dictionaries linking every field probe to the electric field probe
         parameters as found in ``filepath_bad``. If not provided, should be
         read from ``filepath_bad`` directly.
+    sep :
+        Column delimiter in input and output ``CSV`` files.
 
     Raises
     ------
@@ -68,7 +71,7 @@ def fix_wrong_e_field_calibration(
         they should be read from ``filepath_bad`` directly.
 
     """
-    data = load(filepath_bad)
+    data = load(filepath_bad, sep=sep)
 
     if not all((g_probe_bad, a_rack_bad, b_rack_bad)):
         g_probe_bad, a_rack_bad, b_rack_bad = read_e_field_probe_calibration(
@@ -110,4 +113,4 @@ def fix_wrong_e_field_calibration(
 
         filepath_new = filepath_bad
 
-    save(filepath_new, data, **kwargs)
+    save(filepath_new, data, sep=sep, **kwargs)
