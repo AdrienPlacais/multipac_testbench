@@ -20,6 +20,7 @@ from multipac_testbench.util.log_manager import (
     set_up_logging,
     suppress_log_messages,
 )
+from numpy.typing import NDArray
 
 
 class PowerStep(MultipactorTest):
@@ -104,17 +105,42 @@ class PowerStep(MultipactorTest):
         self._dbm = infer_dbm(filepath) if dbm is None else dbm
         self._out_dbm_column = out_dbm_column
 
-    def to_single_values(self, reducer: REDUCER_T) -> pd.Series:
+    def to_single_values(
+        self,
+        reducer: REDUCER_T,
+        special_reducers: dict[str, REDUCER_T] | None = None,
+    ) -> pd.Series:
         """Convert arrays of :class:`.Instrument` values to single floats.
 
         Parameters
         ----------
         reducer :
             Function converting array to float. The default in LabViewer is to
-            take the maximum.
+            take the maximum. But we generally want to take the median of the
+            signal recorded during the pulse.
+        special_reducers :
+            Different functions to apply to some specific columns.
+
+        Note
+        ----
+        As the synchronism of the watt-metre is bad, measured powers are
+        shifted wrt NI9205 measurements. So you will generally want to take the
+        maximum of ``NI9205_Power1`` and ``NI9205_Power2`` columns.
 
         """
-        series = self.df_data.apply(reducer, axis=0, raw=True)
+        special_reducers = special_reducers or {}
+
+        def dispatch(col: str, values: NDArray) -> float:
+            actual_reducer = special_reducers.get(col, reducer)
+            return actual_reducer(values)
+
+        series = pd.Series(
+            {
+                col: dispatch(col, self.df_data[col].values)
+                for col in self.df_data.columns
+            }
+        )
+
         series[self._out_dbm_column] = self._dbm
         series[self._out_index_col] = self._sample_index
         return series
@@ -222,6 +248,7 @@ class PowerStepSet:
         csv_path: Path,
         reducer: REDUCER_T | None = None,
         index_col: str = "Sample index",
+        special_reducers: dict[str, REDUCER_T] | None = None,
         **kwargs,
     ) -> None:
         """Create a file that can be loaded by :class:`MultipactorTest`.
@@ -237,11 +264,14 @@ class PowerStepSet:
             take the maximum. If not set, we also use this.
         index_col :
             Name of the column that will contain each power step index.
+        special_reducers :
+            Different functions to apply to some specific columns.
 
         """
         series = (
             power_step.to_single_values(
-                reducer if reducer is not None else take_maximum
+                reducer if reducer is not None else take_maximum,
+                special_reducers=special_reducers,
             )
             for power_step in sorted(self, key=lambda step: step._sample_index)
         )
