@@ -160,6 +160,21 @@ class Reconstructed(IElectricField):
             # self._r_squared = r_squared
             logging.debug(self.fit_info)
 
+    def data_at(self, position: float) -> NDArray[np.float64]:
+        """Evaluate evolution of voltage during test at a specific position."""
+        data = [
+            _model(
+                np.array([p_f, r, position]),
+                self._psi_0,
+                self._beta,
+                self._z_ohm,
+            )
+            for p_f, r in zip(
+                self._forward_power.data, self._reflection.data, strict=True
+            )
+        ]
+        return np.array(data)
+
 
 def _model(
     var: NDArray[np.float64],
@@ -188,6 +203,21 @@ def _model(
 def _power_to_volt(
     power: NDArray[np.float64], z_ohm: float = 50.0
 ) -> NDArray[np.float64]:
+    r"""Convert power in :unit:`W` to voltage in :unit:`V`.
+
+    Parameters
+    ----------
+    power :
+        Power in :unit:`W`.
+    z_ohm :
+        Line impedance in :unit:`\\Omega`.
+
+    Returns
+    -------
+    NDArray[np.float64]
+        Voltage in :unit:`V`.
+
+    """
     return 2.0 * np.sqrt(power * z_ohm)
 
 
