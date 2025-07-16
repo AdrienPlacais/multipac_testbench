@@ -611,6 +611,10 @@ def plot_df_threshold(
 ) -> Axes:
     """Plot a threshold dataframe, separating lower/upper thresholds.
 
+    If no lower threshold is found, an error message is printed; we try to
+    continue exectution anyway.
+    If no upper threshold is found, there is no problem.
+
     Parameters
     ----------
     df :
@@ -628,24 +632,41 @@ def plot_df_threshold(
         To re-use pre-existing axis.
 
     """
-    axes = df.filter(like="lower").plot(
+    lower = df.filter(like="lower")
+    if lower.empty:
+        logging.error(f"No lower threshold to plot was found.\n{df}")
+        assert (
+            axes is not None
+        ), "You must provide `axes` kwarg to continue execution anyway."
+        return axes
+
+    axes = lower.plot(
         marker="o",
         ms=ms,
+        grid=True,
+        ylabel=ylabel,
         title=fig_title,
-        color=[label_to_color[col] for col in df.filter(like="lower").columns],
+        color=[label_to_color[col] for col in lower.columns],
         ax=axes,
         lw=lw,
+        xticks=xticks,
         **kwargs,
     )
     assert axes is not None
     axes.set_prop_cycle(None)
-    axes = df.filter(like="upper").plot(
-        ax=axes,
+
+    upper = df.filter(like="upper")
+    if upper.empty:
+        return axes
+
+    axes = upper.plot(
         marker="*",
         ms=ms,
         grid=True,
         ylabel=ylabel,
-        color=[label_to_color[col] for col in df.filter(like="upper").columns],
+        title=fig_title,
+        color=[label_to_color[col] for col in upper.columns],
+        ax=axes,
         lw=lw,
         xticks=xticks,
         **kwargs,
