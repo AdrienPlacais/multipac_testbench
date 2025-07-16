@@ -225,7 +225,18 @@ class TestPlotter:
         )
 
         if threshold_set is not None:
-            raise NotImplementedError
+            instruments = self.test.get_instruments(ydata[0])
+            label_to_color = threshold_set.get_threshold_label_color_map()
+            df_thresholds = _add_thresholds_on_axes(
+                axes,
+                instruments,
+                threshold_set,
+                self.test,
+                ydata[0],
+                label_to_color,
+                plot_extrema=kwargs.get("plot_extrema", False),
+            )
+            df_to_plot = pd.concat([df_to_plot, df_thresholds], axis=1)
 
         if png_path is not None:
             plot.save_figure(axes, png_path, **(png_kwargs or {}))
@@ -1543,3 +1554,51 @@ def group_columns_by_detector_position(
         pos = detecting_instrument.position
         pos_to_cols.setdefault(pos, []).append(col)
     return pos_to_cols
+
+
+def _add_thresholds_on_axes(
+    axes: list[Axes],
+    instruments: list[Instrument],
+    threshold_set: ThresholdSet,
+    test: MultipactorTest,
+    to_plot: ABCMeta,
+    label_to_color: dict[str, tuple[float, float, float]],
+    plot_extrema: bool,
+) -> pd.DataFrame:
+    """Add markers to identify MP entry/exit."""
+    data_at_thresholds = threshold_set.data_at_thresholds(instruments)
+    if data_at_thresholds.empty:
+        logging.warning("No thresholds found for current instruments")
+        return data_at_thresholds
+
+    xticks = [ext.sample_index for ext in threshold_set._extrema]
+    pos_to_cols = group_columns_by_detector_position(data_at_thresholds, test)
+
+    for ax in axes:
+        for instr in instruments:
+            position = instr.position
+            assert isinstance(position, float)
+            cols = pos_to_cols.get(position, [])
+            if not cols:
+                continue
+
+            plot.plot_df_threshold(
+                df=data_at_thresholds[cols],
+                ylabel=getattr(to_plot, "ylabel", lambda: "???")(),
+                label_to_color=label_to_color,
+                fig_title="lalala",
+                xticks=xticks,
+                axes=ax,
+            )
+
+    if plot_extrema:
+        ax_by_position = {
+            instr.position: ax for instr, ax in zip(instruments, axes)
+        }
+        plot.plot_extrema_markers(
+            ax_by_position=ax_by_position,
+            instruments=instruments,
+            extrema=threshold_set._extrema,
+        )
+
+    return data_at_thresholds
