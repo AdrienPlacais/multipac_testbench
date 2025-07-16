@@ -1,6 +1,7 @@
 """Define useful relations."""
 
 import logging
+from typing import overload
 
 import numpy as np
 import pandas as pd
@@ -49,9 +50,17 @@ def powers_to_reflection(
     return pd.Series(reflection_coefficient, name=name)
 
 
+@overload
 def reflection_to_swr(
-    reflection_coefficient: NDArray[np.float64], name: str
-) -> pd.Series:
+    reflection_coefficient: NDArray[np.float64], name: str = ""
+) -> pd.Series: ...
+@overload
+def reflection_to_swr(
+    reflection_coefficient: float, name: str = ""
+) -> float: ...
+def reflection_to_swr(
+    reflection_coefficient: NDArray[np.float64] | float, name: str = ""
+) -> pd.Series | float:
     r"""Compute the :math:`SWR`.
 
     We use the definition:
@@ -64,10 +73,20 @@ def reflection_to_swr(
 
     """
     swr = (1.0 + reflection_coefficient) / (1.0 - reflection_coefficient)
+    if isinstance(reflection_coefficient, float):
+        return float(swr)
     return pd.Series(swr, name=name)
 
 
-def swr_to_reflection(swr: NDArray[np.float64], name: str) -> pd.Series:
+@overload
+def swr_to_reflection(
+    swr: NDArray[np.float64], name: str = ""
+) -> pd.Series: ...
+@overload
+def swr_to_reflection(swr: float, name: str = "") -> float: ...
+def swr_to_reflection(
+    swr: NDArray[np.float64] | float, name: str = ""
+) -> pd.Series | float:
     r"""Compute the reflection coefficient :math:`R`.
 
     We use the relation:
@@ -77,4 +96,7 @@ def swr_to_reflection(swr: NDArray[np.float64], name: str) -> pd.Series:
         R = \frac{SWR - 1}{SWR + 1}
 
     """
-    return pd.Series((swr - 1.0) / (swr + 1.0), name=name)
+    reflection_coefficient = (swr - 1.0) / (swr + 1.0)
+    if isinstance(swr, float):
+        return float(reflection_coefficient)
+    return pd.Series(reflection_coefficient, name=name)
