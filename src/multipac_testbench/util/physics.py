@@ -47,3 +47,21 @@ def powers_to_reflection_coefficient(
                 f"was: {tol = }."
             )
     return pd.Series(reflection_coefficient, name=name)
+
+
+def reflection_to_swr(
+    reflection_coefficient: NDArray[np.float64], name: str
+) -> pd.Series:
+    r"""Compute the :math:`SWR`.
+
+    We use the definition:
+
+    .. math::
+
+        SWR = \frac{1 + R}{1 - R}
+
+    where :math:`R` is the reflection coefficient.
+
+    """
+    swr = (1.0 + reflection_coefficient) / (1.0 - reflection_coefficient)
+    return pd.Series(swr, name=name)

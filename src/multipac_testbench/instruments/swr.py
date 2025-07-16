@@ -12,7 +12,7 @@ from multipac_testbench.instruments.reflection_coefficient import (
     ReflectionCoefficient,
 )
 from multipac_testbench.instruments.virtual_instrument import VirtualInstrument
-from numpy.typing import NDArray
+from multipac_testbench.util.physics import reflection_to_swr
 
 
 class SWR(VirtualInstrument):
@@ -52,7 +52,7 @@ class SWR(VirtualInstrument):
         the :class:`.ReflectionCoefficient` data is changed.
 
         """
-        self._raw_data = _compute_swr(
+        self._raw_data = reflection_to_swr(
             self._reflection_coefficient.data, self.name
         )
         return self._raw_data
@@ -67,7 +67,7 @@ class SWR(VirtualInstrument):
         """Compute the SWR from given :class:`.ReflectionCoefficient`."""
         return cls(
             name=name,
-            raw_data=_compute_swr(reflection_coefficient.data, name),
+            raw_data=reflection_to_swr(reflection_coefficient.data, name),
             position=np.nan,
             reflection_coefficient=reflection_coefficient,
             **kwargs,
@@ -77,11 +77,3 @@ class SWR(VirtualInstrument):
     def ylabel(cls) -> str:
         """Label used for plots."""
         return "$SWR$"
-
-
-def _compute_swr(
-    reflection_coefficient: NDArray[np.float64], name: str
-) -> pd.Series:
-    """Compute the :math:`SWR`."""
-    swr = (1.0 + reflection_coefficient) / (1.0 - reflection_coefficient)
-    return pd.Series(swr, name=name)
