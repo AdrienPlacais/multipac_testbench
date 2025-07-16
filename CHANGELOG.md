@@ -5,9 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# [1.7.x]
+# [1.8.x]
 
-## [1.7.5]
+## [1.8.0]
 
 ### Added
 
@@ -15,11 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PowerSetpoint` instrument holding the `NI9205_dBm` column.
 - `PowerStep` and `PowerStepSet` to handle power step files.
   - Allows averaging instrument data, rather than taking the maximum!
+- `FieldPowerError` new `VirtualInstrument`, to compute error between field measured by probes, and field calculated from powers.
 
 ### Changed
 
 - When possible, we determine whether power is growing or not using `PowerSetpoint` rather than `ForwardPower`.
   - This is much more robust, as `NI9205_dBm` column is less noisy `NI9205_Power1`.
+
+# [1.7.x]
 
 ## [1.7.4] - 2025-06-23
 
