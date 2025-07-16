@@ -622,6 +622,8 @@ def plot_df_threshold(
         upper"`` columns.
     ylabel :
         Y label.
+    label_to_color :
+        Maps threshold dataframe column names with a color.
     fig_title :
         Figure title.
     xticks :
