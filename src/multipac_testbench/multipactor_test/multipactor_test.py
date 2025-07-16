@@ -33,6 +33,7 @@ from matplotlib.artist import Artist
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from multipac_testbench.instruments import (
+    FieldPowerError,
     FieldProbe,
     ForwardPower,
     Instrument,
@@ -1404,6 +1405,10 @@ class MultipactorTest:
         reconstructed.fit_voltage()
 
         self.global_diagnostics.add_instrument(reconstructed)
+        for field_probe in e_field_probes:
+            self.global_diagnostics.add_instrument(
+                FieldPowerError.from_instruments(reconstructed, field_probe)
+            )
 
         return
 

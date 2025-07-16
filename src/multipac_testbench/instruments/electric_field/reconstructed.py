@@ -1,4 +1,7 @@
-"""Define voltage along line.
+"""Define theoretical voltage along line.
+
+Also define a virtual instrument to quantify error between theoretical voltage
+and voltage measured by probes.
 
 .. todo::
     voltage fitting, overload: they work but this not clean, not clean at all
@@ -8,10 +11,11 @@
 import logging
 from collections.abc import Sequence
 from functools import partial
-from typing import overload
+from typing import Self, overload
 
 import numpy as np
 import pandas as pd
+from multipac_testbench.instruments import FieldProbe
 from multipac_testbench.instruments.electric_field.field_probe import (
     FieldProbe,
 )
@@ -22,6 +26,7 @@ from multipac_testbench.instruments.power import ForwardPower
 from multipac_testbench.instruments.reflection_coefficient import (
     ReflectionCoefficient,
 )
+from multipac_testbench.instruments.virtual_instrument import VirtualInstrument
 from multipac_testbench.util.helper import r_squared
 from numpy.typing import NDArray
 from scipy import optimize
@@ -43,7 +48,11 @@ class Reconstructed(IElectricField):
         z_ohm: float = 50.0,
         **kwargs,
     ) -> None:
-        """Just instantiate."""
+        """Just instantiate.
+
+        Created by :meth:`.MultipactorTest.reconstruct_voltage_along_line`.
+
+        """
         if position is None:
             position = np.linspace(0.0, 1.3, 201, dtype=np.float64)
         # from_array maybe
@@ -162,18 +171,21 @@ class Reconstructed(IElectricField):
 
     def data_at(self, position: float) -> NDArray[np.float64]:
         """Evaluate evolution of voltage during test at a specific position."""
-        data = [
-            _model(
-                np.array([p_f, r, position]),
-                self._psi_0,
-                self._beta,
-                self._z_ohm,
-            )
-            for p_f, r in zip(
-                self._forward_power.data, self._reflection.data, strict=True
-            )
-        ]
-        return np.array(data)
+        var = np.column_stack(
+            [
+                self._forward_power.data,
+                self._reflection.data,
+                np.full_like(self._reflection.data, position),
+            ]
+        )
+        data = _model(
+            var,
+            self._psi_0,
+            self._beta,
+            self._z_ohm,
+        )
+
+        return data
 
 
 def _model(
@@ -181,13 +193,13 @@ def _model(
     psi_0: float,
     beta: float,
     z_ohm: float = 50.0,
-) -> float:
+) -> NDArray[np.float64]:
     r"""Give voltage for given set of parameters, at proper power and position.
 
     Parameters
     ----------
     var :
-        Variables, namely :math:`[P_f, R, z]`.
+        2D array holding variables in it's three columns: :math:`[P_f, R, z]`.
 
     Returns
     -------
@@ -289,3 +301,96 @@ def voltage_vs_position(
         + 2.0 * reflection * np.cos(2.0 * beta * pos + psi_0)
     )
     return voltage
+
+
+class FieldPowerError(VirtualInstrument):
+    r"""Store relative error between a field probe and theoretical voltage.
+
+    It is defined for every field probe, at a specific position.
+
+    .. math::
+
+        \epsilon_V = \frac{V_{theoretical} - V_{probe}}{V_{theoretical}}
+
+    """
+
+    def __init__(
+        self,
+        name: str,
+        raw_data: pd.Series,
+        reconstructed: Reconstructed,
+        field_probe: FieldProbe,
+        rmse: float,
+        **kwargs,
+    ) -> None:
+        """Compute error.
+
+        Instantiated when a :class:`.Reconstructed` is created (ie, when
+        :meth:`.MultipactorTest.reconstruct_voltage_along_line` is called).
+
+        """
+        super().__init__(name, raw_data, **kwargs)
+        self._reconstructed = reconstructed
+        self._field_probe = field_probe
+        self.rmse = rmse
+        self.name += f" RMSE: {self.rmse:.2f}V"
+
+    @property
+    def data(self) -> NDArray[np.float64]:
+        """Get error data."""
+        if (data := getattr(self, "_data", None)) is not None:
+            return data
+        error, self.rmse = compute_field_errors(
+            self._reconstructed, self._field_probe
+        )
+        self._data = np.array(error)
+        return self._data
+
+    @data.setter
+    def data(self, new_data: NDArray[np.float64]) -> None:
+        """Set ``data``, clean previous ``_data_as_pd``."""
+        self._data = new_data
+        if hasattr(self, "_data_as_pd"):
+            delattr(self, "_data_as_pd")
+
+    @classmethod
+    def ylabel(cls) -> str:
+        """Label used for plots."""
+        return r"Field relative error [%]"
+
+    @classmethod
+    def from_instruments(
+        cls, reconstructed: Reconstructed, field_probe: FieldProbe, **kwargs
+    ) -> Self:
+        """Create object from other instruments."""
+        error, rmse = compute_field_errors(reconstructed, field_probe)
+        return cls(
+            name=f"Error at {field_probe.name}",
+            raw_data=error,
+            rmse=rmse,
+            position=field_probe.position,
+            is_2d=False,
+            color=field_probe.color,
+            reconstructed=reconstructed,
+            field_probe=field_probe,
+            **kwargs,
+        )
+
+
+def compute_field_errors(
+    reconstructed: Reconstructed, field_probe: FieldProbe
+) -> tuple[pd.Series, float]:
+    """Compute relative error between the two instruments.
+
+    The theoretical electric field (calculated from measured forward and
+    reflected powers) is taken as reference.
+
+    Also compute Root Mean Square Error.
+
+    """
+    position = field_probe.position
+    assert isinstance(position, float)
+    theoretical = reconstructed.data_at(position)
+    error = 100.0 * np.abs((theoretical - field_probe.data) / theoretical)
+    rmse = np.sqrt(np.mean((theoretical - field_probe.data) ** 2))
+    return pd.Series(error), float(rmse)

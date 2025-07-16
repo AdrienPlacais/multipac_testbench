@@ -8,6 +8,7 @@ from multipac_testbench.instruments.electric_field.i_electric_field import (
     IElectricField,
 )
 from multipac_testbench.instruments.electric_field.reconstructed import (
+    FieldPowerError,
     Reconstructed,
 )
 from multipac_testbench.instruments.frequency import Frequency
@@ -30,6 +31,7 @@ from multipac_testbench.instruments.virtual_instrument import VirtualInstrument
 __all__ = [
     "CurrentProbe",
     "IElectricField",
+    "FieldPowerError",
     "FieldProbe",
     "ForwardPower",
     "Frequency",
