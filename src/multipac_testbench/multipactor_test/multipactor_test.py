@@ -54,7 +54,10 @@ from multipac_testbench.multipactor_band.test_multipactor_bands import (
     TestMultipactorBands,
 )
 from multipac_testbench.multipactor_test.loader import TRIGGER_POLICIES, load
-from multipac_testbench.threshold.helper import extract_detecting_name
+from multipac_testbench.threshold.helper import (
+    extract_detecting_name,
+    extract_measured_name,
+)
 from multipac_testbench.threshold.threshold_set import ThresholdSet
 from multipac_testbench.util import plot
 from multipac_testbench.util.animate import get_limits
@@ -194,6 +197,7 @@ class TestPlotter:
         if not xlabel:
             xlabel = xdata.name if isinstance(xdata, Instrument) else ""
 
+        dic_axes = None
         if axes is None:
             match title:
                 case "":
@@ -225,15 +229,17 @@ class TestPlotter:
         )
 
         if threshold_set is not None:
-            instruments = self.test.get_instruments(ydata[0])
-            label_to_color = threshold_set.get_threshold_label_color_map()
+            instruments = self.test.get_instruments(ydata)
+            label_to_color = threshold_set.get_threshold_label_color_map(
+                instruments
+            )
+            assert dic_axes is not None
             df_thresholds = _add_thresholds_on_axes(
-                axes,
-                instruments,
-                threshold_set,
-                self.test,
-                ydata[0],
-                label_to_color,
+                dic_axes=dic_axes,
+                instruments=instruments,
+                threshold_set=threshold_set,
+                test=self.test,
+                label_to_color=label_to_color,
                 plot_extrema=kwargs.get("plot_extrema", False),
             )
             df_to_plot = pd.concat([df_to_plot, df_thresholds], axis=1)
@@ -303,8 +309,9 @@ class TestPlotter:
 
         """
         instruments = self.test.get_instruments(to_plot)
-        label_to_color = threshold_set.get_threshold_label_color_map()
-        assert label_to_color is not None
+        label_to_color = threshold_set.get_threshold_label_color_map(
+            instruments
+        )
 
         df = threshold_set.data_at_thresholds(instruments)
         if len(df) == 0:
@@ -1529,9 +1536,11 @@ class MultipactorTest:
 
 
 def group_columns_by_detector_position(
-    df: pd.DataFrame, test: MultipactorTest
+    df: pd.DataFrame,
+    test: MultipactorTest,
+    instrument_nature: ABCMeta | None = None,
 ) -> dict[float, list[str]]:
-    """Group :class:`.ThresholdSet` df columns by detecting instrument pos.
+    """Group threshold dataframe headers by position of detecting instrument.
 
     Parameters
     ----------
@@ -1539,10 +1548,13 @@ def group_columns_by_detector_position(
         Dataframe as returned by :meth:`.ThresholdSet.data_at_thresholds`.
     test :
         Object containing all the :class:`.Instrument`.
+    instrument_nature :
+        If provided, we remove instruments which type is not
+        ``instrument_nature``.
 
     Returns
     -------
-        Maps every position corresponding to a detecting instrument in ``df``,
+        Mapping of every detecting instrument position in ``df``,
         to the list of detecting instruments at the same position.
 
     """
@@ -1551,49 +1563,63 @@ def group_columns_by_detector_position(
         detecting_name = extract_detecting_name(col)
         detecting_instrument = test.get_instrument(detecting_name)
         assert detecting_instrument is not None
+
+        if instrument_nature is not None:
+            measure_name = extract_measured_name(col)
+            measure_instrument = test.get_instrument(measure_name)
+            assert measure_instrument is not None
+            if not isinstance(measure_instrument, instrument_nature):
+                continue
+
         pos = detecting_instrument.position
         pos_to_cols.setdefault(pos, []).append(col)
     return pos_to_cols
 
 
 def _add_thresholds_on_axes(
-    axes: list[Axes],
+    dic_axes: dict[ABCMeta, Axes],
     instruments: list[Instrument],
     threshold_set: ThresholdSet,
     test: MultipactorTest,
-    to_plot: ABCMeta,
     label_to_color: dict[str, tuple[float, float, float]],
     plot_extrema: bool,
 ) -> pd.DataFrame:
     """Add markers to identify MP entry/exit."""
     data_at_thresholds = threshold_set.data_at_thresholds(instruments)
     if data_at_thresholds.empty:
-        logging.warning("No thresholds found for current instruments")
+        logging.warning(f"No thresholds found for {instruments}")
         return data_at_thresholds
 
     xticks = [ext.sample_index for ext in threshold_set._extrema]
-    pos_to_cols = group_columns_by_detector_position(data_at_thresholds, test)
 
-    for ax in axes:
-        for instr in instruments:
-            position = instr.position
-            assert isinstance(position, float)
-            cols = pos_to_cols.get(position, [])
-            if not cols:
-                continue
+    for instr in instruments:
+        instrument_nature = type(instr)
+        axes = dic_axes[instrument_nature]
+        position = instr.position
+        pos_to_cols = group_columns_by_detector_position(
+            data_at_thresholds, test, instrument_nature=instrument_nature
+        )
+        assert isinstance(position, float), (
+            "Instruments storing 2D data, such as `Reconstructed`, are not"
+            " supported."
+        )
+        cols = pos_to_cols.get(position, [])
+        if not cols:
+            continue
 
-            plot.plot_df_threshold(
-                df=data_at_thresholds[cols],
-                ylabel=getattr(to_plot, "ylabel", lambda: "???")(),
-                label_to_color=label_to_color,
-                fig_title="lalala",
-                xticks=xticks,
-                axes=ax,
-            )
+        plot.plot_df_threshold(
+            df=data_at_thresholds[cols],
+            ylabel=getattr(instr, "ylabel", lambda: "???")(),
+            label_to_color=label_to_color,
+            fig_title="",
+            xticks=xticks,
+            axes=axes,
+        )
 
     if plot_extrema:
         ax_by_position = {
-            instr.position: ax for instr, ax in zip(instruments, axes)
+            instr.position: ax
+            for instr, ax in zip(instruments, dic_axes.values())
         }
         plot.plot_extrema_markers(
             ax_by_position=ax_by_position,

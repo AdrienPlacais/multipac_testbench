@@ -10,7 +10,10 @@ from typing import Self
 import numpy as np
 import pandas as pd
 from multipac_testbench.instruments.instrument import Instrument
-from multipac_testbench.threshold.helper import extract_detecting_name
+from multipac_testbench.threshold.helper import (
+    extract_detecting_name,
+    threshold_df_column_header,
+)
 from multipac_testbench.threshold.threshold import (
     THRESHOLD_DETECTOR_T,
     PowerExtremum,
@@ -80,7 +83,7 @@ class ThresholdSet:
             create_thresholds(
                 multipac_detector(instrument.data),
                 growth_array,
-                str(instrument),
+                instrument.name,
                 instrument.position,
                 instrument.color,
             )
@@ -252,10 +255,9 @@ class ThresholdSet:
                 if not global_multipactor and np.isnan(threshold.position):
                     continue
 
-                label = f"{threshold.detecting_instrument} {threshold.nature}"
+                label = threshold_df_column_header(instrument, threshold)
                 idx = threshold.sample_index
                 result[label][idx] = instrument.data[idx]
-                break  # Assume one match is enough
 
         return pd.DataFrame({k: pd.Series(v) for k, v in result.items()})
 
@@ -264,12 +266,19 @@ class ThresholdSet:
     ) -> list[Threshold]:
         """Give thresholds measured by ``instrument``."""
         if isinstance(instrument, Instrument):
-            instrument = str(Instrument)
-        return [
-            x
-            for x in self
-            if extract_detecting_name(x.detecting_instrument) == instrument
-        ]
+            detecting_name = instrument.name
+        else:
+            detecting_name = instrument
+
+        thresholds: list[Threshold] = []
+        for x in self:
+            if isinstance(x.detecting_instrument, Instrument):
+                matching = x.detecting_instrument.name
+            else:
+                matching = x.detecting_instrument
+            if detecting_name == matching:
+                thresholds.append(x)
+        return thresholds
 
     def remove_detected_by(
         self, instrument: Instrument | str | THRESHOLD_DETECTOR_T
@@ -282,17 +291,10 @@ class ThresholdSet:
             f"Removed the {len(to_remove)} thresholds detected by {instrument}"
         )
 
-    #     """Get lower thresholds."""
-    #     return [x for x in self if x.nature == "lower"]
-    #
-    # def uppers(self) -> list[Threshold]:
-    #     """Get upper thresholds."""
-    #     return [x for x in self if x.nature == "upper"]
-
     def get_threshold_label_color_map(
-        self,
+        self, instruments: Sequence[Instrument]
     ) -> dict[str, tuple[float, float, float] | None]:
-        """Return a mapping from threshold label to color.
+        """Maps threshold dataframe column headers to corresponding colors.
 
         Assumes :attr:`.Threshold.color` is already set to the corresponding
         :class:`.Instrument` color.
@@ -300,10 +302,14 @@ class ThresholdSet:
         Returns
         -------
         dict[str, str]
-            Mapping from ``"<detecting_instrument> <nature>"`` to the threshold
-            color.
+            Mapping from a header looking like ``"NI9205_E4 @ upper threshold
+            (according to NI9205_MP4l)"``, to the threshold color (usually,
+            this is detecting instrument color).
 
         """
-        return {
-            f"{th.detecting_instrument} {th.nature}": th.color for th in self
-        }
+        label_to_color = {}
+        for threshold in self:
+            for instrument in instruments:
+                header = threshold_df_column_header(instrument, threshold)
+                label_to_color[header] = threshold.color
+        return label_to_color

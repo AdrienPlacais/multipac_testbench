@@ -1,20 +1,77 @@
 """Define utility functions related to thresholds."""
 
+from multipac_testbench.instruments.instrument import Instrument
+from multipac_testbench.threshold.threshold import Threshold
 
-def extract_detecting_name(label: str) -> str:
+
+def threshold_df_column_header(
+    instrument: Instrument,
+    threshold: Threshold,
+) -> str:
+    """Create consistent column header for threshold dataframes.
+
+    Parameters
+    ----------
+    instrument :
+        Object that measured data in currently labelled column.
+    threshold :
+        Threshold for which you want a header.
+
+    Returns
+    -------
+    str
+        Threshold dataframe column header, looking like: ``"NI9205_E4 @ upper
+        threshold (according to NI9205_MP4l)"``.
+
+    """
+    if isinstance(threshold.detecting_instrument, Instrument):
+        detecting_name = threshold.detecting_instrument.name
+    else:
+        detecting_name = threshold.detecting_instrument
+    header = (
+        f"{instrument.name} @ {threshold.nature} threshold "
+        f"(according to {detecting_name})"
+    )
+    return header
+
+
+def extract_measured_name(label: str) -> str:
     """Get instrument name from a thresholds df column header.
 
     Parameters
     ----------
     label :
-        Column header, looking like ``"CurrentProbe (NI9205_MP4l) upper"``.
+        Threshold dataframe column header, looking like: ``"NI9205_E4 @ upper
+        threshold (according to NI9205_MP4l)"``.
 
     Returns
     -------
+    str
+        Measure instrument name, like ``"NI9205_E4"``.
+
+    """
+    if "@" in label:
+        return label.split("@", 1)[0][:-1]
+
+    raise ValueError(f"{label = } not recognized.")
+
+
+def extract_detecting_name(label: str) -> str:
+    """Get detecting instrument name from a thresholds df column header.
+
+    Parameters
+    ----------
+    label :
+        Threshold dataframe column header, looking like: ``"NI9205_E4 @ upper
+        threshold (according to NI9205_MP4l)"``.
+
+    Returns
+    -------
+    str
         Detecting instrument name, like ``"NI9205_MP4l"``.
 
     """
     if "(" in label:
-        return label.rsplit("(", 1)[1].split(")")[0]
+        return label.rsplit("(", 1)[1].split(" ")[2][:-1]
 
     raise ValueError(f"{label = } not recognized.")
