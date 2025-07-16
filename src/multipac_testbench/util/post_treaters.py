@@ -208,3 +208,10 @@ def replace_data_under_threshold(
             i += 1
 
     return data
+
+
+def return_constant(
+    input_data: NDArray[np.float64], constant: float
+) -> NDArray[np.float64]:
+    """Always return same value."""
+    return np.full_like(input_data, constant)
