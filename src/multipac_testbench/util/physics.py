@@ -65,3 +65,16 @@ def reflection_to_swr(
     """
     swr = (1.0 + reflection_coefficient) / (1.0 - reflection_coefficient)
     return pd.Series(swr, name=name)
+
+
+def swr_to_reflection(swr: NDArray[np.float64], name: str) -> pd.Series:
+    r"""Compute the reflection coefficient :math:`R`.
+
+    We use the relation:
+
+    .. math::
+
+        R = \frac{SWR - 1}{SWR + 1}
+
+    """
+    return pd.Series((swr - 1.0) / (swr + 1.0), name=name)
