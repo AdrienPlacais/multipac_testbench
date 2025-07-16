@@ -7,7 +7,7 @@ import pandas as pd
 from numpy.typing import NDArray
 
 
-def powers_to_reflection_coefficient(
+def powers_to_reflection(
     forward_power: NDArray[np.float64],
     reflected_power: NDArray[np.float64],
     name: str,

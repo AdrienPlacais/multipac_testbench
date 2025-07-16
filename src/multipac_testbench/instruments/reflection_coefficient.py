@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 from multipac_testbench.instruments.power import ForwardPower, ReflectedPower
 from multipac_testbench.instruments.virtual_instrument import VirtualInstrument
-from multipac_testbench.util.physics import powers_to_reflection_coefficient
+from multipac_testbench.util.physics import powers_to_reflection
 
 
 class ReflectionCoefficient(VirtualInstrument):
@@ -57,7 +57,7 @@ class ReflectionCoefficient(VirtualInstrument):
         Also triggers the recalculation of :class:`.SWR`.
 
         """
-        self._raw_data = powers_to_reflection_coefficient(
+        self._raw_data = powers_to_reflection(
             self._forward.data,
             self._reflected.data,
             self.name,
@@ -76,9 +76,7 @@ class ReflectionCoefficient(VirtualInstrument):
         """Compute the reflection coefficient from given :class:`.Power`."""
         return cls(
             name=name,
-            raw_data=powers_to_reflection_coefficient(
-                forward.data, reflected.data, name
-            ),
+            raw_data=powers_to_reflection(forward.data, reflected.data, name),
             position=np.nan,
             forward=forward,
             reflected=reflected,
