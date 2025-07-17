@@ -39,7 +39,10 @@ class InstrumentFactory:
     """Class to create instruments."""
 
     def __init__(
-        self, freq_mhz: float | None = None, is_raw: bool = False
+        self,
+        freq_mhz: float | None = None,
+        is_raw: bool = False,
+        create_virtual_instruments: bool = True,
     ) -> None:
         """Set user-defined constants to create correspondig instrument.
 
@@ -50,10 +53,13 @@ class InstrumentFactory:
         is_raw :
             If set to ``True``, input data files is considered to be raw, ie to
             contain acquisition voltages instead of physical quantities.
+        create_virtual_instruments :
+            If virtual instruments should be created.
 
         """
         self.freq_mhz = freq_mhz
         self._is_raw = is_raw
+        self._create_virtual_instruments = create_virtual_instruments
 
     def run(
         self,
@@ -146,6 +152,8 @@ class InstrumentFactory:
             The created virtual instruments.
 
         """
+        if not self._create_virtual_instruments:
+            return []
         virtuals = []
 
         power_related = []

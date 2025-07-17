@@ -23,7 +23,12 @@ class IMeasurementPointFactory:
 
     """
 
-    def __init__(self, is_raw: bool = False, **kwargs) -> None:
+    def __init__(
+        self,
+        is_raw: bool = False,
+        create_virtual_instruments: bool = True,
+        **kwargs,
+    ) -> None:
         """Instantiate the class with its :class:`.InstrumentFactory`.
 
         Parameters
@@ -31,12 +36,18 @@ class IMeasurementPointFactory:
         is_raw :
             If set to ``True``, input data files is considered to be raw, ie to
             contain acquisition voltages instead of physical quantities.
+        create_virtual_instruments :
+            If virtual instruments should be created.
         kwargs :
             Keyword arguments that are directly passed down to the
             :class:`.InstrumentFactory`.
 
         """
-        self.instrument_factory = InstrumentFactory(is_raw=is_raw, **kwargs)
+        self.instrument_factory = InstrumentFactory(
+            is_raw=is_raw,
+            create_virtual_instruments=create_virtual_instruments,
+            **kwargs,
+        )
 
     def run_single(
         self,

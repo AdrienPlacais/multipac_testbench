@@ -31,6 +31,8 @@ class PowerStep(MultipactorTest):
         "points were removed in R calculation, where reflected power was ",
         "column_header = 'NI9205_dBm' not present in provided file. Skipping",
         "Applied trigger_policy = ",
+        "Adding a post_treater to ",
+        "not present in provided file. Skipping associated instrument",
     ]
 
     def __init__(
@@ -45,6 +47,7 @@ class PowerStep(MultipactorTest):
         dbm: float | None = None,
         out_dbm_column: str = "NI9205_dBm",
         out_index_col: str = "Sample index",
+        create_virtual_instruments: bool = True,
         **kwargs,
     ) -> None:
         """Create object like if it was a :class:`.MultipactorTest`.
@@ -83,6 +86,8 @@ class PowerStep(MultipactorTest):
             To override the dBm values inferred from filename.
         out_dbm_column :
             Where to store the dBm value in the output file.
+        create_virtual_instruments :
+            If virtual instruments should be created.
         kwargs :
             Other kwargs passed to :func:`.load`.
 
@@ -98,6 +103,7 @@ class PowerStep(MultipactorTest):
                 index_col=index_col,
                 trigger_policy="keep_all",
                 remove_metadata_columns=True,
+                create_virtual_instruments=create_virtual_instruments,
                 **kwargs,
             )
         self._sample_index = sample_index
@@ -162,6 +168,7 @@ class PowerStepSet:
         out_index_col: str = "Sample index",
         file_recognizer: POWERSTEP_FILE_RECOGNIZER_T | None = None,
         comment: str = "#",
+        create_virtual_instruments: bool = True,
         **kwargs,
     ) -> None:
         """Load all ``MV`` files in ``folder``, create :class:`.PowerStep`.
@@ -192,6 +199,8 @@ class PowerStepSet:
             :func:`.default_powerstep_file_valider`.
         comment :
             Comment delimiter, to skip the first lines in the source ``CSV``.
+        create_virtual_instruments :
+            If virtual instruments should be created.
 
         """
         self._folder = folder
@@ -217,6 +226,7 @@ class PowerStepSet:
                 out_dbm_column=out_dbm_column,
                 out_index_col=out_index_col,
                 comment=comment,
+                create_virtual_instruments=create_virtual_instruments,
                 **kwargs,
             )
             for filepath, sample_index in file_index_mapping.items()

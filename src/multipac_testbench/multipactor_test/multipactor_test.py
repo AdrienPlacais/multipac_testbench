@@ -671,6 +671,7 @@ class MultipactorTest:
         trigger_policy: TRIGGER_POLICIES = "keep_all",
         index_col: str = "Sample index",
         is_raw: bool = False,
+        create_virtual_instruments: bool = True,
         remove_metadata_columns: bool = False,
         **kwargs,
     ) -> None:
@@ -699,6 +700,8 @@ class MultipactorTest:
         is_raw :
             If set to ``True``, input data files is considered to be raw, ie to
             contain acquisition voltages instead of physical quantities.
+        create_virtual_instruments :
+            If virtual instruments should be created.
         kwargs :
             Other kwargs passed to :func:`.load`.
 
@@ -724,6 +727,7 @@ class MultipactorTest:
         imeasurement_point_factory = IMeasurementPointFactory(
             freq_mhz=freq_mhz,
             is_raw=is_raw,
+            create_virtual_instruments=create_virtual_instruments,
         )
         imeasurement_points = imeasurement_point_factory.run(
             config,
