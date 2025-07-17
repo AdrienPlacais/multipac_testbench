@@ -319,7 +319,7 @@ class TestPlotter:
             return np.array([]), df
         title = str(self.test) if not title else title
         ylabel = getattr(to_plot, "ylabel", lambda: "???")()
-        xticks = [pow_ext.sample_index for pow_ext in threshold_set._extrema]
+        xticks = [pow_ext.sample_index for pow_ext in threshold_set.extrema]
 
         pos_to_cols = group_columns_by_detector_position(df, self.test)
         if same_figure:
@@ -334,7 +334,7 @@ class TestPlotter:
                 plot.plot_extrema_markers(
                     ax_by_position=axes,
                     instruments=instruments,
-                    extrema=threshold_set._extrema,
+                    extrema=threshold_set.extrema,
                 )
             if png_path:
                 plot.save_figure(axes, png_path, **(png_kwargs or {}))
@@ -364,7 +364,7 @@ class TestPlotter:
             plot.plot_extrema_markers(
                 ax_by_position=axes_for_extrema,
                 instruments=instruments,
-                extrema=threshold_set._extrema,
+                extrema=threshold_set.extrema,
             )
 
         if png_path:
@@ -1590,7 +1590,7 @@ def _add_thresholds_on_axes(
         logging.warning(f"No thresholds found for {instruments}")
         return data_at_thresholds
 
-    xticks = [ext.sample_index for ext in threshold_set._extrema]
+    xticks = [ext.sample_index for ext in threshold_set.extrema]
 
     for instr in instruments:
         instrument_nature = type(instr)
@@ -1624,7 +1624,7 @@ def _add_thresholds_on_axes(
         plot.plot_extrema_markers(
             ax_by_position=ax_by_position,
             instruments=instruments,
-            extrema=threshold_set._extrema,
+            extrema=threshold_set.extrema,
         )
 
     return data_at_thresholds

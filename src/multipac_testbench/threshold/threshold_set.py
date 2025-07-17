@@ -11,7 +11,6 @@ import numpy as np
 import pandas as pd
 from multipac_testbench.instruments.instrument import Instrument
 from multipac_testbench.threshold.helper import (
-    extract_detecting_name,
     threshold_df_column_header,
 )
 from multipac_testbench.threshold.threshold import (
@@ -49,7 +48,7 @@ class ThresholdSet:
             thresholds,
             key=lambda t: t.sample_index,
         )
-        self._extrema = sorted(
+        self.extrema = sorted(
             power_extrema,
             key=lambda p: p.sample_index,
         )
@@ -110,7 +109,7 @@ class ThresholdSet:
 
         If two :class:`.Threshold` are detected by the same
         :class:`.Instrument` and their :attr:`.Threshold.sample_index` are
-        separated by ``0`` or less, both objects are removed.
+        separated by ``min_consecutive - 1`` or less, both objects are removed.
 
         Parameters
         ----------
