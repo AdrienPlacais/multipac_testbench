@@ -1077,14 +1077,11 @@ class MultipactorTest:
         """
         detecting_instruments = self.get_instruments(instrument_class)
         growth_array = self._power_growth_array(power_growth_array_kw)
-        factories = {
-            "any": ThresholdSet.anywhere,
-            "all": ThresholdSet.everywhere,
-            None: ThresholdSet.from_instruments,
-        }
-        factory = factories[threshold_reducer]
-        threshold_set = factory(
-            multipac_detector, detecting_instruments, growth_array
+        threshold_set = ThresholdSet.from_instruments(
+            multipac_detector,
+            detecting_instruments,
+            growth_array,
+            threshold_reducer=threshold_reducer,
         )
         return threshold_set
 
