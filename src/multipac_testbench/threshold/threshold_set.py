@@ -235,6 +235,7 @@ class ThresholdSet:
         tol: float = 1e-10,
         global_instruments: bool = False,
         global_multipactor: bool = False,
+        **kwargs,
     ):
         """Return instrument values at threshold sample indices.
 
@@ -266,16 +267,15 @@ class ThresholdSet:
 
         for threshold in self:
             for instrument in instruments:
-                is_close = math.isclose(
-                    instrument.position, threshold.position, abs_tol=tol
+                is_close = (
+                    math.isclose(
+                        instrument.position, threshold.position, abs_tol=tol
+                    )
+                    or (global_instruments and np.isnan(instrument.position))
+                    or (global_multipactor and np.isnan(threshold.position))
                 )
+
                 if not is_close:
-                    continue
-
-                if not global_instruments and np.isnan(instrument.position):
-                    continue
-
-                if not global_multipactor and np.isnan(threshold.position):
                     continue
 
                 label = threshold_df_column_header(instrument, threshold)
