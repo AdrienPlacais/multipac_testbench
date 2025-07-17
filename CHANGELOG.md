@@ -22,6 +22,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - When possible, we determine whether power is growing or not using `PowerSetpoint` rather than `ForwardPower`.
   - This is much more robust, as `NI9205_dBm` column is less noisy `NI9205_Power1`.
 
+### Removed
+
+- `MultipactorBand` objects removed, and replaced by `Threshold` and `ThresholdSet`.
+  This is much more robust, as `MultipactorBand` implied the existence of two consecutive `Threshold` objects.
+  - [ ] Remove also in Somersalo
+  - [ ] Remove also in Perez
+
 # [1.7.x]
 
 ## [1.7.4] - 2025-06-23
