@@ -58,6 +58,7 @@ from multipac_testbench.threshold.helper import (
     extract_detecting_name,
     extract_measured_name,
 )
+from multipac_testbench.threshold.threshold import THRESHOLD_DETECTOR_T
 from multipac_testbench.threshold.threshold_set import ThresholdSet
 from multipac_testbench.util import plot
 from multipac_testbench.util.animate import get_limits
@@ -1046,6 +1047,7 @@ class MultipactorTest:
         multipac_detector: MULTIPAC_DETECTOR_T,
         instrument_class: ABCMeta,
         power_growth_array_kw: dict[str, Any] | None = None,
+        threshold_reducer: THRESHOLD_DETECTOR_T | None = None,
         **kwargs,
     ) -> ThresholdSet:
         """Determine lower and upper multipactor thresholds.
@@ -1061,6 +1063,10 @@ class MultipactorTest:
             applied.
         power_growth_array_kw :
             Keyword arguments passed to :meth:`.PowerSetpoint.growth_array`.
+        threshold_reducer :
+            If provided, we consider that multipactor appears when one
+            detecting :class:`.Instrument` detected it (``"any"``), or only
+            when all detecting :class:`.Instrument` measured it (``"all"``).
 
         Returns
         -------
@@ -1071,7 +1077,13 @@ class MultipactorTest:
         """
         detecting_instruments = self.get_instruments(instrument_class)
         growth_array = self._power_growth_array(power_growth_array_kw)
-        threshold_set = ThresholdSet.from_instruments(
+        factories = {
+            "any": ThresholdSet.anywhere,
+            "all": ThresholdSet.everywhere,
+            None: ThresholdSet.from_instruments,
+        }
+        factory = factories[threshold_reducer]
+        threshold_set = factory(
             multipac_detector, detecting_instruments, growth_array
         )
         return threshold_set

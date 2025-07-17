@@ -47,11 +47,11 @@ class Threshold:
 def create_thresholds(
     multipactor: NDArray[np.bool],
     growth_array: NDArray[np.float64],
-    detecting_instrument: str,
+    detecting_instrument: str | THRESHOLD_DETECTOR_T,
     position: float,
     color: tuple[float, float, float] | None = None,
 ) -> list[Threshold]:
-    """Create all threshold objects.
+    """Create threshold objects corresponding to a single detecting instrument.
 
     Parameters
     ----------

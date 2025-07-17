@@ -76,6 +76,10 @@ class ThresholdSet:
         growth_array :
             Holds ``1.0`` where power increases, ``0.0`` where it is stable,
             ``-1.0`` where it decreases.
+        threshold_reducer :
+            If provided, we consider that multipactor appears when one
+            detecting :class:`.Instrument` detected it (``"any"``), or only
+            when all detecting :class:`.Instrument` measured it (``"all"``).
 
         """
         nested_thresholds = [
@@ -90,6 +94,90 @@ class ThresholdSet:
             if isinstance(instrument.position, float)
         ]
         thresholds = itertools.chain(*nested_thresholds)
+        power_extrema = create_power_extrema(growth_array)
+        return cls(thresholds, power_extrema)
+
+    @classmethod
+    def anywhere(
+        cls,
+        multipac_detector: MULTIPAC_DETECTOR_T,
+        detecting_instruments: Iterable[Instrument],
+        growth_array: NDArray[np.float64],
+    ) -> Self:
+        """Detect when multipactor appears anywhere in the line.
+
+        We consider that we enter a multipactor zone when the phenomenon
+        appears anywhere in the line (first :class:`.Threshold` encountered
+        with ``Threshold.way == "entry"``.)
+        We exit a multipactor zone when the phenomenon disappeared from
+        everywhere in the coaxial line.
+
+        Parameters
+        ----------
+        multipac_detector :
+            Function that takes in the ``data`` of an :class:`.Instrument`
+            and returns an array, where True means multipactor and False no
+            multipactor.
+        detecting_instruments :
+            Instruments to apply ``multipac_detector`` on.
+        growth_array :
+            Holds ``1.0`` where power increases, ``0.0`` where it is stable,
+            ``-1.0`` where it decreases.
+
+        """
+        multipactor_anywhere = np.any(
+            [
+                multipac_detector(instrument.data)
+                for instrument in detecting_instruments
+            ],
+            axis=0,
+        )
+        thresholds = create_thresholds(
+            multipactor_anywhere,
+            growth_array,
+            detecting_instrument="any",
+            position=np.nan,
+            color=(1, 1, 1),
+        )
+        power_extrema = create_power_extrema(growth_array)
+        return cls(thresholds, power_extrema)
+
+    @classmethod
+    def everywhere(
+        cls,
+        multipac_detector: MULTIPAC_DETECTOR_T,
+        detecting_instruments: Iterable[Instrument],
+        growth_array: NDArray[np.float64],
+    ) -> Self:
+        """Detect multipactor only when it appears everywhere in the line.
+
+        Parameters
+        ----------
+        multipac_detector :
+            Function that takes in the ``data`` of an :class:`.Instrument`
+            and returns an array, where True means multipactor and False no
+            multipactor.
+        detecting_instruments :
+            Instruments to apply ``multipac_detector`` on.
+        growth_array :
+            Holds ``1.0`` where power increases, ``0.0`` where it is stable,
+            ``-1.0`` where it decreases.
+
+        """
+        multipactor_anywhere = np.all(
+            [
+                multipac_detector(instrument.data)
+                for instrument in detecting_instruments
+            ],
+            axis=0,
+        )
+        thresholds = create_thresholds(
+            multipactor_anywhere,
+            growth_array,
+            detecting_instrument="all",
+            position=np.nan,
+            color=(1, 1, 1),
+        )
         power_extrema = create_power_extrema(growth_array)
         return cls(thresholds, power_extrema)
 
