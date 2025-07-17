@@ -183,3 +183,7 @@ class PowerSetpoint(Instrument):
             width=width,
             **kwargs,
         )
+
+    @property
+    def _transfer_functions(self) -> list[POST_TREATER_T]:
+        return []
