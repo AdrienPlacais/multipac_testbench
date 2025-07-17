@@ -1,6 +1,5 @@
 """Define an object to hold all thresholds of a multipactor test."""
 
-import itertools
 import logging
 import math
 from collections import defaultdict
@@ -109,7 +108,7 @@ class ThresholdSet:
                 growth_array,
                 detecting_instrument=threshold_reducer,
                 position=np.nan,
-                color=(1, 1, 1),
+                color=(0, 0, 0),
             )
         else:
             raise ValueError(f"Unknown {threshold_reducer = }")
