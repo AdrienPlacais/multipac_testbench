@@ -34,6 +34,7 @@ from multipac_testbench.theoretical.somersalo import (
     plot_somersalo_measured,
     somersalo_base_plot,
 )
+from multipac_testbench.threshold.threshold import THRESHOLD_DETECTOR_T
 from multipac_testbench.threshold.threshold_set import ThresholdSet
 from multipac_testbench.util import log_manager, plot
 from multipac_testbench.util.types import MULTIPAC_DETECTOR_T
@@ -838,6 +839,7 @@ class TestCampaign(list[MultipactorTest]):
         multipac_detector: MULTIPAC_DETECTOR_T,
         instrument_class: ABCMeta,
         power_growth_array_kw: dict[str, Any] | None = None,
+        threshold_reducer: THRESHOLD_DETECTOR_T | None = None,
         **kwargs,
     ) -> dict[MultipactorTest, ThresholdSet]:
         """Determine every :class:`.MultipactorTest` multipactor thresholds.
@@ -853,6 +855,10 @@ class TestCampaign(list[MultipactorTest]):
             applied.
         power_growth_array_kw :
             Keyword arguments passed to :meth:`.PowerSetpoint.growth_array`.
+        threshold_reducer :
+            If provided, we consider that multipactor appears when one
+            detecting :class:`.Instrument` detected it (``"any"``), or only
+            when all detecting :class:`.Instrument` measured it (``"all"``).
 
         Returns
         -------
@@ -866,6 +872,7 @@ class TestCampaign(list[MultipactorTest]):
                 multipac_detector,
                 instrument_class,
                 power_growth_array_kw,
+                threshold_reducer=threshold_reducer,
                 **kwargs,
             )
             for test in self

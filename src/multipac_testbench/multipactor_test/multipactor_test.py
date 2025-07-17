@@ -58,7 +58,10 @@ from multipac_testbench.threshold.helper import (
     extract_detecting_name,
     extract_measured_name,
 )
-from multipac_testbench.threshold.threshold import THRESHOLD_DETECTOR_T
+from multipac_testbench.threshold.threshold import (
+    THRESHOLD_DETECTOR,
+    THRESHOLD_DETECTOR_T,
+)
 from multipac_testbench.threshold.threshold_set import ThresholdSet
 from multipac_testbench.util import plot
 from multipac_testbench.util.animate import get_limits
@@ -93,6 +96,8 @@ class TestPlotter:
         grid: bool = True,
         title: str | list[str] = "",
         threshold_set: ThresholdSet | None = None,
+        global_instruments: bool = False,
+        global_multipactor: bool = False,
         column_names: str | list[str] = "",
         test_color: str | None = None,
         png_path: Path | None = None,
@@ -134,6 +139,13 @@ class TestPlotter:
         threshold_set :
             If provided, mark lower (circle) and upper (star) thresholds on top
             of every :class:`.Instrument` data.
+        global_instruments :
+            If instruments not position-specific (eg :class:`.ForwardPower`)
+            should have their thresholds plotted.
+        global_multipactor :
+            If multipactor not position-specific (eg thresholds created by
+            merging several other multipactor arrays) should have their
+            thresholds plotted.
         column_names :
             To override the default column names. This is used in particular
             with the method :meth:`.TestCampaign.sweet_plot` when
@@ -242,6 +254,8 @@ class TestPlotter:
                 test=self.test,
                 label_to_color=label_to_color,
                 plot_extrema=kwargs.get("plot_extrema", False),
+                global_instruments=global_instruments,
+                global_multipactor=global_multipactor,
             )
             df_to_plot = pd.concat([df_to_plot, df_thresholds], axis=1)
 
@@ -314,7 +328,7 @@ class TestPlotter:
             instruments
         )
 
-        df = threshold_set.data_at_thresholds(instruments)
+        df = threshold_set.data_at_thresholds(instruments, **kwargs)
         if len(df) == 0:
             logging.warning(f"No threshold to plot for {self.test}")
             return np.array([]), df
@@ -1570,8 +1584,13 @@ def group_columns_by_detector_position(
     pos_to_cols = {}
     for col in df.columns:
         detecting_name = extract_detecting_name(col)
-        detecting_instrument = test.get_instrument(detecting_name)
-        assert detecting_instrument is not None
+
+        if detecting_name in THRESHOLD_DETECTOR:
+            pos = np.nan
+        else:
+            detecting_instrument = test.get_instrument(detecting_name)
+            assert detecting_instrument is not None
+            pos = detecting_instrument.position
 
         if instrument_nature is not None:
             measure_name = extract_measured_name(col)
@@ -1580,7 +1599,6 @@ def group_columns_by_detector_position(
             if not isinstance(measure_instrument, instrument_nature):
                 continue
 
-        pos = detecting_instrument.position
         pos_to_cols.setdefault(pos, []).append(col)
     return pos_to_cols
 
@@ -1592,9 +1610,16 @@ def _add_thresholds_on_axes(
     test: MultipactorTest,
     label_to_color: dict[str, tuple[float, float, float]],
     plot_extrema: bool,
+    global_instruments: bool = False,
+    global_multipactor: bool = False,
+    **kwargs,
 ) -> pd.DataFrame:
     """Add markers to identify MP entry/exit."""
-    data_at_thresholds = threshold_set.data_at_thresholds(instruments)
+    data_at_thresholds = threshold_set.data_at_thresholds(
+        instruments,
+        global_instruments=global_instruments,
+        global_multipactor=global_multipactor,
+    )
     if data_at_thresholds.empty:
         logging.warning(f"No thresholds found for {instruments}")
         return data_at_thresholds
@@ -1612,7 +1637,16 @@ def _add_thresholds_on_axes(
             "Instruments storing 2D data, such as `Reconstructed`, are not"
             " supported."
         )
+
         cols = pos_to_cols.get(position, [])
+        if (
+            global_multipactor
+            and (additional := pos_to_cols.get(np.nan, None)) is not None
+        ):
+            cols.extend(additional)
+        if global_instruments:
+            raise NotImplementedError
+
         if not cols:
             continue
 

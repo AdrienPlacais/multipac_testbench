@@ -15,6 +15,7 @@ from numpy.typing import NDArray
 THRESHOLD_NATURE_T = Literal["upper", "lower"]
 THRESHOLD_WAY_T = Literal["enter", "exit"]
 THRESHOLD_DETECTOR_T = Literal["any", "all"]
+THRESHOLD_DETECTOR = ("any", "all")
 POWER_EXTREMUM_T = Literal["minimum", "maximum"]
 
 
