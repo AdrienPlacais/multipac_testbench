@@ -23,10 +23,19 @@ class Penning(Instrument):
         --------
         :func:`.transfer_functions.pressure`
 
+        Parameters
+        ----------
+        a_calib :
+            Calibration slope in :unit:`1/V`.
+        b_calib :
+            Calibration offset.
+
         """
+        #: Calibration slope in :unit:`1/V`.
         self._a_calib: float
         if a_calib is not None:
             self._a_calib = a_calib
+        #: Calibration offset.
         self._b_calib: float
         if b_calib is not None:
             self._b_calib = b_calib

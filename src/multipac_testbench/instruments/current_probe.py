@@ -20,10 +20,10 @@ class CurrentProbe(Instrument):
         Parameters
         ----------
         a_probe :
-            Calibration slope in :unit:`\\muA/V`.
+            Calibration slope in :unit:`\\mu A/V`.
 
         """
-        #: Calibration slope in :unit:`\\muA/V`.
+        #: Calibration slope in :unit:`\\mu A/V`.
         self._a_probe: float
         if a_probe is not None:
             self._a_probe = a_probe

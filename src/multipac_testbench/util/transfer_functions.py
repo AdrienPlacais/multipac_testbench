@@ -20,12 +20,12 @@ def current_probe(
     v_acq :
         Acquisition voltage in :math:`[0, 10~\mathrm{V}]`.
     a :
-        Calibration slope in :unit:`\\muA/V`.
+        Calibration slope in :unit:`\\mu A/V`.
 
     Returns
     -------
     current :
-        :math:`i` in :unit:`\\muA`, which should be the content of the
+        :math:`i` in :unit:`\\mu A`, which should be the content of the
         ``NI9205_MPxl`` columns.
 
     """
@@ -139,9 +139,10 @@ def power(
         Original transfer function in LabView is:
 
         .. math::
-            P = |V_\mathrm{acq}| \times (a_calib - b_calib) + b_calib
+            P = |V_\mathrm{acq}| \times (a_\mathrm{calib} -
+                                         b_\mathr{calib}) + b_\mathrm{calib}
 
-            Note that this is non-linear, and non homogeneous.
+        Note that this is non-linear, and non homogeneous.
 
     Parameters
     ----------
