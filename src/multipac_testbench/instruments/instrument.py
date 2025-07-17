@@ -3,6 +3,7 @@
 import inspect
 import logging
 from abc import ABC
+from collections.abc import Collection
 from typing import Callable, Literal, Self, overload
 
 import numpy as np
@@ -29,6 +30,7 @@ class Instrument(ABC):
     """Hold measurements of a single instrument."""
 
     _raw_data_can_change = False
+    _transfer_functions: Collection[POST_TREATER_T] = []
 
     def __init__(
         self,
@@ -37,6 +39,7 @@ class Instrument(ABC):
         position: NDArray[np.float64] | float,
         is_2d: bool = False,
         color: tuple[float, float, float] | None = None,
+        is_raw: bool = False,
         **kwargs,
     ) -> None:
         """Instantiate the class.
@@ -59,6 +62,11 @@ class Instrument(ABC):
             Color for the plots; all instruments from a same :class:`.PickUp`
             have the same. The default is None, which happens for instruments
             defined in a :class:`.GlobalDiagnostics`.
+        is_raw :
+            If set to ``True``, the functions defined in
+            :attr:`._transfer_functions` are directly appended to the list of
+            post-treaters. They are used to convert raw data (ie: acquisition
+            voltages) to physical quantities.
         kwargs :
             Additional keyword arguments coming from the ``TOML`` configuration
             file.
@@ -87,6 +95,15 @@ class Instrument(ABC):
         self._data_as_pd: pd.Series | pd.DataFrame
 
         self._post_treaters: list[POST_TREATER_T] = []
+        if is_raw:
+            if len(self._transfer_functions) == 0:
+                logging.warning(
+                    f"{self} has no transfer function defined, so its ``data``"
+                    " attribute will hold acquisition voltage in volt rather "
+                    "than any meaningful physical quantity."
+                )
+            for func in self._transfer_functions:
+                self.add_post_treater(func)
 
         #: Functions to call when a post-treater is added to current object.
         #:
