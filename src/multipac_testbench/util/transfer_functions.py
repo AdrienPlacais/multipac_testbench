@@ -1,4 +1,9 @@
-"""Define various instruments transfer functions."""
+"""Define instruments transfer functions.
+
+These are the funtions converting acquisition voltages into actual physical
+quantities.
+
+"""
 
 import numpy as np
 from numpy.typing import NDArray
@@ -12,7 +17,6 @@ def current_probe(
     This is the transfer function of :class:`.CurrentProbe`.
 
     .. math::
-
         i = a_\mathrm{probe} \times V_\mathrm{acq}
 
     Parameters
@@ -44,7 +48,6 @@ def field_probe(
     This is the transfer function of :class:`.FieldProbe`.
 
     .. math::
-
         P = \sqrt{2\times Z_0 \times 10^{-3} \times 10^{
             \frac{
                 a_\mathrm{rack}V_\mathrm{acq} + b_\mathrm{rack}
@@ -126,22 +129,17 @@ def power(
     This is the transfer function of :class:`.Power`.
 
     .. math::
-
-        P = a_calib \times V_\mathrm{acq} + b_calib
-
-
-    .. math::
-
-        P = V_\mathrm{acq} \times (a_calib - b_calib) + b_calib
-
+        P = a_\mathrm{calib} \times V_\mathrm{acq} + b_\mathrm{calib}
 
     .. note::
         Original transfer function in LabView is:
 
         .. math::
-            P = |V_\mathrm{acq}| \times (a_\mathrm{calib} -
-                                         b_\mathr{calib}) + b_\mathrm{calib}
+            P = |V_\mathrm{acq}| \times (a_\mathrm{calib} - b_\mathrm{calib})
+            + b_\mathrm{calib}
 
+        With :math:`a_\mathrm{calib}`: ``REC_LIM_UPP`` and
+        :math:`b_\mathrm{calib}`: ``REC_LIM_LOW``.
         Note that this is non-linear, and non homogeneous.
 
     Parameters
@@ -172,9 +170,8 @@ def power_channel_b(
     Transfer function proposed by M. Vénière.
 
     .. math::
-
         P_\mathrm{ok} =
-        k_\mathrm{fix} \times P_\mathrm{bad}^{alpha_\mathrm{fix}}
+        k_\mathrm{fix} \times P_\mathrm{bad}^{\alpha_\mathrm{fix}}
 
     Parameters
     ----------
@@ -202,8 +199,7 @@ def pressure(
     This is the transfer function of :class:`.Penning`.
 
     .. math::
-
-        p = 10^{a_calib \times V_\mathrm{acq} + b_calib}
+        p = 10^{a_\mathrm{calib} \times V_\mathrm{acq} + b_\mathrm{calib}}
 
     Parameters
     ----------
