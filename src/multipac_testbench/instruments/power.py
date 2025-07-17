@@ -1,15 +1,65 @@
 """Define power probes to measure forward and reflected power."""
 
+import logging
+from functools import partial
+
 import numpy as np
 from multipac_testbench.instruments.instrument import Instrument
+from multipac_testbench.util.transfer_functions import power, power_channel_b
+from multipac_testbench.util.types import POST_TREATER_T
 from numpy.typing import NDArray
 
 
 class Power(Instrument):
     """An instrument to measure power."""
 
-    def __init__(self, *args, position: float = np.nan, **kwargs) -> None:
-        """Instantiate the instrument, declare other specific attributes."""
+    def __init__(
+        self,
+        *args,
+        position: float = np.nan,
+        a_calib: float | None = None,
+        b_calib: float | None = None,
+        k_fix: float | None = None,
+        alpha_fix: float | None = None,
+        **kwargs,
+    ) -> None:
+        """Instantiate the instrument, declare other specific attributes.
+
+        See Also
+        --------
+        :func:`.transfer_functions.power`
+        :func:`.transfer_functions.power_channel_b`
+
+        Notes
+        -----
+        If ``k_fix`` and ``alpha_fix`` are provided, we add a second transfer
+        function, :func:`.transfer_functions.power_channel_b`. It was proposed
+        to fix the power measure on channel B.
+
+        Parameters
+        ----------
+        a_calib :
+            Calibration slope in :unit:`W/V`.
+        b_calib :
+            Calibration offset in :unit:`W`.
+        k_fix :
+            Fix slope constant.
+        alpha_fix :
+            Fix exponent constant.
+
+        """
+        self._a_calib: float
+        if a_calib is not None:
+            self._a_calib = a_calib
+        self._b_calib: float
+        if b_calib is not None:
+            self._b_calib = b_calib
+        self._a_fix: float
+        if k_fix is not None:
+            self._k_fix = k_fix
+        self._alpha_fix: float
+        if alpha_fix is not None:
+            self._alpha_fix = alpha_fix
         super().__init__(*args, position=position, **kwargs)
 
     @classmethod
@@ -40,9 +90,37 @@ class Power(Instrument):
             **kwargs,
         )
 
+    @property
+    def _transfer_functions(self) -> list[POST_TREATER_T]:
+        assert hasattr(self, "_a_calib")
+        assert hasattr(self, "_b_calib")
+
+        funcs = [partial(power, a_calib=self._a_calib, b_calib=self._b_calib)]
+        if hasattr(self, "_alpha_fix") and hasattr(self, "k_fix"):
+            funcs.append(
+                partial(
+                    power_channel_b,
+                    k_fix=self._k_fix,
+                    alpha_fix=self._alpha_fix,
+                )
+            )
+        return funcs
+
 
 class ForwardPower(Power):
     """Store the forward power."""
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        if (
+            self._is_raw
+            and hasattr(self, "_alpha_fix")
+            or hasattr(self, "k_fix")
+        ):
+            logging.warning(
+                "ForwardPower typically measured on channel A, so you should "
+                "not provide the arguments for the channel B fix."
+            )
 
     @classmethod
     def ylabel(cls) -> str:
@@ -52,6 +130,18 @@ class ForwardPower(Power):
 
 class ReflectedPower(Power):
     """Store the reflected power."""
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        if (
+            self._is_raw
+            and not hasattr(self, "_alpha_fix")
+            or not hasattr(self, "k_fix")
+        ):
+            logging.warning(
+                "ReflectedPower typically measured on channel B, so you should"
+                " provide the arguments for the channel B fix."
+            )
 
     @classmethod
     def ylabel(cls) -> str:

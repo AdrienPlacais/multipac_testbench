@@ -3,7 +3,6 @@
 import inspect
 import logging
 from abc import ABC
-from collections.abc import Collection
 from typing import Callable, Literal, Self, overload
 
 import numpy as np
@@ -30,7 +29,6 @@ class Instrument(ABC):
     """Hold measurements of a single instrument."""
 
     _raw_data_can_change = False
-    _transfer_functions: Collection[POST_TREATER_T] = []
 
     def __init__(
         self,
@@ -95,13 +93,8 @@ class Instrument(ABC):
         self._data_as_pd: pd.Series | pd.DataFrame
 
         self._post_treaters: list[POST_TREATER_T] = []
+        self._is_raw = is_raw
         if is_raw:
-            if len(self._transfer_functions) == 0:
-                logging.warning(
-                    f"{self} has no transfer function defined, so its ``data``"
-                    " attribute will hold acquisition voltage in volt rather "
-                    "than any meaningful physical quantity."
-                )
             for func in self._transfer_functions:
                 self.add_post_treater(func)
 
@@ -159,6 +152,22 @@ class Instrument(ABC):
     def class_name(self) -> str:
         """Get the name of the instrument class."""
         return self.__class__.__name__
+
+    @property
+    def _transfer_functions(self) -> list[POST_TREATER_T]:
+        """
+        Give functions transforming acquisition voltage to physical quantity.
+
+        They are used when input files contain raw data, ie acquisition
+        voltages.
+
+        """
+        logging.warning(
+            f"{self} has no transfer function defined, so its ``data``"
+            " attribute will hold acquisition voltage in volt rather than any "
+            "meaningful physical quantity."
+        )
+        return []
 
     @property
     def _raw_data(self) -> pd.Series:

@@ -12,6 +12,7 @@ from multipac_testbench.util.transfer_functions import (
     field_probe,
     field_probe_inv,
 )
+from multipac_testbench.util.types import POST_TREATER_T
 
 
 class FieldProbe(IElectricField):
@@ -22,6 +23,7 @@ class FieldProbe(IElectricField):
         *args,
         g_probe: float | None = None,
         calibration_file: str | None = None,
+        freq_mhz: float | None = None,
         patch: bool = False,
         **kwargs,
     ) -> None:
@@ -31,18 +33,23 @@ class FieldProbe(IElectricField):
             Maybe ``a_rack``, ``b_rack`` and ``g_probe`` shoud be read from the
             results file.
 
+        See Also
+        --------
+        :func:`.transfer_functions.field_probe`
+
         Parameters
         ----------
         g_probe :
             Total attenuation. Probe specific, also depends on frequency. Used
             when the ``g_probe`` in LabViewer is wrong and data must be
-            patched (``patch == True``).
+            patched (``patch == True``), or when ``raw_data``.
         calibration_file :
             Path to the probe calibration file, linking the probe voltage (sent
             to the National Instruments card) to the actual voltage in the tube
-            at the probe position. Check :meth:`._load_calibration_file` for
-            more information. Used when the ``g_probe`` in LabViewer is wrong
-            and data must be patched (``patch == True``).
+            at the probe position. Check :meth:`_rf_rack_calibration_constants`
+            for more information. Used when the ``g_probe`` in LabViewer is
+            wrong and data must be patched (``patch == True``, or when
+            ``raw_data``).
         patch :
             Patch the given data to compensate for a ``g_probe = -1`` in
             LabViewer. This was a bug that is now fixed, so this option should
@@ -51,20 +58,27 @@ class FieldProbe(IElectricField):
             Note that it overrides a ``_raw_data`` protection mechanism.
 
         """
-        super().__init__(*args, **kwargs)
-
         #: Total attenuation. Probe specific, also depends on frequency.
         self._g_probe = g_probe
-
         #: Rack calibration slope in :unit:`V/dBm`.
         self._a_rack: float
         #: Rack calibration constant in :unit:`dBm`.
         self._b_rack: float
+
         if calibration_file is not None:
+            assert (
+                freq_mhz is not None
+            ), "Frequency is mandatory to calibrate probes."
             self._a_rack, self._b_rack = self._rf_rack_calibration_constants(
-                Path(calibration_file)
+                Path(calibration_file),
+                freq_mhz=freq_mhz,
             )
+        super().__init__(*args, **kwargs)
+
         if patch:
+            assert (
+                not self._is_raw
+            ), "`patch` kwarg designed to patch non-raw data."
             self._raw_data_can_change = True
             self._patch_data()
             self._raw_data_can_change = False
@@ -74,8 +88,24 @@ class FieldProbe(IElectricField):
         """Label used for plots."""
         return r"Measured voltage [V]"
 
+    @property
+    def _transfer_functions(self) -> list[POST_TREATER_T]:
+        assert hasattr(self, "_a_rack")
+        assert hasattr(self, "_b_rack")
+        assert self._g_probe is not None
+
+        return [
+            partial(
+                field_probe,
+                g_probe=self._g_probe,
+                a_rack=self._a_rack,
+                b_rack=self._b_rack,
+                z_0=50.0,
+            )
+        ]
+
     def _patch_data(self, g_probe_in_labview: float = -1.0) -> None:
-        """Correct ``raw_data`` when ``g_probe`` in LabVIEWER is wrong.
+        """Correct ``raw_data`` when ``g_probe`` in LabViewer is wrong.
 
         The default value for ``g_probe_in_labview`` is only a guess.
 
@@ -103,7 +133,7 @@ class FieldProbe(IElectricField):
     def _rf_rack_calibration_constants(
         self,
         calibration_file: Path,
-        freq_mhz: float = 120.0,
+        freq_mhz: float,
         freq_col: str = "Frequency [MHz]",
         a_col: str = "a [dBm / V]",
         b_col: str = "b [dBm]",
