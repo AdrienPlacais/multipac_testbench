@@ -1,5 +1,6 @@
 """Define field probe to measure electric field."""
 
+import logging
 from functools import partial
 from pathlib import Path
 
@@ -22,16 +23,13 @@ class FieldProbe(IElectricField):
         self,
         *args,
         g_probe: float | None = None,
+        attenuation_file: str | None = None,
         calibration_file: str | None = None,
         freq_mhz: float | None = None,
         patch: bool = False,
         **kwargs,
     ) -> None:
         r"""Instantiate with some specific arguments.
-
-        .. todo::
-            Maybe ``a_rack``, ``b_rack`` and ``g_probe`` shoud be read from the
-            results file.
 
         See Also
         --------
@@ -42,7 +40,12 @@ class FieldProbe(IElectricField):
         g_probe :
             Total attenuation. Probe specific, also depends on frequency. Used
             when the ``g_probe`` in LabViewer is wrong and data must be
-            patched (``patch == True``), or when ``raw_data``.
+            patched (``patch == True``), or when ``raw_data``. Deprecated,
+            prefer giving ``attenuation_file``.
+        attenuation_file :
+            Path to the probe attenuation file, linking voltage in line to
+            voltage measured by the probe. This is frequency and probe
+            specific.
         calibration_file :
             Path to the probe calibration file, linking the probe voltage (sent
             to the National Instruments card) to the actual voltage in the tube
@@ -60,6 +63,11 @@ class FieldProbe(IElectricField):
         """
         #: Total attenuation. Probe specific, also depends on frequency.
         self._g_probe = g_probe
+        if g_probe is not None:
+            logging.warning(
+                f"Giving ``g_probe`` is deprectated. Prefer giving "
+                "``attenuation_file``."
+            )
         #: Rack calibration slope in :unit:`V/dBm`.
         self._a_rack: float
         #: Rack calibration constant in :unit:`dBm`.
@@ -68,9 +76,17 @@ class FieldProbe(IElectricField):
         if calibration_file is not None:
             assert (
                 freq_mhz is not None
-            ), "Frequency is mandatory to calibrate probes."
+            ), "Frequency is mandatory to calibrate racks."
             self._a_rack, self._b_rack = self._rf_rack_calibration_constants(
                 Path(calibration_file),
+                freq_mhz=freq_mhz,
+            )
+        if attenuation_file is not None:
+            assert (
+                freq_mhz is not None
+            ), "Frequency is mandatory to calibrate probes."
+            self._g_probe = self._probe_attenuation(
+                Path(attenuation_file),
                 freq_mhz=freq_mhz,
             )
         super().__init__(*args, **kwargs)
@@ -192,3 +208,62 @@ class FieldProbe(IElectricField):
         a_rack = ser[a_col]
         b_rack = ser[b_col]
         return a_rack, b_rack
+
+    def _probe_attenuation(
+        self, attenuation_file: Path, freq_mhz: float
+    ) -> float:
+        """Load attenuation file, interpolate proper attenuation data.
+
+        The given file must look like:
+
+        .. code-block::
+
+            # Calibration of electric field probes
+            # Adrien Placais measurement on 2025-06-11
+            # Attenuations are in dB
+            Frequency [MHz],100,120,140,160
+            NI9205_E1,-78.7,-77.2,-75.6,-75.4
+            NI9205_E2,-77.8,-77.4,-77.2,-75.4
+            NI9205_E3,-78.1,-77.2,-76.8,-76.6
+            NI9205_E4,-77.8,-76.8,-75.9,-74.6
+            NI9205_E5,-79.5,-76.9,-76.4,-75.5
+            NI9205_E6,-79.6,-78.2,-77.5,-76.9
+            NI9205_E7,-75.9,-76.6,-74.4,-74.0
+
+        ``self.name`` must correspond to a line in this file.
+
+        Parameters
+        ----------
+        attenuation_file :
+            Path to the ``CSV`` attenuation file.
+        freq_mhz :
+            RF frequency for this test in :unit:`MHz`. If not present in the
+            file, it is interpolated. If it is outside interpolation range, a
+            warning is printed.
+
+        Returns
+        -------
+        g_probe : float
+            Attenuation for this probe at ``freq_mhz``.
+
+        """
+        df = pd.read_csv(attenuation_file, comment="#", index_col=0)
+
+        df.columns = df.columns.astype(float)
+
+        if self.name not in df.index:
+            raise ValueError(
+                f"Probe '{self.name}' not found in attenuation file"
+            )
+
+        freqs = df.columns.to_numpy()
+        attens = df.loc[self.name].to_numpy()
+
+        if freq_mhz < freqs[0] or freq_mhz > freqs[-1]:
+            logging.warning(
+                f"Frequency {freq_mhz} MHz is outside the calibration range "
+                f"({freqs[0]}–{freqs[-1]} MHz). Extrapolating.",
+                UserWarning,
+            )
+
+        return float(np.interp(freq_mhz, freqs, attens))
