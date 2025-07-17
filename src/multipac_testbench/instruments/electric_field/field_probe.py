@@ -21,7 +21,8 @@ class FieldProbe(IElectricField):
 
     def __init__(
         self,
-        *args,
+        name: str,
+        raw_data: pd.Series | None,
         g_probe: float | None = None,
         attenuation_file: str | None = None,
         calibration_file: str | None = None,
@@ -86,10 +87,9 @@ class FieldProbe(IElectricField):
                 freq_mhz is not None
             ), "Frequency is mandatory to calibrate probes."
             self._g_probe = self._probe_attenuation(
-                Path(attenuation_file),
-                freq_mhz=freq_mhz,
+                Path(attenuation_file), freq_mhz=freq_mhz, name=name
             )
-        super().__init__(*args, **kwargs)
+        super().__init__(name=name, raw_data=raw_data, **kwargs)
 
         if patch:
             assert (
@@ -210,7 +210,10 @@ class FieldProbe(IElectricField):
         return a_rack, b_rack
 
     def _probe_attenuation(
-        self, attenuation_file: Path, freq_mhz: float
+        self,
+        attenuation_file: Path,
+        freq_mhz: float,
+        name: str,
     ) -> float:
         """Load attenuation file, interpolate proper attenuation data.
 
@@ -230,8 +233,6 @@ class FieldProbe(IElectricField):
             NI9205_E6,-79.6,-78.2,-77.5,-76.9
             NI9205_E7,-75.9,-76.6,-74.4,-74.0
 
-        ``self.name`` must correspond to a line in this file.
-
         Parameters
         ----------
         attenuation_file :
@@ -240,6 +241,8 @@ class FieldProbe(IElectricField):
             RF frequency for this test in :unit:`MHz`. If not present in the
             file, it is interpolated. If it is outside interpolation range, a
             warning is printed.
+        name :
+            Name of current column; must correspond to a line in the file.
 
         Returns
         -------
@@ -251,13 +254,11 @@ class FieldProbe(IElectricField):
 
         df.columns = df.columns.astype(float)
 
-        if self.name not in df.index:
-            raise ValueError(
-                f"Probe '{self.name}' not found in attenuation file"
-            )
+        if name not in df.index:
+            raise ValueError(f"Probe '{name}' not found in attenuation file")
 
         freqs = df.columns.to_numpy()
-        attens = df.loc[self.name].to_numpy()
+        attens = df.loc[name].to_numpy()
 
         if freq_mhz < freqs[0] or freq_mhz > freqs[-1]:
             logging.warning(
