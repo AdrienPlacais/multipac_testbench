@@ -38,9 +38,22 @@ INSTRUMENT_NAME_T = Literal[
 class InstrumentFactory:
     """Class to create instruments."""
 
-    def __init__(self, freq_mhz: float | None = None) -> None:
-        """Set user-defined constants to create correspondig instrument."""
+    def __init__(
+        self, freq_mhz: float | None = None, is_raw: bool = False
+    ) -> None:
+        """Set user-defined constants to create correspondig instrument.
+
+        Parameters
+        ----------
+        freq_mhz:
+            Frequency in :unit:`MHz`.
+        is_raw :
+            If set to ``True``, input data files is considered to be raw, ie to
+            contain acquisition voltages instead of physical quantities.
+
+        """
         self.freq_mhz = freq_mhz
+        self._is_raw = is_raw
 
     def run(
         self,
@@ -98,7 +111,13 @@ class InstrumentFactory:
             return instrument_class.from_pd_dataframe(
                 name, raw_data, **instruments_kw
             )
-        return instrument_class(name, raw_data, **instruments_kw)
+        return instrument_class(
+            name,
+            raw_data,
+            is_raw=self._is_raw,
+            freq_mhz=self.freq_mhz,
+            **instruments_kw,
+        )
 
     def run_virtual(
         self,

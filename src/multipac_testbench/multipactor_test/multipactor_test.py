@@ -670,6 +670,7 @@ class MultipactorTest:
         sep: str = "\t",
         trigger_policy: TRIGGER_POLICIES = "keep_all",
         index_col: str = "Sample index",
+        is_raw: bool = False,
         remove_metadata_columns: bool = False,
         **kwargs,
     ) -> None:
@@ -695,6 +696,9 @@ class MultipactorTest:
             Name of the column holding index data.
         remove_metadata_columns :
             Remove the rightmost columns holding metadata.
+        is_raw :
+            If set to ``True``, input data files is considered to be raw, ie to
+            contain acquisition voltages instead of physical quantities.
         kwargs :
             Other kwargs passed to :func:`.load`.
 
@@ -718,7 +722,8 @@ class MultipactorTest:
             )
 
         imeasurement_point_factory = IMeasurementPointFactory(
-            freq_mhz=freq_mhz
+            freq_mhz=freq_mhz,
+            is_raw=is_raw,
         )
         imeasurement_points = imeasurement_point_factory.run(
             config,

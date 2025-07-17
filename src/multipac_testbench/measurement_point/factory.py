@@ -23,17 +23,20 @@ class IMeasurementPointFactory:
 
     """
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, is_raw: bool = False, **kwargs) -> None:
         """Instantiate the class with its :class:`.InstrumentFactory`.
 
         Parameters
         ----------
+        is_raw :
+            If set to ``True``, input data files is considered to be raw, ie to
+            contain acquisition voltages instead of physical quantities.
         kwargs :
             Keyword arguments that are directly passed down to the
             :class:`.InstrumentFactory`.
 
         """
-        self.instrument_factory = InstrumentFactory(**kwargs)
+        self.instrument_factory = InstrumentFactory(is_raw=is_raw, **kwargs)
 
     def run_single(
         self,

@@ -697,6 +697,7 @@ class TestCampaign(list[MultipactorTest]):
         sep: str = ";",
         trigger_policy: TRIGGER_POLICIES = "keep_all",
         index_col: str = "Sample index",
+        is_raw: bool = False,
         **kwargs,
     ) -> Self:
         """Instantiate the :class:`.MultipactorTest` and :class:`TestCampaign`.
@@ -719,6 +720,9 @@ class TestCampaign(list[MultipactorTest]):
             How consecutive measures at the same power should be treated.
         index_col :
             Name of column holding measurement index.
+        is_raw :
+            If set to ``True``, input data files are considered to be raw, ie
+            to contain acquisition voltages instead of physical quantities.
 
         Returns
         -------
@@ -745,6 +749,7 @@ class TestCampaign(list[MultipactorTest]):
                     sep=sep,
                     trigger_policy=trigger_policy,
                     index_col=index_col,
+                    is_raw=is_raw,
                     **kwargs,
                 )
             except Exception as e:
