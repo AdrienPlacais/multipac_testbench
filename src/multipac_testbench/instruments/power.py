@@ -115,7 +115,7 @@ class ForwardPower(Power):
         if (
             self._is_raw
             and hasattr(self, "_alpha_fix")
-            or hasattr(self, "k_fix")
+            or hasattr(self, "_k_fix")
         ):
             logging.warning(
                 "ForwardPower typically measured on channel A, so you should "
@@ -133,10 +133,8 @@ class ReflectedPower(Power):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        if (
-            self._is_raw
-            and not hasattr(self, "_alpha_fix")
-            or not hasattr(self, "k_fix")
+        if self._is_raw and not (
+            hasattr(self, "_alpha_fix") and hasattr(self, "_k_fix")
         ):
             logging.warning(
                 "ReflectedPower typically measured on channel B, so you should"
