@@ -604,7 +604,7 @@ def plot_df_threshold(
     label_to_color: dict[str, tuple[float, float, float]],
     fig_title: str,
     xticks: Sequence[float],
-    ms: int = 10,
+    ms: int = 8,
     lw: float = 0.0,
     axes: Axes | None = None,
     **kwargs,
