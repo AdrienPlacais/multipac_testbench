@@ -48,9 +48,7 @@ class CampaignPlotter:
     def sweet_plot(
         self,
         *args,
-        campaign_multipactor_bands: (
-            CampaignMultipactorBands | list[None] | None
-        ) = None,
+        thresholds_sets: dict[MultipactorTest, ThresholdSet] | None = None,
         png_folder: str | None = None,
         csv_folder: str | None = None,
         all_on_same_plot: bool = False,
@@ -65,10 +63,9 @@ class CampaignPlotter:
         ----------
         args :
             Arguments that are passed to :meth:`.MultipactorTest.sweet_plot`.
-        campaign_multipactor_bands :
-            Object holding the :class:`.TestMultipactorBands` corresponding to
-            each :class:`.MultipactorTest` stored in ``self``. The default is
-            None, in which case the multipactor zones are not drawn.
+        thresholds_sets :
+            Thresholds to plot corresponding to some or each
+            :class:`.MultipactorTest`.
         png_folder :
             If provided, all the created figures will be saved there.
         csv_folder :
@@ -88,17 +85,19 @@ class CampaignPlotter:
             Holds data used to create the plot.
 
         """
+        if all_on_same_plot:
+            return self._sweet_plot_same_plot(
+                *args,
+                thresholds_sets=thresholds_sets,
+                png_folder=png_folder,
+                csv_folder=csv_folder,
+                **kwargs,
+            )
+
         all_axes = []
         all_df = []
-        if campaign_multipactor_bands is None:
-            campaign_multipactor_bands = [None for _ in self.campaign]
 
-        zipper = zip(self.campaign, campaign_multipactor_bands, strict=True)
-
-        if all_on_same_plot:
-            return self._sweet_plot_same_plot(zipper, *args, **kwargs)
-
-        for test, band in zipper:
+        for test in self.campaign:
             png_path = (
                 test.output_filepath(png_folder, ".png")
                 if png_folder
@@ -113,8 +112,8 @@ class CampaignPlotter:
 
             axes, df_plot = test.plotter.sweet_plot(
                 *args,
+                threshold_set=(thresholds_sets or {}).get(test, None),
                 png_path=png_path,
-                # test_multipactor_bands=band,
                 csv_path=csv_path,
                 **kwargs,
             )
@@ -124,15 +123,43 @@ class CampaignPlotter:
 
     def _sweet_plot_same_plot(
         self,
-        zipper: zip,
         *args,
+        thresholds_sets: dict[MultipactorTest, ThresholdSet] | None = None,
         png_path: Path | None = None,
         png_kwargs: dict | None = None,
         csv_path: Path | None = None,
         csv_kwargs: dict | None = None,
         **kwargs,
     ) -> tuple[list[Axes], pd.DataFrame]:
-        """Plot the various signals on the same Axes."""
+        """Plot the various signals on the same Axes.
+
+        Parameters
+        ----------
+        args :
+            Arguments that are passed to :meth:`.MultipactorTest.sweet_plot`.
+        thresholds_sets :
+            Thresholds to plot corresponding to some or each
+            :class:`.MultipactorTest`.
+        png_folder :
+            If provided, all the created figures will be saved there.
+        csv_folder :
+            If provided, all the created DataFrame will be saved there.
+        all_on_same_plot :
+            If all the data from all the :class:`.MultipactorTest` should be
+            drawn on the same Axes.
+        kwargs :
+            Other keyword arguments passed to
+            :meth:`.MultipactorTest.sweet_plot`.
+
+        Returns
+        -------
+        axes :
+            Holds plotted fig.
+        data :
+            Holds data used to create the plot.
+
+        """
+
         if len(args) > 1:
             logging.warning(
                 "I am not sure how the interaction of all_on_same_plot with "
@@ -141,10 +168,10 @@ class CampaignPlotter:
         axes = None
         all_df = []
         colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
-        for i, (test, band) in enumerate(zipper):
+        for i, test in enumerate(self.campaign):
             axes, df_plot = test.plotter.sweet_plot(
                 *args,
-                test_multipactor_bands=band,
+                threshold_set=(thresholds_sets or {}).get(test, None),
                 axes=axes,
                 column_names=str(test),
                 title=" ",
