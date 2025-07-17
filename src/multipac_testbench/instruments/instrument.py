@@ -256,7 +256,7 @@ class Instrument(ABC):
 
     def _notify_callbacks(self) -> None:
         """Call all callback functions."""
-        if len(self._callbacks) == 0:
+        if len(getattr(self, "_callbacks", [])) == 0:
             return
 
         for cb in self._callbacks:
