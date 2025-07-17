@@ -262,8 +262,7 @@ class FieldProbe(IElectricField):
         if freq_mhz < freqs[0] or freq_mhz > freqs[-1]:
             logging.warning(
                 f"Frequency {freq_mhz} MHz is outside the calibration range "
-                f"({freqs[0]}--{freqs[-1]} MHz). Extrapolating.",
-                UserWarning,
+                f"({freqs[0]}--{freqs[-1]} MHz). Extrapolating."
             )
 
         return float(np.interp(freq_mhz, freqs, attens))
