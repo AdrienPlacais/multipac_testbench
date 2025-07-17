@@ -9,8 +9,8 @@ from multipac_testbench.instruments.electric_field.i_electric_field import (
     IElectricField,
 )
 from multipac_testbench.util.transfer_functions import (
-    v_acquisition_to_v_coax,
-    v_coax_to_v_acquisition,
+    field_probe,
+    field_probe_inv,
 )
 
 
@@ -84,14 +84,14 @@ class FieldProbe(IElectricField):
         assert hasattr(self, "_b_rack")
         assert self._g_probe is not None
         fun1 = partial(
-            v_coax_to_v_acquisition,
+            field_probe_inv,
             g_probe=g_probe_in_labview,
             a_rack=self._a_rack,
             b_rack=self._b_rack,
             z_0=50.0,
         )
         fun2 = partial(
-            v_acquisition_to_v_coax,
+            field_probe,
             g_probe=self._g_probe,
             a_rack=self._a_rack,
             b_rack=self._b_rack,

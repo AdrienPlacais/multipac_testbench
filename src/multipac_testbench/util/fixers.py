@@ -9,8 +9,8 @@ from multipac_testbench.instruments.electric_field.helper import (
 )
 from multipac_testbench.multipactor_test.loader import load, save
 from multipac_testbench.util.transfer_functions import (
-    v_acquisition_to_v_coax,
-    v_coax_to_v_acquisition,
+    field_probe,
+    field_probe_inv,
 )
 from multipac_testbench.util.types import FIELD_PROBES
 
@@ -90,13 +90,13 @@ def fix_wrong_e_field_calibration(
         if col not in data:
             continue
 
-        v_acqui = v_coax_to_v_acquisition(
+        v_acqui = field_probe_inv(
             data[col].to_numpy(),
             g_probe_bad[probe],
             a_rack_bad[probe],
             b_rack_bad[probe],
         )
-        v_coax = v_acquisition_to_v_coax(
+        v_coax = field_probe(
             v_acqui, g_probe_new[probe], a_rack_new[probe], b_rack_new[probe]
         )
         data[col] = v_coax
