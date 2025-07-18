@@ -299,7 +299,7 @@ class Instrument(ABC):
             return an array with the same size as output.
 
         """
-        logging.info(f"Adding a post_treater to {self}.")
+        logging.debug(f"Adding a post_treater to {self}.")
         if hasattr(self, "_data"):
             delattr(self, "_data")
         if hasattr(self, "_data_as_pd"):

@@ -154,12 +154,14 @@ def power(
 
     Returns
     -------
-    power :
+    watt :
         :math:`P` in :unit:`W`, which should be the content of the
         ``NI9205_Powerx`` columns.
 
     """
-    return a_calib * v_acq + b_calib
+    watt = a_calib * v_acq + b_calib
+    # watt[watt < 0.0] = 0.0
+    return watt
 
 
 def power_channel_b(
