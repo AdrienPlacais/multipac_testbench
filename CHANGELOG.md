@@ -11,11 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Function to fix the voltage columns when rf rack calibration or probe attenuation was not updated in LabView.
-- `PowerSetpoint` instrument holding the `NI9205_dBm` column.
-- `PowerStep` and `PowerStepSet` to handle power step files.
+- `PowerStep` and `PowerStepSet` to handle power step (trigger) files.
   - Allows averaging instrument data, rather than taking the maximum!
-- `FieldPowerError` new `VirtualInstrument`, to compute error between field measured by probes, and field calculated from powers.
+- You can load `RAW` files.
+  - Allows to control the `V_acquisition`➡️ `physical quantity` transfer function.
+  - When loading `PowerStep` (trigger) files, it is more robust to perform averaging on measured current rather than on the physical quantity.
+- New `Instrument` s:
+  - `PowerSetpoint` to hold the `NI9205_dBm` column. Allows for a much more robust detection of power cycles and power extrema.
+  - `FieldPowerError` to compute error between field measured by probes, and field calculated from powers.
+- Function to fix the voltage columns when rf rack calibration or probe attenuation was not updated in LabView.
 
 ### Changed
 
