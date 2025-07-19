@@ -272,6 +272,7 @@ def fit_somersalo_scaling(
     ls: str = "--",
     r_col: str = "R",
     p_col: str = "P_low",
+    freq_mhz: str | None = None,
     **fit_plot_kw,
 ) -> pd.DataFrame:
     """Fit the Somersalo scaling law over measurements.
@@ -293,6 +294,8 @@ def fit_somersalo_scaling(
         Linestyle for the fit line.
     r_col, p_col :
         Column names where R and P_low are stored in ``df_low``.
+    freq_mhz :
+        Label added to the legend. This string already has an unit.
 
     Returns
     -------
@@ -321,6 +324,9 @@ def fit_somersalo_scaling(
 
     else:
         somer_index = f"Fit ({somer_index} = {popt[0]:3.1f}W)"
+
+    if freq_mhz:
+        somer_index += f" @{freq_mhz}"
 
     df_fit = pd.DataFrame(
         {"$R$": R, somer_index: somersalo_scaling_law(R, *popt)}
