@@ -100,6 +100,7 @@ class ThresholdSet:
             multipactors = [
                 multipac_detector(instr.data)
                 for instr in detecting_instruments
+                if isinstance(instr.position, float)
             ]
             reducer = np.any if threshold_reducer == "any" else np.all
             combined = reducer(multipactors, axis=0)

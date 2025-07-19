@@ -11,8 +11,6 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any, Callable, Self, TypeVar, cast
 
-import matplotlib.cm as cm
-import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import multipac_testbench.instruments as ins
 import numpy as np
@@ -463,15 +461,16 @@ class CampaignPlotter:
                 )
 
             df_fit = None
-            if show_fit and not df_low.empty:
-                df_fit = fit_somersalo_scaling(
-                    df_low,
-                    full_output=full_output,
-                    plot=True,
-                    axes=axes,
-                    freq_mhz=suffix,
-                    c=freq_to_color[freq_mhz],
-                )
+            if show_fit:
+                if not df_low.empty:
+                    df_fit = fit_somersalo_scaling(
+                        df_low,
+                        full_output=full_output,
+                        plot=True,
+                        axes=axes,
+                        freq_mhz=suffix,
+                        c=freq_to_color[freq_mhz],
+                    )
 
             df_lows[freq_mhz] = df_low
             df_upps[freq_mhz] = df_upp
@@ -496,6 +495,11 @@ class CampaignPlotter:
                 plot.save_dataframe(
                     df_upps[freq_mhz],
                     csv_dir / f"{csv_stem}_{suffix}_upp.csv",
+                    **(csv_kwargs or {}),
+                )
+                plot.save_dataframe(
+                    df_fits[freq_mhz],
+                    csv_dir / f"{csv_stem}_{suffix}_fit.csv",
                     **(csv_kwargs or {}),
                 )
         return axes, df_lows, df_upps, df_fits
