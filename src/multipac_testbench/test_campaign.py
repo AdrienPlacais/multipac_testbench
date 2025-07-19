@@ -490,15 +490,14 @@ class CampaignPlotter:
                 suffix = f"{freq_mhz:.0f}MHz"
                 plot.save_dataframe(
                     df_lows[freq_mhz],
-                    csv_dir / f"{csv_stem}_{suffix}_low",
+                    csv_dir / f"{csv_stem}_{suffix}_low.csv",
                     **(csv_kwargs or {}),
                 )
-                if add_upper_thresholds:
-                    plot.save_dataframe(
-                        df_upps[freq_mhz],
-                        csv_dir / f"{csv_stem}_{suffix}_upp",
-                        **(csv_kwargs or {}),
-                    )
+                plot.save_dataframe(
+                    df_upps[freq_mhz],
+                    csv_dir / f"{csv_stem}_{suffix}_upp.csv",
+                    **(csv_kwargs or {}),
+                )
         return axes, df_lows, df_upps, df_fits
 
     def voltage_thresholds(
