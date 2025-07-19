@@ -115,6 +115,10 @@ class TestPlotter:
         .. todo::
             Kwargs mixed up between the different methods.
 
+        .. todo::
+            Fix bug when ``threshold_set`` is provided along with an Instrument
+            type returning several instrument types, such as `Power`
+
         Parameters
         ----------
         *ydata :
@@ -259,6 +263,8 @@ class TestPlotter:
                 global_multipactor=global_multipactor,
             )
             df_to_plot = pd.concat([df_to_plot, df_thresholds], axis=1)
+            for ax in dic_axes.values():
+                ax.legend(loc="lower left", ncols=2, fontsize="xx-small")
 
         if png_path is not None:
             plot.save_figure(axes, png_path, **(png_kwargs or {}))
