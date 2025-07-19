@@ -11,6 +11,8 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any, Callable, Self, TypeVar, cast
 
+import matplotlib.cm as cm
+import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import multipac_testbench.instruments as ins
 import numpy as np
@@ -27,9 +29,6 @@ from multipac_testbench.measurement_point.i_measurement_point import (
 )
 from multipac_testbench.multipactor_band.campaign_multipactor_bands import (
     CampaignMultipactorBands,
-)
-from multipac_testbench.multipactor_band.instrument_multipactor_bands import (
-    InstrumentMultipactorBands,
 )
 from multipac_testbench.multipactor_test import MultipactorTest
 from multipac_testbench.multipactor_test.loader import TRIGGER_POLICIES
@@ -420,6 +419,13 @@ class CampaignPlotter:
         for test in self.campaign:
             tests_by_freq[test.freq_mhz].append(test)
 
+        prop_cycle = plt.rcParams["axes.prop_cycle"]
+        colors = [c["color"] for c in prop_cycle]
+        freq_to_color = {
+            freq: colors[i % len(colors)]
+            for i, freq in enumerate(sorted(tests_by_freq.keys()))
+        }
+
         df_lows, df_upps, df_fits = {}, {}, {}
         df_low, df_upp, df_fit = None, None, None
         for freq_mhz, tests in sorted(tests_by_freq.items()):
@@ -444,6 +450,7 @@ class CampaignPlotter:
                     marker="o",
                     label=f"P_low ({suffix})",
                     ax=axes,
+                    c=freq_to_color[freq_mhz],
                     **plot_kwargs,
                 )
             if add_upper_thresholds and not df_upp.empty:
@@ -451,6 +458,7 @@ class CampaignPlotter:
                     marker="*",
                     label=f"P_high ({suffix})",
                     ax=axes,
+                    c=freq_to_color[freq_mhz],
                     **plot_kwargs,
                 )
 
@@ -462,6 +470,7 @@ class CampaignPlotter:
                     plot=True,
                     axes=axes,
                     freq_mhz=suffix,
+                    c=freq_to_color[freq_mhz],
                 )
 
             df_lows[freq_mhz] = df_low
