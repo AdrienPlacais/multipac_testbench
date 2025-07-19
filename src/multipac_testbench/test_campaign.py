@@ -338,7 +338,12 @@ class CampaignPlotter:
         csv_path: Path | None = None,
         csv_kwargs: dict | None = None,
         **fig_kw,
-    ) -> tuple[Axes, pd.DataFrame, pd.DataFrame, pd.DataFrame | None]:
+    ) -> tuple[
+        Axes | None,
+        dict[float, pd.DataFrame] | None,  # df_low per freq
+        dict[float, pd.DataFrame] | None,  # df_upp per freq
+        dict[float, pd.DataFrame | None] | None,  # df_fit per freq
+    ]:
         r"""Represent evolution of forward power threshold with :math:`R`.
 
         Somersalo et al. :cite:`Somersalo1998` link the mixed wave (:math:`MW`)
@@ -393,9 +398,6 @@ class CampaignPlotter:
 
         """
 
-        # frequencies = {test.freq_mhz for test in self.campaign}
-        # if len(frequencies) != 1:
-        #     raise NotImplementedError("Plot over several freqs to implement")
         def build_dataframe(
             r_values: list[float], p_values: list[float], label: str
         ) -> pd.DataFrame:
@@ -405,23 +407,6 @@ class CampaignPlotter:
                 .dropna()
             )
 
-        tests_at_140_mhz = [
-            test for test in self.campaign if test.freq_mhz == 140.0
-        ]
-        lower_rs, upper_rs = [], []
-        lower_ps, upper_ps = [], []
-
-        for test in tests_at_140_mhz:
-            lower_r, lower_p, upper_r, upper_p = (
-                test.data_for_somersalo_scaling_law(
-                    thresholds_sets[test], use_theoretical_r=use_theoretical_r
-                )
-            )
-            lower_rs.append(lower_r)
-            lower_ps.append(lower_p)
-            upper_rs.append(upper_r)
-            upper_ps.append(upper_p)
-
         plot_kwargs = {
             "x": "R",
             "xlabel": ReflectionCoefficient.ylabel(),
@@ -430,35 +415,82 @@ class CampaignPlotter:
             "ms": 15,
             **fig_kw,
         }
-        df_low = build_dataframe(lower_rs, lower_ps, "P_low")
-        axes = df_low.plot(marker="o", ax=axes, **plot_kwargs)
 
-        df_upp = build_dataframe(upper_rs, upper_ps, "P_high")
-        if add_upper_thresholds:
-            axes = df_upp.plot(marker="*", ax=axes, **plot_kwargs)
+        tests_by_freq: dict[float, list[MultipactorTest]] = defaultdict(list)
+        for test in self.campaign:
+            tests_by_freq[test.freq_mhz].append(test)
 
-        df_fit = None
-        if show_fit and len(df_low) > 0:
-            df_fit = fit_somersalo_scaling(
-                df_low, full_output=full_output, plot=True, axes=axes
-            )
+        df_lows, df_upps, df_fits = {}, {}, {}
+        df_low, df_upp, df_fit = None, None, None
+        for freq_mhz, tests in sorted(tests_by_freq.items()):
+            lower_rs, lower_ps, upper_rs, upper_ps = [], [], [], []
 
-        assert axes is not None
+            for test in tests:
+                args = test.data_for_somersalo_scaling_law(
+                    thresholds_sets[test],
+                    use_theoretical_r=use_theoretical_r,
+                )
+                lower_r, lower_p, upper_r, upper_p = args
+                lower_rs.append(lower_r)
+                lower_ps.append(lower_p)
+                upper_rs.append(upper_r)
+                upper_ps.append(upper_p)
+
+            suffix = f"{freq_mhz:.0f}MHz"
+            df_low = build_dataframe(lower_rs, lower_ps, f"P_low ({suffix})")
+            df_upp = build_dataframe(upper_rs, upper_ps, f"P_high ({suffix})")
+            if not df_low.empty:
+                axes = df_low.plot(
+                    marker="o",
+                    label=f"P_low ({suffix})",
+                    ax=axes,
+                    **plot_kwargs,
+                )
+            if add_upper_thresholds and not df_upp.empty:
+                axes = df_upp.plot(
+                    marker="*",
+                    label=f"P_high ({suffix})",
+                    ax=axes,
+                    **plot_kwargs,
+                )
+
+            df_fit = None
+            if show_fit and not df_low.empty:
+                df_fit = fit_somersalo_scaling(
+                    df_low,
+                    full_output=full_output,
+                    plot=True,
+                    axes=axes,
+                    freq_mhz=suffix,
+                )
+
+            df_lows[freq_mhz] = df_low
+            df_upps[freq_mhz] = df_upp
+            df_fits[freq_mhz] = df_fit
+
+        if axes is None:
+            logging.error("No Somersalo scaling law data plotted.")
+            return None, df_lows, df_upps, df_fits
+
         if png_path is not None:
             plot.save_figure(axes, png_path, **(png_kwargs or {}))
-        if csv_path is not None:
-            csv_name = csv_path.stem
-            plot.save_dataframe(
-                df_low,
-                csv_path.with_name(f"{csv_name}_low"),
-                **(csv_kwargs or {}),
-            )
-            plot.save_dataframe(
-                df_upp,
-                csv_path.with_name(f"{csv_name}_upp"),
-                **(csv_kwargs or {}),
-            )
-        return axes, df_low, df_upp, df_fit
+        if csv_path:
+            csv_stem = csv_path.stem
+            csv_dir = csv_path.parent
+            for freq_mhz in df_lows:
+                suffix = f"{freq_mhz:.0f}MHz"
+                plot.save_dataframe(
+                    df_lows[freq_mhz],
+                    csv_dir / f"{csv_stem}_{suffix}_low",
+                    **(csv_kwargs or {}),
+                )
+                if add_upper_thresholds:
+                    plot.save_dataframe(
+                        df_upps[freq_mhz],
+                        csv_dir / f"{csv_stem}_{suffix}_upp",
+                        **(csv_kwargs or {}),
+                    )
+        return axes, df_lows, df_upps, df_fits
 
     def voltage_thresholds(
         self,
