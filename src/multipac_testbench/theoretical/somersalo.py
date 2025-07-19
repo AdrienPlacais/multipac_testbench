@@ -265,18 +265,20 @@ def somersalo_scaling_law(reflected: np.ndarray, p_tw: float) -> np.ndarray:
 
 
 def fit_somersalo_scaling(
-    df_somersalo: pd.DataFrame,
+    df_low: pd.DataFrame,
     full_output: bool,
     plot: bool,
     axes: Axes | None = None,
     ls: str = "--",
+    r_col: str = "R",
+    p_col: str = "P_low",
     **fit_plot_kw,
 ) -> pd.DataFrame:
     """Fit the Somersalo scaling law over measurements.
 
     Parameters
     ----------
-    df_somersalo :
+    df_low :
         DataFrame holding reflection coefficient and forward power. We take the
         proper columns by looking for ``'ReflectionCoefficient'`` and
         ``'ForwardPower'`` column names.
@@ -287,16 +289,20 @@ def fit_somersalo_scaling(
     axes :
         Axes on which scaling law will be drawn. If not provided, a new Axe
         will be created.
+    ls :
+        Linestyle for the fit line.
+    r_col, p_col :
+        Column names where R and P_low are stored in ``df_low``.
 
     Returns
     -------
-    df_fitted :
+    df_fit :
         Holds the fitted Somersalo scaling law.
 
     """
     R = np.linspace(0, 1, 101)
-    r_fit = df_somersalo.filter(like="ReflectionCoefficient").values.ravel()
-    p_fit = df_somersalo.filter(like="ForwardPower").values.ravel()
+    r_fit = df_low.filter(like=r_col).values.ravel()
+    p_fit = df_low.filter(like=p_col).values.ravel()
 
     result = curve_fit(
         f=somersalo_scaling_law,
@@ -316,9 +322,9 @@ def fit_somersalo_scaling(
     else:
         somer_index = f"Fit ({somer_index} = {popt[0]:3.1f}W)"
 
-    df_fitted = pd.DataFrame(
+    df_fit = pd.DataFrame(
         {"$R$": R, somer_index: somersalo_scaling_law(R, *popt)}
     )
     if plot:
-        df_fitted.plot(ax=axes, x=0, y=1, grid=True, ls=ls, **fit_plot_kw)
-    return df_fitted
+        df_fit.plot(ax=axes, x=0, y=1, grid=True, ls=ls, **fit_plot_kw)
+    return df_fit

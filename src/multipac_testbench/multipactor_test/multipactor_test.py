@@ -72,6 +72,7 @@ from multipac_testbench.util.helper import (
     split_rows_by_masks,
     types_match,
 )
+from multipac_testbench.util.physics import swr_to_reflection
 from multipac_testbench.util.types import MULTIPAC_DETECTOR_T
 from numpy.typing import NDArray
 
@@ -1491,10 +1492,10 @@ class MultipactorTest:
 
     def data_for_somersalo_scaling_law(
         self,
-        multipactor_bands: TestMultipactorBands | InstrumentMultipactorBands,
+        threshold_set: ThresholdSet | dict[MultipactorTest, ThresholdSet],
         use_theoretical_r: bool = False,
         **kwargs,
-    ) -> pd.DataFrame:
+    ) -> tuple[float, float, float, float]:
         """Get the data necessary to plot the Somersalo scaling law.
 
         In particular, the power thresholds measured during the last half power
@@ -1502,18 +1503,15 @@ class MultipactorTest:
         time steps. Lower and upper thresholds are returned, even if Somersalo
         scaling law does not concern the upper threshold.
 
+        Use it with global multipactor, ie with :class:`.ThresholdSet` created
+        with ``threshold_reducer="all"``.
+
         Parameters
         ----------
-        multipactor_bands :
-            Object telling where multipactor happens. If it is a
-            :class:`.TestMultipactorBands`, we merge all the
-            :class:`.InstrumentMultipactorBands` in it, to know where the first
-            (``several_bands_politics='keep_first'``) multipactor happened,
-            anywhere in the testbench (``union='relaxed'``). You can also
-            provide directly an :class:`.InstrumentMultipactorBands`; we will
-            take its last :class:`.MultipactorBand`.
+        threshold_set :
+            Object telling where multipactor happens.
         use_theoretical_r :
-            If set to True, we return the :math:`R` corresponding to the
+            If set to True, we use the :math:`R` corresponding to the
             user-defined :math:`SWR`.
         kwargs :
             Other keyword arguments passed to :meth:`.at_last_threshold`.
@@ -1521,31 +1519,47 @@ class MultipactorTest:
         Returns
         -------
         data :
-            Holds the lower and upper :math:`P_f` during last half power cycle,
+            Holds the forward power at the last upper and lower thresholds, as
+            well as corresponding :math:`R` values.
             as well as reflection coefficient :math:`R` at same time steps.
 
         """
-        if isinstance(multipactor_bands, TestMultipactorBands):
-            multipactor_bands = multipactor_bands.merge(
-                union="relaxed",
-                info_test=str(self),
-                several_bands_politics="keep_lowest",
-            )
-
-        instruments = ForwardPower, ReflectionCoefficient
-        df_somersalo = self.at_last_threshold(
-            instruments, multipactor_bands, **kwargs
+        if not isinstance(threshold_set, ThresholdSet):
+            threshold_set = threshold_set[self]
+        forward_power = self.get_instrument(ForwardPower)
+        assert forward_power is not None
+        df = threshold_set.data_at_thresholds(
+            (forward_power,),
+            global_multipactor=True,
+            **kwargs,
         )
 
+        reflection_coeff = self.get_instrument(ReflectionCoefficient).data
         if use_theoretical_r:
             if np.isinf(self.swr):
-                reflection_coeff = 1.0
+                reflection_coeff = np.ones_like(reflection_coeff)
             else:
-                reflection_coeff = (self.swr - 1.0) / (self.swr + 1.0)
-            cols = df_somersalo.filter(like="ReflectionCoefficient").columns
-            df_somersalo[cols] = reflection_coeff
+                reflection_coeff = np.full_like(
+                    reflection_coeff, swr_to_reflection(self.swr)
+                )
 
-        return df_somersalo
+        try:
+            lower_col = df.filter(like="lower").columns[0]
+            lower_index = df[lower_col].last_valid_index()
+            lower_power = df[lower_col][lower_index]
+            lower_r = reflection_coeff[lower_index]
+        except IndexError:
+            lower_r, lower_power = np.nan, np.nan
+
+        try:
+            upper_col = df.filter(like="upper").columns[0]
+            upper_index = df[upper_col].last_valid_index()
+            upper_power = df[upper_col][upper_index]
+            upper_r = reflection_coeff[upper_index]
+        except IndexError:
+            upper_r, upper_power = np.nan, np.nan
+
+        return lower_r, lower_power, upper_r, upper_power
 
     def output_filepath(self, out_folder: str, extension: str) -> Path:
         """Create consistent path for output files."""

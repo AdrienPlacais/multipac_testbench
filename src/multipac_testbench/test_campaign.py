@@ -6,6 +6,7 @@ import functools
 import logging
 import math
 from abc import ABCMeta
+from collections import defaultdict
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any, Callable, Self, TypeVar, cast
@@ -17,6 +18,10 @@ import pandas as pd
 from matplotlib import animation
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+from multipac_testbench.instruments.power import ForwardPower
+from multipac_testbench.instruments.reflection_coefficient import (
+    ReflectionCoefficient,
+)
 from multipac_testbench.measurement_point.i_measurement_point import (
     IMeasurementPoint,
 )
@@ -322,19 +327,18 @@ class CampaignPlotter:
 
     def check_somersalo_scaling_law(
         self,
-        multipactor_bands: (
-            CampaignMultipactorBands | Sequence[InstrumentMultipactorBands]
-        ),
+        thresholds_sets: dict[MultipactorTest, ThresholdSet],
         show_fit: bool = True,
         use_theoretical_r: bool = False,
         full_output: bool = True,
-        drop_idx: list[int] | None = None,
+        add_upper_thresholds: bool = False,
+        axes: Axes | None = None,
         png_path: Path | None = None,
         png_kwargs: dict | None = None,
         csv_path: Path | None = None,
         csv_kwargs: dict | None = None,
         **fig_kw,
-    ) -> tuple[Axes, pd.DataFrame]:
+    ) -> tuple[Axes, pd.DataFrame, pd.DataFrame, pd.DataFrame | None]:
         r"""Represent evolution of forward power threshold with :math:`R`.
 
         Somersalo et al. :cite:`Somersalo1998` link the mixed wave (:math:`MW`)
@@ -357,18 +361,15 @@ class CampaignPlotter:
 
         Parameters
         ----------
-        campaign_multipactor_bands :
-            Object holding the information on where multipactor happens. If a
-            :class:`.CampaignMultipactorBands` object is given, take every
-            :class:`.TestMultipactorBands` in it and merge it. You can also
-            provide one :class:`.InstrumentMultipactorBands` per multipactor
-            test.
+        thresholds_sets :
         show_fit :
             To perform a fit and plot it.
         use_theoretical_r :
             Another patch to allow fitting and plotting using the theoretical
             reflection coefficient instead of the one calculated from
             :math:`P_f` and :math:`P_r`.
+        axes :
+            Axes to plot if provided.
         png_path :
             If provided, the resulting figure will be saved at this location.
         png_kwargs :
@@ -391,49 +392,73 @@ class CampaignPlotter:
             Holds the data that was plotted.
 
         """
-        frequencies = {test.freq_mhz for test in self.campaign}
-        if len(frequencies) != 1:
-            raise NotImplementedError("Plot over several freqs to implement")
 
-        zipper = zip(self.campaign, multipactor_bands, strict=True)
-        data_for_somersalo = [
-            test.data_for_somersalo_scaling_law(band, use_theoretical_r)
-            for (test, band) in zipper
-        ]
-        df_somersalo = pd.concat(data_for_somersalo).filter(like="Lower")
-
-        x_col = df_somersalo.filter(like="ReflectionCoefficient").columns
-        y_col = df_somersalo.filter(like="ForwardPower").columns
-        axes = df_somersalo.plot(
-            x=x_col.values[0],
-            y=y_col,
-            xlabel=ins.ReflectionCoefficient.ylabel(),
-            ylabel=ins.ForwardPower.ylabel(),
-            grid=True,
-            ms=15,
-            marker="+",
-            **fig_kw,
-        )
-
-        if drop_idx is not None:
-            df_somersalo.drop(df_somersalo.index[drop_idx], inplace=True)
-
-        if show_fit:
-            df_fit = fit_somersalo_scaling(
-                df_somersalo, full_output=full_output, plot=True, axes=axes
+        # frequencies = {test.freq_mhz for test in self.campaign}
+        # if len(frequencies) != 1:
+        #     raise NotImplementedError("Plot over several freqs to implement")
+        def build_dataframe(
+            r_values: list[float], p_values: list[float], label: str
+        ) -> pd.DataFrame:
+            return (
+                pd.DataFrame({"R": r_values, label: p_values})
+                .sort_values("R")
+                .dropna()
             )
-            df_somersalo = pd.concat([df_somersalo, df_fit], axis=1)
 
+        tests_at_140_mhz = [
+            test for test in self.campaign if test.freq_mhz == 140.0
+        ]
+        lower_rs, upper_rs = [], []
+        lower_ps, upper_ps = [], []
+
+        for test in tests_at_140_mhz:
+            lower_r, lower_p, upper_r, upper_p = (
+                test.data_for_somersalo_scaling_law(
+                    thresholds_sets[test], use_theoretical_r=use_theoretical_r
+                )
+            )
+            lower_rs.append(lower_r)
+            lower_ps.append(lower_p)
+            upper_rs.append(upper_r)
+            upper_ps.append(upper_p)
+
+        plot_kwargs = {
+            "x": "R",
+            "xlabel": ReflectionCoefficient.ylabel(),
+            "ylabel": ForwardPower.ylabel(),
+            "grid": True,
+            "ms": 15,
+            **fig_kw,
+        }
+        df_low = build_dataframe(lower_rs, lower_ps, "P_low")
+        axes = df_low.plot(marker="o", ax=axes, **plot_kwargs)
+
+        df_upp = build_dataframe(upper_rs, upper_ps, "P_high")
+        if add_upper_thresholds:
+            axes = df_upp.plot(marker="*", ax=axes, **plot_kwargs)
+
+        df_fit = None
+        if show_fit and len(df_low) > 0:
+            df_fit = fit_somersalo_scaling(
+                df_low, full_output=full_output, plot=True, axes=axes
+            )
+
+        assert axes is not None
         if png_path is not None:
-            if png_kwargs is None:
-                png_kwargs = {}
-            plot.save_figure(axes, png_path, **png_kwargs)
+            plot.save_figure(axes, png_path, **(png_kwargs or {}))
         if csv_path is not None:
-            if csv_kwargs is None:
-                csv_kwargs = {}
-            plot.save_dataframe(df_somersalo, csv_path, **csv_kwargs)
-
-        return axes, df_somersalo
+            csv_name = csv_path.stem
+            plot.save_dataframe(
+                df_low,
+                csv_path.with_name(f"{csv_name}_low"),
+                **(csv_kwargs or {}),
+            )
+            plot.save_dataframe(
+                df_upp,
+                csv_path.with_name(f"{csv_name}_upp"),
+                **(csv_kwargs or {}),
+            )
+        return axes, df_low, df_upp, df_fit
 
     def voltage_thresholds(
         self,
