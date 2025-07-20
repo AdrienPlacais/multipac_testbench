@@ -274,8 +274,9 @@ class TestPlotter:
 
     def plot_thresholds(
         self,
-        to_plot: ABCMeta,
-        threshold_set: ThresholdSet,
+        ydata: ABCMeta,
+        threshold_set: ThresholdSet | dict[MultipactorTest, ThresholdSet],
+        xdata: ABCMeta | None = None,
         title: str = "",
         same_figure: bool = True,
         plot_extrema: bool = False,
@@ -297,12 +298,14 @@ class TestPlotter:
 
         Parameters
         ----------
-        to_plot :
+        ydata :
             Class of instrument to plot. Makes most sense with
             :class:`.ForwardPower` or :class:`.FieldProbe`.
         threshold_set :
             Object containing the indexes of thresholds, as well as the
             position of multipactor.
+        xdata :
+            Class of instrument to use as x-data.
         title :
             If provided, overrides automatic title.
         same_figure :
@@ -330,7 +333,11 @@ class TestPlotter:
             The data used to produce the plot.
 
         """
-        instruments = self.test.get_instruments(to_plot)
+        if not isinstance(threshold_set, ThresholdSet):
+            threshold_set = threshold_set[self.test]
+        if xdata is not None:
+            raise NotImplementedError
+        instruments = self.test.get_instruments(ydata)
         label_to_color = threshold_set.get_threshold_label_color_map(
             instruments
         )
@@ -340,7 +347,7 @@ class TestPlotter:
             logging.warning(f"No threshold to plot for {self.test}")
             return np.array([]), df
         title = str(self.test) if not title else title
-        ylabel = getattr(to_plot, "ylabel", lambda: "???")()
+        ylabel = getattr(ydata, "ylabel", lambda: "???")()
         xticks = [pow_ext.sample_index for pow_ext in threshold_set.extrema]
 
         pos_to_cols = group_columns_by_detector_position(df, self.test)
