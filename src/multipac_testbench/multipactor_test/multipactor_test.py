@@ -24,7 +24,7 @@ import math
 from abc import ABCMeta
 from collections.abc import Collection, Iterable, Sequence
 from pathlib import Path
-from typing import Any, Callable, TypeVar, cast
+from typing import Any, Callable, Literal, TypeVar, cast, overload
 
 import numpy as np
 import pandas as pd
@@ -1131,7 +1131,7 @@ class MultipactorTest:
 
         """
         power_instrument = self.get_instrument(
-            PowerSetpoint, raise_missing_intrument_error=False
+            PowerSetpoint, raise_missing_error=False
         )
         if power_instrument is None:
             logging.warning(
@@ -1156,7 +1156,7 @@ class MultipactorTest:
     ) -> NDArray[np.float64]:
         """Determine where power grows, decreases, is stable."""
         power_instrument = self.get_instrument(
-            PowerSetpoint, raise_missing_intrument_error=False
+            PowerSetpoint, raise_missing_error=False
         )
         if power_instrument is None:
             logging.warning(
@@ -1372,12 +1372,28 @@ class MultipactorTest:
                 )
         return out
 
+    @overload
     def get_instrument(
         self,
         instrument_id: ABCMeta | str | Instrument,
+        raise_missing_error: Literal[False],
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
         instruments_to_ignore: Sequence[Instrument | str] = (),
-        raise_missing_intrument_error: bool = True,
+    ) -> Instrument | None: ...
+    @overload
+    def get_instrument(
+        self,
+        instrument_id: ABCMeta | str | Instrument,
+        raise_missing_error: Literal[True] = True,
+        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
+        instruments_to_ignore: Sequence[Instrument | str] = (),
+    ) -> Instrument: ...
+    def get_instrument(
+        self,
+        instrument_id: ABCMeta | str | Instrument,
+        raise_missing_error: bool = True,
+        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
+        instruments_to_ignore: Sequence[Instrument | str] = (),
     ) -> Instrument | None:
         """Get a single instrument matching ``instrument_id``."""
         match (instrument_id):
@@ -1393,7 +1409,7 @@ class MultipactorTest:
                 )
 
         if len(instruments) == 0:
-            if raise_missing_intrument_error:
+            if raise_missing_error:
                 raise MissingInstrumentError(f"No {instrument_id} found.")
             return None
         if len(instruments) > 1:
