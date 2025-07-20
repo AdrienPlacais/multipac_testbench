@@ -284,6 +284,7 @@ class TestPlotter:
         png_kwargs: dict | None = None,
         csv_path: Path | None = None,
         csv_kwargs: dict | None = None,
+        axes: Axes | None = None,
         **kwargs,
     ) -> tuple[Axes | NDArray[Axes], pd.DataFrame]:
         """Plot ``to_plot`` data at multipactor threshold.
@@ -324,6 +325,8 @@ class TestPlotter:
             If provided, plotted data will be saved there.
         csv_kwargs :
             Keyword arguments for the :meth:`pandas.DataFrame.to_csv` method.
+        axes :
+            Axes to re-use. Needs ``sample_plot=True``.
 
         Returns
         -------
@@ -358,6 +361,7 @@ class TestPlotter:
                 label_to_color=label_to_color,
                 fig_title=title,
                 xticks=xticks,
+                axes=axes,
             )
             if plot_extrema:
                 plot.plot_extrema_markers(
