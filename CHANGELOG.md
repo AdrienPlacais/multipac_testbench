@@ -19,7 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New `Instrument` s:
   - `PowerSetpoint` to hold the `NI9205_dBm` column. Allows for a much more robust detection of power cycles and power extrema.
   - `FieldPowerError` to compute error between field measured by probes, and field calculated from powers.
+- `ThresholdSet` object, containing all `Threshold` of a `MultipactorTest`.
+- `AveragedThresholdTest`, derived from `ThresholdSet` to get median of several `Threshold`.
 - Function to fix the voltage columns when rf rack calibration or probe attenuation was not updated in LabView.
+  - Loading `RAW` files and using built-in transfer functions is however more robust.
 
 ### Changed
 
@@ -30,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `MultipactorBand` objects removed, and replaced by `Threshold` and `ThresholdSet`.
   This is much more robust, as `MultipactorBand` implied the existence of two consecutive `Threshold` objects.
-  - [ ] Remove also in Somersalo
+  - [x] Remove also in Somersalo
   - [ ] Remove also in Perez
 
 # [1.7.x]
