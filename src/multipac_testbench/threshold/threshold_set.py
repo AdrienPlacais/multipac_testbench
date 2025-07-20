@@ -22,6 +22,7 @@ from multipac_testbench.threshold.threshold import (
 from multipac_testbench.util.types import MULTIPAC_DETECTOR_T
 from numpy.typing import NDArray
 
+#: Function taking in a :class:`.Threshold`, and returning a boolean.
 THRESHOLD_FILTER_T = Callable[[Threshold], bool]
 
 
@@ -236,7 +237,7 @@ class ThresholdSet:
         global_instruments: bool = False,
         global_multipactor: bool = False,
         **kwargs,
-    ):
+    ) -> pd.DataFrame:
         """Return instrument values at threshold sample indices.
 
         We match :class:`.Threshold` and :class:`.Instrument` objects by
@@ -336,3 +337,74 @@ class ThresholdSet:
                 header = threshold_df_column_header(instrument, threshold)
                 label_to_color[header] = threshold.color
         return label_to_color
+
+
+class AveragedThresholdSet(ThresholdSet):
+    """Holds average of several thresholds.
+
+    The main difference with a classic ``ThresholdSet`` is that its
+    :meth:`.data_at_thresholds` is overriden to return data averaged from
+    several :class:`.Threshold`.
+
+    """
+
+    @classmethod
+    def from_threshold_set(
+        cls,
+        threshold_set: ThresholdSet,
+        predicate: THRESHOLD_FILTER_T | None = None,
+    ) -> Self:
+        """Create an object holding averaged thresholds.
+
+        Parameters
+        ----------
+        threshold_set :
+            The thresholds to average.
+        predicate :
+            To filter thresholds to average. A typical example would be
+            ``lambda t: t.sample_index > 200`` to keep only conditioned
+            thresholds.
+
+        Returns
+        -------
+        AveragedThresholdSet
+            Object containing "averaged" thresholds. It contains one lower and
+            one upper threshold per detecting instrument (if already present in
+            the original :class:`.ThresholdSet`).
+
+        """
+        subset = [
+            t for t in threshold_set if predicate is None or predicate(t)
+        ]
+        return cls(subset, threshold_set.extrema)
+
+    def data_at_thresholds(self, *args, **kwargs) -> pd.DataFrame:
+        """Return average of instrument values at threshold sample indices.
+
+        We match :class:`.Threshold` and :class:`.Instrument` objects by
+        position.
+
+        Parameters
+        ----------
+        instruments :
+            Instruments to which data must be plotted. Must have ``.position``
+            and ``.data`` attributes.
+        tol :
+            Tolerance for position matching.
+        global_instruments :
+            If instruments not position-specific (eg :class:`.ForwardPower`)
+            should be returned.
+        global_multipactor :
+            If multipactor not position-specific (eg thresholds created by
+            merging several other multipactor arrays) should be returned.
+
+        Returns
+        -------
+        pd.DataFrame
+            Columns are named by detecting instrument + threshold nature.
+            Only index is average (median) of instruments values at the various
+            thresholds.
+
+        """
+        df = super().data_at_thresholds(*args, **kwargs)
+        return df.median().to_frame().T
