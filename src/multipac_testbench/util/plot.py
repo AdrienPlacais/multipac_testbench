@@ -6,11 +6,12 @@ import re
 from abc import ABCMeta
 from collections.abc import Collection, Iterable, Sequence
 from pathlib import Path
-from typing import cast
+from typing import TypeVar, cast
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from _typeshed import SupportsRichComparison
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from multipac_testbench.instruments.instrument import Instrument
@@ -24,6 +25,26 @@ from multipac_testbench.util.multipactor_detectors import (
     start_and_end_of_contiguous_true_zones,
 )
 from numpy.typing import NDArray
+
+T = TypeVar("T", bound=SupportsRichComparison)
+
+
+def attribute_to_color(
+    attributes: Iterable[T],
+) -> dict[T, tuple[float, float, float]]:
+    """Map some attributes to colors.
+
+    Used for example by :meth:`.TestCampaign.check_somersalo_scaling_law`, to
+    always keep the same plot color for a given frequency.
+
+    """
+    prop_cycle = plt.rcParams["axes.prop_cycle"]
+    colors = [c["color"] for c in prop_cycle]
+    attr_to_color = {
+        attr: colors[i % len(colors)]
+        for i, attr in enumerate(sorted(attributes))
+    }
+    return attr_to_color
 
 
 def plot_extrema_markers(
