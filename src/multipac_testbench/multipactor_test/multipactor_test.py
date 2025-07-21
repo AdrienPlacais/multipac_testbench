@@ -17,14 +17,13 @@
 
 from __future__ import annotations
 
-import functools
 import itertools
 import logging
 import math
 from abc import ABCMeta
 from collections.abc import Collection, Iterable, Sequence
 from pathlib import Path
-from typing import Any, Callable, Literal, TypeVar, cast, overload
+from typing import Any, Callable, Literal, TypeVar, overload
 
 import numpy as np
 import pandas as pd
