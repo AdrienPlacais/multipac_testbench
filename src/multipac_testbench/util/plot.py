@@ -11,7 +11,6 @@ from typing import TypeVar, cast
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from _typeshed import SupportsRichComparison
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from multipac_testbench.instruments.instrument import Instrument
@@ -26,7 +25,7 @@ from multipac_testbench.util.multipactor_detectors import (
 )
 from numpy.typing import NDArray
 
-T = TypeVar("T", bound=SupportsRichComparison)
+T = TypeVar("T", bound=float)
 
 
 def attribute_to_color(
