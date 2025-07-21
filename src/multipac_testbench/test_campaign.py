@@ -568,6 +568,13 @@ class TestCampaign(list[MultipactorTest]):
         Parameters
         ----------
         thresholds_sets :
+            Contains the threshold to represent. For every instrument, will
+            plot the last lower and upper thresholds found. In general, you
+            will want to give :class:`.ThresholdSet` corresponding to
+            multipactor detected anywhere in the line (use ``threshold_reducer
+            = "any"`` in :meth:`.ThresholdSet.from_instruments`). Additionally,
+            you can also average the last :class:`.Threshold` by giving an
+            :class:`.AveragedThresholdSet`.
         show_fit :
             To perform a fit and plot it.
         use_theoretical_r :
@@ -592,10 +599,15 @@ class TestCampaign(list[MultipactorTest]):
 
         Returns
         -------
-        axes :
+        axes : Axes | None,
             Holds the plot.
-        data :
-            Holds the data that was plotted.
+        df_low : dict[float, pd.DataFrame] | None
+            Holds forward power at every lower threshold, by RF frequency.
+        df_upp : dict[float, pd.DataFrame] | None
+            Holds forward power at every upper threshold, by RF frequency.
+        df_fit : dict[float, pd.DataFrame] | None
+            Holds forward power at every lower threshold, as fitted on
+            ``df_low``, for the different RF frequencies.
 
         """
 
@@ -690,22 +702,13 @@ class TestCampaign(list[MultipactorTest]):
             csv_stem = csv_path.stem
             csv_dir = csv_path.parent
             for freq_mhz in df_lows:
-                suffix = f"{freq_mhz:.0f}MHz"
-                plot.save_dataframe(
-                    df_lows[freq_mhz],
-                    csv_dir / f"{csv_stem}_{suffix}_low.csv",
-                    **(csv_kwargs or {}),
-                )
-                plot.save_dataframe(
-                    df_upps[freq_mhz],
-                    csv_dir / f"{csv_stem}_{suffix}_upp.csv",
-                    **(csv_kwargs or {}),
-                )
-                plot.save_dataframe(
-                    df_fits[freq_mhz],
-                    csv_dir / f"{csv_stem}_{suffix}_fit.csv",
-                    **(csv_kwargs or {}),
-                )
+                for df, name in zip(
+                    (df_lows, df_upps, df_fits), ("low", "upp", "fit")
+                ):
+                    file = csv_dir / f"{csv_stem}_{freq_mhz:.0f}MHz_{name}.csv"
+                    plot.save_dataframe(
+                        df[freq_mhz], file, **(csv_kwargs or {})
+                    )
         return axes, df_lows, df_upps, df_fits
 
     def voltage_thresholds(
