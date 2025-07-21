@@ -6,7 +6,7 @@ import re
 from abc import ABCMeta
 from collections.abc import Collection, Iterable, Sequence
 from pathlib import Path
-from typing import TypeVar, cast
+from typing import Any, TypeVar, cast
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -627,6 +627,7 @@ def plot_df_threshold(
     ms: int = 8,
     lw: float = 0.0,
     axes: Axes | None = None,
+    plot_kwargs: dict[str, Any] | None = None,
     **kwargs,
 ) -> Axes:
     """Plot a threshold dataframe, separating lower/upper thresholds.
@@ -652,6 +653,8 @@ def plot_df_threshold(
         Markers size.
     axes :
         To re-use pre-existing axis.
+    plot_kwargs :
+        Kwargs passed to the plotting function.
 
     """
     lower = df.filter(like="lower")
@@ -672,7 +675,7 @@ def plot_df_threshold(
         ax=axes,
         lw=lw,
         xticks=xticks,
-        **kwargs,
+        **(plot_kwargs or {}),
     )
     assert axes is not None
     axes.set_prop_cycle(None)
@@ -691,7 +694,7 @@ def plot_df_threshold(
         ax=axes,
         lw=lw,
         xticks=xticks,
-        **kwargs,
+        **(plot_kwargs or {}),
     )
     assert axes is not None
     return axes

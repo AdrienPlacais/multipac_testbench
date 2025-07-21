@@ -232,11 +232,11 @@ class ThresholdSet:
 
     def data_at_thresholds(
         self,
-        instruments: Sequence[Instrument],
+        instruments: Iterable[Instrument],
         tol: float = 1e-10,
         global_instruments: bool = False,
         global_multipactor: bool = False,
-        **kwargs,
+        xdata_instrument: Instrument | None = None,
     ) -> pd.DataFrame:
         """Return instrument values at threshold sample indices.
 
@@ -256,14 +256,21 @@ class ThresholdSet:
         global_multipactor :
             If multipactor not position-specific (eg thresholds created by
             merging several other multipactor arrays) should be returned.
+        xdata_instrument :
+            Its data is returned at every threshold. It results in a unique
+            ``xdata`` column, without ``nan``, that can be used as a common
+            x-data for plotting.
 
         Returns
         -------
         pd.DataFrame
-            Columns are named by detecting instrument + threshold nature.
-            Indexes are the corresponding sample indices.
+            Columns are named by detecting instrument + threshold nature:
+            ``"NI9205_E4 @ upper threshold (according to NI9205_MP4l)"``.
+            Indexes are the corresponding sample indices, or
+            ``xdata_instrument`` values at those same sample indices.
 
         """
+        #           {column:  {sample_index: instrument value}}
         result: dict[str, dict[int, float]] = defaultdict(dict)
 
         for threshold in self:
@@ -283,7 +290,15 @@ class ThresholdSet:
                 idx = threshold.sample_index
                 result[label][idx] = instrument.data[idx]
 
-        return pd.DataFrame({k: pd.Series(v) for k, v in result.items()})
+        if xdata_instrument is None:
+            return pd.DataFrame({k: pd.Series(v) for k, v in result.items()})
+
+        xlabel = xdata_instrument.ylabel()
+        result[xlabel] = {
+            t.sample_index: xdata_instrument.data[t.sample_index] for t in self
+        }
+        df = pd.DataFrame({k: pd.Series(v) for k, v in result.items()})
+        return df.set_index(xlabel)
 
     def according_to(
         self, instrument: Instrument | str | THRESHOLD_DETECTOR_T
@@ -381,8 +396,8 @@ class AveragedThresholdSet(ThresholdSet):
     def data_at_thresholds(self, *args, **kwargs) -> pd.DataFrame:
         """Return average of instrument values at threshold sample indices.
 
-        We match :class:`.Threshold` and :class:`.Instrument` objects by
-        position.
+        Keep the xdata column as a representative index: for each y-column,
+        compute the median of its xdata values.
 
         Parameters
         ----------
@@ -397,6 +412,10 @@ class AveragedThresholdSet(ThresholdSet):
         global_multipactor :
             If multipactor not position-specific (eg thresholds created by
             merging several other multipactor arrays) should be returned.
+        xdata_instrument :
+            Its data is returned at every threshold. It results in a unique
+            ``xdata`` column, without ``nan``, that can be used as a common
+            x-data for plotting.
 
         Returns
         -------
@@ -407,4 +426,23 @@ class AveragedThresholdSet(ThresholdSet):
 
         """
         df = super().data_at_thresholds(*args, **kwargs)
-        return df.median().to_frame().T
+        if df.index.name is None:
+            return df.median().to_frame().T
+
+        xname = df.index.name
+        records = []
+
+        for col in df.columns:
+            y = df[col].dropna()
+            if y.empty:
+                continue
+            x_median = y.index.to_series().median()
+            y_median = y.median()
+
+            row = pd.Series({col: y_median}, name=x_median)
+            records.append(row)
+
+        df = pd.DataFrame(records).sort_index()
+        df.index.name = xname
+        df = df.reindex(sorted(df.columns), axis=1)
+        return df

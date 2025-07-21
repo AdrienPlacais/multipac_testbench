@@ -32,6 +32,7 @@ from matplotlib.artist import Artist
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from multipac_testbench.instruments import (
+    SWR,
     FieldPowerError,
     FieldProbe,
     ForwardPower,
@@ -61,7 +62,10 @@ from multipac_testbench.threshold.threshold import (
     THRESHOLD_DETECTOR,
     THRESHOLD_DETECTOR_T,
 )
-from multipac_testbench.threshold.threshold_set import ThresholdSet
+from multipac_testbench.threshold.threshold_set import (
+    AveragedThresholdSet,
+    ThresholdSet,
+)
 from multipac_testbench.util import plot
 from multipac_testbench.util.animate import get_limits
 from multipac_testbench.util.helper import (
@@ -939,10 +943,10 @@ class MultipactorTest:
     ) -> tuple[float, float, float, float]:
         """Get the data necessary to plot the Somersalo scaling law.
 
-        In particular, the power thresholds measured during the last half power
-        cycle, and the reflection coefficient :math:`R` at the corresponding
-        time steps. Lower and upper thresholds are returned, even if Somersalo
-        scaling law does not concern the upper threshold.
+        In particular, the last detected power thresholds, and the reflection
+        coefficient :math:`R` at the corresponding time steps. Lower and upper
+        thresholds are returned, even if Somersalo scaling law does not concern
+        the upper threshold.
 
         Use it with global multipactor, ie with :class:`.ThresholdSet` created
         with ``threshold_reducer="all"``.
@@ -961,14 +965,12 @@ class MultipactorTest:
         -------
         data :
             Holds the forward power at the last upper and lower thresholds, as
-            well as corresponding :math:`R` values.
-            as well as reflection coefficient :math:`R` at same time steps.
+            well as corresponding :math:`R` values (same time steps).
 
         """
         if not isinstance(threshold_set, ThresholdSet):
             threshold_set = threshold_set[self]
         forward_power = self.get_instrument(ForwardPower)
-        assert forward_power is not None
         df = threshold_set.data_at_thresholds(
             (forward_power,),
             global_multipactor=True,
@@ -1002,7 +1004,84 @@ class MultipactorTest:
 
         return lower_r, lower_power, upper_r, upper_power
 
-    def output_filepath(self, out_folder: str, extension: str) -> Path:
+    def data_for_perez_scaling_law(
+        self,
+        threshold_set: ThresholdSet | dict[MultipactorTest, ThresholdSet],
+        xdata: ABCMeta,
+        use_theoretical_xdata: bool = False,
+        **kwargs,
+    ) -> tuple[pd.DataFrame, dict[str, tuple[float, float, float] | None]]:
+        """Get the data necessary to plot the Perez scaling law.
+
+        In particular, the last measured voltage thresholds, and :math:`SWR` or
+        :math:`R` according to ``xdata`` at corresponding time steps.
+
+        Use it with local multipactor, ie *avoid* :class:`.ThresholdSet`
+        created with a ``threshold_reducer``.
+
+        Parameters
+        ----------
+        threshold_set :
+            Object telling where multipactor happens.
+        xdata :
+            Desired type of ``xdata``, generally :class:`.SWR` or
+            :class:`.ReflectionCoefficient`.
+        use_theoretical_xdata :
+            To use theoretical ``xdata``. Works only for reflection coefficient
+            and standing wave ratio.
+        kwargs :
+            Other keyword arguments passed to :meth:`.at_last_threshold`.
+
+        Returns
+        -------
+        df :
+            Holds the last voltage thresholds, as well as corresponding
+            :math:`R` or :math:`SWR` values. Column headers look like:
+            ``"NI9205_E4 @ upper threshold (according to NI9205_MP4l)"``.
+        label_to_color :
+            Maps every y-column of the dataframe to a specific color.
+
+        """
+        if not isinstance(threshold_set, ThresholdSet):
+            threshold_set = threshold_set[self]
+
+        field_probes = self.get_instruments(FieldProbe)
+        label_to_color = threshold_set.get_threshold_label_color_map(
+            field_probes
+        )
+        x_instr = self.get_instrument(xdata)
+        df = threshold_set.data_at_thresholds(
+            field_probes, xdata_instrument=x_instr
+        )
+
+        if not isinstance(threshold_set, AveragedThresholdSet):
+            raise NotImplementedError(
+                "Here, we should reduce the given df to keep only one "
+                "Threshold of each nature per detecting instrument."
+            )
+
+        x_column = x_instr.ylabel()
+        if use_theoretical_xdata:
+            if xdata == SWR:
+                df[x_column] = np.full_like(df[x_column], self.swr)
+            elif xdata == ReflectionCoefficient:
+                if np.isinf(self.swr):
+                    df[x_column] = np.ones_like(df[x_column])
+                else:
+                    df[x_column] = np.full_like(
+                        df[x_column], swr_to_reflection(self.swr)
+                    )
+            else:
+                raise ValueError(
+                    "`use_theoretical_xdata` argument only supported for `SWR`"
+                    "and `ReflectionCoefficient` instruments. You gave "
+                    f"{xdata = }"
+                )
+
+        logging.info("What happens when several data wich same xdata?")
+        return df, label_to_color
+
+    def output_filepath(self, out_folder: Path | str, extension: str) -> Path:
         """Create consistent path for output files."""
         filepath = output_filepath(
             self.filepath, self.swr, self.freq_mhz, out_folder, extension
@@ -1204,10 +1283,11 @@ class MultipactorTest:
         same_figure: bool = True,
         plot_extrema: bool = False,
         png_path: Path | None = None,
-        png_kwargs: dict | None = None,
+        png_kwargs: dict[str, Any] | None = None,
         csv_path: Path | None = None,
         csv_kwargs: dict | None = None,
         axes: Axes | None = None,
+        plot_kwargs: dict[str, Any] | None = None,
         **kwargs,
     ) -> tuple[Axes | NDArray[Axes], pd.DataFrame]:
         """Plot ``to_plot`` data at multipactor threshold.
@@ -1250,6 +1330,8 @@ class MultipactorTest:
             Keyword arguments for the :meth:`pandas.DataFrame.to_csv` method.
         axes :
             Axes to re-use. Needs ``sample_plot=True``.
+        plot_kwargs :
+            Kwargs passed the plot function.
 
         Returns
         -------
@@ -1268,7 +1350,7 @@ class MultipactorTest:
             instruments
         )
 
-        df = threshold_set.data_at_thresholds(instruments, **kwargs)
+        df = threshold_set.data_at_thresholds(instruments)
         if len(df) == 0:
             logging.warning(f"No threshold to plot for {self}")
             return np.array([]), df
@@ -1285,12 +1367,15 @@ class MultipactorTest:
                 fig_title=title,
                 xticks=xticks,
                 axes=axes,
+                plot_kwargs=plot_kwargs,
+                **kwargs,
             )
             if plot_extrema:
                 plot.plot_extrema_markers(
                     ax_by_position=axes,
                     instruments=instruments,
                     extrema=threshold_set.extrema,
+                    **kwargs,
                 )
             if png_path:
                 plot.save_figure(axes, png_path, **(png_kwargs or {}))

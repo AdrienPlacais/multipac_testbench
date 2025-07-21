@@ -6,7 +6,7 @@ import logging
 import math
 from abc import ABCMeta
 from collections import defaultdict
-from collections.abc import Collection, Sequence
+from collections.abc import Collection, Mapping, Sequence
 from pathlib import Path
 from typing import Any, Callable, Self, TypeVar
 
@@ -17,6 +17,9 @@ import pandas as pd
 from matplotlib import animation
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+from multipac_testbench.instruments.electric_field.field_probe import (
+    FieldProbe,
+)
 from multipac_testbench.instruments.power import ForwardPower
 from multipac_testbench.instruments.reflection_coefficient import (
     ReflectionCoefficient,
@@ -317,7 +320,7 @@ class TestCampaign(list[MultipactorTest]):
                 else None
             )
 
-            axes, df_plot = test.plotter.sweet_plot(
+            axes, df_plot = test.sweet_plot(
                 *args,
                 threshold_set=(thresholds_sets or {}).get(test, None),
                 png_path=png_path,
@@ -376,7 +379,7 @@ class TestCampaign(list[MultipactorTest]):
         all_df = []
         colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
         for i, test in enumerate(self):
-            axes, df_plot = test.plotter.sweet_plot(
+            axes, df_plot = test.sweet_plot(
                 *args,
                 threshold_set=(thresholds_sets or {}).get(test, None),
                 axes=axes,
@@ -401,7 +404,8 @@ class TestCampaign(list[MultipactorTest]):
         to_plot: ABCMeta,
         thresholds_sets: dict[MultipactorTest, ThresholdSet],
         *args,
-        png_folder: str | None = None,
+        png_folder: Path | str | None = None,
+        png_kwargs: dict[str, Any] | None = None,
         csv_folder: str | None = None,
         **kwargs,
     ) -> tuple[list[list[Axes]], list[pd.DataFrame]]:
@@ -425,6 +429,7 @@ class TestCampaign(list[MultipactorTest]):
                 threshold_set,
                 *args,
                 png_path=png_path,
+                png_kwargs=png_kwargs,
                 csv_path=csv_path,
                 **kwargs,
             )
@@ -567,6 +572,7 @@ class TestCampaign(list[MultipactorTest]):
 
         See Also
         --------
+        :meth:`.TestCampaign.check_perez_scaling_law`
         :meth:`.MultipactorTest.determine_thresholds`
         :meth:`.AveragedThresholdSet.from_thresholds`
 
@@ -698,6 +704,159 @@ class TestCampaign(list[MultipactorTest]):
                         df[freq_mhz], file, **(csv_kwargs or {})
                     )
         return axes, df_lows, df_upps, df_fits
+
+    def check_perez_scaling_law(
+        self,
+        thresholds_sets: Mapping[MultipactorTest, ThresholdSet],
+        xdata: ABCMeta,
+        use_theoretical_xdata: bool = False,
+        add_upper_thresholds: bool = False,
+        axes_by_freq: dict[float, Axes | None] | None = None,
+        png_path: Path | None = None,
+        png_kwargs: dict | None = None,
+        csv_path: Path | None = None,
+        csv_kwargs: dict | None = None,
+        ms: float = 15,
+        low_marker: str = "o",
+        high_marker: str = "*",
+        **fig_kw,
+    ) -> tuple[dict[float, Axes] | None, dict[float, pd.DataFrame]]:
+        r"""
+        Represent evolution of voltage threshold with :math:`R` or :math:`SWR`.
+
+        Perez et al. :cite:`Perez2009` studied evolution of thresholds,
+        expressed as voltage, with the propagation mode. They concluded that,
+        for low values of frequency-gap product (:math:`fd < 7~\mathrm{GHz\cdot
+        mm}`), voltage thresholds were independent from the propagation mode.
+        When :math:`fd > 7~\mathrm{GHz\cdot mm}`, SW lower thresholds are
+        higher than TW lower thresholds.
+
+        .. note::
+            In contrary to the Somersalo scaling law, "local" multipactor
+            thresholds should be given.
+
+        See Also
+        --------
+        :meth:`.TestCampaign.check_somersalo_scaling_law`
+        :meth:`.AveragedThresholdSet.from_thresholds`
+
+        Parameters
+        ----------
+        thresholds_sets :
+            Contains the threshold to represent. For every instrument, will
+            plot the last lower and upper thresholds found. In general, you
+            will want to give :class:`.ThresholdSet` corresponding to
+            multipactor detected anywhere in the line (use ``threshold_reducer
+            = "any"`` in :meth:`.ThresholdSet.from_instruments`). Additionally,
+            you can also average the last :class:`.Threshold` by giving an
+            :class:`.AveragedThresholdSet`.
+        xdata :
+            TODO
+        use_theoretical_xdata :
+            TODO
+        add_upper_thresholds :
+            To also plot upper thresholds.
+        axes_by_freq :
+            Axes to re-use.
+        png_path :
+            If provided, the resulting figure will be saved at this location.
+        png_kwargs :
+            Other keyword arguments passed to the :func:`.save_figure`
+            function.
+        csv_path :
+            If provided, the data to produce the figure will be saved in this
+            location.
+        csv_kwargs :
+            Other keyword arguments passed to the :func:`.save_dataframe`
+            function.
+        fig_kw :
+            Other keyword arguments passed to Figure.
+
+        Returns
+        -------
+        axes : dict[float, Axes] | None
+            Holds the plot.
+        thresholds_by_freq : dict[float, pd.DataFrame]
+            Plotted thresholds, by freq.
+
+        """
+
+        xlabel = getattr(xdata, "ylabel", lambda: None)()
+        assert xlabel is not None, (
+            "xdata should be an Instrument class, or at least an object with "
+            "an `ylabel` method. Common choices are `ReflectionCoefficient` or"
+            f"`SWR`. You gave: {xdata}"
+        )
+
+        plot_kwargs = {
+            "xlabel": xlabel,
+            "ylabel": FieldProbe.ylabel(),
+            "grid": True,
+            "ms": ms,
+            **fig_kw,
+        }
+
+        tests_by_freq: dict[float, list[MultipactorTest]] = defaultdict(list)
+        for test in self:
+            tests_by_freq[test.freq_mhz].append(test)
+
+        if axes_by_freq is None:
+            axes_by_freq = {}
+        axes_by_freq = {
+            freq: axes_by_freq.get(freq, None) for freq in tests_by_freq
+        }
+
+        label_to_color = {}
+        thresholds_by_freq: dict[float, pd.DataFrame] = {}
+        for freq_mhz, tests in sorted(tests_by_freq.items()):
+            dfs, labels_to_colors = zip(
+                *(
+                    test.data_for_perez_scaling_law(
+                        thresholds_sets[test],
+                        xdata=xdata,
+                        use_theoretical_xdata=use_theoretical_xdata,
+                    )
+                    for test in tests
+                )
+            )
+
+            logging.info(
+                "Here check concatenation goes alright. Also check what happens when columns are different."
+            )
+            df = pd.concat(dfs)
+            thresholds_by_freq[freq_mhz] = df
+
+            for d in labels_to_colors:
+                for key, val in d.items():
+                    if key in label_to_color:
+                        continue
+                    label_to_color[key] = val
+
+            axes_by_freq[freq_mhz] = df.filter(like="lower").plot(
+                marker=low_marker, ax=axes_by_freq[freq_mhz], **plot_kwargs
+            )
+            if add_upper_thresholds:
+                df.filter(like="upper").plot(
+                    marker=high_marker,
+                    ax=axes_by_freq[freq_mhz],
+                    title=f"{freq_mhz:.0f}MHz",
+                    **plot_kwargs,
+                )
+
+        if len(axes_by_freq) == 0:
+            logging.error("No Perez scaling law data plotted.")
+            return None, thresholds_by_freq
+
+        if png_path is not None:
+            raise NotImplementedError
+            plot.save_figure(axes, png_path, **(png_kwargs or {}))
+        if csv_path:
+            csv_stem = csv_path.stem
+            csv_dir = csv_path.parent
+            for freq_mhz, df in thresholds_by_freq.items():
+                file = csv_dir / f"{csv_stem}_{freq_mhz:.0f}MHz.csv"
+                plot.save_dataframe(df, file, **(csv_kwargs or {}))
+        return axes_by_freq, thresholds_by_freq
 
     def voltage_thresholds(
         self,

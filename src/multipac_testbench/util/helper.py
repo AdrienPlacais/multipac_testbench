@@ -140,7 +140,8 @@ def output_filepath(
         Theoretical rf frequency to add to the output file name.
     out_folder :
         Relative name of the folder where data will be saved; it is defined
-        w.r.t. to the parent folder of ``filepath``.
+        w.r.t. to the parent folder of ``filepath`` if it is a string. If it
+        is a ``Path``, we consider it is absolute.
     extension :
         Extension of the output file, with the dot.
 
@@ -162,7 +163,11 @@ def output_filepath(
         .name
     )
 
-    folder = filepath.parent / out_folder
+    folder = (
+        filepath.parent / out_folder
+        if isinstance(out_folder, str)
+        else out_folder
+    )
 
     if not folder.is_dir():
         folder.mkdir(parents=True)
