@@ -6,7 +6,7 @@ import logging
 import math
 from abc import ABCMeta
 from collections import defaultdict
-from collections.abc import Sequence
+from collections.abc import Collection, Sequence
 from pathlib import Path
 from typing import Any, Callable, Self, TypeVar
 
@@ -541,9 +541,9 @@ class TestCampaign(list[MultipactorTest]):
         **fig_kw,
     ) -> tuple[
         Axes | None,
-        dict[float, pd.DataFrame] | None,  # df_low per freq
-        dict[float, pd.DataFrame] | None,  # df_upp per freq
-        dict[float, pd.DataFrame | None] | None,  # df_fit per freq
+        dict[float, pd.DataFrame] | None,
+        dict[float, pd.DataFrame] | None,
+        dict[float, pd.DataFrame | None] | None,
     ]:
         r"""Represent evolution of forward power threshold with :math:`R`.
 
@@ -556,10 +556,19 @@ class TestCampaign(list[MultipactorTest]):
             P_\mathrm{MW} \sim \frac{1}{(1 + R)^2}P_\mathrm{TW}
 
         .. note::
-            Multipactor is detected on a global level, i.e. multipactor
-            threshold is reached when multipactor is detected anywhere in the
-            system. Also, we represent the thresholds that were measured during
-            the last half-power cycle.
+            - Multipactor is detected on a global level, i.e. multipactor
+              threshold is reached when multipactor is detected anywhere in the
+              system. Such :class:`.ThresholdSet` can be created by using
+              ``threshold_reducer = "any"`` in
+              :meth:`.MultipactorTest.determine_thresholds`.
+            - The represented thresholds are the last one found during the
+              test. This is not necessarily very precise, so you may want to
+              feed in an :class:`.AveragedThresholdSet`.
+
+        See Also
+        --------
+        :meth:`.MultipactorTest.determine_thresholds`
+        :meth:`.AveragedThresholdSet.from_thresholds`
 
         .. todo::
             Columns in the output file are illogic
@@ -568,13 +577,7 @@ class TestCampaign(list[MultipactorTest]):
         Parameters
         ----------
         thresholds_sets :
-            Contains the threshold to represent. For every instrument, will
-            plot the last lower and upper thresholds found. In general, you
-            will want to give :class:`.ThresholdSet` corresponding to
-            multipactor detected anywhere in the line (use ``threshold_reducer
-            = "any"`` in :meth:`.ThresholdSet.from_instruments`). Additionally,
-            you can also average the last :class:`.Threshold` by giving an
-            :class:`.AveragedThresholdSet`.
+            Contains the threshold to represent.
         show_fit :
             To perform a fit and plot it.
         use_theoretical_r :
@@ -610,16 +613,6 @@ class TestCampaign(list[MultipactorTest]):
             ``df_low``, for the different RF frequencies.
 
         """
-
-        def build_dataframe(
-            r_values: list[float], p_values: list[float], label: str
-        ) -> pd.DataFrame:
-            return (
-                pd.DataFrame({"R": r_values, label: p_values})
-                .sort_values("R")
-                .dropna()
-            )
-
         plot_kwargs = {
             "x": "R",
             "xlabel": ReflectionCoefficient.ylabel(),
@@ -633,12 +626,7 @@ class TestCampaign(list[MultipactorTest]):
         for test in self:
             tests_by_freq[test.freq_mhz].append(test)
 
-        prop_cycle = plt.rcParams["axes.prop_cycle"]
-        colors = [c["color"] for c in prop_cycle]
-        freq_to_color = {
-            freq: colors[i % len(colors)]
-            for i, freq in enumerate(sorted(tests_by_freq.keys()))
-        }
+        freq_to_color = plot.attribute_to_color(tests_by_freq.keys())
 
         df_lows, df_upps, df_fits = {}, {}, {}
         df_low, df_upp, df_fit = None, None, None
@@ -657,8 +645,8 @@ class TestCampaign(list[MultipactorTest]):
                 upper_ps.append(upper_p)
 
             suffix = f"{freq_mhz:.0f}MHz"
-            df_low = build_dataframe(lower_rs, lower_ps, f"P_low ({suffix})")
-            df_upp = build_dataframe(upper_rs, upper_ps, f"P_high ({suffix})")
+            df_low = _build_dataframe(lower_rs, lower_ps, f"P_low ({suffix})")
+            df_upp = _build_dataframe(upper_rs, upper_ps, f"P_high ({suffix})")
             if not df_low.empty:
                 axes = df_low.plot(
                     marker="o",
@@ -923,3 +911,14 @@ class TestCampaign(list[MultipactorTest]):
                 *args, num=iternum + i, png_path=png_path, **kwargs
             )
         return
+
+
+def _build_dataframe(
+    x_values: Collection[float], y_values: Collection[float], label: str
+) -> pd.DataFrame:
+    """Gather the two given lists and sort them by `x` values."""
+    return (
+        pd.DataFrame({"x": x_values, label: y_values})
+        .sort_values("x")
+        .dropna()
+    )
