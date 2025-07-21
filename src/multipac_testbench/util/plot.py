@@ -467,7 +467,7 @@ def save_figure(
 def save_dataframe(
     df_to_plot: pd.DataFrame,
     csv_path: Path,
-    sep: str = "\t",
+    sep: str = ",",
     verbose: bool = False,
     **csv_kwargs,
 ) -> None:
