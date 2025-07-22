@@ -533,7 +533,7 @@ class TestCampaign(list[MultipactorTest]):
 
     def check_somersalo_scaling_law(
         self,
-        thresholds_sets: dict[MultipactorTest, ThresholdSet],
+        thresholds_sets: Mapping[MultipactorTest, ThresholdSet],
         show_fit: bool = True,
         use_theoretical_r: bool = False,
         full_output: bool = True,
