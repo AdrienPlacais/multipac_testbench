@@ -17,13 +17,14 @@ class Power(Instrument):
         self,
         *args,
         position: float = np.nan,
-        a_calib: float | None = None,
-        b_calib: float | None = None,
+        p_low: float | None = None,
+        p_high: float | None = None,
         k_fix: float | None = None,
         alpha_fix: float | None = None,
+        ensure_no_negative: bool = False,
         **kwargs,
     ) -> None:
-        """Instantiate the instrument, declare other specific attributes.
+        r"""Instantiate the instrument, declare other specific attributes.
 
         See Also
         --------
@@ -38,22 +39,26 @@ class Power(Instrument):
 
         Parameters
         ----------
-        a_calib :
-            Calibration slope in :unit:`W/V`.
-        b_calib :
-            Calibration offset in :unit:`W`.
+        p_low, p_high :
+            Lowest and highest measurable powers in :unit:`W/V`. Must
+            correspond to what is set in the watt meter. Correspond to
+            ``REC_LIM_LOW`` and ``REC_LIM_UPP`` in LabView.
         k_fix :
             Fix slope constant.
         alpha_fix :
             Fix exponent constant.
+        ensure_no_negative :
+            Set negative powers to :math:`0~\mathrm{V}`. Should be useless.
 
         """
         self._a_calib: float
-        if a_calib is not None:
-            self._a_calib = a_calib
         self._b_calib: float
-        if b_calib is not None:
-            self._b_calib = b_calib
+        self._ensure_no_negative = ensure_no_negative
+        if p_low is not None and p_high is not None:
+            self._a_calib, self._b_calib = self._get_wattmeter_calibration(
+                p_low, p_high
+            )
+
         self._a_fix: float
         if k_fix is not None:
             self._k_fix = k_fix
@@ -90,12 +95,35 @@ class Power(Instrument):
             **kwargs,
         )
 
+    def _get_wattmeter_calibration(
+        self, p_low: float, p_high: float, v_low: float = 0.0, v_high=1.0
+    ) -> tuple[float, float]:
+        r"""Compute the wattmetre transfer function parameters.
+
+        We just find the linear relation parameters:
+
+        .. math:
+            P_\mathrm{W} = a_\mathrm{calib} \times V_\mathrm{acqui} +
+            b_\mathrm{calib}
+
+        """
+        a_calib = (p_high - p_low) / (v_high - v_low)
+        b_calib = p_low - a_calib * v_low
+        return a_calib, b_calib
+
     @property
     def _transfer_functions(self) -> list[POST_TREATER_T]:
         assert hasattr(self, "_a_calib")
         assert hasattr(self, "_b_calib")
 
-        funcs = [partial(power, a_calib=self._a_calib, b_calib=self._b_calib)]
+        funcs = [
+            partial(
+                power,
+                a_calib=self._a_calib,
+                b_calib=self._b_calib,
+                ensure_no_negative=self._ensure_no_negative,
+            )
+        ]
         if hasattr(self, "_alpha_fix") and hasattr(self, "k_fix"):
             funcs.append(
                 partial(

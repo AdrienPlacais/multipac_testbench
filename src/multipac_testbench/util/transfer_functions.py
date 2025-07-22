@@ -122,7 +122,10 @@ def field_probe_inv(
 
 
 def power(
-    v_acq: NDArray[np.float64], a_calib: float, b_calib: float
+    v_acq: NDArray[np.float64],
+    a_calib: float,
+    b_calib: float,
+    ensure_no_negative: bool = False,
 ) -> NDArray[np.float64]:
     r"""Convert acquisition voltage to power.
 
@@ -135,12 +138,11 @@ def power(
         Original transfer function in LabView is:
 
         .. math::
-            P = |V_\mathrm{acq}| \times (a_\mathrm{calib} - b_\mathrm{calib})
-            + b_\mathrm{calib}
+            P = |V_\mathrm{acq}| \times (``REC_LIM_UPP`` - ``REC_LIM_LOW``)
+            + ``REC_LIM_LOW``.
 
-        With :math:`a_\mathrm{calib}`: ``REC_LIM_UPP`` and
-        :math:`b_\mathrm{calib}`: ``REC_LIM_LOW``.
-        Note that this is non-linear, and non homogeneous.
+        We removed the absolute value; to avoid negative powers (should not
+        appear), use ``ensure_no_negative=True``.
 
     Parameters
     ----------
@@ -151,6 +153,8 @@ def power(
         Calibration slope in :unit:`W/V`.
     b_calib :
         Calibration offset in :unit:`W`.
+    ensure_no_negative :
+        Set negative powers to :math:`0~\mathrm{V}`.
 
     Returns
     -------
@@ -160,7 +164,8 @@ def power(
 
     """
     watt = a_calib * v_acq + b_calib
-    # watt[watt < 0.0] = 0.0
+    if ensure_no_negative:
+        watt[watt < 0.0] = 0.0
     return watt
 
 
