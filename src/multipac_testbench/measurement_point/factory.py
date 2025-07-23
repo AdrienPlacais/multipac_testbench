@@ -99,12 +99,16 @@ class IMeasurementPointFactory:
         verbose: bool = False,
     ) -> tuple[GlobalDiagnostics | None, list[PickUp]]:
         """Create all the measurement points."""
-        measurement_points: list[IMeasurementPoint] = []
-
         colors = cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
-        for key, val in config.items():
-            c = (0, 0, 0) if "global" in key else next(colors)
-            measurement_points.append(self.run_single(key, val, df_data, c))
+        measurement_points = [
+            self.run_single(
+                key,
+                val,
+                df_data,
+                color=(0, 0, 0) if "global" in key else next(colors),
+            )
+            for key, val in config.items()
+        ]
 
         global_diagnostics = self._filter_global_diagnostics(
             measurement_points, verbose
