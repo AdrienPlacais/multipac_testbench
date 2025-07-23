@@ -1,6 +1,7 @@
 """Define a class to create the proper :class:`.IMeasurementPoint`."""
 
 import logging
+from itertools import cycle
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -98,14 +99,12 @@ class IMeasurementPointFactory:
         verbose: bool = False,
     ) -> tuple[GlobalDiagnostics | None, list[PickUp]]:
         """Create all the measurement points."""
-        colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
-        n_colors = len(colors)
-        measurement_points = [
-            self.run_single(
-                config_key, config_value, df_data, colors[i % n_colors]
-            )
-            for i, (config_key, config_value) in enumerate(config.items())
-        ]
+        measurement_points: list[IMeasurementPoint] = []
+
+        colors = cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
+        for key, val in config.items():
+            c = (0, 0, 0) if "global" in key else next(colors)
+            measurement_points.append(self.run_single(key, val, df_data, c))
 
         global_diagnostics = self._filter_global_diagnostics(
             measurement_points, verbose
