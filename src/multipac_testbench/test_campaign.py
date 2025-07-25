@@ -35,7 +35,7 @@ from multipac_testbench.theoretical.somersalo import (
 from multipac_testbench.threshold.threshold import THRESHOLD_DETECTOR_T
 from multipac_testbench.threshold.threshold_set import ThresholdSet
 from multipac_testbench.util import log_manager, plot
-from multipac_testbench.util.helper import load_config
+from multipac_testbench.util.files import load_config
 from multipac_testbench.util.types import MULTIPAC_DETECTOR_T
 
 T = TypeVar("T", bound=Callable[..., Any])

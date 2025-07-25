@@ -7,6 +7,7 @@ from typing import Literal
 
 import numpy as np
 import pandas as pd
+from multipac_testbench.util.files import resolve_path
 from numpy.typing import NDArray
 
 #: How consecutive-same power points should be treated.
@@ -33,7 +34,7 @@ def load(
     remove_metadata_columns: bool = False,
     **kwargs,
 ) -> pd.DataFrame:
-    """Load the LabVIEWER file.
+    """Load the LabViewer file.
 
     If ``trigger_policy`` is set, perform operations to select the desired
     trigger. These operations do not preserve original sample indexes.
@@ -102,7 +103,7 @@ def _load_file(
         logging.error(f"{filepath} extension not supported.")
         raise RuntimeError
     try:
-        data = pandas_reader(filepath, index_col=index_col, **kwargs)
+        data = pandas_reader((filepath), index_col=index_col, **kwargs)
     except Exception as e:
         logging.error(
             f"There was a mismatch is the number of columns in {filepath}"

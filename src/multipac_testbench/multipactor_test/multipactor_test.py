@@ -62,9 +62,9 @@ from multipac_testbench.threshold.threshold_set import (
 )
 from multipac_testbench.util import plot
 from multipac_testbench.util.animate import get_limits
+from multipac_testbench.util.files import load_config, resolve_path
 from multipac_testbench.util.helper import (
     flatten,
-    load_config,
     output_filepath,
     save_by_position,
     split_rows_by_masks,
