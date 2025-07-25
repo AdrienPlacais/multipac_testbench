@@ -35,6 +35,7 @@ from multipac_testbench.theoretical.somersalo import (
 from multipac_testbench.threshold.threshold import THRESHOLD_DETECTOR_T
 from multipac_testbench.threshold.threshold_set import ThresholdSet
 from multipac_testbench.util import log_manager, plot
+from multipac_testbench.util.helper import load_config
 from multipac_testbench.util.types import MULTIPAC_DETECTOR_T
 
 T = TypeVar("T", bound=Callable[..., Any])
@@ -53,7 +54,7 @@ class TestCampaign(list[MultipactorTest]):
         filepaths: Sequence[Path],
         frequencies: Sequence[float],
         swrs: Sequence[float],
-        config: dict,
+        config: dict[str, Any] | str | Path,
         info: Sequence[str] = (),
         sep: str = ";",
         trigger_policy: TRIGGER_POLICIES = "keep_all",
@@ -103,7 +104,11 @@ class TestCampaign(list[MultipactorTest]):
             try:
                 multipactor_test = MultipactorTest(
                     filepath,
-                    config,
+                    (
+                        config
+                        if isinstance(config, dict)
+                        else load_config(config)
+                    ),
                     freq_mhz,
                     swr,
                     info,

@@ -64,6 +64,7 @@ from multipac_testbench.util import plot
 from multipac_testbench.util.animate import get_limits
 from multipac_testbench.util.helper import (
     flatten,
+    load_config,
     output_filepath,
     save_by_position,
     split_rows_by_masks,
@@ -88,7 +89,7 @@ class MultipactorTest:
     def __init__(
         self,
         filepath: Path,
-        config: dict,
+        config: dict[str, Any] | str | Path,
         freq_mhz: float,
         swr: float,
         info: str = "",
@@ -155,7 +156,7 @@ class MultipactorTest:
             create_virtual_instruments=create_virtual_instruments,
         )
         imeasurement_points = imeasurement_point_factory.run(
-            config,
+            config if isinstance(config, dict) else load_config(config),
             df_data,
         )
         #: Where all diagnostics at a specific pick-up are defined (e.g.

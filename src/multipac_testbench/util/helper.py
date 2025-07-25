@@ -1,6 +1,7 @@
 """Define general usage functions."""
 
 import logging
+import tomllib
 from collections.abc import Callable, Iterable, Iterator, Sequence
 from pathlib import Path
 from typing import Any, TypeVar
@@ -240,3 +241,10 @@ def drop_repeated_col(
         col = df.columns[0]
     df = df.loc[df[col] != df[col].shift()]
     return df
+
+
+def load_config(config_path: str | Path) -> dict[str, Any]:
+    """Load the configuration file."""
+    with open(config_path, "rb") as f:
+        config = tomllib.load(f)
+    return config

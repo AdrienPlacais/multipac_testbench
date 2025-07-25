@@ -4,6 +4,7 @@
 import logging
 from collections.abc import Iterator, Mapping
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 from multipac_testbench.multipactor_test import MultipactorTest
@@ -15,6 +16,7 @@ from multipac_testbench.multipactor_test.helper import (
     powerstep_files,
     take_maximum,
 )
+from multipac_testbench.util.helper import load_config
 from multipac_testbench.util.log_manager import suppress_log_messages
 from numpy.typing import NDArray
 
@@ -34,7 +36,7 @@ class PowerStep(MultipactorTest):
     def __init__(
         self,
         filepath: Path,
-        config: dict,
+        config: dict[str, Any] | str | Path,
         freq_mhz: float,
         swr: float,
         sample_index: int,
@@ -91,7 +93,9 @@ class PowerStep(MultipactorTest):
         with suppress_log_messages("", self.log_messages_to_suppress):
             super().__init__(
                 filepath=filepath,
-                config=config,
+                config=(
+                    config if isinstance(config, dict) else load_config(config)
+                ),
                 freq_mhz=freq_mhz,
                 swr=swr,
                 info=f"Sample index #{sample_index}",
@@ -154,7 +158,7 @@ class PowerStepSet:
     def __init__(
         self,
         folder: Path,
-        config: dict,
+        config: dict[str, Any] | str | Path,
         freq_mhz: float,
         swr: float,
         sep: str = "\t",
@@ -210,7 +214,9 @@ class PowerStepSet:
         self._power_steps = [
             PowerStep(
                 filepath=filepath,
-                config=config,
+                config=(
+                    config if isinstance(config, dict) else load_config(config)
+                ),
                 freq_mhz=freq_mhz,
                 swr=swr,
                 sample_index=sample_index,
