@@ -14,9 +14,6 @@ import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from multipac_testbench.instruments.instrument import Instrument
-from multipac_testbench.multipactor_band.test_multipactor_bands import (
-    TestMultipactorBands,
-)
 from multipac_testbench.threshold.threshold import PowerExtremum
 from multipac_testbench.threshold.threshold_set import ThresholdSet
 from multipac_testbench.util.helper import drop_repeated_col, is_nested_list
@@ -698,45 +695,6 @@ def plot_df_threshold(
     )
     assert axes is not None
     return axes
-
-
-def add_instrument_multipactor_bands(
-    test_multipactor_bands: TestMultipactorBands,
-    axes: list[Axes] | Axes | None = None,
-    scale: float = 1.0,
-    alpha: float = 0.5,
-    legend: bool = True,
-    twinx: bool = False,
-    **kwargs,
-) -> Axes | list[Axes]:
-    """Add the multipactor bands to a pre-existing plot."""
-    if isinstance(axes, list):
-        axes_aslist = [
-            add_instrument_multipactor_bands(
-                test_multipactor_bands,
-                axe,
-                scale=scale,
-                alpha=alpha,
-                legend=legend,
-                twinx=twinx,
-                **kwargs,
-            )
-            for axe in axes
-        ]
-        return axes_aslist
-
-    mp_axes = axes
-    if twinx:
-        assert axes is not None
-        mp_axes = axes.twinx()
-
-    mp_axes = test_multipactor_bands.plot_as_bool(
-        mp_axes, scale, alpha, legend, **kwargs
-    )
-    if legend:
-        assert axes is not None
-        _merge_legends(axes, mp_axes)
-    return mp_axes
 
 
 def _merge_legends(ax1: Axes, ax2: Axes) -> None:

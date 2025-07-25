@@ -3,19 +3,13 @@
 import inspect
 import logging
 from abc import ABC
-from typing import Callable, Literal, Self, overload
+from typing import Callable, Self
 
 import numpy as np
 import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.container import StemContainer
 from matplotlib.lines import Line2D
-from multipac_testbench.multipactor_band.instrument_multipactor_bands import (
-    InstrumentMultipactorBands,
-)
-from multipac_testbench.multipactor_band.test_multipactor_bands import (
-    TestMultipactorBands,
-)
 from multipac_testbench.util.filtering import (
     array_is_growing,
     remove_isolated_false,
@@ -306,130 +300,6 @@ class Instrument(ABC):
             delattr(self, "_data_as_pd")
         self._post_treaters.append(post_treater)
         self._notify_callbacks()
-
-    def at_thresholds(
-        self, instrument_multipactor_bands: InstrumentMultipactorBands
-    ) -> pd.DataFrame:
-        """Get what was measured by instrument at thresholds."""
-        lower = [
-            self.data[i] if i is not None else np.nan
-            for i in instrument_multipactor_bands.lower_indexes()
-        ]
-        upper = [
-            self.data[i] if i is not None else np.nan
-            for i in instrument_multipactor_bands.upper_indexes()
-        ]
-        label = f" threshold {self} "
-        label += f"according to {instrument_multipactor_bands.instrument_name}"
-        df_at_thresholds = pd.DataFrame(
-            {"Lower" + label: lower, "Upper" + label: upper}
-        )
-        return df_at_thresholds
-
-    @overload
-    def multipactor_band_at_same_position(
-        self,
-        multipactor_bands: TestMultipactorBands,
-        raise_no_match_error: Literal[True],
-        global_diagnostics: bool = False,
-        tol: float = 1e-10,
-        **kwargs,
-    ) -> InstrumentMultipactorBands: ...
-
-    @overload
-    def multipactor_band_at_same_position(
-        self,
-        multipactor_bands: TestMultipactorBands,
-        raise_no_match_error: Literal[False],
-        global_diagnostics: bool = False,
-        tol: float = 1e-10,
-        **kwargs,
-    ) -> InstrumentMultipactorBands | None: ...
-
-    @overload
-    def multipactor_band_at_same_position(
-        self,
-        multipactor_bands: TestMultipactorBands,
-        raise_no_match_error: bool,
-        global_diagnostics: bool = False,
-        tol: float = 1e-10,
-        **kwargs,
-    ) -> InstrumentMultipactorBands | None: ...
-
-    @overload
-    def multipactor_band_at_same_position(
-        self,
-        multipactor_bands: InstrumentMultipactorBands,
-        raise_no_match_error: bool,
-        global_diagnostics: bool = False,
-        tol: float = 1e-10,
-        **kwargs,
-    ) -> InstrumentMultipactorBands: ...
-
-    def multipactor_band_at_same_position(
-        self,
-        multipactor_bands: TestMultipactorBands | InstrumentMultipactorBands,
-        raise_no_match_error: bool = False,
-        global_diagnostics: bool = False,
-        tol: float = 1e-10,
-        **kwargs,
-    ) -> InstrumentMultipactorBands | None:
-        """Get the multipactor that was measured at the same position.
-
-        This is useful to easily match the data from a field probe to the
-        multipactor bands measured by the current probe at the same position.
-
-        Parameters
-        ----------
-        multipactor_bands :
-            List of :class:`.InstrumentMultipactorBands` among which you want
-            to find the match. If a :class:`.InstrumentMultipactorBands` is
-            given, return it back without further checking.
-        tol :
-            Mismatch allowed between positions.
-        global_diagnostics :
-            If multipactor detected by a global instrument should be returned.
-        raise_no_match_error :
-            If True, method always return an object.
-        kwargs :
-            Other keyword arguments, currently unused.
-
-        Returns
-        -------
-        InstrumentMultipactorBands | None
-
-        """
-        if isinstance(multipactor_bands, InstrumentMultipactorBands):
-            return multipactor_bands
-
-        assert isinstance(self.position, float)
-        matching_multipactor_bands = [
-            band
-            for band in multipactor_bands
-            if band is not None
-            and (
-                abs(band.position - self.position) < tol
-                or np.isnan(self.position)
-                or (global_diagnostics and np.isnan(band.position))
-            )
-        ]
-        n_found = len(matching_multipactor_bands)
-        if n_found == 0:
-            if not raise_no_match_error:
-                return
-
-            raise ValueError(
-                f"No MultipactorBand among {multipactor_bands} with a position"
-                f" matching {self} was found."
-            )
-
-        if n_found > 1:
-            logging.warning(
-                "There are several multipactor bands that were measured for "
-                f"the same instrument {self}: {matching_multipactor_bands}"
-            )
-
-        return matching_multipactor_bands[0]
 
     def _post_treat(self, data: NDArray[np.float64]) -> NDArray[np.float64]:
         """Apply all post-treatment functions."""

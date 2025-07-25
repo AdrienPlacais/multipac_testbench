@@ -9,11 +9,7 @@ import pandas as pd
 from matplotlib.axes import Axes
 from multipac_testbench.instruments.factory import InstrumentFactory
 from multipac_testbench.instruments.instrument import Instrument
-from multipac_testbench.multipactor_band.instrument_multipactor_bands import (
-    InstrumentMultipactorBands,
-)
-from multipac_testbench.util.types import MULTIPAC_DETECTOR_T, POST_TREATER_T
-from numpy.typing import NDArray
+from multipac_testbench.util.types import POST_TREATER_T
 
 
 class IMeasurementPoint(ABC):
@@ -140,48 +136,14 @@ class IMeasurementPoint(ABC):
         for instrument in instruments:
             instrument.add_post_treater(post_treater)
 
-    def detect_multipactor(
-        self,
-        multipac_detector: MULTIPAC_DETECTOR_T,
-        instrument_class: ABCMeta,
-        growth_mask: NDArray[np.bool],
-        debug: bool = False,
-        info: str = "",
-    ) -> InstrumentMultipactorBands | None:
-        """Detect multipactor with ``multipac_detector``."""
-        instrument = self.get_instrument(instrument_class)
-        if instrument is None:
-            return
-        multipactor = multipac_detector(instrument.data)
-        instrument_multipactor_bands = InstrumentMultipactorBands(
-            multipactor,
-            growth_mask,
-            instrument.name,
-            self.name,
-            instrument.position,
-            info,
-            color=self.color,
-        )
-        if debug:
-            axes = instrument.data_as_pd.plot(grid=True)
-            axes = axes.twinx()
-            df_float = pd.DataFrame(
-                {
-                    "Power grows?": growth_mask,
-                    "Multipactor?": multipactor[1:],
-                }
-            ).astype(float)
-            axes = df_float.plot(ax=axes, grid=True)
-
-        return instrument_multipactor_bands
-
     def scatter_instruments_data(
         self,
         instrument_class_axes: dict[ABCMeta, Axes],
         xdata: float,
-        instrument_multipactor_bands: InstrumentMultipactorBands,
+        instrument_multipactor_bands: Any,
     ) -> None:
         """Scatter data measured by desired instruments."""
+        raise NotImplementedError
         for instrument_class, axes in instrument_class_axes.items():
             instrument = self.get_instrument(instrument_class)
             if instrument is None:
