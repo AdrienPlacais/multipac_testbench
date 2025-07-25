@@ -21,7 +21,7 @@ class Power(Instrument):
         p_high: float | None = None,
         k_fix: float | None = None,
         alpha_fix: float | None = None,
-        ensure_no_negative: bool = False,
+        ensure_no_negative: bool = True,
         **kwargs,
     ) -> None:
         r"""Instantiate the instrument, declare other specific attributes.

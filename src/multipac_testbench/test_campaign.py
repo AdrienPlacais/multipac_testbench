@@ -620,7 +620,7 @@ class TestCampaign(list[MultipactorTest]):
 
         """
         plot_kwargs = {
-            "x": "R",
+            "x": "x",
             "xlabel": ReflectionCoefficient.ylabel(),
             "ylabel": ForwardPower.ylabel(),
             "grid": True,

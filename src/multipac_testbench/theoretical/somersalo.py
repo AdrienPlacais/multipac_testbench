@@ -270,7 +270,7 @@ def fit_somersalo_scaling(
     plot: bool,
     axes: Axes | None = None,
     ls: str = "--",
-    r_col: str = "R",
+    r_col: str = "x",
     p_col: str = "P_low",
     freq_mhz: str | None = None,
     **fit_plot_kw,
