@@ -24,12 +24,6 @@ from multipac_testbench.instruments.power import ForwardPower
 from multipac_testbench.instruments.reflection_coefficient import (
     ReflectionCoefficient,
 )
-from multipac_testbench.measurement_point.i_measurement_point import (
-    IMeasurementPoint,
-)
-from multipac_testbench.multipactor_band.campaign_multipactor_bands import (
-    CampaignMultipactorBands,
-)
 from multipac_testbench.multipactor_test import MultipactorTest
 from multipac_testbench.multipactor_test.loader import TRIGGER_POLICIES
 from multipac_testbench.theoretical.somersalo import (
@@ -132,79 +126,6 @@ class TestCampaign(list[MultipactorTest]):
         """Add post-treatment functions to instruments."""
         for test in self:
             test.add_post_treater(*args, **kwargs)
-
-    def at_last_threshold(
-        self,
-        instrument_id: ABCMeta | Sequence[ABCMeta],
-        campaign_multipactor_bands: CampaignMultipactorBands,
-        *args,
-        **kwargs,
-    ) -> pd.DataFrame:
-        """Make a resume of data measured at last thresholds."""
-        zipper = zip(self, campaign_multipactor_bands, strict=True)
-        df_thresholds = [
-            test.at_last_threshold(instrument_id, band, *args, **kwargs)
-            for test, band in zipper
-        ]
-        return pd.concat(df_thresholds)
-
-    def detect_multipactor(
-        self,
-        multipac_detector: MULTIPAC_DETECTOR_T,
-        instrument_class: ABCMeta,
-        *args,
-        power_growth_mask_kw: dict[str, int | float] | None = None,
-        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
-        debug: bool = False,
-        **kwargs,
-    ) -> CampaignMultipactorBands:
-        """Create the :class:`.InstrumentMultipactorBands` objects.
-
-        Parameters
-        ----------
-        multipac_detector :
-            Function that takes in the ``data`` of an :class:`.Instrument` and
-            returns an array, where True means multipactor and False no
-            multipactor.
-        instrument_class :
-            Type of instrument on which ``multipac_detector`` should be
-            applied.
-        power_growth_mask_kw :
-            Keyword arguments passed to the function that determines when power
-            is increasing, when it is decreasing
-            (:meth:`.ForwardPower.growth_mask`).
-        measurement_points_to_exclude :
-            :class:`.IMeasurementPoint` where you do not want to know if there
-            is multipacting.
-        debug :
-            To plot the data used for multipactor detection, where power grows,
-            where multipactor is detected.
-
-        Returns
-        -------
-        nested_instrument_multipactor_bands :
-            :class:`.InstrumentMultipactorBands` objects holding when multipactor
-            happens. They are sorted first by :class:`.MultipactorTest` (outer
-            level), then per :class:`.Instrument` of class ``instrument_class``
-            (inner level).
-
-        """
-        tests_multipactor_bands = [
-            test.detect_multipactor(
-                multipac_detector=multipac_detector,
-                instrument_class=instrument_class,
-                *args,
-                power_growth_mask_kw=power_growth_mask_kw,
-                measurement_points_to_exclude=measurement_points_to_exclude,
-                debug=debug,
-                **kwargs,
-            )
-            for test in self
-        ]
-        campaign_multipactor_bands = CampaignMultipactorBands(
-            tests_multipactor_bands
-        )
-        return campaign_multipactor_bands
 
     def determine_thresholds(
         self,
@@ -439,7 +360,7 @@ class TestCampaign(list[MultipactorTest]):
 
     def somersalo_chart(
         self,
-        multipactor_bands: CampaignMultipactorBands,
+        thresholds_sets: Mapping[MultipactorTest, ThresholdSet],
         orders_one_point: tuple[int, ...] = (1, 2, 3, 4, 5, 6, 7),
         orders_two_point: tuple[int, ...] = (1,),
         **fig_kw,
@@ -474,6 +395,7 @@ class TestCampaign(list[MultipactorTest]):
             Right axis (two-point multipactor).
 
         """
+        raise NotImplementedError
         log_power = np.linspace(-1.5, 3.5, 2)
         xlim = (log_power[0], log_power[-1])
         ylim_one_point = (2.2, 9.2)
@@ -500,7 +422,7 @@ class TestCampaign(list[MultipactorTest]):
         for kwargs in (one_point_kw, two_point_kw):
             plot_somersalo_analytical(log_power=log_power, **kwargs)
 
-        self._add_somersalo_measured(ax1, ax2, multipactor_bands)
+        self._add_somersalo_measured(ax1, ax2, thresholds_sets)
         ax1.grid(True)
         return fig, ax1, ax2
 
@@ -508,7 +430,7 @@ class TestCampaign(list[MultipactorTest]):
         self,
         ax1: Axes,
         ax2: Axes,
-        multipactor_bands: CampaignMultipactorBands,
+        thresholds_sets: Mapping[MultipactorTest, ThresholdSet],
         **plot_kw,
     ) -> None:
         """Put the measured multipacting limits on Somersalo plot.
@@ -520,9 +442,8 @@ class TestCampaign(list[MultipactorTest]):
             cycle, or every power that led to multipacting during whole test.
 
         """
-        zipper = zip(self, multipactor_bands, strict=True)
-        for test, bands in zipper:
-            somersalo_data = test.data_for_somersalo(bands)
+        for test, threshold_set in thresholds_sets.items():
+            somersalo_data = test.data_for_somersalo(threshold_set)
             plot_somersalo_measured(
                 mp_test_name=str(test),
                 somersalo_data=somersalo_data,
@@ -820,9 +741,6 @@ class TestCampaign(list[MultipactorTest]):
                 )
             )
 
-            logging.info(
-                "Here check concatenation goes alright. Also check what happens when columns are different."
-            )
             df = pd.concat(dfs)
             thresholds_by_freq[freq_mhz] = df
 
@@ -861,88 +779,9 @@ class TestCampaign(list[MultipactorTest]):
                 plot.save_dataframe(df, file, **(csv_kwargs or {}))
         return axes_by_freq, thresholds_by_freq
 
-    def voltage_thresholds(
-        self,
-        campaign_multipactor_bands: CampaignMultipactorBands,
-        measurement_points_to_exclude: Sequence[str] = (),
-        png_path: Path | None = None,
-        png_kwargs: dict | None = None,
-        csv_path: Path | None = None,
-        csv_kwargs: dict | None = None,
-        **fig_kw,
-    ) -> tuple[Axes, pd.DataFrame]:
-        """Plot the lower and upper thresholds as voltage.
-
-        Parameters
-        ----------
-        campaign_multipactor_bands :
-            Object holding where multipactor happens for every test.
-        measurement_points_to_exclude :
-            Some measurement points to exclude. The default is an empty tuple.
-        png_path :
-            If provided, the resulting figure will be saved at this location.
-            The default is None.
-        png_kwargs :
-            Other keyword arguments passed to the :func:`.save_figure`
-            function. The default is None.
-        csv_path :
-            If provided, the data to produce the figure will be saved in this
-            location. The default is None.
-        csv_kwargs :
-            Other keyword arguments passed to the :func:`.save_dataframe`
-            function.
-        fig_kw :
-            Other keyword arguments passed to the :meth:`pandas.DataFrame.plot`
-            method.
-
-        Returns
-        -------
-        tuple[Axes, pd.DataFrame]
-        axes :
-            Plotted axes.
-        data :
-            Corresponding data.
-
-        """
-        frequencies = {test.freq_mhz for test in self}
-        if len(frequencies) != 1:
-            raise NotImplementedError("Plot over several freqs to implement")
-
-        voltages = self.at_last_threshold(
-            ins.FieldProbe,
-            campaign_multipactor_bands,
-            measurement_points_to_exclude=measurement_points_to_exclude,
-        )
-
-        axes = voltages.filter(like="Lower").plot(
-            grid=True,
-            ylabel="Thresholds $V$ [V]",
-            marker="o",
-            ms=10,
-            **fig_kw,
-        )
-        axes.set_prop_cycle(None)
-        axes = voltages.filter(like="Upper").plot(
-            grid=True,
-            ax=axes,
-            ylabel="Thresholds $V$ [V]",
-            marker="^",
-            ms=10,
-            **fig_kw,
-        )
-        if png_path is not None:
-            if png_kwargs is None:
-                png_kwargs = {}
-            plot.save_figure(axes, png_path, **png_kwargs)
-        if csv_path is not None:
-            if csv_kwargs is None:
-                csv_kwargs = {}
-            plot.save_dataframe(voltages, csv_path, **csv_kwargs)
-        return axes, voltages
-
     def susceptibility(
         self,
-        campaign_multipactor_bands: CampaignMultipactorBands,
+        thresholds_sets: Mapping[MultipactorTest, ThresholdSet],
         measurement_points_to_exclude: Sequence[str] = (),
         keep_only_travelling: bool = True,
         tol: float = 1e-6,
@@ -958,7 +797,7 @@ class TestCampaign(list[MultipactorTest]):
 
         Parameters
         ----------
-        campaign_multipactor_bands :
+        thresholds_sets :
             Object holding where multipactor happens for every test.
         measurement_points_to_exclude :
             Some measurement points to exclude.
@@ -995,6 +834,7 @@ class TestCampaign(list[MultipactorTest]):
             Corresponding data.
 
         """
+        raise NotImplementedError
         df_susceptibility = self.at_last_threshold(
             ins.FieldProbe,
             campaign_multipactor_bands,

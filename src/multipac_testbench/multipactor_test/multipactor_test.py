@@ -47,12 +47,6 @@ from multipac_testbench.measurement_point.factory import (
 from multipac_testbench.measurement_point.i_measurement_point import (
     IMeasurementPoint,
 )
-from multipac_testbench.multipactor_band.instrument_multipactor_bands import (
-    InstrumentMultipactorBands,
-)
-from multipac_testbench.multipactor_band.test_multipactor_bands import (
-    TestMultipactorBands,
-)
 from multipac_testbench.multipactor_test.loader import TRIGGER_POLICIES, load
 from multipac_testbench.threshold.helper import (
     extract_detecting_name,
@@ -250,8 +244,7 @@ class MultipactorTest:
         for instrument in instruments:
             if isinstance(instrument.data_as_pd, pd.DataFrame):
                 logging.error(
-                    f"You want to plot {instrument}, which data is 2D. Not "
-                    "supported."
+                    f"You want to plot {instrument}, which data is 2D. Not supported."
                 )
                 continue
             data_to_plot.append(instrument.data_as_pd)
@@ -353,148 +346,6 @@ class MultipactorTest:
 
         return data_to_plot, y_columns, color
 
-    def instruments_and_multipactor_bands(
-        self,
-        instruments_id: ABCMeta,
-        multipactor_bands: TestMultipactorBands | InstrumentMultipactorBands,
-        raise_no_match_error: bool = True,
-        global_diagnostics: bool = True,
-        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
-        instruments_to_ignore: Sequence[Instrument | str] = (),
-    ) -> zip:
-        """Match the instruments with their multipactor bands.
-
-        Parameters
-        ----------
-        instruments_id :
-            Class of instrument under study.
-        multipactor_bands :
-            All multipactor bands, among which we will be looking. If only one
-            is given (:class:`.InstrumentMultipactorBands`), then all
-            :class:`.Instrument` will be matched with the same identical
-            :class:`.InstrumentMultipactorBands`.
-        raise_no_match_error :
-            If an error should be raised when no
-            :class:`.InstrumentMultipactorBands` match an
-            :class:`.Instrument`.
-        global_diagnostics :
-            If :class:`.InstrumentMultipactorBands` that were obtained from a
-            global diagnostic should be matched.
-        measurement_points_to_exclude :
-            :class:`.Instrument` at this pick-ups are skipped.
-        instruments_to_ignore :
-            :class:`.Instrument` in this sequence are skipped.
-
-        Returns
-        -------
-        zipper :
-            Object matching every :class:`.Instrument` with the appropriate
-            :class:`.InstrumentMultipactorBands`.
-
-        """
-        instruments = self.get_instruments(
-            instruments_id,
-            measurement_points_to_exclude,
-            instruments_to_ignore,
-        )
-
-        matching_mp_bands = [
-            instrument.multipactor_band_at_same_position(
-                multipactor_bands,
-                raise_no_match_error=raise_no_match_error,
-                global_diagnostics=global_diagnostics,
-            )
-            for instrument in instruments
-        ]
-        zipper = zip(instruments, matching_mp_bands, strict=True)
-        return zipper
-
-    def at_last_threshold(
-        self,
-        instrument_id: ABCMeta | Sequence[ABCMeta],
-        multipactor_bands: TestMultipactorBands | InstrumentMultipactorBands,
-        **kwargs,
-    ) -> pd.DataFrame:
-        """Give the ``instrument_id`` measurements at last threshold."""
-        if isinstance(instrument_id, Sequence):
-            all_df_thresholds = [
-                self.at_last_threshold(
-                    single_instrument_id, multipactor_bands, **kwargs
-                )
-                for single_instrument_id in instrument_id
-            ]
-            return pd.concat(all_df_thresholds, axis=1)
-
-        zipper = self.instruments_and_multipactor_bands(
-            instrument_id, multipactor_bands, **kwargs
-        )
-        df_thresholds = pd.concat(
-            [
-                instrument.at_thresholds(band).tail(1)
-                for instrument, band in zipper
-            ],
-            axis=1,
-        )
-        df_thresholds.index = [str(self)]
-        return df_thresholds
-
-    def detect_multipactor(
-        self,
-        multipac_detector: MULTIPAC_DETECTOR_T,
-        instrument_class: ABCMeta,
-        power_growth_mask_kw: dict[str, Any] | None = None,
-        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
-        debug: bool = False,
-        **kwargs,
-    ) -> TestMultipactorBands:
-        """Create the :class:`.TestMultipactorBands` object.
-
-        Parameters
-        ----------
-        multipac_detector :
-            Function that takes in the ``data`` of an :class:`.Instrument`
-            and returns an array, where True means multipactor and False no
-            multipactor.
-        instrument_class :
-            Type of instrument on which ``multipac_detector`` should be
-            applied.
-        power_growth_mask_kw :
-            Keyword arguments passed to :meth:`.ForwardPower.growth_mask`.
-        measurement_points_to_exclude :
-            Some measurement points that should not be considered.
-        debug :
-            To plot the data used for multipactor detection, where power grows,
-            where multipactor is detected.
-
-        Returns
-        -------
-        test_multipactor_bands :
-            Objets containing when multipactor happens, according to
-            ``multipac_detector``, at every pick-up holding an
-            :class:`.Instrument` of type ``instrument_class``.
-
-        """
-        growth_mask = self._power_growth_mask(power_growth_mask_kw)
-
-        measurement_points = self.get_measurement_points(
-            to_exclude=measurement_points_to_exclude
-        )
-
-        instrument_multipactor_bands = [
-            measurement_point.detect_multipactor(
-                multipac_detector,
-                instrument_class,
-                growth_mask,
-                debug,
-                info=f" {self}",
-            )
-            for measurement_point in measurement_points
-        ]
-        test_multipactor_bands = TestMultipactorBands(
-            instrument_multipactor_bands, growth_mask
-        )
-        return test_multipactor_bands
-
     def determine_thresholds(
         self,
         multipac_detector: MULTIPAC_DETECTOR_T,
@@ -562,7 +413,7 @@ class MultipactorTest:
                 "(NI9205_Power1) instead of the PowerSetpoint (NI9205_dBm). "
                 "This is more error-prone, in particular if consecutive Sample"
                 " index corresond to different powers. In this case, you may "
-                "see that all MultipactorBands are merged. You can fix this by"
+                "see that all multipactor bands are merged. You can fix this by"
                 "setting ``consecutive_criterions`` to 0."
             )
             power_instrument = self.get_instrument(ForwardPower)
@@ -587,7 +438,7 @@ class MultipactorTest:
                 "(NI9205_Power1) instead of the PowerSetpoint (NI9205_dBm). "
                 "This is more error-prone, in particular if consecutive Sample"
                 " index corresond to different powers. In this case, you may "
-                "see that all MultipactorBands are merged. You can fix this by"
+                "see that all multipactor bands are merged. You can fix this by"
                 "setting ``consecutive_criterions`` to 0."
             )
             power_instrument = self.get_instrument(ForwardPower)
@@ -731,9 +582,9 @@ class MultipactorTest:
         if name is not None:
             name = (name,)
         measurement_points = self.get_measurement_points(name, to_exclude)
-        assert len(measurement_points) == 1, (
-            "Only one IMeasurementPoint " "should match."
-        )
+        assert (
+            len(measurement_points) == 1
+        ), "Only one IMeasurementPoint should match."
         return measurement_points[0]
 
     def get_instruments(
@@ -749,7 +600,7 @@ class MultipactorTest:
         instruments_to_ignore: Sequence[Instrument | str] = (),
     ) -> list[Instrument]:
         """Get all instruments matching ``instrument_id``."""
-        match (instruments_id):
+        match instruments_id:
             case None:
                 points: Collection[IMeasurementPoint] = self.pick_ups
                 if self.global_diagnostics is not None:
@@ -819,7 +670,7 @@ class MultipactorTest:
         instruments_to_ignore: Sequence[Instrument | str] = (),
     ) -> Instrument | None:
         """Get a single instrument matching ``instrument_id``."""
-        match (instrument_id):
+        match instrument_id:
             case Instrument():
                 return instrument_id
             case str() as instrument_name:
@@ -910,7 +761,7 @@ class MultipactorTest:
 
     def data_for_somersalo(
         self,
-        test_multipactor_bands: TestMultipactorBands,
+        threshold_set: ThresholdSet,
     ) -> dict[str, float | list[float]]:
         """Get the data required to create the Somersalo plot.
 
@@ -918,9 +769,10 @@ class MultipactorTest:
             Allow representation of several pick-ups.
 
         """
-        last_powers = self.at_last_threshold(
-            ForwardPower, test_multipactor_bands
-        ).iloc[0]
+        raise NotImplementedError
+        last_powers = self.at_last_threshold(ForwardPower, threshold_set).iloc[
+            0
+        ]
         z_ohm = 50.0
         d_mm = 0.5 * (38.78 - 16.87)
         logging.warning(f"Used default {d_mm = }")
@@ -1594,9 +1446,7 @@ class MultipactorTest:
         self,
         instruments_to_plot: Sequence[ABCMeta],
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
-        instrument_multipactor_bands: (
-            Sequence[InstrumentMultipactorBands] | None
-        ) = None,
+        thresholds_set: ThresholdSet | None = None,
         png_path: Path | None = None,
         **fig_kw,
     ) -> tuple[Figure, list[Axes]]:
@@ -1628,12 +1478,10 @@ class MultipactorTest:
             to_exclude=measurement_points_to_exclude
         )
 
-        instrument_multipactor_bands = (
-            self._get_proper_instrument_multipactor_bands(
-                multipactor_measured_at=measurement_points,
-                instrument_multipactor_bands=instrument_multipactor_bands,
-                measurement_points_to_exclude=measurement_points_to_exclude,
-            )
+        thresholds_set = self._get_proper_instrument_multipactor_bands(
+            multipactor_measured_at=measurement_points,
+            instrument_multipactor_bands=thresholds_set,
+            measurement_points_to_exclude=measurement_points_to_exclude,
         )
 
         for i, measurement_point in enumerate(measurement_points):
@@ -1723,10 +1571,9 @@ def _add_thresholds_on_axes(
         pos_to_cols = group_columns_by_detector_position(
             data_at_thresholds, test, instrument_nature=instrument_nature
         )
-        assert isinstance(position, float), (
-            "Instruments storing 2D data, such as `Reconstructed`, are not"
-            " supported."
-        )
+        assert isinstance(
+            position, float
+        ), "Instruments storing 2D data, such as `Reconstructed`, are not supported."
 
         cols = pos_to_cols.get(position, [])
         if (
