@@ -848,8 +848,11 @@ class TestCampaign(list[MultipactorTest]):
             return None, thresholds_by_freq
 
         if png_path is not None:
-            raise NotImplementedError
-            plot.save_figure(axes, png_path, **(png_kwargs or {}))
+            for freq, axes in axes_by_freq.items():
+                if axes is None:
+                    continue
+                name = png_path.with_name(f"{png_path.name}_{freq}MHz.png")
+                plot.save_figure(axes, name, **(png_kwargs or {}))
         if csv_path:
             csv_stem = csv_path.stem
             csv_dir = csv_path.parent
