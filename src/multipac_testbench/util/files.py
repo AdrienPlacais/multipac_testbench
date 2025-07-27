@@ -36,7 +36,7 @@ def resolve_path(path: str | Path) -> Path:
     if path.exists():
         return path
 
-    package_data_root = resources.files("multipac_tesbench.data")
+    package_data_root = resources.files("multipac_testbench.data")
     fallback = package_data_root / str(path)
     if fallback.is_file():
         return fallback

@@ -9,6 +9,7 @@ import pandas as pd
 from multipac_testbench.instruments.electric_field.i_electric_field import (
     IElectricField,
 )
+from multipac_testbench.util.files import resolve_path
 from multipac_testbench.util.transfer_functions import (
     field_probe,
     field_probe_inv,
@@ -23,11 +24,9 @@ class FieldProbe(IElectricField):
         self,
         name: str,
         raw_data: pd.Series | None,
-        g_probe: float | None = None,
         attenuation_file: str | None = None,
         calibration_file: str | None = None,
         freq_mhz: float | None = None,
-        patch: bool = False,
         **kwargs,
     ) -> None:
         r"""Instantiate with some specific arguments.
@@ -38,11 +37,6 @@ class FieldProbe(IElectricField):
 
         Parameters
         ----------
-        g_probe :
-            Total attenuation. Probe specific, also depends on frequency. Used
-            when the ``g_probe`` in LabViewer is wrong and data must be
-            patched (``patch == True``), or when ``raw_data``. Deprecated,
-            prefer giving ``attenuation_file``.
         attenuation_file :
             Path to the probe attenuation file, linking voltage in line to
             voltage measured by the probe. This is frequency and probe
@@ -54,21 +48,10 @@ class FieldProbe(IElectricField):
             for more information. Used when the ``g_probe`` in LabViewer is
             wrong and data must be patched (``patch == True``, or when
             ``raw_data``).
-        patch :
-            Patch the given data to compensate for a ``g_probe = -1`` in
-            LabViewer. This was a bug that is now fixed, so this option should
-            be useless now. See also :meth:`._patch_data`. The actual
-            ``g_probe``, as well as the ``calibration_file`` argument.
-            Note that it overrides a ``_raw_data`` protection mechanism.
 
         """
         #: Total attenuation. Probe specific, also depends on frequency.
-        self._g_probe = g_probe
-        if g_probe is not None:
-            logging.warning(
-                f"Giving ``g_probe`` is deprectated. Prefer giving "
-                "``attenuation_file``."
-            )
+        self._g_probe: float
         #: Rack calibration slope in :unit:`V/dBm`.
         self._a_rack: float
         #: Rack calibration constant in :unit:`dBm`.
@@ -79,7 +62,7 @@ class FieldProbe(IElectricField):
                 freq_mhz is not None
             ), "Frequency is mandatory to calibrate racks."
             self._a_rack, self._b_rack = self._rf_rack_calibration_constants(
-                Path(calibration_file),
+                calibration_file,
                 freq_mhz=freq_mhz,
             )
         if attenuation_file is not None:
@@ -91,14 +74,6 @@ class FieldProbe(IElectricField):
             )
         super().__init__(name=name, raw_data=raw_data, **kwargs)
 
-        if patch:
-            assert (
-                not self._is_raw
-            ), "`patch` kwarg designed to patch non-raw data."
-            self._raw_data_can_change = True
-            self._patch_data()
-            self._raw_data_can_change = False
-
     @classmethod
     def ylabel(cls) -> str:
         """Label used for plots."""
@@ -108,8 +83,7 @@ class FieldProbe(IElectricField):
     def _transfer_functions(self) -> list[POST_TREATER_T]:
         assert hasattr(self, "_a_rack")
         assert hasattr(self, "_b_rack")
-        assert self._g_probe is not None
-
+        assert hasattr(self, "_g_probe")
         return [
             partial(
                 field_probe,
@@ -120,35 +94,9 @@ class FieldProbe(IElectricField):
             )
         ]
 
-    def _patch_data(self, g_probe_in_labview: float = -1.0) -> None:
-        """Correct ``raw_data`` when ``g_probe`` in LabViewer is wrong.
-
-        The default value for ``g_probe_in_labview`` is only a guess.
-
-        """
-        assert hasattr(self, "_a_rack")
-        assert hasattr(self, "_b_rack")
-        assert self._g_probe is not None
-        fun1 = partial(
-            field_probe_inv,
-            g_probe=g_probe_in_labview,
-            a_rack=self._a_rack,
-            b_rack=self._b_rack,
-            z_0=50.0,
-        )
-        fun2 = partial(
-            field_probe,
-            g_probe=self._g_probe,
-            a_rack=self._a_rack,
-            b_rack=self._b_rack,
-            z_0=50.0,
-        )
-        self._raw_data = fun1(self._raw_data)
-        self._raw_data = fun2(self._raw_data)
-
     def _rf_rack_calibration_constants(
         self,
-        calibration_file: Path,
+        calibration_file: Path | str,
         freq_mhz: float,
         freq_col: str = "Frequency [MHz]",
         a_col: str = "a [dBm / V]",
@@ -194,7 +142,7 @@ class FieldProbe(IElectricField):
 
         """
         data = pd.read_csv(
-            calibration_file,
+            resolve_path(calibration_file),
             sep="\t",
             comment="#",
             index_col=freq_col,
@@ -211,7 +159,7 @@ class FieldProbe(IElectricField):
 
     def _probe_attenuation(
         self,
-        attenuation_file: Path,
+        attenuation_file: Path | str,
         freq_mhz: float,
         name: str,
     ) -> float:
@@ -250,7 +198,9 @@ class FieldProbe(IElectricField):
             Attenuation for this probe at ``freq_mhz``.
 
         """
-        df = pd.read_csv(attenuation_file, comment="#", index_col=0)
+        df = pd.read_csv(
+            resolve_path(attenuation_file), comment="#", index_col=0
+        )
 
         df.columns = df.columns.astype(float)
 

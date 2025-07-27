@@ -62,7 +62,7 @@ from multipac_testbench.threshold.threshold_set import (
 )
 from multipac_testbench.util import plot
 from multipac_testbench.util.animate import get_limits
-from multipac_testbench.util.files import load_config, resolve_path
+from multipac_testbench.util.files import load_config
 from multipac_testbench.util.helper import (
     flatten,
     output_filepath,
@@ -93,7 +93,7 @@ class MultipactorTest:
         freq_mhz: float,
         swr: float,
         info: str = "",
-        sep: str = "\t",
+        sep: str = ",",
         trigger_policy: TRIGGER_POLICIES = "keep_all",
         index_col: str = "Sample index",
         is_raw: bool = False,
@@ -1135,6 +1135,8 @@ class MultipactorTest:
         title: str = "",
         same_figure: bool = True,
         plot_extrema: bool = False,
+        global_instruments: bool = False,
+        global_multipactor: bool = False,
         png_path: Path | None = None,
         png_kwargs: dict[str, Any] | None = None,
         csv_path: Path | None = None,
@@ -1172,6 +1174,12 @@ class MultipactorTest:
             Add ``to_plot`` values at the power minima and maxima. Makes most
             sense with voltage/power instruments. Resulting plot may be very
             crowded if ``same_figure == True``.
+        global_instruments :
+            If instruments not position-specific (eg :class:`.ForwardPower`)
+            should be plotted.
+        global_multipactor :
+            If multipactor not position-specific (eg thresholds created by
+            merging several other multipactor arrays) should be plotted.
         png_path :
             If provided, figure will be saved there.
         png_kwargs :
@@ -1203,7 +1211,11 @@ class MultipactorTest:
             instruments
         )
 
-        df = threshold_set.data_at_thresholds(instruments)
+        df = threshold_set.data_at_thresholds(
+            instruments,
+            global_instruments=global_instruments,
+            global_multipactor=global_multipactor,
+        )
         if len(df) == 0:
             logging.warning(f"No threshold to plot for {self}")
             return np.array([]), df

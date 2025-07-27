@@ -6,6 +6,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 import numpy as np
+from multipac_testbench.util.files import resolve_path
 from numpy.typing import NDArray
 
 
@@ -104,8 +105,6 @@ def powerstep_files(
         Maps power step files with corresponding sample index.
 
     """
-    files = sorted(
-        path for f in os.listdir(folder) if file_recognizer(path := Path(f))
-    )
+    files = sorted(path for path in folder.iterdir() if file_recognizer(path))
     file_index_mapping = {folder / f: i for i, f in enumerate(files)}
     return file_index_mapping

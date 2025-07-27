@@ -56,7 +56,7 @@ class TestCampaign(list[MultipactorTest]):
         swrs: Sequence[float],
         config: dict[str, Any] | str | Path,
         info: Sequence[str] = (),
-        sep: str = ";",
+        sep: str = ",",
         trigger_policy: TRIGGER_POLICIES = "keep_all",
         index_col: str = "Sample index",
         is_raw: bool = False,
@@ -261,9 +261,9 @@ class TestCampaign(list[MultipactorTest]):
         self,
         *args,
         thresholds_sets: dict[MultipactorTest, ThresholdSet] | None = None,
-        png_path: Path | None = None,
+        png_folder: Path | None = None,
         png_kwargs: dict | None = None,
-        csv_path: Path | None = None,
+        csv_folder: Path | None = None,
         csv_kwargs: dict | None = None,
         **kwargs,
     ) -> tuple[list[Axes], pd.DataFrame]:
@@ -318,10 +318,16 @@ class TestCampaign(list[MultipactorTest]):
         assert axes is not None
         df_to_plot = pd.concat(all_df, axis=1)
 
-        if png_path:
-            plot.save_figure(axes, png_path, **(png_kwargs or {}))
-        if csv_path:
-            plot.save_dataframe(df_to_plot, csv_path, **(csv_kwargs or {}))
+        if png_folder:
+            plot.save_figure(
+                axes, png_folder / "all_on_same_plot.png", **(png_kwargs or {})
+            )
+        if csv_folder:
+            plot.save_dataframe(
+                df_to_plot,
+                csv_folder / "all_on_same_plot.csv",
+                **(csv_kwargs or {}),
+            )
 
         return axes, df_to_plot
 

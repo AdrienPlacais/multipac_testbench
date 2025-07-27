@@ -7,7 +7,6 @@ from typing import Literal
 
 import numpy as np
 import pandas as pd
-from multipac_testbench.util.files import resolve_path
 from numpy.typing import NDArray
 
 #: How consecutive-same power points should be treated.

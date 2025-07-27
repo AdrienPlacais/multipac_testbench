@@ -16,7 +16,7 @@ from multipac_testbench.multipactor_test.helper import (
     powerstep_files,
     take_maximum,
 )
-from multipac_testbench.util.helper import load_config
+from multipac_testbench.util.files import load_config
 from multipac_testbench.util.log_manager import suppress_log_messages
 from numpy.typing import NDArray
 
@@ -45,6 +45,7 @@ class PowerStep(MultipactorTest):
         dbm: float | None = None,
         out_dbm_column: str = "NI9205_dBm",
         out_index_col: str = "Sample index",
+        comment: str = "#",
         create_virtual_instruments: bool = True,
         **kwargs,
     ) -> None:
@@ -84,6 +85,8 @@ class PowerStep(MultipactorTest):
             To override the dBm values inferred from filename.
         out_dbm_column :
             Where to store the dBm value in the output file.
+        comment :
+            Comment string in the given file.
         create_virtual_instruments :
             If virtual instruments should be created.
         kwargs :
@@ -103,6 +106,7 @@ class PowerStep(MultipactorTest):
                 index_col=index_col,
                 trigger_policy="keep_all",
                 remove_metadata_columns=True,
+                comment=comment,
                 create_virtual_instruments=create_virtual_instruments,
                 **kwargs,
             )
