@@ -44,14 +44,8 @@ class ThresholdSet:
             :class:`.MultipactorTest`.
 
         """
-        self._thresholds = sorted(
-            thresholds,
-            key=lambda t: t.sample_index,
-        )
-        self.extrema = sorted(
-            power_extrema,
-            key=lambda p: p.sample_index,
-        )
+        self._thresholds = sorted(thresholds, key=lambda t: t.sample_index)
+        self.extrema = sorted(power_extrema, key=lambda p: p.sample_index)
         self._warn_instruments_at_same_position()
 
     @classmethod
@@ -117,6 +111,43 @@ class ThresholdSet:
 
         power_extrema = create_power_extrema(growth_array)
         return cls(thresholds, power_extrema)
+
+    @classmethod
+    def last(
+        cls, threshold_set: Self, predicate: THRESHOLD_FILTER_T | None = None
+    ) -> Self:
+        """
+        Create object holding the last threshold measured by every instrument.
+
+        See Also
+        --------
+        :class:`AveragedThresholdSet`
+
+        Parameters
+        ----------
+        threshold_set :
+            Holds all the detected thresholds.
+        predicate :
+            Additional predicate, *eg* to exclude thresholds measured during
+            the first power cycles, from a specific detecting instrument, of
+            a certain type...
+
+        Returns
+        -------
+        ThresholdSet
+            Holds only one lower and one upper :class:`.Threshold` per
+            detecting instrument: the last one measured during the test.
+
+        """
+        filtered_thresholds = tuple(
+            [t for t in threshold_set if predicate is None or predicate(t)]
+        )
+        last_thresholds_by_instr: dict[str, Threshold] = {}
+        for t in filtered_thresholds[::-1]:
+            if t.detecting_instrument in last_thresholds_by_instr:
+                continue
+            last_thresholds_by_instr[t.detecting_instrument] = t
+        return cls(last_thresholds_by_instr.values(), threshold_set.extrema)
 
     def __iter__(self) -> Iterator[Threshold]:
         """Iterate over stored :class:`.Threshold` objects.
@@ -352,6 +383,10 @@ class ThresholdSet:
                 header = threshold_df_column_header(instrument, threshold)
                 label_to_color[header] = threshold.color
         return label_to_color
+
+    def detecting_instruments(self) -> set[str | THRESHOLD_DETECTOR_T]:
+        """Return instruments that detected at least one threshold."""
+        return {t.detecting_instrument for t in self}
 
 
 class AveragedThresholdSet(ThresholdSet):
