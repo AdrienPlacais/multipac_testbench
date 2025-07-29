@@ -5,7 +5,10 @@ reached.
 
 """
 
+from __future__ import annotations
+
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Literal
 
@@ -17,6 +20,9 @@ THRESHOLD_WAY_T = Literal["enter", "exit"]
 THRESHOLD_DETECTOR_T = Literal["any", "all"]
 THRESHOLD_DETECTOR = ("any", "all")
 POWER_EXTREMUM_T = Literal["minimum", "maximum"]
+
+#: Function taking in a :class:`.Threshold`, and returning a boolean.
+THRESHOLD_FILTER_T = Callable[["Threshold"], bool]
 
 
 @dataclass
@@ -50,6 +56,7 @@ def create_thresholds(
     growth_array: NDArray[np.float64],
     detecting_instrument: str | THRESHOLD_DETECTOR_T,
     position: float,
+    predicate: THRESHOLD_FILTER_T | None = None,
     color: tuple[float, float, float] | None = None,
 ) -> list[Threshold]:
     """Create threshold objects corresponding to a single detecting instrument.
@@ -68,6 +75,8 @@ def create_thresholds(
     position :
         Position of :class:`.Instrument` that created the ``multipactor``
         array.
+    predicate :
+        Function filtering the created thresholds.
     color :
         Color of the detecting instrument.
 
@@ -75,7 +84,7 @@ def create_thresholds(
     -------
     list[Threshold]
         All multipactor thresholds detected by the :class:`.Instrument` named
-        ``detecting_instrument``.
+        ``detecting_instrument``, filtered by ``predicate``.
 
     """
     thresholds: list[Threshold] = []
@@ -125,7 +134,7 @@ def create_thresholds(
                 color=actual_color,
             )
         )
-    return thresholds
+    return [t for t in thresholds if predicate is None or predicate(t)]
 
 
 @dataclass

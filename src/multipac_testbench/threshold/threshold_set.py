@@ -3,7 +3,7 @@
 import logging
 import math
 from collections import defaultdict
-from collections.abc import Callable, Iterable, Iterator, Sequence
+from collections.abc import Iterable, Iterator, Sequence
 from typing import Self
 
 import numpy as np
@@ -14,6 +14,7 @@ from multipac_testbench.threshold.helper import (
 )
 from multipac_testbench.threshold.threshold import (
     THRESHOLD_DETECTOR_T,
+    THRESHOLD_FILTER_T,
     PowerExtremum,
     Threshold,
     create_power_extrema,
@@ -21,9 +22,6 @@ from multipac_testbench.threshold.threshold import (
 )
 from multipac_testbench.util.types import MULTIPAC_DETECTOR_T
 from numpy.typing import NDArray
-
-#: Function taking in a :class:`.Threshold`, and returning a boolean.
-THRESHOLD_FILTER_T = Callable[[Threshold], bool]
 
 
 class ThresholdSet:
@@ -54,6 +52,7 @@ class ThresholdSet:
         multipac_detector: MULTIPAC_DETECTOR_T,
         detecting_instruments: Iterable[Instrument],
         growth_array: NDArray[np.float64],
+        predicate: THRESHOLD_FILTER_T | None = None,
         threshold_reducer: THRESHOLD_DETECTOR_T | None = None,
     ) -> Self:
         """Create a ThresholdSet using the specified detection strategy.
@@ -76,6 +75,9 @@ class ThresholdSet:
               of the provided detecting instrument.
             - "all": thresholds appear when multipactor is detected by *all*
               the provided detecting instrument.
+        predicate :
+            Function filtering the thresholds. Applied *after*
+            ``threshold_reducer``.
 
         """
         if threshold_reducer is None:
@@ -88,6 +90,7 @@ class ThresholdSet:
                     growth_array,
                     detecting_instrument=instr.name,
                     position=instr.position,
+                    predicate=predicate,
                     color=instr.color,
                 )
             ]
@@ -104,6 +107,7 @@ class ThresholdSet:
                 growth_array,
                 detecting_instrument=threshold_reducer,
                 position=np.nan,
+                predicate=predicate,
                 color=(0, 0, 0),
             )
         else:

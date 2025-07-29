@@ -55,6 +55,7 @@ from multipac_testbench.threshold.helper import (
 from multipac_testbench.threshold.threshold import (
     THRESHOLD_DETECTOR,
     THRESHOLD_DETECTOR_T,
+    THRESHOLD_FILTER_T,
 )
 from multipac_testbench.threshold.threshold_set import (
     AveragedThresholdSet,
@@ -353,6 +354,7 @@ class MultipactorTest:
         instrument_class: ABCMeta,
         power_growth_array_kw: dict[str, Any] | None = None,
         threshold_reducer: THRESHOLD_DETECTOR_T | None = None,
+        predicate: THRESHOLD_FILTER_T | None = None,
         **kwargs,
     ) -> ThresholdSet:
         """Determine lower and upper multipactor thresholds.
@@ -372,6 +374,9 @@ class MultipactorTest:
             If provided, we consider that multipactor appears when one
             detecting :class:`.Instrument` detected it (``"any"``), or only
             when all detecting :class:`.Instrument` measured it (``"all"``).
+        predicate :
+            Function filtering the thresholds. Applied *after*
+            ``threshold_reducer``.
 
         Returns
         -------
@@ -387,6 +392,7 @@ class MultipactorTest:
             detecting_instruments,
             growth_array,
             threshold_reducer=threshold_reducer,
+            predicate=predicate,
         )
         return threshold_set
 

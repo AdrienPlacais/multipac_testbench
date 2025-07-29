@@ -6,7 +6,7 @@ import logging
 import math
 from abc import ABCMeta
 from collections import defaultdict
-from collections.abc import Collection, Mapping, Sequence
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any, Callable, Self, TypeVar
 
@@ -32,7 +32,10 @@ from multipac_testbench.theoretical.somersalo import (
     plot_somersalo_measured,
     somersalo_base_plot,
 )
-from multipac_testbench.threshold.threshold import THRESHOLD_DETECTOR_T
+from multipac_testbench.threshold.threshold import (
+    THRESHOLD_DETECTOR_T,
+    THRESHOLD_FILTER_T,
+)
 from multipac_testbench.threshold.threshold_set import ThresholdSet
 from multipac_testbench.util import log_manager, plot
 from multipac_testbench.util.files import load_config
@@ -138,6 +141,7 @@ class TestCampaign(list[MultipactorTest]):
         instrument_class: ABCMeta,
         power_growth_array_kw: dict[str, Any] | None = None,
         threshold_reducer: THRESHOLD_DETECTOR_T | None = None,
+        predicate: THRESHOLD_FILTER_T | None = None,
         **kwargs,
     ) -> dict[MultipactorTest, ThresholdSet]:
         """Determine every :class:`.MultipactorTest` multipactor thresholds.
@@ -157,6 +161,9 @@ class TestCampaign(list[MultipactorTest]):
             If provided, we consider that multipactor appears when one
             detecting :class:`.Instrument` detected it (``"any"``), or only
             when all detecting :class:`.Instrument` measured it (``"all"``).
+        predicate :
+            Function filtering the thresholds. Applied *after*
+            ``threshold_reducer``.
 
         Returns
         -------
@@ -171,6 +178,7 @@ class TestCampaign(list[MultipactorTest]):
                 instrument_class,
                 power_growth_array_kw,
                 threshold_reducer=threshold_reducer,
+                predicate=predicate,
                 **kwargs,
             )
             for test in self
