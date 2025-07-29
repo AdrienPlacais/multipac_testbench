@@ -498,9 +498,6 @@ class TestCampaign(list[MultipactorTest]):
               system. Such :class:`.ThresholdSet` can be created by using
               ``threshold_reducer = "any"`` in
               :meth:`.MultipactorTest.determine_thresholds`.
-            - The represented thresholds are the last one found during the
-              test. This is not necessarily very precise, so you may want to
-              feed in an :class:`.AveragedThresholdSet`.
 
         See Also
         --------
@@ -519,9 +516,9 @@ class TestCampaign(list[MultipactorTest]):
         show_fit :
             To perform a fit and plot it.
         use_theoretical_r :
-            Another patch to allow fitting and plotting using the theoretical
-            reflection coefficient instead of the one calculated from
-            :math:`P_f` and :math:`P_r`.
+            Allows fitting and plotting using the theoretical reflection
+            coefficient instead of the one calculated from :math:`P_f` and
+            :math:`P_r`.
         axes :
             Axes to plot if provided.
         png_path :
@@ -556,6 +553,7 @@ class TestCampaign(list[MultipactorTest]):
             "ylabel": ForwardPower.ylabel(),
             "grid": True,
             "ms": 15,
+            "lw": 0,
             **fig_kw,
         }
 
