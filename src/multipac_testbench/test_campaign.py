@@ -552,7 +552,6 @@ class TestCampaign(list[MultipactorTest]):
 
         """
         plot_kwargs = {
-            "x": "x",
             "xlabel": ReflectionCoefficient.ylabel(),
             "ylabel": ForwardPower.ylabel(),
             "grid": True,
@@ -569,22 +568,16 @@ class TestCampaign(list[MultipactorTest]):
         df_lows, df_upps, df_fits = {}, {}, {}
         df_low, df_upp, df_fit = None, None, None
         for freq_mhz, tests in sorted(tests_by_freq.items()):
-            lower_rs, lower_ps, upper_rs, upper_ps = [], [], [], []
-
-            for test in tests:
-                args = test.data_for_somersalo_scaling_law(
-                    thresholds_sets[test],
-                    use_theoretical_r=use_theoretical_r,
+            dfs = [
+                test.data_for_somersalo_scaling_law(
+                    thresholds_sets[test], use_theoretical_r=use_theoretical_r
                 )
-                lower_r, lower_p, upper_r, upper_p = args
-                lower_rs.append(lower_r)
-                lower_ps.append(lower_p)
-                upper_rs.append(upper_r)
-                upper_ps.append(upper_p)
+                for test in tests
+            ]
 
             suffix = f"{freq_mhz:.0f}MHz"
-            df_low = _build_dataframe(lower_rs, lower_ps, f"P_low ({suffix})")
-            df_upp = _build_dataframe(upper_rs, upper_ps, f"P_high ({suffix})")
+            df = pd.concat(dfs)
+            df_low = df.filter(like="lower").dropna()
             if not df_low.empty:
                 axes = df_low.plot(
                     marker="o",
@@ -593,18 +586,7 @@ class TestCampaign(list[MultipactorTest]):
                     c=freq_to_color[freq_mhz],
                     **plot_kwargs,
                 )
-            if add_upper_thresholds and not df_upp.empty:
-                axes = df_upp.plot(
-                    marker="*",
-                    label=f"P_high ({suffix})",
-                    ax=axes,
-                    c=freq_to_color[freq_mhz],
-                    **plot_kwargs,
-                )
-
-            df_fit = None
-            if show_fit:
-                if not df_low.empty:
+                if show_fit:
                     df_fit = fit_somersalo_scaling(
                         df_low,
                         full_output=full_output,
@@ -613,6 +595,17 @@ class TestCampaign(list[MultipactorTest]):
                         freq_mhz=suffix,
                         c=freq_to_color[freq_mhz],
                     )
+            if (
+                add_upper_thresholds
+                and not (df_upp := df.filter(like="upper").dropna()).empty
+            ):
+                axes = df_upp.plot(
+                    marker="*",
+                    label=f"P_high ({suffix})",
+                    ax=axes,
+                    c=freq_to_color[freq_mhz],
+                    **plot_kwargs,
+                )
 
             df_lows[freq_mhz] = df_low
             df_upps[freq_mhz] = df_upp
@@ -924,14 +917,3 @@ class TestCampaign(list[MultipactorTest]):
                 *args, num=iternum + i, png_path=png_path, **kwargs
             )
         return
-
-
-def _build_dataframe(
-    x_values: Collection[float], y_values: Collection[float], label: str
-) -> pd.DataFrame:
-    """Gather the two given lists and sort them by `x` values."""
-    return (
-        pd.DataFrame({"x": x_values, label: y_values})
-        .sort_values("x")
-        .dropna()
-    )

@@ -270,8 +270,7 @@ def fit_somersalo_scaling(
     plot: bool,
     axes: Axes | None = None,
     ls: str = "--",
-    r_col: str = "x",
-    p_col: str = "P_low",
+    p_col: str = "lower",
     freq_mhz: str | None = None,
     **fit_plot_kw,
 ) -> pd.DataFrame:
@@ -292,8 +291,8 @@ def fit_somersalo_scaling(
         will be created.
     ls :
         Linestyle for the fit line.
-    r_col, p_col :
-        Column names where R and P_low are stored in ``df_low``.
+    p_col :
+        Subset of the column name holding lower threshold.
     freq_mhz :
         Label added to the legend. This string already has an unit.
 
@@ -303,13 +302,11 @@ def fit_somersalo_scaling(
         Holds the fitted Somersalo scaling law.
 
     """
-    R = np.linspace(0, 1, 101)
-    r_fit = df_low.filter(like=r_col).values.ravel()
     p_fit = df_low.filter(like=p_col).values.ravel()
 
     result = curve_fit(
         f=somersalo_scaling_law,
-        xdata=r_fit,
+        xdata=df_low.index.values,
         ydata=p_fit,
         full_output=full_output,
     )
@@ -328,8 +325,9 @@ def fit_somersalo_scaling(
     if freq_mhz:
         somer_index += f" @{freq_mhz}"
 
+    r_law = np.linspace(0, 1, 101)
     df_fit = pd.DataFrame(
-        {"$R$": R, somer_index: somersalo_scaling_law(R, *popt)}
+        {"$R$": r_law, somer_index: somersalo_scaling_law(r_law, *popt)}
     )
     if plot:
         df_fit.plot(ax=axes, x=0, y=1, grid=True, ls=ls, **fit_plot_kw)

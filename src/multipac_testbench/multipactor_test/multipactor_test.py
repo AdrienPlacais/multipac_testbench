@@ -793,7 +793,7 @@ class MultipactorTest:
         threshold_set: ThresholdSet | dict[MultipactorTest, ThresholdSet],
         use_theoretical_r: bool = False,
         **kwargs,
-    ) -> tuple[float, float, float, float]:
+    ) -> pd.DataFrame:
         """Get the data necessary to plot the Somersalo scaling law.
 
         In particular, the last detected power thresholds, and the reflection
@@ -823,11 +823,16 @@ class MultipactorTest:
         """
         if not isinstance(threshold_set, ThresholdSet):
             threshold_set = threshold_set[self]
+
+        if len(instr := threshold_set.detecting_instruments()) > 1:
+            logging.error(
+                "This method may not be relatable if multipactor was detected "
+                f"by several instruments. Detecting instruments:\n{instr}"
+            )
+
         forward_power = self.get_instrument(ForwardPower)
         df = threshold_set.data_at_thresholds(
-            (forward_power,),
-            global_multipactor=True,
-            **kwargs,
+            (forward_power,), global_multipactor=True, **kwargs
         )
 
         reflection_coeff = self.get_instrument(ReflectionCoefficient).data
@@ -839,23 +844,8 @@ class MultipactorTest:
                     reflection_coeff, swr_to_reflection(self.swr)
                 )
 
-        try:
-            lower_col = df.filter(like="lower").columns[0]
-            lower_index = df[lower_col].last_valid_index()
-            lower_power = df[lower_col][lower_index]
-            lower_r = reflection_coeff[lower_index]
-        except IndexError:
-            lower_r, lower_power = np.nan, np.nan
-
-        try:
-            upper_col = df.filter(like="upper").columns[0]
-            upper_index = df[upper_col].last_valid_index()
-            upper_power = df[upper_col][upper_index]
-            upper_r = reflection_coeff[upper_index]
-        except IndexError:
-            upper_r, upper_power = np.nan, np.nan
-
-        return lower_r, lower_power, upper_r, upper_power
+        df[ReflectionCoefficient.ylabel()] = reflection_coeff[df.index]
+        return df.set_index(ReflectionCoefficient.ylabel())
 
     def data_for_perez_scaling_law(
         self,
