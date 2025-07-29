@@ -149,6 +149,18 @@ class ThresholdSet:
             last_thresholds_by_instr[t.detecting_instrument] = t
         return cls(last_thresholds_by_instr.values(), threshold_set.extrema)
 
+    @classmethod
+    def subset(
+        cls, threshold_set: Self, predicate: THRESHOLD_FILTER_T
+    ) -> Self:
+        """Return object holding a subset of ``threshold_set``.
+
+        ``predicate`` is used to filter on the :class:`.Threshold`.
+
+        """
+        thresholds = [t for t in threshold_set if predicate(t)]
+        return cls(thresholds=thresholds, power_extrema=threshold_set.extrema)
+
     def __iter__(self) -> Iterator[Threshold]:
         """Iterate over stored :class:`.Threshold` objects.
 
