@@ -13,4 +13,5 @@ Subpackages
    :maxdepth: 5
 
    multipac_testbench.data.calibration
-   multipac_testbench.data.power_step_files
+   multipac_testbench.data.multipactor_tests
+   multipac_testbench.data.power_steps

@@ -267,7 +267,7 @@ class PowerStepSet:
         special_reducers: dict[str, REDUCER_T] | None = None,
         **kwargs,
     ) -> None:
-        """Create a file that can be loaded by :class:`MultipactorTest`.
+        """Create a file that can be loaded by :class:`.MultipactorTest`.
 
         Parameters
         ----------

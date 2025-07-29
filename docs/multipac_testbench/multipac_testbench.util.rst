@@ -13,6 +13,7 @@ Submodules
    :maxdepth: 5
 
    multipac_testbench.util.animate
+   multipac_testbench.util.files
    multipac_testbench.util.filtering
    multipac_testbench.util.fixers
    multipac_testbench.util.helper

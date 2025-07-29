@@ -8,7 +8,7 @@ Configuration
 
 Basics
 ------
-The test bench setup is defined in a ``.toml`` file.
+The test bench setup is defined in a `TOML` file.
 Here is a short example:
 
 .. code-block:: toml
@@ -45,14 +45,13 @@ Here is a short example:
 
 You can check :data:`.STRING_TO_INSTRUMENT_CLASS` for the allowed names of instruments.
 
-Field probes patch
-------------------
-In some of the first test, the field probes signal was converted from the acquisition voltage to the actual voltage with a transfer function that was wrong.
-To correct it, add to every field probe following keywords:
-
- - `patch=True` to activate patch
+Raw files
+---------
+If you instantiate your objects with raw data, you must tell the code how to convert the acquisitions voltages to actual physical data.
+Each instrument has a transfer function, which needs parameters defined in the `TOML`.
+As an example, :class:`.FieldProbe` needs:
  - `calibration_file` (see also: `MULTIPAC testbench calibrate racks`_)
- - `g_probe` gain of the probe
+ - `attenuation_file`
 
 .. _MULTIPAC testbench calibrate racks: https://github.com/AdrienPlacais/multipac_testbench_calibrate_racks
 
@@ -69,11 +68,11 @@ To correct it, add to every field probe following keywords:
    # Some instruments accept other arguments:
    [E1.instruments_kw.NI9205_E1]
    class_name = "FieldProbe"
-   g_probe = -77.3
-   patch = true
    calibration_file = "../data/calibration/E1_fit_calibration.csv"
+   attenuation_file = "../data/calibration/attenuations.csv"
 
+See also: :ref:`load data <load>`.
 
 Examples
 --------
-Some example configurations are in the repository in `docs/source/manual/data/`.
+An example configurations is in the repository in `src/multipac_testbench/data/`.

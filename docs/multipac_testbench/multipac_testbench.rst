@@ -15,7 +15,6 @@ Subpackages
    multipac_testbench.data
    multipac_testbench.instruments
    multipac_testbench.measurement_point
-   multipac_testbench.multipactor_band
    multipac_testbench.multipactor_test
    multipac_testbench.theoretical
    multipac_testbench.threshold

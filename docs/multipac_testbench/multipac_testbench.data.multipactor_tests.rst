@@ -1,7 +1,7 @@
-power\_step\_files package
+multipactor\_tests package
 ===================================================
 
-.. automodule:: multipac_testbench.data.power_step_files
+.. automodule:: multipac_testbench.data.multipactor_tests
    :members:
    :undoc-members:
    :show-inheritance:
