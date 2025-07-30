@@ -752,6 +752,7 @@ class TestCampaign(list[MultipactorTest]):
             )
 
             df = pd.concat(dfs)
+            df = df.reindex(sorted(df.columns), axis=1)
             thresholds_by_freq[freq_mhz] = df
 
             for d in labels_to_colors:
@@ -787,6 +788,8 @@ class TestCampaign(list[MultipactorTest]):
             for freq_mhz, df in thresholds_by_freq.items():
                 file = csv_dir / f"{csv_stem}_{freq_mhz:.0f}MHz.csv"
                 plot.save_dataframe(df, file, **(csv_kwargs or {}))
+                file = csv_dir / f"{csv_stem}_{freq_mhz:.0f}MHz_stats.csv"
+                plot.save_dataframe(df.describe(), file, **(csv_kwargs or {}))
         return axes_by_freq, thresholds_by_freq
 
     def susceptibility(
