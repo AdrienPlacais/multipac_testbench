@@ -786,6 +786,8 @@ class TestCampaign(list[MultipactorTest]):
             csv_stem = csv_path.stem
             csv_dir = csv_path.parent
             for freq_mhz, df in thresholds_by_freq.items():
+                df = df.rename(columns=lambda x: x[:13])
+
                 file = csv_dir / f"{csv_stem}_{freq_mhz:.0f}MHz.csv"
                 plot.save_dataframe(df, file, **(csv_kwargs or {}))
                 file = csv_dir / f"{csv_stem}_{freq_mhz:.0f}MHz_stats.csv"
