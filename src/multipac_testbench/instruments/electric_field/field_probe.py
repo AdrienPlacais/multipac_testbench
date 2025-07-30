@@ -10,10 +10,7 @@ from multipac_testbench.instruments.electric_field.i_electric_field import (
     IElectricField,
 )
 from multipac_testbench.util.files import resolve_path
-from multipac_testbench.util.transfer_functions import (
-    field_probe,
-    field_probe_inv,
-)
+from multipac_testbench.util.transfer_functions import field_probe
 from multipac_testbench.util.types import POST_TREATER_T
 
 
@@ -72,6 +69,10 @@ class FieldProbe(IElectricField):
             self._g_probe = self._probe_attenuation(
                 Path(attenuation_file), freq_mhz=freq_mhz, name=name
             )
+        self._files = {
+            "attenuation": attenuation_file,
+            "calibration": calibration_file,
+        }
         super().__init__(name=name, raw_data=raw_data, **kwargs)
 
     @classmethod
