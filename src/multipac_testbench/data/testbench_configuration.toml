@@ -28,7 +28,7 @@ class_name = "CurrentProbe"
 
 [E1.instruments_kw.NI9205_E1]
 attenuation_file = "calibration/attenuations.csv"
-calibration_file = "calibration/electric-field-probes_attenuation/E1_fit_calibration.csv"
+calibration_file = "calibration/rf-racks/E1_fit_calibration.csv"
 class_name = "ElectricFieldProbe"
 
 # ==================================
@@ -42,7 +42,7 @@ class_name = "CurrentProbe"
 
 [E2.instruments_kw.NI9205_E2]
 attenuation_file = "calibration/attenuations.csv"
-calibration_file = "calibration/electric-field-probes_attenuation/E2_fit_calibration.csv"
+calibration_file = "calibration/rf-racks/E2_fit_calibration.csv"
 class_name = "ElectricFieldProbe"
 
 # ==================================
@@ -56,7 +56,7 @@ class_name = "CurrentProbe"
 
 [E3.instruments_kw.NI9205_E3]
 attenuation_file = "calibration/attenuations.csv"
-calibration_file = "calibration/electric-field-probes_attenuation/E3_fit_calibration.csv"
+calibration_file = "calibration/rf-racks/E3_fit_calibration.csv"
 class_name = "ElectricFieldProbe"
 
 # ==================================
@@ -70,7 +70,7 @@ class_name = "CurrentProbe"
 
 [E4.instruments_kw.NI9205_E4]
 attenuation_file = "calibration/attenuations.csv"
-calibration_file = "calibration/electric-field-probes_attenuation/E4_fit_calibration.csv"
+calibration_file = "calibration/rf-racks/E4_fit_calibration.csv"
 class_name = "ElectricFieldProbe"
 
 # ==================================
@@ -84,7 +84,7 @@ class_name = "CurrentProbe"
 
 [E5.instruments_kw.NI9205_E5]
 attenuation_file = "calibration/attenuations.csv"
-calibration_file = "calibration/electric-field-probes_attenuation/E5_fit_calibration.csv"
+calibration_file = "calibration/rf-racks/E5_fit_calibration.csv"
 class_name = "ElectricFieldProbe"
 
 # ==================================
@@ -98,7 +98,7 @@ class_name = "CurrentProbe"
 
 [E6.instruments_kw.NI9205_E6]
 attenuation_file = "calibration/attenuations.csv"
-calibration_file = "calibration/electric-field-probes_attenuation/E6_fit_calibration.csv"
+calibration_file = "calibration/rf-racks/E6_fit_calibration.csv"
 class_name = "ElectricFieldProbe"
 
 # ==================================
@@ -113,7 +113,7 @@ class_name = "CurrentProbe"
 
 [E7.instruments_kw.NI9205_E7]
 attenuation_file = "calibration/attenuations.csv"
-calibration_file = "calibration/electric-field-probes_attenuation/E7_fit_calibration.csv"
+calibration_file = "calibration/rf-racks/E7_fit_calibration.csv"
 class_name = "ElectricFieldProbe"
 
 [E8]
