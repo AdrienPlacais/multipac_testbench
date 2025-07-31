@@ -462,7 +462,7 @@ class TestCampaign(list[MultipactorTest]):
 
         """
         for test, threshold_set in thresholds_sets.items():
-            somersalo_data = test.data_for_somersalo(threshold_set)
+            somersalo_data = test.data_for_susceptibility(threshold_set)
             plot_somersalo_measured(
                 mp_test_name=str(test),
                 somersalo_data=somersalo_data,

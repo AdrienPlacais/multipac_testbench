@@ -766,33 +766,49 @@ class MultipactorTest:
 
         return
 
-    def data_for_somersalo(
+    def data_for_susceptibility(
         self,
-        threshold_set: ThresholdSet,
-    ) -> dict[str, float | list[float]]:
-        """Get the data required to create the Somersalo plot.
+        threshold_set: ThresholdSet | dict[MultipactorTest, ThresholdSet],
+        ydata: ABCMeta = type(FieldProbe),
+        d_mm: float = 10.955,
+        z_ohm: float = 50.0,
+        fd_col: str = r"$f\cdot d~[\mathrm{GHz mm}]",
+        **kwargs,
+    ) -> pd.DataFrame:
+        r"""Get the data required to create the susceptibility plot.
 
-        .. todo::
-            Allow representation of several pick-ups.
+        d_mm = 0.5 * (38.78 - 16.87)
+
+        Parameters
+        ----------
+        threshold_set :
+            Object telling where multipactor happens.
+        ydata :
+            Type of instrument of which you want data in y-axis. In general,
+            you will want :class:`.FieldProbe` or :class:`.ForwardPower`.
+        d_mm :
+            System gap in :unit:`mm`.
+        z_ohm :
+            Line impedance in :unit:`\\Omega`.
+        fd_col :
+            Name of the column that will hold the :math:`f\cdot d` product.
+
+        Returns
+        -------
+        pd.DataFrame
+            Holds value of ``ydata`` instruments at lower and upper thresholds,
+            as well as the :math:`f\cdot d` values.
 
         """
-        raise NotImplementedError
-        last_powers = self.at_last_threshold(ForwardPower, threshold_set).iloc[
-            0
-        ]
-        z_ohm = 50.0
-        d_mm = 0.5 * (38.78 - 16.87)
-        logging.warning(f"Used default {d_mm = }")
-        somersalo_data = {
-            "powers_kw": [
-                last_powers.iloc[0] * 1e-3,
-                last_powers.iloc[1] * 1e-3,
-            ],
-            "z_ohm": z_ohm,
-            "d_mm": d_mm,
-            "freq_ghz": self.freq_mhz * 1e-3,
-        }
-        return somersalo_data
+        if not isinstance(threshold_set, ThresholdSet):
+            threshold_set = threshold_set[self]
+
+        instruments = self.get_instruments(ydata)
+        df = threshold_set.data_at_thresholds(
+            instruments, global_multipactor=True, **kwargs
+        )
+        df[fd_col] = d_mm * self.freq_mhz * 1e-3
+        return df
 
     def data_for_somersalo_scaling_law(
         self,
