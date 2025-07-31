@@ -96,6 +96,8 @@ def swr_to_reflection(
         R = \frac{SWR - 1}{SWR + 1}
 
     """
+    if isinstance(swr, float) and np.isinf(swr):
+        return 1.0
     reflection_coefficient = (swr - 1.0) / (swr + 1.0)
     if isinstance(swr, float):
         return float(reflection_coefficient)
