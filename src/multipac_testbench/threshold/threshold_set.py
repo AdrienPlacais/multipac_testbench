@@ -350,6 +350,7 @@ class ThresholdSet:
         global_instruments: bool = False,
         global_multipactor: bool = False,
         xdata_instrument: Instrument | None = None,
+        unique_x_value: float | None = None,
     ) -> pd.DataFrame:
         """Return instrument values at threshold sample indices.
 
@@ -373,6 +374,9 @@ class ThresholdSet:
             Its data is returned at every threshold. It results in a unique
             ``xdata`` column, without ``nan``, that can be used as a common
             x-data for plotting.
+        unique_x_value :
+            If given, this value will replace every value of the
+            ``xdata_instrument`` column.
 
         Returns
         -------
@@ -411,6 +415,8 @@ class ThresholdSet:
             t.sample_index: xdata_instrument.data[t.sample_index] for t in self
         }
         df = pd.DataFrame({k: pd.Series(v) for k, v in result.items()})
+        if unique_x_value is not None:
+            df[xlabel] = unique_x_value
         return df.set_index(xlabel)
 
     def according_to(
