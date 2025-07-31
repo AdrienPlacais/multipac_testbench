@@ -48,7 +48,7 @@ class Threshold:
     #: Position of the object that detected this threshold.
     position: float
     #: Color of the :class:`.Instrument` that detected this threshold.
-    color: tuple[float, float, float] = (0, 0, 0)
+    color: tuple[float, float, float] = (1.0, 1.0, 1.0)
 
 
 def create_thresholds(
