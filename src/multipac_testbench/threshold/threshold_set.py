@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 from multipac_testbench.instruments.instrument import Instrument
 from multipac_testbench.threshold.helper import (
+    sorter_index_then_way,
     threshold_df_column_header,
 )
 from multipac_testbench.threshold.threshold import (
@@ -164,6 +165,71 @@ class ThresholdSet:
         """
         thresholds = [t for t in threshold_set if predicate(t)]
         return cls(thresholds=thresholds, power_extrema=threshold_set.extrema)
+
+    @classmethod
+    def extreme(
+        cls, threshold_set: Self, predicate: THRESHOLD_FILTER_T | None = None
+    ) -> Self:
+        """Create object holding only the most *extreme* :class:`.Threshold`.
+
+        For each half cycle:
+        - If power increases: keep first lower and last upper threshold.
+        - If power decreases: keep first upper and last lower threshold.
+          - If there was still multipactor somewhere when the half power cycle
+              ended (e.g. instrument with a lower but no upper threshold),
+              no upper threshold is added.
+        - If direction is undetermined: skip the cycle.
+
+        Parameters
+        ----------
+        threshold_set :
+            The full set of thresholds.
+        predicate :
+            A function to select relevant thresholds.
+
+        Returns
+        -------
+        ThresholdSet
+            A new object containing only selected extreme thresholds.
+
+        """
+        assert len(threshold_set.detecting_instruments()) <= 1, (
+            "This method currently does not handle detection from several "
+            "instruments."
+        )
+
+        subset = []
+        for key, thresholds in threshold_set._thresholds_by_half_power_cycle(
+            predicate=predicate
+        ).items():
+            if not thresholds:
+                continue
+
+            direction = key.split("(", 1)[-1].removesuffix(")").strip()
+            if direction not in {"increasing", "decreasing"}:
+                logging.warning(f"Skipped undetermined cycle: {key}")
+                continue
+
+            if direction == "increasing":
+                first = min(thresholds, key=sorter_index_then_way)
+                if first.nature == "lower" and first.way == "enter":
+                    subset.append(first)
+
+                last = max(thresholds, key=sorter_index_then_way)
+                if last.nature == "upper" and last.way == "exit":
+                    subset.append(last)
+                continue
+
+            if direction == "decreasing":
+                first = min(thresholds, key=sorter_index_then_way)
+                if first.nature == "upper" and first.way == "enter":
+                    subset.append(first)
+
+                last = max(thresholds, key=sorter_index_then_way)
+                if last.nature == "lower" and last.way == "exit":
+                    subset.append(last)
+
+        return cls(thresholds=subset, power_extrema=threshold_set.extrema)
 
     def __iter__(self) -> Iterator[Threshold]:
         """Iterate over stored :class:`.Threshold` objects.
@@ -403,6 +469,58 @@ class ThresholdSet:
     def detecting_instruments(self) -> set[str | THRESHOLD_DETECTOR_T]:
         """Return instruments that detected at least one threshold."""
         return {t.detecting_instrument for t in self}
+
+    def _thresholds_by_half_power_cycle(
+        self, predicate: THRESHOLD_FILTER_T | None = None
+    ) -> dict[str, list[Threshold]]:
+        """Group thresholds by half power cycle, based on sample index range.
+
+        Each group includes thresholds between two consecutive extrema:
+        ``[extremum_i.sample_index, extremum_{i+1}.sample_index)``
+
+        The dictionary key is of the form:
+        - "0 (increasing)" if power increases over the interval
+        - "1 (decreasing)" if power decreases over the interval
+        - "2 (undetermined)" if direction cannot be determined
+
+        .. note::
+           Not ultra efficient. To update if necessary.
+
+        Parameters
+        ----------
+        predicate :
+            Filter the :class:`.Threshold` instances.
+
+        Returns
+        -------
+        dict[str, list[Threshold]]
+            Dictionary mapping half-cycle index to thresholds within that
+            range. Keys are sorted by increasing power cycle index values.
+
+        """
+        thresholds_by_cycle: dict[str, list[Threshold]] = {}
+
+        for i, (ext1, ext2) in enumerate(
+            zip(self.extrema[:-1], self.extrema[1:])
+        ):
+            if ext1.nature == "minimum" and ext2.nature == "maximum":
+                direction = "increasing"
+            elif ext1.nature == "maximum" and ext2.nature == "minimum":
+                direction = "decreasing"
+            else:
+                direction = "undetermined"
+
+            key = f"{i} ({direction})"
+
+            thresholds = [
+                t
+                for t in self
+                if ext1.sample_index <= t.sample_index < ext2.sample_index
+                and (predicate is None or predicate(t))
+            ]
+            thresholds_by_cycle[key] = thresholds
+
+        return thresholds_by_cycle
 
 
 class AveragedThresholdSet(ThresholdSet):
