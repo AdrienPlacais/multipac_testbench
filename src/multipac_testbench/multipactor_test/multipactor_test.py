@@ -852,22 +852,17 @@ class MultipactorTest:
                 f"by several instruments. Detecting instruments:\n{instr}"
             )
 
-        forward_power = self.get_instrument(ForwardPower)
         df = threshold_set.data_at_thresholds(
-            (forward_power,), global_multipactor=True, **kwargs
+            (self.get_instrument(ForwardPower),),
+            global_multipactor=True,
+            xdata_instrument=self.get_instrument(ReflectionCoefficient),
+            unique_x_value=(
+                swr_to_reflection(self.swr) if use_theoretical_r else None
+            ),
+            **kwargs,
         )
 
-        reflection_coeff = self.get_instrument(ReflectionCoefficient).data
-        if use_theoretical_r:
-            if np.isinf(self.swr):
-                reflection_coeff = np.ones_like(reflection_coeff)
-            else:
-                reflection_coeff = np.full_like(
-                    reflection_coeff, swr_to_reflection(self.swr)
-                )
-
-        df[ReflectionCoefficient.ylabel()] = reflection_coeff[df.index]
-        return df.set_index(ReflectionCoefficient.ylabel())
+        return df
 
     def data_for_perez_scaling_law(
         self,
