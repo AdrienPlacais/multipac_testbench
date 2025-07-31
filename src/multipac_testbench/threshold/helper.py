@@ -3,7 +3,7 @@
 from collections import defaultdict
 
 from multipac_testbench.instruments.instrument import Instrument
-from multipac_testbench.threshold.threshold import Threshold
+from multipac_testbench.threshold.threshold import THRESHOLD_WAY_T, Threshold
 
 
 def threshold_df_column_header(
@@ -95,3 +95,15 @@ def reached_last_upper(thresholds: list[Threshold]) -> bool:
         if expecting == "upper":
             return False  # still expecting an upper threshold
     return True
+
+
+def sorter_index_then_way(threshold: Threshold) -> tuple[int, int]:
+    """Give ``sample_index`` and ``way`` of ``threshold``.
+
+    Used to sort thresholds:
+    - first, by sample index
+    - in case of equality, ``"enter" < "exit"``.
+
+    """
+    ways: dict[THRESHOLD_WAY_T, int] = {"enter": 0, "exit": 1}
+    return threshold.sample_index, ways[threshold.way]
