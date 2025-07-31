@@ -382,9 +382,10 @@ class ThresholdSet:
         -------
         pd.DataFrame
             Columns are named by detecting instrument + threshold nature:
-            ``"NI9205_E4 @ upper threshold (according to NI9205_MP4l)"``.
-            Indexes are the corresponding sample indices, or
-            ``xdata_instrument`` values at those same sample indices.
+            ``"NI9205_E4 @ upper threshold (according to NI9205_MP4l)"``. If
+            ``xdata_instrument`` was given, also return this instrument values
+            at every sample index (can be unique value if ``unique_x_value``
+            was given). Indexes are the sample indices at every threshold.
 
         """
         #           {column:  {sample_index: instrument value}}
@@ -417,7 +418,7 @@ class ThresholdSet:
         df = pd.DataFrame({k: pd.Series(v) for k, v in result.items()})
         if unique_x_value is not None:
             df[xlabel] = unique_x_value
-        return df.set_index(xlabel)
+        return df
 
     def according_to(
         self, instrument: Instrument | str | THRESHOLD_DETECTOR_T

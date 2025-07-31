@@ -862,7 +862,7 @@ class MultipactorTest:
             **kwargs,
         )
 
-        return df
+        return df.set_index(ReflectionCoefficient.ylabel())
 
     def data_for_perez_scaling_law(
         self,
@@ -909,28 +909,14 @@ class MultipactorTest:
         label_to_color = threshold_set.get_threshold_label_color_map(
             field_probes
         )
+
         x_instr = self.get_instrument(xdata)
-        df = threshold_set.data_at_thresholds(
-            field_probes, xdata_instrument=x_instr
-        )
-
-        if not isinstance(threshold_set, AveragedThresholdSet):
-            raise NotImplementedError(
-                "Here, we should reduce the given df to keep only one "
-                "Threshold of each nature per detecting instrument."
-            )
-
-        x_column = x_instr.ylabel()
+        unique_x_value = None
         if use_theoretical_xdata:
-            if xdata == SWR:
-                df[x_column] = np.full_like(df[x_column], self.swr)
-            elif xdata == ReflectionCoefficient:
-                if np.isinf(self.swr):
-                    df[x_column] = np.ones_like(df[x_column])
-                else:
-                    df[x_column] = np.full_like(
-                        df[x_column], swr_to_reflection(self.swr)
-                    )
+            if xdata == ReflectionCoefficient:
+                unique_x_value = swr_to_reflection(self.swr)
+            elif xdata == SWR:
+                unique_x_value = self.swr
             else:
                 raise ValueError(
                     "`use_theoretical_xdata` argument only supported for `SWR`"
@@ -938,7 +924,19 @@ class MultipactorTest:
                     f"{xdata = }"
                 )
 
-        logging.info("What happens when several data wich same xdata?")
+        df = threshold_set.data_at_thresholds(
+            field_probes,
+            xdata_instrument=x_instr,
+            unique_x_value=unique_x_value,
+        ).set_index(x_instr.ylabel())
+
+        if not isinstance(threshold_set, AveragedThresholdSet):
+            logging.error(
+                "Here, we should reduce the given df to keep only one "
+                "Threshold of each nature per detecting instrument. Trying to "
+                "continue anyway..."
+            )
+
         return df, label_to_color
 
     def output_filepath(self, out_folder: Path | str, extension: str) -> Path:
