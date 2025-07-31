@@ -12,12 +12,16 @@ from multipac_testbench.multipactor_test.power_step import (
     PowerStepSet,
 )
 from multipac_testbench.test_campaign import TestCampaign
-from multipac_testbench.threshold.threshold_set import ThresholdSet
+from multipac_testbench.threshold.threshold_set import (
+    AveragedThresholdSet,
+    ThresholdSet,
+)
 
 __all__ = [
+    "AveragedThresholdSet",
     "MultipactorTest",
-    "TestCampaign",
     "PowerStep",
     "PowerStepSet",
+    "TestCampaign",
     "ThresholdSet",
 ]
