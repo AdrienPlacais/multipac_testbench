@@ -1,5 +1,7 @@
 """Define utility functions related to thresholds."""
 
+from collections import defaultdict
+
 from multipac_testbench.instruments.instrument import Instrument
 from multipac_testbench.threshold.threshold import Threshold
 
@@ -75,3 +77,21 @@ def extract_detecting_name(label: str) -> str:
         return label.rsplit("(", 1)[1].split(" ")[2][:-1]
 
     raise ValueError(f"{label = } not recognized.")
+
+
+def reached_last_upper(thresholds: list[Threshold]) -> bool:
+    """Determine if all lower thresholds have a matching upper."""
+    grouped: dict[str, list[Threshold]] = defaultdict(list)
+    for t in thresholds:
+        grouped[t.detecting_instrument].append(t)
+    for thresh in grouped.values():
+        sorted_thresholds = sorted(thresh, key=lambda t: t.sample_index)
+        expecting = None
+        for t in sorted_thresholds:
+            if t.nature == "lower":
+                expecting = "upper"
+            elif t.nature == "upper" and expecting == "upper":
+                expecting = None
+        if expecting == "upper":
+            return False  # still expecting an upper threshold
+    return True
