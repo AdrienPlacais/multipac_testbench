@@ -56,17 +56,9 @@ autodoc_default_options = {
     "show_inheritance": True,
 }
 autodoc_mock_imports = []
-# to test:
-# autodoc_alias_type = {"THRESHOLD_REDUCER_T": multipac_testbench.threshold.threshold.THRESHOLD_REDUCER_T}
-#
-# Get return type following:
-# Returns:
-#           - var1 (type) - Description
-#           - var2 (type) - Description
+
 napoleon_use_rtype = True
 typehints_document_rtype = True
-# Avoid `Return type` in a separated line (except if no return description was
-# given)
 typehints_use_rtype = True
 
 # sphinx-autodoc-typehints
