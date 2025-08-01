@@ -1,0 +1,152 @@
+[global]
+[global.instruments_kw]
+
+[global.instruments_kw.NI9205_Power1]
+class_name = "ForwardPower"
+ensure_no_negative = false
+p_high = 1200
+p_low = 1.0
+
+[global.instruments_kw.NI9205_Power2]
+alpha_fix = 1.0783
+class_name = "ReflectedPower"
+ensure_no_negative = false
+k_fix = 0.71
+p_high = 1200
+p_low = 1.0
+
+[global.instruments_kw.NI9205_dBm]
+class_name = "PowerSetpoint"
+
+[E1]
+position = 0e0
+
+[E1.instruments_kw]
+[E1.instruments_kw.NI9205_MP1l]
+a_probe = 1210
+class_name = "CurrentProbe"
+
+[E1.instruments_kw.NI9205_E1]
+attenuation_file = "calibration/attenuations.csv"
+calibration_file = "calibration/rf-racks/E1_fit_calibration.csv"
+class_name = "ElectricFieldProbe"
+
+# ==================================
+[E2]
+position = 0.26
+
+[E2.instruments_kw]
+[E2.instruments_kw.NI9205_MP2l]
+a_probe = 1210
+class_name = "CurrentProbe"
+
+[E2.instruments_kw.NI9205_E2]
+attenuation_file = "calibration/attenuations.csv"
+calibration_file = "calibration/rf-racks/E2_fit_calibration.csv"
+class_name = "ElectricFieldProbe"
+
+# ==================================
+[E3]
+position = 0.39
+
+[E3.instruments_kw]
+[E3.instruments_kw.NI9205_MP3l]
+a_probe = 1210
+class_name = "CurrentProbe"
+
+[E3.instruments_kw.NI9205_E3]
+attenuation_file = "calibration/attenuations.csv"
+calibration_file = "calibration/rf-racks/E3_fit_calibration.csv"
+class_name = "ElectricFieldProbe"
+
+# ==================================
+[E4]
+position = 0.611
+
+[E4.instruments_kw]
+[E4.instruments_kw.NI9205_MP4l]
+a_probe = 1210
+class_name = "CurrentProbe"
+
+[E4.instruments_kw.NI9205_E4]
+attenuation_file = "calibration/attenuations.csv"
+calibration_file = "calibration/rf-racks/E4_fit_calibration.csv"
+class_name = "ElectricFieldProbe"
+
+# ==================================
+[E5]
+position = 0.832
+
+[E5.instruments_kw]
+[E5.instruments_kw.NI9205_MP5l]
+a_probe = 1210
+class_name = "CurrentProbe"
+
+[E5.instruments_kw.NI9205_E5]
+attenuation_file = "calibration/attenuations.csv"
+calibration_file = "calibration/rf-racks/E5_fit_calibration.csv"
+class_name = "ElectricFieldProbe"
+
+# ==================================
+[E6]
+position = 0.962
+
+[E6.instruments_kw]
+[E6.instruments_kw.NI9205_MP6l]
+a_probe = 1220
+class_name = "CurrentProbe"
+
+[E6.instruments_kw.NI9205_E6]
+attenuation_file = "calibration/attenuations.csv"
+calibration_file = "calibration/rf-racks/E6_fit_calibration.csv"
+class_name = "ElectricFieldProbe"
+
+# ==================================
+[E7]
+position = 1.222
+
+[E7.instruments_kw]
+[E7.instruments_kw.NI9205_MP7l]
+a_probe = 1050
+class_name = "CurrentProbe"
+
+
+[E7.instruments_kw.NI9205_E7]
+attenuation_file = "calibration/attenuations.csv"
+calibration_file = "calibration/rf-racks/E7_fit_calibration.csv"
+class_name = "ElectricFieldProbe"
+
+[E8]
+position = 0.611
+
+[E8.instruments_kw]
+[E8.instruments_kw.NI9205_MP8l]
+a_probe = 1050
+class_name = "CurrentProbe"
+
+# ==================================
+# [OF]
+# position = 0.656
+#
+# [OF.instruments_kw]
+# [OF.instruments_kw.NI9205_Arc1]
+# class_name = "OpticalFibre"
+#
+# [dummy]
+# position=-1
+#
+# [dummy.instruments_kw]
+# [dummy.instruments_kw.NI9205_Penning1]
+# class_name="Penning"
+# a_calib=0.714285714
+# b_calib=-10
+# [dummy.instruments_kw.NI9205_Penning2]
+# class_name="Penning"
+# a_calib=0.714285714
+# b_calib=-10
+# [dummy.instruments_kw.NI9205_bayard-alpert]
+# class_name="Penning"
+# a_calib=0.75
+# b_calib=-5.8125
+
+# ==================================

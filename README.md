@@ -32,6 +32,10 @@ Then, add `multipac_testbench.src` to your `$PYTHONPATH` environment variable.
 - 🤝 [Contributing](./CONTRIBUTING.md)
 - 🚀 [Tutorials/examples](https://multipac-testbench.readthedocs.io/en/stable/manual/tutorials.html)
 
+TODO:
+- [ ] Add notebook execution to normal test workflow.
+  - [ ] Add jupyter installation to `pip` deps for test
+
 ## Future updates
 
 - [X] Calibration of new field probes.
@@ -43,3 +47,9 @@ Then, add `multipac_testbench.src` to your `$PYTHONPATH` environment variable.
 - [ ] Option to plot maximum of a signal per power cycle.
 - [ ] Bug fix: Upper threshold is given even when we did not exit the multipactor zone.
 - [X] Adding a post-treater to `Power` instruments should be reflected in `SWR` and `ReflectionCoefficient` calculations.
+
+## Labviewer to-do
+- [ ] Automatic export binary -> xlsx or csv
+- [ ] Automatic export of individual power step files
+- [ ] Allow to take last value from individual power step file rather than highest
+- [ ] Fix synxhro of dBm column

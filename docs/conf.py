@@ -13,6 +13,7 @@ import sys
 from pprint import pformat
 
 import multipac_testbench
+import sphinx
 from sphinx.util import inspect
 
 sys.path.append(os.path.abspath("./_ext"))
@@ -40,6 +41,32 @@ extensions = [
     "sphinx_tabs.tabs",
     "sphinxcontrib.bibtex",
 ]
+
+# -- autodoc -------------------------------------------------------------
+autodoc_default_options = {
+    "ignore-module-all": True,
+    # Ref of inherited methods, when not specifically redefined
+    # for example: :meth:`.ForwardPower.where_is_growing`:
+    "inherited-members": True,
+    "members": True,
+    "member-order": "bysource",
+    "private-members": True,
+    "special-members": "__init__, __post_init__, __str__",  # Document those special members
+    "undoc-members": True,  # Document members without doc
+    "show_inheritance": True,
+}
+autodoc_mock_imports = []
+
+napoleon_use_rtype = True
+typehints_document_rtype = True
+typehints_use_rtype = True
+
+# sphinx-autodoc-typehints
+always_document_param_types = True
+always_use_bars_union = True
+
+# -----------------------------------------------------------------------------
+typehints_defaults = "comma"
 add_module_names = False
 default_role = "literal"
 todo_include_todos = True
@@ -54,20 +81,6 @@ exclude_patterns = [
 ]
 bibtex_bibfiles = ["references.bib"]
 
-# -- autodoc ---------------------------------------------------
-autodoc_default_options = {
-    "ignore-module-all": True,
-    # Ref of inherited methods, when not specifically redefined
-    # for example: :meth:`.ForwardPower.where_is_growing`:
-    "inherited-members": True,
-    "show_inheritance": True,
-    "member-order": "bysource",  # Keep original members order
-    "members": True,
-    "private-members": True,  # Document _private members
-    "special-members": "__init__, __post_init__, __str__",  # Document those special members
-    "undoc-members": True,  # Document members without doc
-}
-
 # -- Check that there is no broken link --------------------------------------
 nitpicky = True
 nitpick_ignore = [
@@ -76,9 +89,11 @@ nitpick_ignore = [
     ("py:class", "T"),
     ("py:class", "np.float64"),
     ("py:class", "numpy.float64"),
+    ("py:class", "numpy.int32"),
+    ("py:obj", "numpy._typing._array_like._ScalarType_co"),
     # Temporary fix, see https://github.com/sphinx-doc/sphinx/issues/13178
     ("py:class", "pathlib._local.Path"),
-    ("py:class", "ins.Instrument"),
+    ("py:class", "Path"),
 ]
 
 # Link to other libraries
@@ -90,13 +105,6 @@ intersphinx_mapping = {
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
 }
 
-# Parameters for sphinx-autodoc-typehints and napoleon
-always_document_param_types = True
-always_use_bar_union = True
-typehints_defaults = "comma"
-typehints_use_rtype = True
-autodoc_typehints = "description"
-napoleon_use_rtype = False
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
@@ -117,3 +125,18 @@ def object_description(obj: object) -> str:
 
 
 inspect.object_description = object_description
+
+# -- Bug fixes ---------------------------------------------------------------
+# Fix following warning:
+# <unknown>:1: WARNING: py:class reference target not found: pathlib._local.Path [ref.class]
+# Note that a patch is provided by Sphinx 8.2, but nbsphinx 0.9.7 requires
+# sphinx<8.2
+# Associated issue:
+# https://github.com/sphinx-doc/sphinx/issues/13178
+if sys.version_info[:2] >= (3, 13) and sphinx.version_info[:2] < (8, 2):  # type: ignore
+    import pathlib
+
+    from sphinx.util.typing import _INVALID_BUILTIN_CLASSES
+
+    _INVALID_BUILTIN_CLASSES[pathlib.Path] = "pathlib.Path"  # type: ignore
+    nitpick_ignore.append(("py:class", "pathlib._local.Path"))

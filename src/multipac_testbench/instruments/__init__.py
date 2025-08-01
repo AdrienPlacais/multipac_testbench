@@ -8,6 +8,7 @@ from multipac_testbench.instruments.electric_field.i_electric_field import (
     IElectricField,
 )
 from multipac_testbench.instruments.electric_field.reconstructed import (
+    FieldPowerError,
     Reconstructed,
 )
 from multipac_testbench.instruments.frequency import Frequency
@@ -17,6 +18,7 @@ from multipac_testbench.instruments.penning import Penning
 from multipac_testbench.instruments.power import (
     ForwardPower,
     Power,
+    PowerSetpoint,
     ReflectedPower,
 )
 from multipac_testbench.instruments.reflection_coefficient import (
@@ -29,14 +31,15 @@ from multipac_testbench.instruments.virtual_instrument import VirtualInstrument
 __all__ = [
     "CurrentProbe",
     "IElectricField",
+    "FieldPowerError",
     "FieldProbe",
     "ForwardPower",
     "Frequency",
     "Instrument",
     "OpticalFibre",
-    "OpticalFibre",
     "Penning",
     "Power",
+    "PowerSetpoint",
     "Reconstructed",
     "ReflectedPower",
     "ReflectionCoefficient",

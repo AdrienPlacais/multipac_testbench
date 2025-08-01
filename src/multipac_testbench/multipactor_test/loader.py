@@ -1,6 +1,7 @@
-"""Define functions to prepare data for :class:`.MultipactorTest.`"""
+"""Define functions to prepare data for :class:`.MultipactorTest`."""
 
 import logging
+import math
 from pathlib import Path
 from typing import Literal
 
@@ -28,9 +29,11 @@ def load(
     sep: str = "\t",
     trigger_policy: TRIGGER_POLICIES = "keep_all",
     dbm_column: str = "NI9205_dBm",
+    index_col: str = "Sample index",
+    remove_metadata_columns: bool = False,
     **kwargs,
 ) -> pd.DataFrame:
-    """Load the LabVIEWER file.
+    """Load the LabViewer file.
 
     If ``trigger_policy`` is set, perform operations to select the desired
     trigger. These operations do not preserve original sample indexes.
@@ -45,15 +48,23 @@ def load(
         How consecutive measures at the same power should be treated.
     dbm_column :
         Name of the column holding the power.
+    index_col :
+        Name of the column holding indexes.
+    remove_metadata_columns :
+        Remove the rightmost columns holding metadata.
     kwargs :
-        Other kwargs passed to :func:`pandas.load`.
+        Other kwargs passed to :func:`._load_file`.
 
     """
-    data = _load_file(filepath, sep=sep, **kwargs)
+    data = _load_file(filepath, sep=sep, index_col=index_col, **kwargs)
+
+    if remove_metadata_columns:
+        data = data.select_dtypes(include=["float", "int"])
 
     filtered = _apply_trigger_filtering(
         trigger_policy, data, dbm_column=dbm_column
-    ).reset_index()
+    ).reset_index(drop=True)
+    filtered.index.name = index_col
 
     printer = logging.info
     if trigger_policy in ("average", "keep_all"):
@@ -71,7 +82,9 @@ def load(
     return filtered
 
 
-def _load_file(filepath: Path, **kwargs) -> pd.DataFrame:
+def _load_file(
+    filepath: Path, index_col: str = "Sample index", **kwargs
+) -> pd.DataFrame:
     """Load the data file.
 
     .. todo::
@@ -89,7 +102,7 @@ def _load_file(filepath: Path, **kwargs) -> pd.DataFrame:
         logging.error(f"{filepath} extension not supported.")
         raise RuntimeError
     try:
-        data = pandas_reader(filepath, index_col="Sample index", **kwargs)
+        data = pandas_reader((filepath), index_col=index_col, **kwargs)
     except Exception as e:
         logging.error(
             f"There was a mismatch is the number of columns in {filepath}"
@@ -161,14 +174,25 @@ def _group_consecutive_equal_power(
 
     Returns
     -------
-    NDArray
         An array of group labels of the same length as ``power``.
 
     """
     labels = [0]
     group = 0
     for i in range(1, len(power)):
-        if abs(power[i] - power[i - 1]) >= tol:
+        if not math.isclose(power[i], power[i - 1], abs_tol=tol):
             group += 1
         labels.append(group)
     return np.array(labels)
+
+
+def save(filepath: Path, data: pd.DataFrame, **kwargs) -> None:
+    """Save the dataframe as a new LabViewer results file."""
+    save_meth = data.to_csv
+    if filepath.suffix == ".xlsx":
+        save_meth = data.to_excel
+        if "sep" in kwargs:
+            del kwargs["sep"]
+
+    logging.info(f"Saving new LabViewer file to {filepath}")
+    save_meth(filepath, **kwargs)

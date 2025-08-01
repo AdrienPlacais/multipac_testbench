@@ -1,6 +1,7 @@
 """Define a class to create the proper :class:`.IMeasurementPoint`."""
 
 import logging
+from itertools import cycle
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -23,17 +24,31 @@ class IMeasurementPointFactory:
 
     """
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(
+        self,
+        is_raw: bool = False,
+        create_virtual_instruments: bool = True,
+        **kwargs,
+    ) -> None:
         """Instantiate the class with its :class:`.InstrumentFactory`.
 
         Parameters
         ----------
+        is_raw :
+            If set to ``True``, input data files is considered to be raw, ie to
+            contain acquisition voltages instead of physical quantities.
+        create_virtual_instruments :
+            If virtual instruments should be created.
         kwargs :
             Keyword arguments that are directly passed down to the
             :class:`.InstrumentFactory`.
 
         """
-        self.instrument_factory = InstrumentFactory(**kwargs)
+        self.instrument_factory = InstrumentFactory(
+            is_raw=is_raw,
+            create_virtual_instruments=create_virtual_instruments,
+            **kwargs,
+        )
 
     def run_single(
         self,
@@ -58,7 +73,6 @@ class IMeasurementPointFactory:
 
         Returns
         -------
-        measurement_point :
             A :class:`.GlobalDiagnostics` or :class:`.PickUp`.
 
         """
@@ -84,13 +98,15 @@ class IMeasurementPointFactory:
         verbose: bool = False,
     ) -> tuple[GlobalDiagnostics | None, list[PickUp]]:
         """Create all the measurement points."""
-        colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
-        n_colors = len(colors)
+        colors = cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
         measurement_points = [
             self.run_single(
-                config_key, config_value, df_data, colors[i % n_colors]
+                key,
+                val,
+                df_data,
+                color=(0, 0, 0) if "global" in key else next(colors),
             )
-            for i, (config_key, config_value) in enumerate(config.items())
+            for key, val in config.items()
         ]
 
         global_diagnostics = self._filter_global_diagnostics(

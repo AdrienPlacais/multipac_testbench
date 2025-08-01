@@ -3,19 +3,13 @@
 import inspect
 import logging
 from abc import ABC
-from typing import Callable, Literal, Self, overload
+from typing import Callable, Self
 
 import numpy as np
 import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.container import StemContainer
 from matplotlib.lines import Line2D
-from multipac_testbench.multipactor_band.instrument_multipactor_bands import (
-    InstrumentMultipactorBands,
-)
-from multipac_testbench.multipactor_band.test_multipactor_bands import (
-    TestMultipactorBands,
-)
 from multipac_testbench.util.filtering import (
     array_is_growing,
     remove_isolated_false,
@@ -37,6 +31,7 @@ class Instrument(ABC):
         position: NDArray[np.float64] | float,
         is_2d: bool = False,
         color: tuple[float, float, float] | None = None,
+        is_raw: bool = False,
         **kwargs,
     ) -> None:
         """Instantiate the class.
@@ -59,6 +54,11 @@ class Instrument(ABC):
             Color for the plots; all instruments from a same :class:`.PickUp`
             have the same. The default is None, which happens for instruments
             defined in a :class:`.GlobalDiagnostics`.
+        is_raw :
+            If set to ``True``, the functions defined in
+            :attr:`._transfer_functions` are directly appended to the list of
+            post-treaters. They are used to convert raw data (ie: acquisition
+            voltages) to physical quantities.
         kwargs :
             Additional keyword arguments coming from the ``TOML`` configuration
             file.
@@ -87,6 +87,10 @@ class Instrument(ABC):
         self._data_as_pd: pd.Series | pd.DataFrame
 
         self._post_treaters: list[POST_TREATER_T] = []
+        self._is_raw = is_raw
+        if is_raw:
+            for func in self._transfer_functions:
+                self.add_post_treater(func)
 
         #: Functions to call when a post-treater is added to current object.
         #:
@@ -130,7 +134,6 @@ class Instrument(ABC):
 
         Returns
         -------
-        instrument :
             An instrument. Note that its ``data`` attribute will be a 2D
             array.
 
@@ -142,6 +145,22 @@ class Instrument(ABC):
     def class_name(self) -> str:
         """Get the name of the instrument class."""
         return self.__class__.__name__
+
+    @property
+    def _transfer_functions(self) -> list[POST_TREATER_T]:
+        """
+        Give functions transforming acquisition voltage to physical quantity.
+
+        They are used when input files contain raw data, ie acquisition
+        voltages.
+
+        """
+        logging.warning(
+            f"{self} has no transfer function defined, so its ``data``"
+            " attribute will hold acquisition voltage in volt rather than any "
+            "meaningful physical quantity."
+        )
+        return []
 
     @property
     def _raw_data(self) -> pd.Series:
@@ -164,7 +183,10 @@ class Instrument(ABC):
 
         """
         if not self._raw_data_can_change:
-            raise ValueError("raw_data should not be updated.")
+            raise ValueError(
+                "._raw_data should not be updated. If you need to do so "
+                "anyway, set ._raw_data_can_change to True."
+            )
         self.__raw_data = new_value
         for dependent in ("_data", "_data_as_pd"):
             if hasattr(self, dependent):
@@ -227,7 +249,7 @@ class Instrument(ABC):
 
     def _notify_callbacks(self) -> None:
         """Call all callback functions."""
-        if len(self._callbacks) == 0:
+        if len(getattr(self, "_callbacks", [])) == 0:
             return
 
         for cb in self._callbacks:
@@ -240,13 +262,6 @@ class Instrument(ABC):
                 f"Using new data from {self} to recompute data in {owner}."
             )
             cb()
-
-    def _get_plot_methods(self, is_2d: bool) -> tuple[Callable, Callable]:
-        """Give the proper plotting functions according to ``is_2d``."""
-        plotters = (self._plot_vs_position_for_1d, self._scatter_data_1d)
-        if is_2d:
-            plotters = (self._plot_vs_position_for_2d, self._scatter_data_2d)
-        return plotters
 
     @property
     def post_treaters(self) -> list[POST_TREATER_T]:
@@ -277,137 +292,13 @@ class Instrument(ABC):
             return an array with the same size as output.
 
         """
-        logging.info(f"Adding a post_treater to {self}.")
+        logging.debug(f"Adding a post_treater to {self}.")
         if hasattr(self, "_data"):
             delattr(self, "_data")
         if hasattr(self, "_data_as_pd"):
             delattr(self, "_data_as_pd")
         self._post_treaters.append(post_treater)
         self._notify_callbacks()
-
-    def at_thresholds(
-        self, instrument_multipactor_bands: InstrumentMultipactorBands
-    ) -> pd.DataFrame:
-        """Get what was measured by instrument at thresholds."""
-        lower = [
-            self.data[i] if i is not None else np.nan
-            for i in instrument_multipactor_bands.lower_indexes()
-        ]
-        upper = [
-            self.data[i] if i is not None else np.nan
-            for i in instrument_multipactor_bands.upper_indexes()
-        ]
-        label = f" threshold {self} "
-        label += f"according to {instrument_multipactor_bands.instrument_name}"
-        df_at_thresholds = pd.DataFrame(
-            {"Lower" + label: lower, "Upper" + label: upper}
-        )
-        return df_at_thresholds
-
-    @overload
-    def multipactor_band_at_same_position(
-        self,
-        multipactor_bands: TestMultipactorBands,
-        raise_no_match_error: Literal[True],
-        global_diagnostics: bool = False,
-        tol: float = 1e-10,
-        **kwargs,
-    ) -> InstrumentMultipactorBands: ...
-
-    @overload
-    def multipactor_band_at_same_position(
-        self,
-        multipactor_bands: TestMultipactorBands,
-        raise_no_match_error: Literal[False],
-        global_diagnostics: bool = False,
-        tol: float = 1e-10,
-        **kwargs,
-    ) -> InstrumentMultipactorBands | None: ...
-
-    @overload
-    def multipactor_band_at_same_position(
-        self,
-        multipactor_bands: TestMultipactorBands,
-        raise_no_match_error: bool,
-        global_diagnostics: bool = False,
-        tol: float = 1e-10,
-        **kwargs,
-    ) -> InstrumentMultipactorBands | None: ...
-
-    @overload
-    def multipactor_band_at_same_position(
-        self,
-        multipactor_bands: InstrumentMultipactorBands,
-        raise_no_match_error: bool,
-        global_diagnostics: bool = False,
-        tol: float = 1e-10,
-        **kwargs,
-    ) -> InstrumentMultipactorBands: ...
-
-    def multipactor_band_at_same_position(
-        self,
-        multipactor_bands: TestMultipactorBands | InstrumentMultipactorBands,
-        raise_no_match_error: bool = False,
-        global_diagnostics: bool = False,
-        tol: float = 1e-10,
-        **kwargs,
-    ) -> InstrumentMultipactorBands | None:
-        """Get the multipactor that was measured at the same position.
-
-        This is useful to easily match the data from a field probe to the
-        multipactor bands measured by the current probe at the same position.
-
-        Parameters
-        ----------
-        multipactor_bands :
-            List of :class:`.InstrumentMultipactorBands` among which you want
-            to find the match. If a :class:`.InstrumentMultipactorBands` is
-            given, return it back without further checking.
-        tol :
-            Mismatch allowed between positions.
-        global_diagnostics :
-            If multipactor detected by a global instrument should be returned.
-        raise_no_match_error :
-            If True, method always return an object.
-        kwargs :
-            Other keyword arguments, currently unused.
-
-        Returns
-        -------
-        InstrumentMultipactorBands | None
-
-        """
-        if isinstance(multipactor_bands, InstrumentMultipactorBands):
-            return multipactor_bands
-
-        assert isinstance(self.position, float)
-        matching_multipactor_bands = [
-            band
-            for band in multipactor_bands
-            if band is not None
-            and (
-                abs(band.position - self.position) < tol
-                or np.isnan(self.position)
-                or (global_diagnostics and np.isnan(band.position))
-            )
-        ]
-        n_found = len(matching_multipactor_bands)
-        if n_found == 0:
-            if not raise_no_match_error:
-                return
-
-            raise ValueError(
-                f"No MultipactorBand among {multipactor_bands} with a position"
-                f" matching {self} was found."
-            )
-
-        if n_found > 1:
-            logging.warning(
-                "There are several multipactor bands that were measured for "
-                f"the same instrument {self}: {matching_multipactor_bands}"
-            )
-
-        return matching_multipactor_bands[0]
 
     def _post_treat(self, data: NDArray[np.float64]) -> NDArray[np.float64]:
         """Apply all post-treatment functions."""
@@ -420,6 +311,13 @@ class Instrument(ABC):
                     "the array."
                 )
         return data
+
+    def _get_plot_methods(self, is_2d: bool) -> tuple[Callable, Callable]:
+        """Give the proper plotting functions according to ``is_2d``."""
+        plotters = (self._plot_vs_position_for_1d, self._scatter_data_1d)
+        if is_2d:
+            plotters = (self._plot_vs_position_for_2d, self._scatter_data_2d)
+        return plotters
 
     def _plot_vs_position_for_1d(
         self,
@@ -451,7 +349,6 @@ class Instrument(ABC):
 
         Returns
         -------
-        artist :
             The plotted stem.
 
         """
@@ -504,7 +401,6 @@ class Instrument(ABC):
 
         Returns
         -------
-        artist :
             The plotted line.
 
         """
@@ -581,6 +477,7 @@ class Instrument(ABC):
         self,
         minimum_number_of_points: int = 0,
         n_trailing_points_to_check: int = 0,
+        width: int = 10,
         **kwargs,
     ) -> NDArray[np.bool]:
         """Identify regions where the signal is increasing ("growing").
@@ -589,8 +486,11 @@ class Instrument(ABC):
         trend. It returns a boolean array of the same length as the input
         signal, where ``True`` indicates a region of growth and ``False``
         otherwise.
-        *A priori*, will be useful for :class:`.ForwardPower` and
-        :class:`.RPA`.
+        *A priori*, will be useful for:
+
+        - :class:`.PowerSetpoint` to determine power cycles. A fallback is
+          :class:`.ForwardPower`.
+        - :class:`.RPA`.
 
         The method performs three main operations:
 
@@ -611,6 +511,8 @@ class Instrument(ABC):
             ``False`` if they form an isolated or uncertain growth pattern.
             Particulatly useful for :class:`.ForwardPower` to avoid detection
             of a new power cycle at the end of the test.
+        width :
+            Width of the sample to determine increase.
         **kwargs :
             Additional keyword arguments passed to :func:`.array_is_growing`.
 
@@ -631,18 +533,21 @@ class Instrument(ABC):
         n_points = len(self._raw_data)
         is_growing: list[bool] = []
 
-        previous_value = True
+        local_is_growing = True
         for i in range(n_points):
             local_is_growing = array_is_growing(
-                self.data, i, undetermined_value=previous_value, **kwargs
+                self.data,
+                i,
+                no_change_value=local_is_growing,
+                width=width,
+                **kwargs,
             )
 
             is_growing.append(local_is_growing)
-            previous_value = local_is_growing
 
         growth_mask = np.array(is_growing, dtype=np.bool)
 
-        # Remove isolated False
+        # Remove isolated False (useful for noisy instruments)
         if minimum_number_of_points > 0:
             growth_mask = remove_isolated_false(
                 growth_mask, minimum_number_of_points
@@ -657,3 +562,53 @@ class Instrument(ABC):
             )
 
         return growth_mask
+
+    def growth_array(
+        self,
+        **kwargs,
+    ) -> NDArray[np.float64]:
+        """Identify regions where the signal is increasing ("growing").
+
+        This method analyzes a signal to determine where it exhibits a growing
+        trend. It returns a float array of the same length as the input
+        signal, where ``1.0`` indicates a region of growth and ``-1.0``
+        otherwise. ``0.0`` means constant signal.
+        *A priori*, will be useful for:
+
+        - :class:`.PowerSetpoint` to determine power cycles
+
+        Notes
+        -----
+        Designed for non-noisy instruments such as :class:`.PowerSetpoint`.
+
+        Parameters
+        ----------
+        width :
+            Width of the sample to determine increase.
+        no_change_value :
+            Value to put in growth mask when we did not manage to find whether
+            measured signal increased or not.
+        **kwargs :
+            Additional keyword arguments passed to :func:`.array_is_growing`.
+
+        Returns
+        -------
+            Array where +1 means growing, -1 decreasing, 0 means constant.
+
+        """
+        bool_to_float = {True: 1.0, False: -1.0, None: 0.0}
+        is_growing = [
+            bool_to_float[
+                array_is_growing(
+                    self.data,
+                    i,
+                    width=2,
+                    no_change_value=None,
+                    default_first_value=None,
+                    **kwargs,
+                )
+            ]
+            for i in range(len(self._raw_data))
+        ]
+        is_growing[-1] = 0.0
+        return np.array(is_growing, dtype=np.float64)

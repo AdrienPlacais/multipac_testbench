@@ -6,21 +6,226 @@ import re
 from abc import ABCMeta
 from collections.abc import Collection, Iterable, Sequence
 from pathlib import Path
-from typing import cast
+from typing import Any, TypeVar, cast
 
+import matplotlib.cm as cm
+import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from multipac_testbench.multipactor_band.test_multipactor_bands import (
-    TestMultipactorBands,
-)
+from matplotlib.typing import ColorType
+from multipac_testbench.instruments.instrument import Instrument
+from multipac_testbench.threshold.threshold import PowerExtremum
+from multipac_testbench.threshold.threshold_set import ThresholdSet
 from multipac_testbench.util.helper import drop_repeated_col, is_nested_list
 from multipac_testbench.util.multipactor_detectors import (
     start_and_end_of_contiguous_true_zones,
 )
 from numpy.typing import NDArray
+
+T = TypeVar("T", bound=float)
+
+
+def plot_susceptibility_with_grad(
+    df: pd.DataFrame,
+    zcol: str,
+    ax: Axes | None = None,
+    xlim: tuple[float, float] | None = None,
+    ylim: tuple[float, float] | None = None,
+    ylabel: str | None = None,
+    cmap: mcolors.Colormap | None = None,
+    s: int = 5,
+    **kwargs,
+) -> Axes:
+    """Draw ``lower`` and ``upper`` columns of ``df``. Use ``zcol`` for color.
+
+    Parameters
+    ----------
+    df :
+        Holds data to plot; must have columns with ``"lower"`` and ``"upper"``
+        in their name.
+    zcol :
+        Column in ``df`` used to colour the markers.
+    ax :
+        To re-use a pre-existing axis.
+    xlim, ylim :
+        Plot limits.
+    ylabel :
+        Label for y-axis.
+    cmap :
+        Colour map to be used.
+    s :
+        Size for the markers.
+    kwargs :
+        Other keyword arguments passed to ``plt.scatter``.
+
+    """
+    if ax is None:
+        _, ax = plt.subplots()
+
+    n_dropped = df[zcol].isna().sum()
+    if n_dropped:
+        logging.warning(f"Dropped {n_dropped} rows with NaN in {zcol} column.")
+        df = df.dropna(subset=[zcol])
+    zdata = df[zcol].to_numpy()
+
+    scatter_kwargs = {
+        "norm": mcolors.Normalize(vmin=zdata.min(), vmax=zdata.max()),
+        "cmap": cmap or cm.get_cmap("viridis"),
+        "c": zdata,
+        "x": df.index,
+        "s": s,
+    } | kwargs
+
+    for col in df.filter(like="lower"):
+        ax.scatter(y=df[col], marker="o", label=col, **scatter_kwargs)
+    for col in df.filter(like="upper"):
+        ax.scatter(y=df[col], marker="*", label=col, **scatter_kwargs)
+
+    sm = cm.ScalarMappable(
+        norm=scatter_kwargs["norm"], cmap=scatter_kwargs["cmap"]
+    )
+    sm.set_array([])
+    ax.figure.colorbar(sm, ax=ax, label=zcol)
+
+    if ylabel:
+        ax.set_ylabel(ylabel)
+    ax.legend()
+    ax.grid(True)
+    ax.set(xscale="log", yscale="log", xlim=xlim, ylim=ylim)
+    return ax
+
+
+def plot_susceptibility_without_grad(
+    df: pd.DataFrame,
+    label_to_color: dict[str, ColorType],
+    ax: Axes | None = None,
+    xlim: tuple[float, float] | None = None,
+    ylim: tuple[float, float] | None = None,
+    ylabel: str | None = None,
+    s: int = 5,
+    **kwargs,
+) -> Axes:
+    """Draw ``lower`` and ``upper`` columns of ``df``.
+
+    Parameters
+    ----------
+    df :
+        Holds data to plot; must have columns with ``"lower"`` and ``"upper"``
+        in their name.
+    label_to_color :
+        Maps column names with color to use.
+    ax :
+        To re-use a pre-existing axis.
+    xlim, ylim :
+        Plot limits.
+    ylabel :
+        Label for y-axis.
+    s :
+        Size for the markers.
+    kwargs :
+        Other keyword arguments passed to ``plt.scatter``.
+
+    """
+    if ax is None:
+        _, ax = plt.subplots()
+
+    scatter_kwargs = {
+        "x": df.index,
+        "s": s,
+    } | kwargs
+
+    for col in df.filter(like="lower"):
+        ax.scatter(
+            y=df[col],
+            marker="o",
+            label=col,
+            c=label_to_color[str(col)],
+            **scatter_kwargs,
+        )
+    for col in df.filter(like="upper"):
+        ax.scatter(
+            y=df[col],
+            marker="*",
+            label=col,
+            c=label_to_color[str(col)],
+            **scatter_kwargs,
+        )
+
+    if ylabel:
+        ax.set_ylabel(ylabel)
+    ax.legend()
+    ax.grid(True)
+    ax.set(xscale="log", yscale="log", xlim=xlim, ylim=ylim)
+    return ax
+
+
+def attribute_to_color(
+    attributes: Iterable[T],
+) -> dict[T, tuple[float, float, float]]:
+    """Map some attributes to colors.
+
+    Used for example by :meth:`.TestCampaign.check_somersalo_scaling_law`, to
+    always keep the same plot color for a given frequency.
+
+    """
+    prop_cycle = plt.rcParams["axes.prop_cycle"]
+    colors = [c["color"] for c in prop_cycle]
+    attr_to_color = {
+        attr: colors[i % len(colors)]
+        for i, attr in enumerate(sorted(attributes))
+    }
+    return attr_to_color
+
+
+def plot_extrema_markers(
+    ax_by_position: dict[float, Axes] | Axes,
+    instruments: list[Instrument],
+    extrema: list[PowerExtremum],
+    marker_style: dict[str, dict] | None = None,
+    zorder: int = 3,
+) -> None:
+    """Plot PowerExtremum values as markers from all instruments.
+
+    .. todo::
+        Fill above/below the extrema.
+
+    Parameters
+    ----------
+    ax_by_position :
+        Axes (if same_figure=True) or dict mapping position to Axes.
+    instruments :
+        Instruments from which to extract values (must have `.data` and `.position`).
+    extrema :
+        Global PowerExtremum instances (with `.sample_index` and `.nature`).
+    marker_style :
+        Optional dict mapping nature ("minimum", "maximum") to plot kwargs
+        (like color, marker shape, etc.).
+    zorder :
+        Layer order.
+
+    """
+    if isinstance(ax_by_position, dict):
+        get_ax = lambda pos: ax_by_position[pos]
+    else:
+        get_ax = lambda pos: ax_by_position  # same figure
+
+    marker_style = marker_style or {
+        "minimum": dict(marker="v", linestyle="none", label="Minimum"),
+        "maximum": dict(marker="^", linestyle="none", label="Maximum"),
+    }
+
+    for extremum in extrema:
+        style = marker_style.get(extremum.nature, {})
+        for instr in instruments:
+            if extremum.sample_index >= len(instr.data):
+                continue  # Skip if sample index is out of bounds
+            x_val = extremum.sample_index
+            y_val = instr.data[extremum.sample_index]
+            ax = get_ax(instr.position)
+            ax.plot(x_val, y_val, color=instr.color, **style, zorder=zorder)
 
 
 def create_fig(
@@ -41,9 +246,9 @@ def create_fig(
 
     Returns
     -------
-    fig :
+
         Figure holding the axes.
-    instrument_class_axes :
+
         Dictionary linking the class of the instruments to plot with the
         associated axes.
 
@@ -135,7 +340,6 @@ def create_df_to_plot(
 
     Returns
     -------
-    df_to_plot :
         Contains x and y data that will be plotted.
 
     """
@@ -190,15 +394,15 @@ def match_x_and_y_column_names(
 
     Returns
     -------
-    x_columns :
         Name of the instrument(s) used as x-axis. Three possibilities:
+
         - If it is None, we plot again sample index.
         - If it is a single :class:`.Instrument` name, it will be used as
           x-data for every plot.
         - If it is a list of names, its length matches the length of
           ``y_columns``. This is typically what happens when we plot an
           instrument vs another.
-    y_columns :
+
         Name of the instruments for y-axis.
 
     """
@@ -263,7 +467,6 @@ def actual_plot(
 
     Returns
     -------
-    list[Axes]
         Plotted axes, or an array containing them.
 
     """
@@ -396,7 +599,7 @@ def save_figure(
 def save_dataframe(
     df_to_plot: pd.DataFrame,
     csv_path: Path,
-    sep: str = "\t",
+    sep: str = ",",
     verbose: bool = False,
     **csv_kwargs,
 ) -> None:
@@ -508,8 +711,8 @@ def _add_single_bg_color(
         label = None
 
 
-def add_instrument_multipactor_bands(
-    test_multipactor_bands: TestMultipactorBands,
+def add_thresholds(
+    threshold_set: ThresholdSet,
     axes: list[Axes] | Axes | None = None,
     scale: float = 1.0,
     alpha: float = 0.5,
@@ -517,7 +720,7 @@ def add_instrument_multipactor_bands(
     twinx: bool = False,
     **kwargs,
 ) -> Axes | list[Axes]:
-    """Add the multipactor bands to a pre-existing plot."""
+    """Add the thresholds position to a pre-existing plot."""
     if isinstance(axes, list):
         axes_aslist = [
             add_instrument_multipactor_bands(
@@ -545,6 +748,88 @@ def add_instrument_multipactor_bands(
         assert axes is not None
         _merge_legends(axes, mp_axes)
     return mp_axes
+
+
+def plot_df_threshold(
+    df: pd.DataFrame,
+    ylabel: str,
+    label_to_color: dict[str, tuple[float, float, float]],
+    fig_title: str,
+    xticks: Sequence[float],
+    ms: int = 8,
+    lw: float = 0.0,
+    axes: Axes | None = None,
+    plot_kwargs: dict[str, Any] | None = None,
+    **kwargs,
+) -> Axes:
+    """Plot a threshold dataframe, separating lower/upper thresholds.
+
+    If no lower threshold is found, an error message is printed; we try to
+    continue exectution anyway.
+    If no upper threshold is found, there is no problem.
+
+    Parameters
+    ----------
+    df :
+        Holds ``"{Instrument.name} lower"`` and ``"{Instrument.name}
+        upper"`` columns.
+    ylabel :
+        Y label.
+    label_to_color :
+        Maps threshold dataframe column names with a color.
+    fig_title :
+        Figure title.
+    xticks :
+        Position of xticks. A common choice is the position of power extrema.
+    ms :
+        Markers size.
+    axes :
+        To re-use pre-existing axis.
+    plot_kwargs :
+        Kwargs passed to the plotting function.
+
+    """
+    lower = df.filter(like="lower")
+    if lower.empty:
+        logging.error(f"No lower threshold to plot was found.\n{df}")
+        assert (
+            axes is not None
+        ), "You must provide `axes` kwarg to continue execution anyway."
+        return axes
+
+    axes = lower.plot(
+        marker="o",
+        ms=ms,
+        grid=True,
+        ylabel=ylabel,
+        title=fig_title,
+        color=[label_to_color[col] for col in lower.columns],
+        ax=axes,
+        lw=lw,
+        xticks=xticks,
+        **(plot_kwargs or {}),
+    )
+    assert axes is not None
+    axes.set_prop_cycle(None)
+
+    upper = df.filter(like="upper")
+    if upper.empty:
+        return axes
+
+    axes = upper.plot(
+        marker="*",
+        ms=ms,
+        grid=True,
+        ylabel=ylabel,
+        title=fig_title,
+        color=[label_to_color[col] for col in upper.columns],
+        ax=axes,
+        lw=lw,
+        xticks=xticks,
+        **(plot_kwargs or {}),
+    )
+    assert axes is not None
+    return axes
 
 
 def _merge_legends(ax1: Axes, ax2: Axes) -> None:

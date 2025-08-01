@@ -1,9 +1,9 @@
 """Define general usage functions."""
 
 import logging
-from collections.abc import Iterable, Iterator, Sequence
+from collections.abc import Callable, Iterable, Iterator, Sequence
 from pathlib import Path
-from typing import TypeVar
+from typing import Any, TypeVar
 
 import numpy as np
 import pandas as pd
@@ -140,13 +140,13 @@ def output_filepath(
         Theoretical rf frequency to add to the output file name.
     out_folder :
         Relative name of the folder where data will be saved; it is defined
-        w.r.t. to the parent folder of ``filepath``.
+        w.r.t. to the parent folder of ``filepath`` if it is a string. If it
+        is a ``Path``, we consider it is absolute.
     extension :
         Extension of the output file, with the dot.
 
     Returns
     -------
-    filename :
         A full filepath.
 
     """
@@ -162,12 +162,40 @@ def output_filepath(
         .name
     )
 
-    folder = filepath.parent / out_folder
+    folder = (
+        filepath.parent / out_folder
+        if isinstance(out_folder, str)
+        else out_folder
+    )
 
     if not folder.is_dir():
         folder.mkdir(parents=True)
 
     return folder / filename
+
+
+def save_by_position(
+    items: dict[float, Any], base_path: Path, save_fn: Callable, kwargs: dict
+):
+    """Save keys of ``items`` according to their key (position).
+
+    Parameters
+    ----------
+    items :
+        Objects to save, grouped by position.
+    base_path : Path
+        Common path of all objects to save.
+    save_fn : Callable
+        Function to call for saving the objects.
+    kwargs : dict
+        Passed to ``save_fn``.
+
+    """
+    for pos, item in items.items():
+        fname = base_path.with_name(
+            f"{base_path.stem}_pos{pos:.3f}{base_path.suffix}"
+        )
+        save_fn(item, fname, **kwargs)
 
 
 def r_squared(

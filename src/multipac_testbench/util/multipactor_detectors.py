@@ -35,7 +35,6 @@ def quantity_is_above_threshold(
 
     Returns
     -------
-    multipactor :
         True where multipactor was detected.
 
     """
@@ -65,7 +64,6 @@ def start_and_end_of_contiguous_true_zones(
 
     Returns
     -------
-    zones :
         List of first and last index of every multipactor band (multipactor
         contiguous zone).
 

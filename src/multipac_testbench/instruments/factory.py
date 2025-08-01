@@ -16,6 +16,7 @@ STRING_TO_INSTRUMENT_CLASS = {
     "ForwardPower": ins.ForwardPower,
     "OpticalFibre": ins.OpticalFibre,
     "Penning": ins.Penning,
+    "PowerSetpoint": ins.PowerSetpoint,
     "RPACurrent": ins.RPACurrent,
     "RPAPotential": ins.RPAPotential,
     "ReflectedPower": ins.ReflectedPower,
@@ -27,6 +28,7 @@ INSTRUMENT_NAME_T = Literal[
     "ForwardPower",
     "OpticalFibre",
     "Penning",
+    "PowerSetpoint",
     "RPACurrent",
     "RPAPotential",
     "ReflectedPower",
@@ -36,9 +38,28 @@ INSTRUMENT_NAME_T = Literal[
 class InstrumentFactory:
     """Class to create instruments."""
 
-    def __init__(self, freq_mhz: float | None = None) -> None:
-        """Set user-defined constants to create correspondig instrument."""
+    def __init__(
+        self,
+        freq_mhz: float | None = None,
+        is_raw: bool = False,
+        create_virtual_instruments: bool = True,
+    ) -> None:
+        """Set user-defined constants to create correspondig instrument.
+
+        Parameters
+        ----------
+        freq_mhz:
+            Frequency in :unit:`MHz`.
+        is_raw :
+            If set to ``True``, input data files is considered to be raw, ie to
+            contain acquisition voltages instead of physical quantities.
+        create_virtual_instruments :
+            If virtual instruments should be created.
+
+        """
         self.freq_mhz = freq_mhz
+        self._is_raw = is_raw
+        self._create_virtual_instruments = create_virtual_instruments
 
     def run(
         self,
@@ -47,7 +68,7 @@ class InstrumentFactory:
         class_name: INSTRUMENT_NAME_T,
         column_header: str | list[str] | None = None,
         **instruments_kw: Any,
-    ) -> ins.Instrument:
+    ) -> ins.Instrument | None:
         """Take the proper subclass, instantiate it and return it.
 
         Parameters
@@ -70,7 +91,6 @@ class InstrumentFactory:
 
         Returns
         -------
-        instrument :
             Instrument properly subclassed.
 
         """
@@ -83,13 +103,26 @@ class InstrumentFactory:
         if column_header is None:
             column_header = name
 
+        if column_header not in df_data:
+            logging.error(
+                f"{column_header = } not present in provided file. Skipping "
+                "associated instrument."
+            )
+            return
+
         raw_data = df_data[column_header]
 
         if isinstance(raw_data, pd.DataFrame):
             return instrument_class.from_pd_dataframe(
                 name, raw_data, **instruments_kw
             )
-        return instrument_class(name, raw_data, **instruments_kw)
+        return instrument_class(
+            name,
+            raw_data,
+            is_raw=self._is_raw,
+            freq_mhz=self.freq_mhz,
+            **instruments_kw,
+        )
 
     def run_virtual(
         self,
@@ -114,10 +147,11 @@ class InstrumentFactory:
 
         Returns
         -------
-        virtuals :
             The created virtual instruments.
 
         """
+        if not self._create_virtual_instruments:
+            return []
         virtuals = []
 
         power_related = []

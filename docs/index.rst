@@ -14,6 +14,7 @@ Welcome to MULTIPAC test bench's documentation!
 
    manual/presentation
    manual/configuration
+   manual/load_experimental_data
    manual/gallery
    manual/tutorials
    manual/bibliography
