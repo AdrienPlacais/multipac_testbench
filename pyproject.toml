@@ -1,20 +1,20 @@
 [project]
 authors = [{ name = "Adrien Plaçais", email = "placais@lpsc.in2p3.fr" }]
 classifiers = [
-   "Development Status :: 3 - Alpha",
-   "Intended Audience :: Science/Research",
-   "License :: OSI Approved :: MIT License",
-   "Operating System :: OS Independent",
-   "Programming Language :: Python :: 3.12",
-   "Topic :: Scientific/Engineering :: Physics",
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Physics",
 ]
 dependencies = [
-   "matplotlib>=3.9.1, <4",
-   "numpy>=2, <3",
-   "openpyxl>=3.1,<4",
-   "pandas>=2.2, <3",
-   "pre-commit>=4, <5",
-   "scipy>=1.15,<2",
+  "matplotlib>=3.9.1, <4",
+  "numpy>=2, <3",
+  "openpyxl>=3.1,<4",
+  "pandas>=2.2, <3",
+  "pre-commit>=4, <5",
+  "scipy>=1.15,<2",
 ]
 description = "Post-treat the data produced by the MULTIPAC test bench."
 dynamic = ["version"]
@@ -25,12 +25,13 @@ requires-python = ">=3.11"
 
 [project.optional-dependencies]
 docs = [
-   "myst-parser>=4, <5",
-   "nbsphinx>=0.9.6, <1",
-   "sphinx-autodoc-typehints>=3.0.1, <4",
-   "sphinx-rtd-theme>=3, <4",
-   "sphinx-tabs>=3.4,<4",
-   "sphinxcontrib-bibtex>=2.6,<3",
+  "sphinx>=8.1,<9",
+  "myst-parser>=4, <5",
+  "nbsphinx>=0.9.7, <1",
+  "sphinx-autodoc-typehints>=3.0.1, <4",
+  "sphinx-rtd-theme>=3, <4",
+  "sphinx-tabs>=3.4,<4",
+  "sphinxcontrib-bibtex>=2.6,<3",
 ]
 notebooks = ["jupyter>=1.1,<2"]
 test = ["pytest>=8.3.2, <9", "pytest-mock>=3.14, <4", "nbmake>=1.5.4,<2"]
@@ -53,8 +54,8 @@ src_paths = ["./multipac_testbench/"]
 addopts = ["--import-mode=importlib", "--strict-markers"]
 filterwarnings = ["ignore:.*cKDTree.*:DeprecationWarning"]
 markers = [
-   "notebook: mark tests that rely on the execution of notebook without error",
-   "slow: mark slow tests (typically > 5s)",
+  "notebook: mark tests that rely on the execution of notebook without error",
+  "slow: mark slow tests (typically > 5s)",
 ]
 minversion = "6.0"
 testpaths = ["tests"]
