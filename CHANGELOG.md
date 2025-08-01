@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # [1.8.x]
 
+## [1.8.1] - 2025-08-01
+
+### Fixed
+
+- Updated paths to notebooks used in unit testing.
+
 ## [1.8.0] - 2025-08-01
 
 ### Added

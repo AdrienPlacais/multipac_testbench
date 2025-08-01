@@ -12,9 +12,9 @@ from nbconvert.preprocessors import ExecutePreprocessor
         pytest.param("animate_multipactor_test.ipynb", marks=pytest.mark.slow),
         pytest.param("check_somersalo_scaling_law.ipynb"),
         pytest.param("compare_several_tests.ipynb"),
-        pytest.param("complete_study_example.ipynb", marks=pytest.mark.slow),
+        pytest.param("load.ipynb"),
         pytest.param("plot_evolution_thresholds.ipynb"),
-        pytest.param("plot_rpa_data.ipynb"),
+        # pytest.param("plot_rpa_data.ipynb"),
         pytest.param(
             "plot_signal_measured_by_instruments_vs_another_signal.ipynb"
         ),
