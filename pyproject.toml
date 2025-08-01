@@ -34,7 +34,12 @@ docs = [
   "sphinxcontrib-bibtex>=2.6,<3",
 ]
 notebooks = ["jupyter>=1.1,<2"]
-test = ["pytest>=8.3.2, <9", "pytest-mock>=3.14, <4", "nbmake>=1.5.4,<2"]
+test = [
+  "nbconvert>=7.16.6,<8",
+  "nbmake>=1.5.4,<2",
+  "pytest-mock>=3.14, <4",
+  "pytest>=8.3.2, <9",
+]
 
 [project.scripts]
 
