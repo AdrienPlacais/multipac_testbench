@@ -97,9 +97,11 @@ nitpick_ignore = [
     ("py:class", "T"),
     ("py:class", "np.float64"),
     ("py:class", "numpy.float64"),
+    ("py:class", "numpy.int32"),
+    ("py:obj", "numpy._typing._array_like._ScalarType_co"),
     # Temporary fix, see https://github.com/sphinx-doc/sphinx/issues/13178
     ("py:class", "pathlib._local.Path"),
-    ("py:class", "ins.Instrument"),
+    ("py:class", "Path"),
 ]
 
 # Link to other libraries
