@@ -24,6 +24,7 @@ from multipac_testbench.instruments.power import ForwardPower
 from multipac_testbench.instruments.reflection_coefficient import (
     ReflectionCoefficient,
 )
+from multipac_testbench.instruments.swr import SWR
 from multipac_testbench.multipactor_test import MultipactorTest
 from multipac_testbench.multipactor_test.loader import TRIGGER_POLICIES
 from multipac_testbench.theoretical.somersalo import (
@@ -794,19 +795,20 @@ class TestCampaign(list[MultipactorTest]):
                 plot.save_dataframe(df.describe(), file, **(csv_kwargs or {}))
         return axes_by_freq, thresholds_by_freq
 
-    def susceptibility(
+    def susceptibility_chart(
         self,
         thresholds_sets: Mapping[MultipactorTest, ThresholdSet],
-        measurement_points_to_exclude: Sequence[str] = (),
+        ydata: ABCMeta = type(FieldProbe),
         keep_only_travelling: bool = True,
         tol: float = 1e-6,
-        gap_in_cm: float | None = None,
-        xlabel: str = r"$f\times d~[\mathrm{MHz\cdot cm}]$",
+        d_cm: float | None = None,
+        fd_col: str = r"$f\cdot d~[\mathrm{MHz~cm}]$",
         png_path: Path | None = None,
         png_kwargs: dict | None = None,
         csv_path: Path | None = None,
         csv_kwargs: dict | None = None,
-        **fig_kw,
+        fig_kwargs: dict | None = None,
+        **kwargs,
     ) -> tuple[Axes, pd.DataFrame]:
         """Create a susceptibility chart.
 
@@ -814,17 +816,17 @@ class TestCampaign(list[MultipactorTest]):
         ----------
         thresholds_sets :
             Object holding where multipactor happens for every test.
-        measurement_points_to_exclude :
-            Some measurement points to exclude.
+        ydata :
+            Type of instrument of which you want data in y-axis. In general,
+            you will want :class:`.FieldProbe` or :class:`.ForwardPower`.
         keep_only_travelling :
             To remove points where :math:`SWR` is not unity.
         tol :
             Tolerance over the :math:`SWR` when performing the
             ``keep_only_travelling`` check.
-        gap_in_cm :
-            Gap of the system. If not provided, we take the value of MULTIPAC
-            test bench.
-        xlabel :
+        d_cm :
+            System gap in :unit:`cm`.
+        fd_col :
             The xlabel for the plot. The default is good enough.
         png_path :
             If provided, the resulting figure will be saved at this location.
@@ -837,9 +839,10 @@ class TestCampaign(list[MultipactorTest]):
         csv_kwargs :
             Other keyword arguments passed to the :func:`.save_dataframe`
             function.
-        fig_kw :
+        fig_kwargs :
             Other keyword arguments passed to the :meth:`pandas.DataFrame.plot`
             method.
+        kwargs :
 
         Returns
         -------
@@ -849,49 +852,32 @@ class TestCampaign(list[MultipactorTest]):
             Corresponding data.
 
         """
-        raise NotImplementedError
-        df_susceptibility = self.at_last_threshold(
-            ins.FieldProbe,
-            campaign_multipactor_bands,
-            measurement_points_to_exclude=measurement_points_to_exclude,
-        )
+        if d_cm is None:
+            d_cm = 0.5 * (3.878 - 1.687)
 
-        frequencies = np.array([test.freq_mhz for test in self])
-        if gap_in_cm is None:
-            gap_in_cm = 0.5 * (3.878 - 1.687)
-            logging.info(f"Used default {gap_in_cm = }")
+        dfs = [
+            test.data_for_susceptibility(
+                thresholds, ydata=ydata, d_cm=d_cm, fd_col=fd_col
+            )
+            for test, thresholds in thresholds_sets.items()
+            if not keep_only_travelling
+            or math.isclose(test.swr, 1.0, abs_tol=tol)
+        ]
+        df = pd.concat([df for df in dfs if not df.empty])
 
-        df_susceptibility[xlabel] = frequencies * gap_in_cm
-        df_susceptibility.set_index(xlabel, inplace=True)
-
-        if keep_only_travelling:
-            swr = [test.swr for test in self]
-            is_travelling = [math.isclose(x, 1.0, abs_tol=tol) for x in swr]
-            df_susceptibility = df_susceptibility[is_travelling]
-
-        axes = df_susceptibility.filter(like="Lower").plot(
-            marker="o", lw=0.0, **fig_kw
-        )
-        axes.set_prop_cycle(None)
-        axes = df_susceptibility.filter(like="Upper").plot(
-            ax=axes,
-            ylabel="Measured voltage [V]",
-            marker="^",
-            lw=0.0,
-            grid=True,
-            logx=True,
-            logy=True,
-            **fig_kw,
+        axes = plot.plot_thresholds_with_grad(
+            df,
+            ylabel=getattr(ydata, "ylabel", lambda: "???")(),
+            xlim=(80, 700),
+            ylim=(1e1, 1e7) if ydata == ForwardPower else None,
+            zcol=SWR.ylabel(),
+            **(fig_kwargs or {}),
         )
         if png_path is not None:
-            if png_kwargs is None:
-                png_kwargs = {}
-            plot.save_figure(axes, png_path, **png_kwargs)
+            plot.save_figure(axes, png_path, **(png_kwargs or {}))
         if csv_path is not None:
-            if csv_kwargs is None:
-                csv_kwargs = {}
-            plot.save_dataframe(df_susceptibility, csv_path, **csv_kwargs)
-        return axes, df_susceptibility
+            plot.save_dataframe(df, csv_path, **(csv_kwargs or {}))
+        return axes, df
 
     def animate_instruments_vs_position(
         self,

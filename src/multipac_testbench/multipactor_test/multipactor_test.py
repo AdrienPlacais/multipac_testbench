@@ -21,7 +21,7 @@ import itertools
 import logging
 import math
 from abc import ABCMeta
-from collections.abc import Collection, Iterable, Sequence
+from collections.abc import Collection, Iterable, Mapping, Sequence
 from pathlib import Path
 from typing import Any, Callable, Literal, TypeVar, overload
 
@@ -768,16 +768,17 @@ class MultipactorTest:
 
     def data_for_susceptibility(
         self,
-        threshold_set: ThresholdSet | dict[MultipactorTest, ThresholdSet],
+        threshold_set: ThresholdSet | Mapping[MultipactorTest, ThresholdSet],
         ydata: ABCMeta = type(FieldProbe),
-        d_mm: float = 10.955,
-        z_ohm: float = 50.0,
-        fd_col: str = r"$f\cdot d~[\mathrm{GHz mm}]",
+        use_theoretical_swr: bool = False,
+        d_cm: float = 1.0955,
+        fd_col: str = r"$f\cdot d~[\mathrm{MHz cm}]",
         **kwargs,
     ) -> pd.DataFrame:
         r"""Get the data required to create the susceptibility plot.
 
-        d_mm = 0.5 * (38.78 - 16.87)
+        In particular, voltage or power thresholds according to ``ydata``,
+        SWR, and :math:`f\cdot d` product.
 
         Parameters
         ----------
@@ -786,10 +787,12 @@ class MultipactorTest:
         ydata :
             Type of instrument of which you want data in y-axis. In general,
             you will want :class:`.FieldProbe` or :class:`.ForwardPower`.
-        d_mm :
-            System gap in :unit:`mm`.
-        z_ohm :
-            Line impedance in :unit:`\\Omega`.
+        use_theoretical_swr :
+            To insert theoretical SWR defined by :attr:`.MultipactorTest.swr`
+            instead of the value taken from :class:`.SWR`
+            :class:`.VirtualInstrument`.
+        d_cm :
+            System gap in :unit:`cm`.
         fd_col :
             Name of the column that will hold the :math:`f\cdot d` product.
 
@@ -805,10 +808,14 @@ class MultipactorTest:
 
         instruments = self.get_instruments(ydata)
         df = threshold_set.data_at_thresholds(
-            instruments, global_multipactor=True, **kwargs
+            instruments,
+            global_multipactor=True,
+            xdata_instrument=self.get_instrument(SWR),
+            unique_x_value=self.swr if use_theoretical_swr else None,
+            **kwargs,
         )
-        df[fd_col] = d_mm * self.freq_mhz * 1e-3
-        return df
+        df[fd_col] = d_cm * self.freq_mhz
+        return df.set_index(fd_col)
 
     def data_for_somersalo_scaling_law(
         self,
