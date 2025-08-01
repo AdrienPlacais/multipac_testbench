@@ -33,8 +33,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `MultipactorBand` objects removed, and replaced by `Threshold` and `ThresholdSet`.
   This is much more robust, as `MultipactorBand` implied the existence of two consecutive `Threshold` objects.
-  - [x] Remove also in Somersalo
-  - [ ] Remove also in Perez
 
 # [1.7.x]
 
@@ -105,7 +103,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Modified
 
 - Proper packaging, local installation with pip.
- - You shall remove the `.src` in the `multipac_testbench` imports.
+- You shall remove the `.src` in the `multipac_testbench` imports.
 
 ## [1.5.2] - 2024-03-06
 
@@ -139,7 +137,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `plot_instruments_y_vs_instrument_x`
 - `Powers`
 
-
 ## [1.5.0] - 2024-03-02
 
 ### Added
@@ -161,9 +158,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
- - For consistency, one `Instrument` = one column in the `MultipactorTest.df_data`.
- - Now, use the dedicated instruments: `ForwardPower`, `ReflectedPower` (both are `Power`), `SWR`, `ReflectionCoefficient`
-
+- For consistency, one `Instrument` = one column in the `MultipactorTest.df_data`.
+- Now, use the dedicated instruments: `ForwardPower`, `ReflectedPower` (both are `Power`), `SWR`, `ReflectionCoefficient`
 
 ## [1.4.1] - 2024-02-19
 
@@ -179,7 +175,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Instruments.RfPower`
 - `Instruments.SWR`
 
-
 ## [1.4.0] - 2024-02-14
 
 ### Added
@@ -194,15 +189,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `plot_multipactor_limits`
   - `plot_data_at_multipactor_thresholds`
 - You can now create `MultipactorBands` objects from several other `MultipactorBands` objects. Typical use cases:
- - At a pick-up with a `Penning` and a `CurrentProbe`, merge their multipactor bands.
- - Know when multipactor happens somewhere in the testbench, by merging all the detected multipactor bands.
+- At a pick-up with a `Penning` and a `CurrentProbe`, merge their multipactor bands.
+- Know when multipactor happens somewhere in the testbench, by merging all the detected multipactor bands.
 - `TestCampaign.somersalo_scaling_law`, `TestCampaign.check_perez` to check some scaling laws
 
 ### Modified
 
 - The `FieldProbe._patch_data` method modifies its `raw_data` instead of adding a `post_treater`, so that we can plot 'raw' field measurements that make any sense.
-- `MultipactorTest.susceptiblity_plot` is `MultipactorTest.susceptiblity_chart` 
-- `MultipactorTest.somersalo` is `MultipactorTest.somersalo_chart` 
+- `MultipactorTest.susceptiblity_plot` is `MultipactorTest.susceptiblity_chart`
+- `MultipactorTest.somersalo` is `MultipactorTest.somersalo_chart`
 - The `detect_multipactor` methods now return a list of `MultipactorBands` objects. Give it to `plot_multipactor_limits`, `plot_data_at_multipactor_thresholds`, `somersalo_chart`, `susceptiblity_chart` methods to explicitely link the plotted instruments to the multipacting bands.
 
 ### Deprecated
@@ -210,6 +205,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `multipactor_bands` attributes of `Instrument` and `IMeasurementPoint` will be removed. It will be mandatory to explicitely pass this argument when you want to plot multipactor limits.
 
 ### Fixed
+
 - The fitting of the electric field over the probes now work correctly.
 
 ## [1.3.3] - 2024-02-10
