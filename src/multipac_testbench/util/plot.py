@@ -15,6 +15,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+from matplotlib.typing import ColorType
 from multipac_testbench.instruments.instrument import Instrument
 from multipac_testbench.threshold.threshold import PowerExtremum
 from multipac_testbench.threshold.threshold_set import ThresholdSet
@@ -27,7 +28,7 @@ from numpy.typing import NDArray
 T = TypeVar("T", bound=float)
 
 
-def plot_thresholds_with_grad(
+def plot_susceptibility_with_grad(
     df: pd.DataFrame,
     zcol: str,
     ax: Axes | None = None,
@@ -88,6 +89,70 @@ def plot_thresholds_with_grad(
     )
     sm.set_array([])
     ax.figure.colorbar(sm, ax=ax, label=zcol)
+
+    if ylabel:
+        ax.set_ylabel(ylabel)
+    ax.legend()
+    ax.grid(True)
+    ax.set(xscale="log", yscale="log", xlim=xlim, ylim=ylim)
+    return ax
+
+
+def plot_susceptibility_without_grad(
+    df: pd.DataFrame,
+    label_to_color: dict[str, ColorType],
+    ax: Axes | None = None,
+    xlim: tuple[float, float] | None = None,
+    ylim: tuple[float, float] | None = None,
+    ylabel: str | None = None,
+    s: int = 5,
+    **kwargs,
+) -> Axes:
+    """Draw ``lower`` and ``upper`` columns of ``df``.
+
+    Parameters
+    ----------
+    df :
+        Holds data to plot; must have columns with ``"lower"`` and ``"upper"``
+        in their name.
+    label_to_color :
+        Maps column names with color to use.
+    ax :
+        To re-use a pre-existing axis.
+    xlim, ylim :
+        Plot limits.
+    ylabel :
+        Label for y-axis.
+    s :
+        Size for the markers.
+    kwargs :
+        Other keyword arguments passed to ``plt.scatter``.
+
+    """
+    if ax is None:
+        _, ax = plt.subplots()
+
+    scatter_kwargs = {
+        "x": df.index,
+        "s": s,
+    } | kwargs
+
+    for col in df.filter(like="lower"):
+        ax.scatter(
+            y=df[col],
+            marker="o",
+            label=col,
+            c=label_to_color[str(col)],
+            **scatter_kwargs,
+        )
+    for col in df.filter(like="upper"):
+        ax.scatter(
+            y=df[col],
+            marker="*",
+            label=col,
+            c=label_to_color[str(col)],
+            **scatter_kwargs,
+        )
 
     if ylabel:
         ax.set_ylabel(ylabel)

@@ -799,10 +799,11 @@ class TestCampaign(list[MultipactorTest]):
         self,
         thresholds_sets: Mapping[MultipactorTest, ThresholdSet],
         ydata: ABCMeta = type(FieldProbe),
-        keep_only_travelling: bool = True,
-        tol: float = 1e-6,
         d_cm: float | None = None,
         fd_col: str = r"$f\cdot d~[\mathrm{MHz~cm}]$",
+        xlim: tuple[float, float] | None = None,
+        ylim: tuple[float, float] | None = None,
+        color_according_to_swr: bool = True,
         png_path: Path | None = None,
         png_kwargs: dict | None = None,
         csv_path: Path | None = None,
@@ -821,13 +822,14 @@ class TestCampaign(list[MultipactorTest]):
             you will want :class:`.FieldProbe` or :class:`.ForwardPower`.
         keep_only_travelling :
             To remove points where :math:`SWR` is not unity.
-        tol :
-            Tolerance over the :math:`SWR` when performing the
-            ``keep_only_travelling`` check.
         d_cm :
             System gap in :unit:`cm`.
         fd_col :
             The xlabel for the plot. The default is good enough.
+        xlim, ylim :
+            Plot limits.
+        color_according_to_swr :
+            If True, the markers colors follow the value of the SWR.
         png_path :
             If provided, the resulting figure will be saved at this location.
         png_kwargs :
@@ -860,19 +862,32 @@ class TestCampaign(list[MultipactorTest]):
                 thresholds, ydata=ydata, d_cm=d_cm, fd_col=fd_col
             )
             for test, thresholds in thresholds_sets.items()
-            if not keep_only_travelling
-            or math.isclose(test.swr, 1.0, abs_tol=tol)
         ]
         df = pd.concat([df for df in dfs if not df.empty])
 
-        axes = plot.plot_thresholds_with_grad(
-            df,
-            ylabel=getattr(ydata, "ylabel", lambda: "???")(),
-            xlim=(80, 700),
-            ylim=(1e1, 1e7) if ydata == ForwardPower else None,
-            zcol=SWR.ylabel(),
-            **(fig_kwargs or {}),
-        )
+        fig_kwargs = {
+            "df": df,
+            "ylabel": getattr(ydata, "ylabel", lambda: "???")(),
+            "xlim": xlim or (80, 700),
+            "ylim": ylim or (1e1, 1e7),
+        } | (fig_kwargs or {})
+        if color_according_to_swr:
+            axes = plot.plot_susceptibility_with_grad(
+                zcol=SWR.ylabel(), **fig_kwargs
+            )
+        else:
+            labels_to_colors = [
+                threshold_set.get_threshold_label_color_map(
+                    test.get_instruments(ydata)
+                )
+                for test, threshold_set in thresholds_sets.items()
+            ]
+            label_to_col = {
+                k: v for d in labels_to_colors for k, v in d.items()
+            }
+            axes = plot.plot_susceptibility_without_grad(
+                label_to_color=label_to_col, **fig_kwargs
+            )
         if png_path is not None:
             plot.save_figure(axes, png_path, **(png_kwargs or {}))
         if csv_path is not None:
