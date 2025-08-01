@@ -50,8 +50,8 @@ Raw files
 If you instantiate your objects with raw data, you must tell the code how to convert the acquisitions voltages to actual physical data.
 Each instrument has a transfer function, which needs parameters defined in the `TOML`.
 As an example, :class:`.FieldProbe` needs:
- - `calibration_file` (see also: `MULTIPAC testbench calibrate racks`_)
- - `attenuation_file`
+- `calibration_file` (see also: `MULTIPAC testbench calibrate racks`_)
+- `attenuation_file`
 
 .. _MULTIPAC testbench calibrate racks: https://github.com/AdrienPlacais/multipac_testbench_calibrate_racks
 
