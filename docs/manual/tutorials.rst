@@ -11,9 +11,10 @@ Just know that every useful method from :py:class:`.MultipactorTest` has its equ
 .. toctree::
    :maxdepth: 2
 
+   notebooks/load.ipynb
+
    notebooks/plot_signals_measured_by_instruments.ipynb
    notebooks/plot_signal_measured_by_instruments_vs_another_signal.ipynb
-   notebooks/plot_rpa_data.ipynb
    notebooks/compare_several_tests.ipynb
 
    notebooks/plot_evolution_thresholds.ipynb
@@ -24,5 +25,3 @@ Just know that every useful method from :py:class:`.MultipactorTest` has its equ
 
    notebooks/reconstruct_voltage.ipynb
    notebooks/animate_multipactor_test.ipynb
-
-   notebooks/complete_study_example.ipynb
