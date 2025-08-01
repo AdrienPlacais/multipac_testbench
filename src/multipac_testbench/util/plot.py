@@ -8,6 +8,8 @@ from collections.abc import Collection, Iterable, Sequence
 from pathlib import Path
 from typing import Any, TypeVar, cast
 
+import matplotlib.cm as cm
+import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -23,6 +25,76 @@ from multipac_testbench.util.multipactor_detectors import (
 from numpy.typing import NDArray
 
 T = TypeVar("T", bound=float)
+
+
+def plot_thresholds_with_grad(
+    df: pd.DataFrame,
+    zcol: str,
+    ax: Axes | None = None,
+    xlim: tuple[float, float] | None = None,
+    ylim: tuple[float, float] | None = None,
+    ylabel: str | None = None,
+    cmap: mcolors.Colormap | None = None,
+    s: int = 5,
+    **kwargs,
+) -> Axes:
+    """Draw ``lower`` and ``upper`` columns of ``df``. Use ``zcol`` for color.
+
+    Parameters
+    ----------
+    df :
+        Holds data to plot; must have columns with ``"lower"`` and ``"upper"``
+        in their name.
+    zcol :
+        Column in ``df`` used to colour the markers.
+    ax :
+        To re-use a pre-existing axis.
+    xlim, ylim :
+        Plot limits.
+    ylabel :
+        Label for y-axis.
+    cmap :
+        Colour map to be used.
+    s :
+        Size for the markers.
+    kwargs :
+        Other keyword arguments passed to ``plt.scatter``.
+
+    """
+    if ax is None:
+        _, ax = plt.subplots()
+
+    n_dropped = df[zcol].isna().sum()
+    if n_dropped:
+        logging.warning(f"Dropped {n_dropped} rows with NaN in {zcol} column.")
+        df = df.dropna(subset=[zcol])
+    zdata = df[zcol].to_numpy()
+
+    scatter_kwargs = {
+        "norm": mcolors.Normalize(vmin=zdata.min(), vmax=zdata.max()),
+        "cmap": cmap or cm.get_cmap("viridis"),
+        "c": zdata,
+        "x": df.index,
+        "s": s,
+    } | kwargs
+
+    for col in df.filter(like="lower"):
+        ax.scatter(y=df[col], marker="o", label=col, **scatter_kwargs)
+    for col in df.filter(like="upper"):
+        ax.scatter(y=df[col], marker="*", label=col, **scatter_kwargs)
+
+    sm = cm.ScalarMappable(
+        norm=scatter_kwargs["norm"], cmap=scatter_kwargs["cmap"]
+    )
+    sm.set_array([])
+    ax.figure.colorbar(sm, ax=ax, label=zcol)
+
+    if ylabel:
+        ax.set_ylabel(ylabel)
+    ax.legend()
+    ax.grid(True)
+    ax.set(xscale="log", yscale="log", xlim=xlim, ylim=ylim)
+    return ax
 
 
 def attribute_to_color(
