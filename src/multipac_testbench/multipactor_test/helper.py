@@ -1,12 +1,10 @@
-"""Define helper functions for :class:`.MultipactorTest`, :class:`.PowerStep.`"""
+"""Define helper funcs for :class:`.MultipactorTest`, :class:`.PowerStep`."""
 
 import logging
-import os
 from collections.abc import Callable
 from pathlib import Path
 
 import numpy as np
-from multipac_testbench.util.files import resolve_path
 from numpy.typing import NDArray
 
 
@@ -76,8 +74,8 @@ def take_median(
     return float(value)
 
 
-#: Functions detecting if the file as argument corresponds to a ``PowerStep``
-#: file.
+#: Functions detecting if the file as argument corresponds to a
+#: :class:`.PowerStep` file.
 POWERSTEP_FILE_RECOGNIZER_T = Callable[[Path], bool]
 
 

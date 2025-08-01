@@ -173,11 +173,13 @@ class ThresholdSet:
         """Create object holding only the most *extreme* :class:`.Threshold`.
 
         For each half cycle:
+
         - If power increases: keep first lower and last upper threshold.
         - If power decreases: keep first upper and last lower threshold.
+
           - If there was still multipactor somewhere when the half power cycle
-              ended (e.g. instrument with a lower but no upper threshold),
-              no upper threshold is added.
+            ended (e.g. instrument with a lower but no upper threshold), no
+            upper threshold is added.
         - If direction is undetermined: skip the cycle.
 
         Parameters

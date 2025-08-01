@@ -1,4 +1,4 @@
-"""Define functions to prepare data for :class:`.MultipactorTest.`"""
+"""Define functions to prepare data for :class:`.MultipactorTest`."""
 
 import logging
 import math
@@ -53,7 +53,7 @@ def load(
     remove_metadata_columns :
         Remove the rightmost columns holding metadata.
     kwargs :
-        Other kwargs passed to :func:`pandas.load`.
+        Other kwargs passed to :func:`._load_file`.
 
     """
     data = _load_file(filepath, sep=sep, index_col=index_col, **kwargs)

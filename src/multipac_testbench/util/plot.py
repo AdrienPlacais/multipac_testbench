@@ -397,6 +397,7 @@ def match_x_and_y_column_names(
     -------
     x_columns :
         Name of the instrument(s) used as x-axis. Three possibilities:
+
         - If it is None, we plot again sample index.
         - If it is a single :class:`.Instrument` name, it will be used as
           x-data for every plot.

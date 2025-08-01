@@ -168,6 +168,7 @@ class MultipactorTest:
         self.global_diagnostics = imeasurement_points[0]
 
         self.freq_mhz = freq_mhz
+        #: Objective SWR for the test.
         self.swr = swr
         self.info = info
 
@@ -717,7 +718,7 @@ class MultipactorTest:
         tol :
             Absolute tolerance used when comparing positions.
         **kwargs :
-            Passed to :meth:`MultipactorTest.get_instruments`.
+            Passed to :meth:`.MultipactorTest.get_instruments`.
 
         Returns
         -------
@@ -841,7 +842,8 @@ class MultipactorTest:
             If set to True, we use the :math:`R` corresponding to the
             user-defined :math:`SWR`.
         kwargs :
-            Other keyword arguments passed to :meth:`.at_last_threshold`.
+            Other keyword arguments passed to
+            :meth:`.ThresholdSet.data_at_thresholds`.
 
         Returns
         -------
@@ -897,7 +899,7 @@ class MultipactorTest:
             To use theoretical ``xdata``. Works only for reflection coefficient
             and standing wave ratio.
         kwargs :
-            Other keyword arguments passed to :meth:`.at_last_threshold`.
+            Currently unused.
 
         Returns
         -------

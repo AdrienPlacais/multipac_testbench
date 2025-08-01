@@ -1,7 +1,7 @@
 """Provide data for testing purposes.
 
 These files can be generated:
-- With the :meth:`.PowerstepSet.to_multipactor_test_file`
+- With the :meth:`.PowerStepSet.to_multipactor_test_file`
 - Manually from LabViewer.
 
 """

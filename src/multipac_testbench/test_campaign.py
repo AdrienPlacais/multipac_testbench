@@ -1,9 +1,6 @@
 """Define an object to store data from several :class:`.MultipactorTest`."""
 
-from __future__ import annotations
-
 import logging
-import math
 from abc import ABCMeta
 from collections import defaultdict
 from collections.abc import Mapping, Sequence
@@ -11,7 +8,6 @@ from pathlib import Path
 from typing import Any, Callable, Self, TypeVar
 
 import matplotlib.pyplot as plt
-import multipac_testbench.instruments as ins
 import numpy as np
 import pandas as pd
 from matplotlib import animation
@@ -512,11 +508,7 @@ class TestCampaign(list[MultipactorTest]):
         --------
         :meth:`.TestCampaign.check_perez_scaling_law`
         :meth:`.MultipactorTest.determine_thresholds`
-        :meth:`.AveragedThresholdSet.from_thresholds`
-
-        .. todo::
-            Columns in the output file are illogic
-            xx | P_measured | R_measured | R_fit | P_fit
+        :meth:`.AveragedThresholdSet.from_threshold_set`
 
         Parameters
         ----------
@@ -670,7 +662,7 @@ class TestCampaign(list[MultipactorTest]):
         See Also
         --------
         :meth:`.TestCampaign.check_somersalo_scaling_law`
-        :meth:`.AveragedThresholdSet.from_thresholds`
+        :meth:`.AveragedThresholdSet.from_threshold_set`
 
         Parameters
         ----------
