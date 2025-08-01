@@ -246,9 +246,9 @@ def create_fig(
 
     Returns
     -------
-    fig :
+
         Figure holding the axes.
-    instrument_class_axes :
+
         Dictionary linking the class of the instruments to plot with the
         associated axes.
 
@@ -340,7 +340,6 @@ def create_df_to_plot(
 
     Returns
     -------
-    df_to_plot :
         Contains x and y data that will be plotted.
 
     """
@@ -395,7 +394,6 @@ def match_x_and_y_column_names(
 
     Returns
     -------
-    x_columns :
         Name of the instrument(s) used as x-axis. Three possibilities:
 
         - If it is None, we plot again sample index.
@@ -404,7 +402,7 @@ def match_x_and_y_column_names(
         - If it is a list of names, its length matches the length of
           ``y_columns``. This is typically what happens when we plot an
           instrument vs another.
-    y_columns :
+
         Name of the instruments for y-axis.
 
     """
@@ -469,7 +467,6 @@ def actual_plot(
 
     Returns
     -------
-    list[Axes]
         Plotted axes, or an array containing them.
 
     """

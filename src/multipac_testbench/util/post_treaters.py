@@ -46,7 +46,6 @@ moving-average-or-running-mean
 
     Returns
     -------
-    data :
         Smoothed data.
 
     """
@@ -188,7 +187,6 @@ def replace_data_under_threshold(
 
     Returns
     -------
-    NDArray[np.float64]
         Modified data array.
 
     """

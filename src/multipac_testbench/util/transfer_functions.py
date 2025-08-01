@@ -28,7 +28,6 @@ def current_probe(
 
     Returns
     -------
-    current :
         :math:`i` in :unit:`\\mu A`, which should be the content of the
         ``NI9205_MPxl`` columns.
 
@@ -71,7 +70,6 @@ def field_probe(
 
     Returns
     -------
-    v_coax :
         :math:`V_\mathrm{coax}` in :unit:`V`, which should be the content of
         the ``NI9205_Ex`` columns.
 
@@ -110,7 +108,6 @@ def field_probe_inv(
 
     Returns
     -------
-    v_acq :
         Acquisition voltage in :math:`[0, 10~\mathrm{V}]`.
 
     """
@@ -158,7 +155,6 @@ def power(
 
     Returns
     -------
-    watt :
         :math:`P` in :unit:`W`, which should be the content of the
         ``NI9205_Powerx`` columns.
 
@@ -191,7 +187,6 @@ def power_channel_b(
 
     Returns
     -------
-    p_ok :
         Fixed power in :unit:`W`.
 
     """
@@ -219,7 +214,6 @@ def pressure(
 
     Returns
     -------
-    pressure :
         :math:`P` in :unit:`mbar`, which should be the content of the
         ``NI9205_Penningx`` and ``NI9205_bayard-alpert`` columns.
 
