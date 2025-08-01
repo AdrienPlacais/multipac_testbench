@@ -66,7 +66,7 @@ def fix_wrong_e_field_calibration(
 
     Raises
     ------
-    NotImplementedError :
+    NotImplementedError
         When the bad electric field probes parameters are not provided and
         they should be read from ``filepath_bad`` directly.
 

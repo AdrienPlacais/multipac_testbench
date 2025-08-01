@@ -91,7 +91,6 @@ class InstrumentFactory:
 
         Returns
         -------
-        instrument :
             Instrument properly subclassed.
 
         """
@@ -148,7 +147,6 @@ class InstrumentFactory:
 
         Returns
         -------
-        virtuals :
             The created virtual instruments.
 
         """

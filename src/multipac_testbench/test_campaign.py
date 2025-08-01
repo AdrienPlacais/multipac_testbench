@@ -88,7 +88,6 @@ class TestCampaign(list[MultipactorTest]):
 
         Returns
         -------
-        test_campaign :
             List of :class:`.MultipactorTest`.
 
         """
@@ -538,13 +537,13 @@ class TestCampaign(list[MultipactorTest]):
 
         Returns
         -------
-        axes : Axes | None,
+        axes :
             Holds the plot.
-        df_low : dict[float, pd.DataFrame] | None
+        df_low :
             Holds forward power at every lower threshold, by RF frequency.
-        df_upp : dict[float, pd.DataFrame] | None
+        df_upp :
             Holds forward power at every upper threshold, by RF frequency.
-        df_fit : dict[float, pd.DataFrame] | None
+        df_fit :
             Holds forward power at every lower threshold, as fitted on
             ``df_low``, for the different RF frequencies.
 
@@ -698,9 +697,9 @@ class TestCampaign(list[MultipactorTest]):
 
         Returns
         -------
-        axes : dict[float, Axes] | None
+        axes :
             Holds the plot.
-        thresholds_by_freq : dict[float, pd.DataFrame]
+        thresholds_by_freq :
             Plotted thresholds, by freq.
 
         """

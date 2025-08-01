@@ -23,7 +23,6 @@ def get_limits(
 
     Returns
     -------
-    limits :
         Dictionary linking avery Axe with its limits.
 
     """

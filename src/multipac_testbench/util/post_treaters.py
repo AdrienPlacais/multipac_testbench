@@ -94,7 +94,7 @@ def average_y_for_nearby_x_within_distance(
 
     Raises
     ------
-    ValueError :
+    ValueError
         If ``x_values`` and ``y_values`` do not have the same shape.
 
     Examples

@@ -203,7 +203,6 @@ def _model(
 
     Returns
     -------
-    v :
         Voltage at position :math:`z` for forward power :math:`P_f`.
 
     """
@@ -226,7 +225,6 @@ def _power_to_volt(
 
     Returns
     -------
-    NDArray[np.float64]
         Voltage in :unit:`V`.
 
     """
@@ -288,7 +286,6 @@ def voltage_vs_position(
 
     Returns
     -------
-    voltage :
         :math:`V(z)` at proper position in :unit:`V`.
 
     """

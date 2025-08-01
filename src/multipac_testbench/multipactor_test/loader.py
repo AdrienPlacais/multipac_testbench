@@ -174,7 +174,6 @@ def _group_consecutive_equal_power(
 
     Returns
     -------
-    NDArray
         An array of group labels of the same length as ``power``.
 
     """

@@ -31,7 +31,6 @@ def remove_trailing_true(
 
     Returns
     -------
-    data :
         Boolean array without trailing True.
 
     """
@@ -101,7 +100,6 @@ def array_is_growing(
 
     Returns
     -------
-    is_growing :
         If the array is locally increasing, ``no_change_value`` if array is
         locally constant.
 

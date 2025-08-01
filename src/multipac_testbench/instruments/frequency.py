@@ -37,7 +37,6 @@ class Frequency(VirtualInstrument):
 
         Returns
         -------
-        frequency :
             Instantiated object.
 
         """

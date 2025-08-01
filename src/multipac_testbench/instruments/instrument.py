@@ -134,7 +134,6 @@ class Instrument(ABC):
 
         Returns
         -------
-        instrument :
             An instrument. Note that its ``data`` attribute will be a 2D
             array.
 
@@ -350,7 +349,6 @@ class Instrument(ABC):
 
         Returns
         -------
-        artist :
             The plotted stem.
 
         """
@@ -403,7 +401,6 @@ class Instrument(ABC):
 
         Returns
         -------
-        artist :
             The plotted line.
 
         """

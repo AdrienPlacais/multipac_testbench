@@ -147,7 +147,6 @@ def output_filepath(
 
     Returns
     -------
-    filename :
         A full filepath.
 
     """

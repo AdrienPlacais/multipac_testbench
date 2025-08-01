@@ -139,7 +139,6 @@ class ThresholdSet:
 
         Returns
         -------
-        ThresholdSet
             Holds only one lower and one upper :class:`.Threshold` per
             detecting instrument: the last one measured during the test.
 
@@ -191,7 +190,6 @@ class ThresholdSet:
 
         Returns
         -------
-        ThresholdSet
             A new object containing only selected extreme thresholds.
 
         """
@@ -333,7 +331,6 @@ class ThresholdSet:
 
         Returns
         -------
-        list[Threshold]
             All multipactor thresholds detected at this position.
 
         """
@@ -382,7 +379,6 @@ class ThresholdSet:
 
         Returns
         -------
-        pd.DataFrame
             Columns are named by detecting instrument + threshold nature:
             ``"NI9205_E4 @ upper threshold (according to NI9205_MP4l)"``. If
             ``xdata_instrument`` was given, also return this instrument values
@@ -462,7 +458,6 @@ class ThresholdSet:
 
         Returns
         -------
-        dict[str, str]
             Mapping from a header looking like ``"NI9205_E4 @ upper threshold
             (according to NI9205_MP4l)"``, to the threshold color (usually,
             this is detecting instrument color).
@@ -502,7 +497,6 @@ class ThresholdSet:
 
         Returns
         -------
-        dict[str, list[Threshold]]
             Dictionary mapping half-cycle index to thresholds within that
             range. Keys are sorted by increasing power cycle index values.
 
@@ -560,7 +554,6 @@ class AveragedThresholdSet(ThresholdSet):
 
         Returns
         -------
-        AveragedThresholdSet
             Object containing "averaged" thresholds. It contains one lower and
             one upper threshold per detecting instrument (if already present in
             the original :class:`.ThresholdSet`).
@@ -597,7 +590,6 @@ class AveragedThresholdSet(ThresholdSet):
 
         Returns
         -------
-        pd.DataFrame
             Columns are named by detecting instrument + threshold nature.
             Only index is average (median) of instruments values at the various
             thresholds.

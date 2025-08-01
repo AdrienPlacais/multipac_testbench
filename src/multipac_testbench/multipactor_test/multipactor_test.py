@@ -479,7 +479,6 @@ class MultipactorTest:
 
         Returns
         -------
-        instruments :
             All the instruments matching the required conditions.
 
         """
@@ -512,7 +511,6 @@ class MultipactorTest:
 
         Returns
         -------
-        instruments :
             All the instruments matching the required conditions.
 
         """
@@ -548,7 +546,6 @@ class MultipactorTest:
 
         Returns
         -------
-        i_measurement_points :
             The desired objects.
 
         """
@@ -583,7 +580,6 @@ class MultipactorTest:
 
         Returns
         -------
-        measurement_point :
             The desired object.
 
         """
@@ -799,7 +795,6 @@ class MultipactorTest:
 
         Returns
         -------
-        pd.DataFrame
             Holds value of ``ydata`` instruments at lower and upper thresholds,
             as well as the :math:`f\cdot d` values.
 
@@ -847,7 +842,6 @@ class MultipactorTest:
 
         Returns
         -------
-        data :
             Holds the forward power at the last upper and lower thresholds, as
             well as corresponding :math:`R` values (same time steps).
 
@@ -1402,7 +1396,7 @@ class MultipactorTest:
         Returns
         -------
         fig :
-         Figure holding the axes.
+            Figure holding the axes.
         axes_instruments :
             Links the instruments to plot with the Axes they should be plotted
             on.
