@@ -221,19 +221,21 @@ def _somersalo_coordinates(
 
 def plot_somersalo_measured(
     mp_test_name: str,
-    somersalo_data: dict[str, float | np.ndarray],
+    susceptibility_df: pd.DataFrame,
     ax1: Axes,
     ax2: Axes,
     **plot_kw,
 ) -> None:
     """Plot the data on Somersalo plot."""
-    df_somersalo = _somersalo_coordinates(
-        mp_test_name=mp_test_name, **somersalo_data
-    )
-    for (_, series), ax, marker in zip(
-        df_somersalo.items(), (ax1, ax2), ("o", "*")
-    ):
-        series.plot(ax=ax, marker=marker, lw=0, legend=True, **plot_kw)
+    raise NotImplementedError
+    # susceptibility_coords = _susceptibility_coordinates(
+    #     mp_test_name=mp_test_name, susceptibility_df
+    # )
+    # for (_, series), ax, marker in zip(
+    #     susceptibility_coords.items(), (ax1, ax2), ("o", "*")
+    # ):
+    #     series.plot(ax=ax, marker=marker, lw=0, legend=True, **plot_kw)
+    #
 
 
 def somersalo_scaling_law(reflected: np.ndarray, p_tw: float) -> np.ndarray:
