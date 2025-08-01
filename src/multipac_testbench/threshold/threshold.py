@@ -3,7 +3,12 @@
 Also define a place-holder to mark when a minimum or maximum of threshold was
 reached.
 
+.. todo::
+   Fix the typing of ``THRESHOLD_FILTER_T``.
+
 """
+
+from __future__ import annotations
 
 import logging
 from collections.abc import Callable
