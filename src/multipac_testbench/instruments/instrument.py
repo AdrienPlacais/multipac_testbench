@@ -314,10 +314,9 @@ class Instrument(ABC):
 
     def _get_plot_methods(self, is_2d: bool) -> tuple[Callable, Callable]:
         """Give the proper plotting functions according to ``is_2d``."""
-        plotters = (self._plot_vs_position_for_1d, self._scatter_data_1d)
         if is_2d:
-            plotters = (self._plot_vs_position_for_2d, self._scatter_data_2d)
-        return plotters
+            return self._plot_vs_position_for_2d, self._scatter_data_2d
+        return self._plot_vs_position_for_1d, self._scatter_data_1d
 
     def _plot_vs_position_for_1d(
         self,

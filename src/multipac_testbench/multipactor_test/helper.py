@@ -57,7 +57,7 @@ def take_maximum(raw_data: NDArray) -> float:
 
 
 def take_median(
-    raw_data: NDArray, first_index: int = -100, last_index: int = -1
+    raw_data: NDArray, first_index: int = 0, last_index: int = -1
 ) -> float:
     """Take median from ``first_index`` to ``last_index``."""
     size = len(raw_data)
