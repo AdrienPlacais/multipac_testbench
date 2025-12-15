@@ -104,5 +104,5 @@ def powerstep_files(
 
     """
     files = sorted(path for path in folder.iterdir() if file_recognizer(path))
-    file_index_mapping = {folder / f: i for i, f in enumerate(files)}
+    file_index_mapping = {f.absolute(): i for i, f in enumerate(files)}
     return file_index_mapping

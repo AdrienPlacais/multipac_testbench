@@ -56,7 +56,9 @@ def load(
         Other kwargs passed to :func:`._load_file`.
 
     """
-    data = _load_file(filepath, sep=sep, index_col=index_col, **kwargs)
+    data = _load_file(
+        filepath.resolve(), sep=sep, index_col=index_col, **kwargs
+    )
 
     if remove_metadata_columns:
         data = data.select_dtypes(include=["float", "int"])
