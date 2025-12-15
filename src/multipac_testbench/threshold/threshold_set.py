@@ -483,6 +483,7 @@ class ThresholdSet:
         ``[extremum_i.sample_index, extremum_{i+1}.sample_index)``
 
         The dictionary key is of the form:
+
         - "0 (increasing)" if power increases over the interval
         - "1 (decreasing)" if power decreases over the interval
         - "2 (undetermined)" if direction cannot be determined
