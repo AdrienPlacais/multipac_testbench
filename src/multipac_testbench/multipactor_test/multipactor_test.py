@@ -1151,6 +1151,7 @@ class MultipactorTest:
         csv_kwargs: dict | None = None,
         axes: Axes | None = None,
         plot_kwargs: dict[str, Any] | None = None,
+        test_color: str | None = None,
         **kwargs,
     ) -> tuple[Axes | NDArray[Axes], pd.DataFrame]:
         """Plot ``to_plot`` data at multipactor threshold.
@@ -1201,6 +1202,11 @@ class MultipactorTest:
             Axes to re-use. Needs ``sample_plot=True``.
         plot_kwargs :
             Kwargs passed the plot function.
+        test_color :
+            Color used by :meth:`.TestCampaign.plot_thresholds` when
+            ``all_on_same_plot=True``. It overrides the :class:`.Instrument`
+            color and is used to discriminate every :class:`.MultipactorTest`
+            from another.
 
         Returns
         -------
@@ -1218,6 +1224,9 @@ class MultipactorTest:
         label_to_color = threshold_set.get_threshold_label_color_map(
             instruments
         )
+        if test_color is not None:
+            for key in label_to_color:
+                label_to_color[key] = test_color
 
         df = threshold_set.data_at_thresholds(
             instruments,
