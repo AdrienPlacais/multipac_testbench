@@ -16,6 +16,7 @@ from matplotlib.figure import Figure
 from multipac_testbench.instruments.electric_field.field_probe import (
     FieldProbe,
 )
+from multipac_testbench.instruments.instrument import Instrument
 from multipac_testbench.instruments.power import ForwardPower
 from multipac_testbench.instruments.reflection_coefficient import (
     ReflectionCoefficient,
@@ -36,7 +37,7 @@ from multipac_testbench.threshold.threshold import (
 from multipac_testbench.threshold.threshold_set import ThresholdSet
 from multipac_testbench.util import log_manager, plot
 from multipac_testbench.util.files import load_config
-from multipac_testbench.util.types import MULTIPAC_DETECTOR_T
+from multipac_testbench.util.types import MULTIPAC_DETECTOR_T, POST_TREATER_T
 
 T = TypeVar("T", bound=Callable[..., Any])
 
@@ -126,10 +127,14 @@ class TestCampaign(list[MultipactorTest]):
             multipactor_tests.append(multipactor_test)
         return cls(multipactor_tests)
 
-    def add_post_treater(self, *args, **kwargs) -> None:
+    def add_post_treater(
+        self,
+        post_treater: POST_TREATER_T,
+        instrument_class: ABCMeta = Instrument,
+    ) -> None:
         """Add post-treatment functions to instruments."""
         for test in self:
-            test.add_post_treater(*args, **kwargs)
+            test.add_post_treater(post_treater, instrument_class)
 
     def determine_thresholds(
         self,

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.9.0] - unreleased
 
+### Added
+
+- `DiffPenning` `VirtualInstrument` that holds pressure variations.
+
 ### Fixed
 
 - `dBm` of `PowerStep` is read from the header instead of the file name.

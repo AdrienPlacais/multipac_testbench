@@ -50,6 +50,15 @@ def powers_to_reflection(
     return pd.Series(reflection_coefficient, name=name)
 
 
+def diff(data: NDArray[np.float64], name: str) -> pd.Series:
+    """Return ``data`` differential. Add a nan at the start.
+
+    Currently used for :class:`.DiffPenning` creation.
+
+    """
+    return pd.Series(np.diff(data, prepend=np.nan), name=name)
+
+
 @overload
 def reflection_to_swr(
     reflection_coefficient: NDArray[np.float64], name: str = ""
