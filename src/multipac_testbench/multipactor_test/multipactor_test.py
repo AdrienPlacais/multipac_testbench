@@ -134,7 +134,8 @@ class MultipactorTest:
 
         """
         self.filepath = filepath
-        df_data = load(
+
+        df_data, self._commented_lines = load(
             filepath,
             sep=sep,
             trigger_policy=trigger_policy,

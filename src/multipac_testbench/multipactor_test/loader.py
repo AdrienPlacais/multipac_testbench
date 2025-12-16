@@ -32,7 +32,7 @@ def load(
     index_col: str = "Sample index",
     remove_metadata_columns: bool = False,
     **kwargs,
-) -> pd.DataFrame:
+) -> tuple[pd.DataFrame, list[str]]:
     """Load the LabViewer file.
 
     If ``trigger_policy`` is set, perform operations to select the desired
@@ -55,8 +55,16 @@ def load(
     kwargs :
         Other kwargs passed to :func:`._load_file`.
 
+    Returns
+    -------
+    pandas.DataFrame
+        Holds data.
+    list[str]
+        The comments, without their comment character, line by line. If loading
+        a ``XLSX``, an empty list is returned.
+
     """
-    data = _load_file(
+    data, commented_lines = _load_file(
         filepath.resolve(), sep=sep, index_col=index_col, **kwargs
     )
 
@@ -71,7 +79,7 @@ def load(
     printer = logging.info
     if trigger_policy in ("average", "keep_all"):
         printer(f"Applied {trigger_policy = } on {filepath}")
-        return filtered
+        return filtered, commented_lines
 
     fraction = 100 * len(filtered) / len(data)
     if trigger_policy == "trim":
@@ -81,16 +89,39 @@ def load(
             printer = logging.error
 
     printer(f"After {trigger_policy = }, kept {fraction:.2f}% of {filepath}")
-    return filtered
+    return filtered, commented_lines
 
 
 def _load_file(
-    filepath: Path, index_col: str = "Sample index", **kwargs
-) -> pd.DataFrame:
+    filepath: Path,
+    index_col: str = "Sample index",
+    comment: str = "#",
+    **kwargs,
+) -> tuple[pd.DataFrame, list[str]]:
     """Load the data file.
 
     .. todo::
         Allow for ``TXT`` or ``XLSX`` input files.
+
+    Parameters
+    ----------
+    filepath :
+        File to load.
+    index_col :
+        Name of the index column.
+    comment :
+        Comment character.
+    kwargs :
+        Other keyword arguments passed to the loading function. Holds
+        ``"sep"`` key-value pair, which is removed if loading a ``XLSX``.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Holds data.
+    list[str]
+        The comments, without their comment character, line by line. If loading
+        a ``XLSX``, an empty list is returned.
 
     """
     ext = filepath.suffix
@@ -104,7 +135,9 @@ def _load_file(
         logging.error(f"{filepath} extension not supported.")
         raise RuntimeError
     try:
-        data = pandas_reader((filepath), index_col=index_col, **kwargs)
+        data = pandas_reader(
+            (filepath), index_col=index_col, comment=comment, **kwargs
+        )
     except Exception as e:
         logging.error(
             f"There was a mismatch is the number of columns in {filepath}"
@@ -115,7 +148,18 @@ def _load_file(
         logging.exception(e)
         raise e
 
-    return data
+    if ext == ".xlsx":
+        return data, []
+
+    commented_lines = []
+    with open(filepath) as f:
+        for line in f:
+            if line.startswith(comment):
+                commented_lines.append(line.removeprefix(comment).rstrip("\n"))
+            else:
+                break
+
+    return data, commented_lines
 
 
 def _apply_trigger_filtering(
