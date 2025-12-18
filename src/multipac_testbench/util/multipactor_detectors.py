@@ -89,7 +89,8 @@ def quantity_is_above_local_average(
     slow_trend = running_mean(quantity, n_mean=baseline_window)
     residual = quantity - slow_trend
     noise_level = np.median(np.abs(residual))
-    multipactor = residual > threshold_factor * noise_level
+    limit = noise_level * threshold_factor
+    multipactor = residual > limit
 
     return clean_boolean_mask(
         multipactor,
