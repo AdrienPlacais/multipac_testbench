@@ -7,6 +7,7 @@ from multipac_testbench.util.filtering import (
     remove_isolated_false,
     remove_isolated_true,
 )
+from multipac_testbench.util.post_treaters import running_mean
 from numpy.typing import NDArray
 from scipy.ndimage import binary_closing, binary_opening, uniform_filter1d
 
@@ -92,7 +93,7 @@ def quantity_is_above_local_average(
 
     """
     # Baseline = slow trend
-    baseline = uniform_filter1d(quantity, size=baseline_window, mode="nearest")
+    baseline = running_mean(quantity, n_mean=baseline_window)
 
     residual = quantity - baseline
     noise_level = np.median(np.abs(residual))
