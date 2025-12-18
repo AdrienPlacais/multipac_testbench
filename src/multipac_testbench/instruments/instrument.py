@@ -3,6 +3,7 @@
 import inspect
 import logging
 from abc import ABC
+from copy import deepcopy
 from typing import Callable, Self
 
 import numpy as np
@@ -103,6 +104,19 @@ class Instrument(ABC):
         """Give concise information on instrument."""
         out = f"{self.class_name} ({self.name})"
         return out
+
+    def copy(self) -> Self:
+        """Deep copy of the instrument."""
+        return deepcopy(self)
+
+    def replace(self, **overrides) -> Self:
+        """Copy with modified attributes."""
+        new = self.copy()
+        for name, value in overrides.items():
+            if not hasattr(new, name):
+                raise AttributeError(name)
+            setattr(new, name, value)
+        return new
 
     @classmethod
     def ylabel(cls) -> str:
