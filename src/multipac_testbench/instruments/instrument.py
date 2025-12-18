@@ -12,7 +12,7 @@ from matplotlib.container import StemContainer
 from matplotlib.lines import Line2D
 from multipac_testbench.util.filtering import (
     array_is_growing,
-    remove_isolated_false,
+    clean_boolean_mask,
     remove_trailing_true,
 )
 from multipac_testbench.util.types import CALLBACK_T, POST_TREATER_T
@@ -547,10 +547,9 @@ class Instrument(ABC):
         growth_mask = np.array(is_growing, dtype=np.bool)
 
         # Remove isolated False (useful for noisy instruments)
-        if minimum_number_of_points > 0:
-            growth_mask = remove_isolated_false(
-                growth_mask, minimum_number_of_points
-            )
+        growth_mask = clean_boolean_mask(
+            growth_mask, min_true=0, max_false_gap=minimum_number_of_points
+        )
 
         # Ensure that last growth is False (useful for Power)
         if n_trailing_points_to_check > 0:
