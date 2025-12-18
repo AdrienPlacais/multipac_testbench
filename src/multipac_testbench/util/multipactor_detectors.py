@@ -8,6 +8,7 @@ from multipac_testbench.util.filtering import (
     remove_isolated_true,
 )
 from numpy.typing import NDArray
+from scipy.ndimage import binary_closing, binary_opening, uniform_filter1d
 
 
 def quantity_is_above_threshold(
@@ -18,6 +19,10 @@ def quantity_is_above_threshold(
     **kwargs: Any,
 ) -> NDArray[np.bool]:
     """Detect where ``quantity`` is above a given threshold.
+
+    .. todo::
+       Replace ``remove_isolated_true``, ``remove_isolated_false`` by
+       ``binary_opening``, ``binary_closing``?
 
     Parameters
     ----------
@@ -49,6 +54,55 @@ def quantity_is_above_threshold(
         )
 
     return multipactor
+
+
+def quantity_is_above_local_average(
+    quantity: NDArray[np.float64],
+    baseline_window: int = 300,
+    threshold_factor: float = 3.0,
+    min_width: int = 10,
+    **kwargs,
+) -> NDArray[np.bool]:
+    """Detect where ``quantity`` is above the local average.
+
+    Procedure is the following:
+
+    #. Compute running mean.
+    #. Compute array of residuals between actual data and running mean.
+    #. Average array of residuals to get mean difference level.
+    #. Multipactor happens where residuals are above the noise level, scaled
+       by ``threshold_factor``.
+    #. Clean: remove isolated True/False.
+
+    Parameters
+    ----------
+    quantity :
+        Array of measured multipactor quantity.
+    baseline_window :
+        Window size (in samples) for baseline estimation. Set it to two power
+        cycles for a good first estimation.
+    threshold_factor :
+        Multiplier for noise level above baseline. This can be negative!
+    min_width :
+        Minimum multipactor width in samples.
+
+    Returns
+    -------
+        True where multipactor was detected.
+
+    """
+    # Baseline = slow trend
+    baseline = uniform_filter1d(quantity, size=baseline_window, mode="nearest")
+
+    residual = quantity - baseline
+    noise_level = np.median(np.abs(residual))
+    multipactor = residual > threshold_factor * noise_level
+
+    # remove small spikes, fill gaps
+    structure = np.ones(min_width, dtype=bool)
+    multipactor = binary_opening(multipactor, structure=structure)
+    multipactor = binary_closing(multipactor, structure=structure)
+    return multipactor.astype(np.bool)
 
 
 def start_and_end_of_contiguous_true_zones(

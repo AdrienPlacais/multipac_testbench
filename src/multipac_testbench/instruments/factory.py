@@ -241,13 +241,13 @@ class InstrumentFactory:
         if len(pennings) == 0:
             logging.debug("No Penning defined. Skipping.")
             return
-        diff_penning = [
+        diff_pennings = [
             ins.DiffPenning.from_penning(
                 penning=penning, name=f"DiffPenning_{i}", **kwargs
             )
             for i, penning in enumerate(pennings)
         ]
-        return diff_penning
+        return diff_pennings
 
     def _constant_values_defined_by_user(
         self,

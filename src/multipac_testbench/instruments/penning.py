@@ -71,7 +71,7 @@ class DiffPenning(VirtualInstrument):
     def __init__(
         self, name: str, raw_data: pd.Series, penning: Penning, **kwargs
     ) -> None:
-        """Create object, save :class:`.Power` objects."""
+        """Create object, save :class:`.Penning` object."""
         super().__init__(name, raw_data, **kwargs)
 
         self._penning = penning
