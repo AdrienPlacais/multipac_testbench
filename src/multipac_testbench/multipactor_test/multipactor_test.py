@@ -367,6 +367,8 @@ class MultipactorTest:
         power_growth_array_kw: dict[str, Any] | None = None,
         threshold_reducer: THRESHOLD_DETECTOR_T | None = None,
         predicate: THRESHOLD_FILTER_T | None = None,
+        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
+        instruments_to_ignore: Sequence[Instrument | str] = (),
         **kwargs,
     ) -> ThresholdSet:
         """Determine lower and upper multipactor thresholds.
@@ -397,7 +399,11 @@ class MultipactorTest:
             ``instrument_class``.
 
         """
-        detecting_instruments = self.get_instruments(instrument_class)
+        detecting_instruments = self.get_instruments(
+            instrument_class,
+            measurement_points_to_exclude=measurement_points_to_exclude,
+            instruments_to_ignore=instruments_to_ignore,
+        )
         growth_array = self._power_growth_array(power_growth_array_kw)
         threshold_set = ThresholdSet.from_instruments(
             multipac_detector,
