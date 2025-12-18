@@ -210,6 +210,16 @@ class MultipactorTest:
         for point in measurement_points:
             point.add_post_treater(*args, **kwargs)
 
+    def add_instrument(
+        self,
+        instrument: Instrument,
+        measurement_point: str | IMeasurementPoint,
+    ) -> None:
+        """Manually add an instrument."""
+        if isinstance(measurement_point, str):
+            measurement_point = self.get_measurement_point(measurement_point)
+        measurement_point.add_instrument(instrument)
+
     def _set_x_data(
         self,
         xdata: ABCMeta | None,
