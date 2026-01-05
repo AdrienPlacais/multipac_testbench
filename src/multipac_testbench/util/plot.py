@@ -888,3 +888,8 @@ def styles_from_column_cycle(
             style_map[col] = {"linestyle": next(cycle)}
 
     return style_map
+
+
+def default_ylabel() -> str:
+    """Produce a default y-label."""
+    return "???"

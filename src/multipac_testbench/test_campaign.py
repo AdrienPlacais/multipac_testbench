@@ -874,7 +874,7 @@ class TestCampaign(list[MultipactorTest]):
 
         fig_kwargs = {
             "df": df,
-            "ylabel": getattr(ydata, "ylabel", lambda: "???")(),
+            "ylabel": getattr(ydata, "ylabel", plot.default_ylabel)(),
             "xlim": xlim or (80, 700),
             "ylim": ylim or (1e1, 1e7),
         } | (fig_kwargs or {})

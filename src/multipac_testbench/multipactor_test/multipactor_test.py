@@ -1254,7 +1254,7 @@ class MultipactorTest:
             logging.warning(f"No threshold to plot for {self}")
             return np.array([]), df
         title = str(self) if not title else title
-        ylabel = getattr(ydata, "ylabel", lambda: "???")()
+        ylabel = getattr(ydata, "ylabel", plot.default_ylabel)()
         xticks = [pow_ext.sample_index for pow_ext in threshold_set.extrema]
 
         pos_to_cols = group_columns_by_detector_position(df, self)
@@ -1636,7 +1636,7 @@ def _add_thresholds_on_axes(
 
         plot.plot_df_threshold(
             df=data_at_thresholds[cols],
-            ylabel=getattr(instr, "ylabel", lambda: "???")(),
+            ylabel=getattr(instr, "ylabel", plot.default_ylabel)(),
             label_to_color=label_to_color,
             fig_title="",
             xticks=xticks,
