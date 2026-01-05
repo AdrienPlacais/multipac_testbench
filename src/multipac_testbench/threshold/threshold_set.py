@@ -335,11 +335,11 @@ class ThresholdSet:
 
         """
         return [
-            x
-            for x in self._thresholds
-            if math.isclose(x.position, position, abs_tol=tol)
+            thresh
+            for thresh in self._thresholds
+            if math.isclose(thresh.position, position, abs_tol=tol)
             or return_global
-            and (np.isnan(x.position) or np.isnan(position))
+            and (thresh.is_global or np.isnan(position))
         ]
 
     def data_at_thresholds(
@@ -395,8 +395,8 @@ class ThresholdSet:
                     math.isclose(
                         instrument.position, threshold.position, abs_tol=tol
                     )
-                    or (global_instruments and np.isnan(instrument.position))
-                    or (global_multipactor and np.isnan(threshold.position))
+                    or (global_instruments and instrument.is_global)
+                    or (global_multipactor and threshold.is_global)
                 )
 
                 if not is_close:

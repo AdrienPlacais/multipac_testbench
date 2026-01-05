@@ -105,6 +105,11 @@ class Instrument(ABC):
         out = f"{self.class_name} ({self.name})"
         return out
 
+    @property
+    def is_global(self) -> bool:
+        """Tell if instrument is global by checking if ``position`` is nan."""
+        return bool(np.isnan(self.position))
+
     def copy(self) -> Self:
         """Deep copy of the instrument."""
         return deepcopy(self)

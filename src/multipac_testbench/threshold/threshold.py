@@ -53,6 +53,11 @@ class Threshold:
     #: Color of the :class:`.Instrument` that detected this threshold.
     color: tuple[float, float, float] = (1.0, 1.0, 1.0)
 
+    @property
+    def is_global(self) -> bool:
+        """Tell if threshold is global by checking if ``position`` is nan."""
+        return bool(np.isnan(self.position))
+
 
 def create_thresholds(
     multipactor: NDArray[np.bool],

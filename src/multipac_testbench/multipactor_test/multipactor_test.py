@@ -724,7 +724,7 @@ class MultipactorTest:
         ----------
         position :
             The position in meter to match. If it is ``np.nan``, we return
-            global instruments (their ``position`` is also ``np.nan``).
+            global instruments.
         instrument_id :
             Filter instruments by class, name, or instance. If not provided, we
             look for all stored instruments.
@@ -740,7 +740,7 @@ class MultipactorTest:
         """
         instruments = self.get_instruments(instrument_id, **kwargs)
         if np.isnan(position):
-            return [i for i in instruments if np.isnan(i.position)]
+            return [i for i in instruments if i.is_global]
 
         return [
             i
@@ -1171,13 +1171,16 @@ class MultipactorTest:
         global_multipactor :
             If non-local multipactor should be plotted.
 
+        Returns
+        -------
+            Instruments data at thresholds, as plotted in the figure.
+
         """
         if not ydata:
             raise ValueError("At least one Instrument type must be provided")
         dfs: list[pd.DataFrame] = []
 
         for y in ydata:
-            assert isinstance(y, ABCMeta)
             instruments = self.get_instruments(y)
             df = threshold_set.data_at_thresholds(
                 instruments,
@@ -1197,17 +1200,21 @@ class MultipactorTest:
             )
 
             axes = dic_axes[y]
+            pos_to_cols = group_columns_by_detector_position(
+                df, self, instrument_nature=y
+            )
             for instr in instruments:
-                pos_to_cols = group_columns_by_detector_position(
-                    df, self, instrument_nature=y
-                )
-
                 position = instr.position
-                assert isinstance(position, float), (
-                    "Instruments storing 2D data, such as `Reconstructed`, are"
-                    "not supported."
-                )
+                if not isinstance(position, float):
+                    logging.error(
+                        "Instruments storing 2D data, such as `Reconstructed`,"
+                        " are not supported."
+                    )
+                    continue
+
                 cols = pos_to_cols.get(position, [])
+                if global_instruments and instr.is_global:
+                    cols.extend(*[col for col in pos_to_cols.values()])
 
                 if (
                     global_multipactor
@@ -1215,8 +1222,6 @@ class MultipactorTest:
                     is not None
                 ):
                     cols.extend(additional)
-                if global_instruments:
-                    raise NotImplementedError
                 if not cols:
                     continue
 
