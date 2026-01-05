@@ -995,10 +995,6 @@ class MultipactorTest:
         .. todo::
             Kwargs mixed up between the different methods.
 
-        .. todo::
-            Fix bug when ``threshold_set`` is provided along with an Instrument
-            type returning several instrument types, such as `Power`
-
         Parameters
         ----------
         *ydata :
@@ -1127,17 +1123,11 @@ class MultipactorTest:
         )
 
         if threshold_set is not None:
-            instruments = self.get_instruments(ydata)
-            label_to_color = threshold_set.get_threshold_label_color_map(
-                instruments
-            )
             assert dic_axes is not None
-            df_thresholds = _add_thresholds_on_axes(
+            df_thresholds = self._add_thresholds_on_axes(
+                *ydata,
                 dic_axes=dic_axes,
-                instruments=instruments,
                 threshold_set=threshold_set,
-                test=self,
-                label_to_color=label_to_color,
                 plot_extrema=kwargs.get("plot_extrema", False),
                 global_instruments=global_instruments,
                 global_multipactor=global_multipactor,
@@ -1151,6 +1141,112 @@ class MultipactorTest:
         if csv_path is not None:
             plot.save_dataframe(df_to_plot, csv_path, **(csv_kwargs or {}))
         return axes, df_to_plot
+
+    def _add_thresholds_on_axes(
+        self,
+        *ydata: ABCMeta,
+        dic_axes: dict[ABCMeta, Axes],
+        threshold_set: ThresholdSet,
+        plot_extrema: bool,
+        global_instruments: bool = False,
+        global_multipactor: bool = False,
+    ) -> pd.DataFrame:
+        """Mark position of lower and upper thresholds on pre-existing plot.
+
+        Parameters
+        ----------
+        *ydata :
+            Type(s) of :class:`.Instrument`(s) to plot.
+        dic_axes :
+            Links every type of :class:`.Instrument` with the `Axes` it must be
+            plotted on.
+        threshold_set :
+            Defines the position of the multipator thresholds of the current
+            multipactor test.
+        plot_extrema :
+            Add instrument to plot values at the power minima and maxima. Makes
+            most sense with voltage/power instruments.
+        global_instruments :
+            If global instruments in ``instruments`` should be included.
+        global_multipactor :
+            If non-local multipactor should be plotted.
+
+        """
+        if not ydata:
+            raise ValueError("At least one Instrument type must be provided")
+        dfs: list[pd.DataFrame] = []
+
+        for y in ydata:
+            assert isinstance(y, ABCMeta)
+            instruments = self.get_instruments(y)
+            df = threshold_set.data_at_thresholds(
+                instruments,
+                global_instruments=global_instruments,
+                global_multipactor=global_multipactor,
+            )
+            if df.empty:
+                logging.warning(f"No thresholds found for {instruments}")
+                dfs.append(df)
+                continue
+
+            xticks = [
+                extremum.sample_index for extremum in threshold_set.extrema
+            ]
+            label_to_color = threshold_set.get_threshold_label_color_map(
+                instruments
+            )
+
+            axes = dic_axes[y]
+            for instr in instruments:
+                pos_to_cols = group_columns_by_detector_position(
+                    df, self, instrument_nature=y
+                )
+
+                position = instr.position
+                assert isinstance(position, float), (
+                    "Instruments storing 2D data, such as `Reconstructed`, are"
+                    "not supported."
+                )
+                cols = pos_to_cols.get(position, [])
+
+                if (
+                    global_multipactor
+                    and (additional := pos_to_cols.get(np.nan, None))
+                    is not None
+                ):
+                    cols.extend(additional)
+                if global_instruments:
+                    raise NotImplementedError
+                if not cols:
+                    continue
+
+                instrument_data_at_thresholds = df[cols]
+                assert isinstance(instrument_data_at_thresholds, pd.DataFrame)
+                plot.plot_df_threshold(
+                    df=instrument_data_at_thresholds,
+                    ylabel=getattr(instr, "ylabel", plot.default_ylabel)(),
+                    label_to_color=label_to_color,
+                    fig_title="",
+                    xticks=xticks,
+                    axes=axes,
+                )
+
+            dfs.append(df)
+
+            if not plot_extrema:
+                continue
+
+            ax_by_position = {
+                instr.position: ax
+                for instr, ax in zip(instruments, dic_axes.values())
+            }
+            plot.plot_extrema_markers(
+                ax_by_position=ax_by_position,
+                instruments=instruments,
+                extrema=threshold_set.extrema,
+            )
+
+        return pd.concat(dfs, axis=1)
 
     def plot_thresholds(
         self,
@@ -1171,11 +1267,12 @@ class MultipactorTest:
         test_color: str | None = None,
         **kwargs,
     ) -> tuple[Axes | NDArray[Axes], pd.DataFrame]:
-        """Plot ``to_plot`` data at multipactor threshold.
+        """Plot ``ydata`` instances data at multipactor threshold.
 
-        When ``to_plot`` is :class:`.ForwardPower` or :class:`.FieldProbe`,
-        the output is the threshold. But this method works with any instrument
-        type.
+        When ``ydata`` is :class:`.ForwardPower` or :class:`.FieldProbe`,
+        the figure represents the evolution of the power/voltage multpactor
+        threshold during the test. But this method can be used with any
+        instrument type.
 
         .. todo::
             Add a way to fit exponential (?) law on the thresholds. Will need
@@ -1586,72 +1683,3 @@ def group_columns_by_detector_position(
 
         pos_to_cols.setdefault(pos, []).append(col)
     return pos_to_cols
-
-
-def _add_thresholds_on_axes(
-    dic_axes: dict[ABCMeta, Axes],
-    instruments: list[Instrument],
-    threshold_set: ThresholdSet,
-    test: MultipactorTest,
-    label_to_color: dict[str, tuple[float, float, float]],
-    plot_extrema: bool,
-    global_instruments: bool = False,
-    global_multipactor: bool = False,
-    **kwargs,
-) -> pd.DataFrame:
-    """Add markers to identify MP entry/exit."""
-    data_at_thresholds = threshold_set.data_at_thresholds(
-        instruments,
-        global_instruments=global_instruments,
-        global_multipactor=global_multipactor,
-    )
-    if data_at_thresholds.empty:
-        logging.warning(f"No thresholds found for {instruments}")
-        return data_at_thresholds
-
-    xticks = [ext.sample_index for ext in threshold_set.extrema]
-
-    for instr in instruments:
-        instrument_nature = type(instr)
-        axes = dic_axes[instrument_nature]
-        position = instr.position
-        pos_to_cols = group_columns_by_detector_position(
-            data_at_thresholds, test, instrument_nature=instrument_nature
-        )
-        assert isinstance(
-            position, float
-        ), "Instruments storing 2D data, such as `Reconstructed`, are not supported."
-
-        cols = pos_to_cols.get(position, [])
-        if (
-            global_multipactor
-            and (additional := pos_to_cols.get(np.nan, None)) is not None
-        ):
-            cols.extend(additional)
-        if global_instruments:
-            raise NotImplementedError
-
-        if not cols:
-            continue
-
-        plot.plot_df_threshold(
-            df=data_at_thresholds[cols],
-            ylabel=getattr(instr, "ylabel", plot.default_ylabel)(),
-            label_to_color=label_to_color,
-            fig_title="",
-            xticks=xticks,
-            axes=axes,
-        )
-
-    if plot_extrema:
-        ax_by_position = {
-            instr.position: ax
-            for instr, ax in zip(instruments, dic_axes.values())
-        }
-        plot.plot_extrema_markers(
-            ax_by_position=ax_by_position,
-            instruments=instruments,
-            extrema=threshold_set.extrema,
-        )
-
-    return data_at_thresholds

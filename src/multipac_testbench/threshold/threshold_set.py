@@ -450,7 +450,7 @@ class ThresholdSet:
 
     def get_threshold_label_color_map(
         self, instruments: Sequence[Instrument]
-    ) -> dict[str, tuple[float, float, float] | None]:
+    ) -> dict[str, tuple[float, float, float]]:
         """Maps threshold dataframe column headers to corresponding colors.
 
         Assumes :attr:`.Threshold.color` is already set to the corresponding
