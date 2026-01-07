@@ -1204,6 +1204,8 @@ class MultipactorTest:
                 df, self, instrument_nature=y
             )
             for instr in instruments:
+                if not instr.relatable_thresholds:
+                    continue
                 position = instr.position
                 if not isinstance(position, float):
                     logging.error(

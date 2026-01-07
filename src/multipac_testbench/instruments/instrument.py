@@ -33,6 +33,7 @@ class Instrument(ABC):
         is_2d: bool = False,
         color: tuple[float, float, float] | None = None,
         is_raw: bool = False,
+        relatable_thresholds: bool = True,
         **kwargs,
     ) -> None:
         """Instantiate the class.
@@ -60,6 +61,10 @@ class Instrument(ABC):
             :attr:`._transfer_functions` are directly appended to the list of
             post-treaters. They are used to convert raw data (ie: acquisition
             voltages) to physical quantities.
+        relatable_thresholds :
+            Whether ``threshold_set`` argument of ``sweet_plot`` methods should
+            produce scatter plots marking thresholds positions for this
+            instrument.
         kwargs :
             Additional keyword arguments coming from the ``TOML`` configuration
             file.
@@ -92,6 +97,7 @@ class Instrument(ABC):
         if is_raw:
             for func in self._transfer_functions:
                 self.add_post_treater(func)
+        self.relatable_thresholds = relatable_thresholds
 
         #: Functions to call when a post-treater is added to current object.
         #:
@@ -629,3 +635,6 @@ class Instrument(ABC):
         ]
         is_growing[-1] = 0.0
         return np.array(is_growing, dtype=np.float64)
+
+
+INSTRUMENT_FILTER = Callable[[Instrument], bool]
