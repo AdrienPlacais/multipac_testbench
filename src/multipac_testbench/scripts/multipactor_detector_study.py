@@ -1,4 +1,4 @@
-"""Define functions to help parametrize :func:`.quantity_is_above_local_average`.
+"""Define functions to help parametrize :func:`.quantity_is_above_lower_envelope`.
 
 In particular, plots intermediate lines.
 
@@ -11,29 +11,38 @@ import numpy as np
 import pandas as pd
 from matplotlib.axes import Axes
 from multipac_testbench import MultipactorTest
-from multipac_testbench.instruments import (
-    CurrentProbe,
-    Instrument,
-    VirtualInstrument,
-)
+from multipac_testbench.instruments import Instrument, VirtualInstrument
 from multipac_testbench.instruments.power import ForwardPower
 from multipac_testbench.measurement_point.i_measurement_point import (
     IMeasurementPoint,
 )
 from multipac_testbench.util.multipactor_detectors import (
-    quantity_is_above_local_average,
+    quantity_is_above_lower_envelope,
+    residual_threshold,
 )
-from multipac_testbench.util.post_treaters import running_mean
+from multipac_testbench.util.post_treaters import lower_envelope
 
 
 class ConstructionLine(VirtualInstrument):
     """Define a fake instrument type.
 
     It will hold intermediate calculations from
-    :func:`.quantity_is_above_local_average` to help tuning this multipactor
+    :func:`.quantity_is_above_lower_envelope` to help tuning this multipactor
     detector.
 
+    We set ``relatable_thresholds`` to ``False`` to avoid marking thresholds
+    positions on these plots.
+
     """
+
+    relatable_thresholds = False
+
+    def __init__(
+        self, *args, relatable_thresholds: bool = False, **kwargs
+    ) -> None:
+        super().__init__(
+            *args, relatable_thresholds=relatable_thresholds, **kwargs
+        )
 
     @classmethod
     def ylabel(cls) -> str:
@@ -44,32 +53,37 @@ class ConstructionLine(VirtualInstrument):
 def study(
     instrument_class: ABCMeta,
     test: MultipactorTest,
-    baseline_window: int = 300,
-    threshold_factor: float = 3.0,
+    envelope_window: int = 150,
+    threshold_factor: float = 0.8,
     consecutive_criterion: int = 0,
-    minimum_number_of_points: int = 1,
+    minimum_number_of_points: int = 10,
 ) -> list[Axes]:
-    measurement_point, instrument, slow_trend = add_slow_trend_instrument(
-        instrument_class, test, baseline_window
-    )
-    add_construction_lines(
-        measurement_point, instrument, slow_trend, threshold_factor
-    )
-
     detector = partial(
-        quantity_is_above_local_average,
-        baseline_window=baseline_window,
+        quantity_is_above_lower_envelope,
+        envelope_window=envelope_window,
         threshold_factor=threshold_factor,
         consecutive_criterion=consecutive_criterion,
         minimum_number_of_points=minimum_number_of_points,
     )
 
+    measurement_point, instrument, envelope = add_lower_envelope_instrument(
+        instrument_class, test, envelope_window
+    )
+    construction_lines = add_construction_lines(
+        measurement_point, instrument, envelope, threshold_factor
+    )
     threshold_set = test.determine_thresholds(
-        detector, instrument_class, instruments_to_ignore=(slow_trend,)
+        detector,
+        instrument_class,
+        instruments_to_ignore=(envelope, *construction_lines),
     )
 
-    to_plot = (instrument_class, CurrentProbe, ForwardPower)
-    axes, _ = test.sweet_plot(*to_plot, threshold_set=threshold_set)
+    to_plot = (instrument_class, ForwardPower)
+    axes, _ = test.sweet_plot(
+        *to_plot,
+        threshold_set=threshold_set,
+        global_instruments=True,
+    )
 
     # for ax in axes:
     #     lines = ax.get_lines()
@@ -82,61 +96,82 @@ def study(
     return axes
 
 
-def add_slow_trend_instrument(
-    instrument_class: ABCMeta, test: MultipactorTest, baseline_window: int
+def add_lower_envelope_instrument(
+    instrument_class: ABCMeta, test: MultipactorTest, envelope_window: int
 ) -> tuple[IMeasurementPoint, Instrument, Instrument]:
-    """Add fake instrument based on ``instrument_class``, with smoothened data.
+    """Create fake instrument holding lower envelope.
 
-    The fake instrument is a copy of the multipactor-detecting instrument, so
-    it will have the same type.
+    This instrument is a copy of the multipactor-detecting instrument, so it
+    will have the same type.
 
     For now, ``test`` can only have one instance of ``instrument_class``.
 
+    Parameters
+    ----------
+    instrument_class :
+        Class of the detecting instrument.
+    test :
+        The multipactor test under study.
+    envelope_window :
+        Number of samples of the envelope window. Typically, one power cycle.
+
+    Returns
+    -------
+    IMeasurementPoint
+        Where the detecting instrument and the virtual instruments were added.
+    Instrument
+        Detecting instrument instance.
+    Instrument
+        :class:`.Instrument` instance holding the lower envelope of the
+        detecting instrument data.
+
     """
-    instrument = test.get_instrument(instrument_class)
+    detecting = test.get_instrument(instrument_class)
 
     measurement_points = [
         mp
         for mp in test.get_measurement_points()
-        if instrument in mp.instruments
+        if detecting in mp.instruments
     ]
     assert len(measurement_points) == 1
     measurement_point = measurement_points[0]
 
-    slow_trend = instrument.replace(
-        name=instrument.name + f" smoothened over {baseline_window} samples",
+    envelope = detecting.replace(
+        name=detecting.name + f" lower envelope, {envelope_window} samples",
+        data=pd.Series(
+            lower_envelope(detecting.data, envelope_window=envelope_window)
+        ),
         color=(0, 0, 0),
+        relatable_thresholds=False,
     )
-    smoother = partial(running_mean, n_mean=baseline_window)
-    slow_trend.add_post_treater(smoother)
+    __import__("pdb").set_trace()
 
-    measurement_point.add_instrument(slow_trend)
-    return measurement_point, instrument, slow_trend
+    measurement_point.add_instrument(envelope)
+    return measurement_point, detecting, envelope
 
 
 def add_construction_lines(
     measurement_point: IMeasurementPoint,
-    instrument: Instrument,
-    slow_trend: Instrument,
+    detecting: Instrument,
+    envelope: Instrument,
     threshold_factor: float,
-) -> None:
+) -> tuple[ConstructionLine, ConstructionLine]:
     """Add fake instruments holding intermediate data.
 
     They are :class:`.ConstructionLine` instances.
 
     """
-    residuals = slow_trend.data - instrument.data
-    residual = ConstructionLine(
+    residual, threshold = residual_threshold(detecting.data, envelope.data)
+
+    res = ConstructionLine(
         name="Residual",
-        raw_data=pd.Series(residuals),
-        position=instrument.position,
-    )
-    limits = np.full_like(
-        residuals, np.median(np.abs(residual.data)) * threshold_factor
+        raw_data=pd.Series(residual),
+        position=detecting.position,
     )
     limit = ConstructionLine(
         name=f"Limit; {threshold_factor = }",
-        raw_data=pd.Series(limits),
-        position=instrument.position,
+        raw_data=pd.Series(np.full_like(residual, fill_value=threshold)),
+        position=detecting.position,
     )
-    measurement_point.add_instrument(residual, limit)
+    measurement_point.add_instrument(res, limit)
+    return res, limit

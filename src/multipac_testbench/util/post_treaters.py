@@ -6,7 +6,7 @@ from typing import Literal
 
 import numpy as np
 from numpy.typing import NDArray
-from scipy.ndimage import uniform_filter1d
+from scipy.ndimage import minimum_filter1d, uniform_filter1d
 
 #: Available modes for the running mean routine.
 CONVOLUTION_MODES_T = Literal[
@@ -23,7 +23,7 @@ def running_mean(
     mode: CONVOLUTION_MODES_T | DEPRECATED_CONVOLUTION_MODES_T = "nearest",
     **kwargs,
 ) -> NDArray[np.float64]:
-    """Compute the runnning mean.
+    """Compute the running mean.
 
     .. deprecated:: 1.9.0
        The modes listed in :data:`DEPRECATED_CONVOLUTION_MODES` will call the
@@ -59,6 +59,38 @@ def running_mean(
             input_data, np.ones(n_mean) / n_mean, mode=mode
         ).astype(np.float64)
     return uniform_filter1d(input_data, size=n_mean, mode=mode)
+
+
+def lower_envelope(
+    input_data: NDArray[np.float64],
+    envelope_window: int,
+    mode: CONVOLUTION_MODES_T = "nearest",
+) -> NDArray[np.float64]:
+    """Compute the lower envelope, i.e. the signal minimum without the bumps.
+
+    .. todo::
+       Illustration in documentation.
+
+    .. todo::
+       May also use :func:`scipy.ndimage.percentile_filter`. May be more robust
+       with noisy data or occasional downward spikes. To test.
+
+    Parameters
+    ----------
+    input_data :
+        Data to smooth of shape ``N``.
+    envelope_window :
+        Number of points on which lower envelope is taken.
+    mode :
+        Convolution modes. Refer to :func:`scipy.ndimage.minimum_filter1d`
+        documentation, which is the actual function that is called.
+
+    Returns
+    -------
+        Smoothed data.
+
+    """
+    return minimum_filter1d(input_data, size=envelope_window, mode=mode)
 
 
 def average_y_for_nearby_x_within_distance(

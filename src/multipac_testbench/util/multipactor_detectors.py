@@ -6,7 +6,7 @@ import numpy as np
 from multipac_testbench.util.filtering import (
     clean_boolean_mask,
 )
-from multipac_testbench.util.post_treaters import running_mean
+from multipac_testbench.util.post_treaters import lower_envelope, running_mean
 from numpy.typing import NDArray
 
 
@@ -58,10 +58,10 @@ def quantity_is_above_local_average(
 
     Procedure is the following:
 
-    #. Compute running mean (slow trend).
-    #. Compute array of residuals between actual data and running mean.
-    #. Average array of residuals to get mean difference level.
-    #. Multipactor happens where residuals are above the noise level, scaled
+    1. Compute running mean (slow trend).
+    2. Compute array of residuals between actual data and running mean.
+    3. Average array of residuals to get mean difference level.
+    4. Multipactor happens where residuals are above the noise level, scaled
        by ``threshold_factor``.
 
     Parameters
@@ -75,7 +75,7 @@ def quantity_is_above_local_average(
         Multiplier for noise level above baseline. This can be negative!
     consecutive_criterion :
         If provided, we gather multipactor zones that were separated by
-        ``consecutive_criterion`` measure points or less.
+        ``consecutive_criterion`` measurement points or less.
     minimum_number_of_points :
         If provided, the multipactor must happen on at least
         ``minimum_number_of_points`` consecutive points, otherwise we consider
@@ -87,16 +87,108 @@ def quantity_is_above_local_average(
 
     """
     slow_trend = running_mean(quantity, n_mean=baseline_window)
-    residual = quantity - slow_trend
-    noise_level = np.median(np.abs(residual))
-    limit = noise_level * threshold_factor
-    multipactor = residual > limit
+    residual, threshold = residual_threshold(
+        quantity, slow_trend, factor=threshold_factor
+    )
+    multipactor = residual > threshold
 
     return clean_boolean_mask(
         multipactor,
         min_true=minimum_number_of_points,
         max_false_gap=consecutive_criterion,
     )
+
+
+def quantity_is_above_lower_envelope(
+    quantity: NDArray[np.float64],
+    envelope_window: int = 150,
+    threshold_factor: float = 3.0,
+    consecutive_criterion: int = 0,
+    minimum_number_of_points: int = 1,
+) -> NDArray[np.bool]:
+    """Detect where ``quantity`` is above the local average.
+
+    Procedure is the following:
+
+    1. Compute lower envelope (slow trend without local bumps).
+    2. Compute array of residuals between actual data and lower envelope.
+    3. Average array of residuals to get mean difference level.
+    4. Multipactor happens wmin_widthhere residuals are above the noise level,
+       scaled by ``threshold_factor``.
+
+    Parameters
+    ----------
+    quantity :
+        Array of measured multipactor quantity.
+    envelope_window :
+        Window size (in samples) for lower envelope calculation. Set it to one
+        power cycle for a good first estimation.
+    threshold_factor :
+        Multiplier for noise level above lower envelope. This can be negative!
+    consecutive_criterion :
+        If provided, we gather multipactor zones that were separated by
+        ``consecutive_criterion`` measurement points or less.
+    minimum_number_of_points :
+        If provided, the multipactor must happen on at least
+        ``minimum_number_of_points`` consecutive points, otherwise we consider
+        that it was a measurement flaw.
+
+    Returns
+    -------
+        True where multipactor was detected.
+
+    """
+    envelope = lower_envelope(quantity, envelope_window)
+    residual, threshold = residual_threshold(
+        quantity, envelope, factor=threshold_factor
+    )
+    multipactor = residual > threshold
+
+    return clean_boolean_mask(
+        multipactor,
+        min_true=minimum_number_of_points,
+        max_false_gap=consecutive_criterion,
+    )
+
+
+def residual_threshold(
+    data: NDArray[np.float64],
+    baseline: NDArray[np.float64],
+    factor: float = 1.0,
+) -> tuple[NDArray[np.float64], float]:
+    """Compute residuals and a robust noise-based detection threshold.
+
+    The baseline is assumed to represent typical non-multipactor behavior.
+    Residuals are defined as positive excursions of ``data`` above this
+    baseline. A robust estimate of the residual noise amplitude is obtained
+    from the median absolute deviation and scaled to define a detection
+    threshold.
+
+    Notes
+    -----
+    Noise-based limit above which residuals are classified as multipactor.
+
+    Parameters
+    ----------
+    data :
+        :class:`.Instrument` data.
+    baseline :
+        Estimate of the non-multipactor baseline. Typically obtained with
+        :func:`.running_mean` or :func:`.lower_envelope`.
+    factor :
+        Multiplicative factor applied to the noise estimate to set the
+        detection strictness. Higher values reduce false positives.
+
+    Returns
+    -------
+    NDArray[np.float64]
+        Difference ``data - baseline``.
+    float
+        Noise-based limit above which residuals are classified as multipactor.
+
+    """
+    residual = data - baseline
+    return residual, factor * float(np.median(np.abs(residual)))
 
 
 def start_and_end_of_contiguous_true_zones(
