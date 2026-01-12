@@ -1041,6 +1041,8 @@ class MultipactorTest:
         csv_path :
             If specified, save the data used to produce the plot in
             ``csv_path``.
+        csv_kwargs :
+            Keyword arguments passed to :func:`.plot.save_dataframe`.
         masks :
             A dictionary where each key is a suffix used to label the split
             columns, and each value is a boolean mask of the same length as the
@@ -1645,6 +1647,54 @@ class MultipactorTest:
             fig, instrument_class_axes.values(), png_path
         )
         return fig, axes
+
+    def statistics(
+        self,
+        thresholds_set: ThresholdSet,
+        instrument_class: ABCMeta,
+        global_instruments: bool = False,
+        global_multipactor: bool = False,
+        csv_path: Path | None = None,
+        csv_kwargs: dict[str, Any] | None = None,
+        **kwargs,
+    ) -> pd.DataFrame:
+        """Compute some statistics on ``instrument_class`` at thresholds.
+
+        Parameters
+        ----------
+        thresholds_set :
+            Calculated multipactor thresholds.
+        instrument_class :
+            Class of instruments under study.
+        global_instruments :
+            If instruments not position-specific (eg :class:`.ForwardPower`)
+            should have their thresholds plotted.
+        global_multipactor :
+            If multipactor not position-specific (eg thresholds created by
+            merging several other multipactor arrays) should have their
+            thresholds plotted.
+        csv_path :
+            If specified, save the data used to produce the plot in
+            ``csv_path``.
+        csv_kwargs :
+            Keyword arguments passed to :func:`.plot.save_dataframe`.
+        kwargs :
+            Other keyword arguments passed to
+            :meth:`.ThresholdSet.data_at_thresholds`.
+
+        """
+        instruments = self.get_instruments(instrument_class)
+
+        df = thresholds_set.data_at_thresholds(
+            instruments,
+            global_instruments=global_instruments,
+            global_multipactor=global_multipactor,
+            **kwargs,
+        )
+        stats = df.describe() if not df.empty else df
+        if csv_path:
+            plot.save_dataframe(stats, csv_path, **(csv_kwargs or {}))
+        return stats
 
 
 def group_columns_by_detector_position(
