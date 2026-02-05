@@ -27,6 +27,7 @@ from typing import Any, Callable, Literal, TypeVar, overload
 
 import numpy as np
 import pandas as pd
+import scipy
 from matplotlib import animation
 from matplotlib.artist import Artist
 from matplotlib.axes import Axes
@@ -73,7 +74,6 @@ from multipac_testbench.util.helper import (
 )
 from multipac_testbench.util.physics import swr_to_reflection
 from multipac_testbench.util.types import MULTIPAC_DETECTOR_T
-from numpy.typing import NDArray
 
 T = TypeVar("T", bound=Callable[..., Any])
 
@@ -1692,6 +1692,14 @@ class MultipactorTest:
             **kwargs,
         )
         stats = df.describe() if not df.empty else df
+
+        if not stats.empty:
+            count = stats.loc["count"]
+            # 97.5th percentile of t distribution, since 95% CI is two-tailed
+            t_critical = scipy.stats.t.ppf(0.975, df=count - 1)
+            stats.loc["confidence interval"] = (
+                t_critical * stats.loc["std"] / np.sqrt(count)
+            )
         if csv_path:
             plot.save_dataframe(stats, csv_path, **(csv_kwargs or {}))
         return stats
