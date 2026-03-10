@@ -27,6 +27,7 @@ from typing import Any, Callable, Literal, TypeVar, overload
 
 import numpy as np
 import pandas as pd
+import scipy
 from matplotlib import animation
 from matplotlib.artist import Artist
 from matplotlib.axes import Axes
@@ -41,12 +42,29 @@ from multipac_testbench.instruments import (
     Reconstructed,
     ReflectionCoefficient,
 )
+from multipac_testbench.instruments.predicates import (
+    INSTRUMENT_FILTER,
+    INSTRUMENT_ID,
+    INSTRUMENTS_ID,
+    MEASUREMENT_POINTS_ID,
+    combine_predicates,
+    dummy_instrument_filter,
+    filter_instruments,
+    instrument_excluder,
+    instrument_name_selector,
+    instrument_type_selector,
+    measurement_point_excluder,
+)
 from multipac_testbench.measurement_point.factory import (
     IMeasurementPointFactory,
+)
+from multipac_testbench.measurement_point.global_diagnostics import (
+    GlobalDiagnostics,
 )
 from multipac_testbench.measurement_point.i_measurement_point import (
     IMeasurementPoint,
 )
+from multipac_testbench.measurement_point.pick_up import PickUp
 from multipac_testbench.multipactor_test.loader import TRIGGER_POLICIES, load
 from multipac_testbench.threshold.helper import (
     extract_detecting_name,
@@ -66,6 +84,7 @@ from multipac_testbench.util.animate import get_limits
 from multipac_testbench.util.files import load_config
 from multipac_testbench.util.helper import (
     flatten,
+    is_collection_of,
     output_filepath,
     save_by_position,
     split_rows_by_masks,
@@ -210,25 +229,50 @@ class MultipactorTest:
         for point in measurement_points:
             point.add_post_treater(*args, **kwargs)
 
+    def add_instrument(
+        self,
+        instrument: Instrument,
+        measurement_point: str | IMeasurementPoint,
+    ) -> None:
+        """Manually add an instrument."""
+        if isinstance(measurement_point, str):
+            measurement_point = self.get_measurement_point(measurement_point)
+        measurement_point.add_instrument(instrument)
+
+    @property
+    def instruments(self) -> list[Instrument]:
+        """Get all stored instruments."""
+        points: list[PickUp | GlobalDiagnostics] = []
+        points.extend(self.pick_ups)
+        if self.global_diagnostics is not None:
+            points.append(self.global_diagnostics)
+
+        instruments = [point.instruments for point in points]
+
+        return list(itertools.chain(*instruments))
+
     def _set_x_data(
         self,
         xdata: ABCMeta | None,
+        predicate: INSTRUMENT_FILTER | None = None,
         exclude: Sequence[str] = (),
     ) -> tuple[list[pd.Series], list[str] | None]:
-        """Set the data that will be used for x-axis.
+        r"""Set the data that will be used for x-axis.
 
         Parameters
         ----------
         xdata :
             Class of an instrument, or None (in this case, use default index).
         exclude :
-            Name of instruments to exclude.
+            Name of instruments to exclude. Deprecated, prefer ``predicate``.
+        predicate :
+            :class:`.Instrument` filtering function.
 
         Returns
         -------
-        data_to_plot :
+        data_to_plot : list[pd.Series]
             Contains the data used for x axis.
-        x_columns :
+        x_columns : list[str]  | None
             Name of the column(s) used for x axis.
 
         """
@@ -236,19 +280,18 @@ class MultipactorTest:
             return [], None
 
         instruments = self.get_instruments(
-            xdata, instruments_to_ignore=exclude
+            xdata,
+            instruments_to_ignore=exclude,
+            predicate=predicate,
         )
-        x_columns = [
-            instrument.name
-            for instrument in instruments
-            if instrument.name not in exclude
-        ]
+        x_columns = [instrument.name for instrument in instruments]
 
         data_to_plot = []
         for instrument in instruments:
             if isinstance(instrument.data_as_pd, pd.DataFrame):
                 logging.error(
-                    f"You want to plot {instrument}, which data is 2D. Not supported."
+                    f"You want to plot {instrument}, which data is 2D. Not "
+                    "supported."
                 )
                 continue
             data_to_plot.append(instrument.data_as_pd)
@@ -260,6 +303,7 @@ class MultipactorTest:
         data_to_plot: list[pd.Series | pd.DataFrame],
         *ydata: ABCMeta,
         exclude: Sequence[str] = (),
+        predicate: INSTRUMENT_FILTER | None = None,
         column_names: str | list[str] = "",
         masks: dict[str, NDArray[np.bool]] | None = None,
         **kwargs,
@@ -274,7 +318,10 @@ class MultipactorTest:
         *ydata :
             The class of the instruments to plot.
         exclude :
-            Name of some instruments to exclude.
+            Name of some instruments to exclude. Deprecated, prefer using
+            ``predicate``.
+        predicate :
+            :class:`.Instrument` filtering function.
         column_names :
             To override the default column names. This is used in particular
             with the method :meth:`.TestCampaign.sweet_plot`, when
@@ -304,7 +351,12 @@ class MultipactorTest:
             same :class:`.PickUp`.
 
         """
-        instruments = [self.get_instruments(y) for y in ydata]
+        instruments = [
+            self.get_instruments(
+                y, predicate=predicate, instruments_to_ignore=exclude
+            )
+            for y in ydata
+        ]
         y_columns = []
         color: dict[str, str] = {}
 
@@ -312,12 +364,6 @@ class MultipactorTest:
             sub_ycols = []
 
             for instrument in sublist:
-                if instrument.name in exclude:
-                    logging.debug(
-                        f"Skipping {instrument} because it is excluded."
-                    )
-                    continue
-
                 df = instrument.data_as_pd
                 if masks is not None:
                     df = split_rows_by_masks(df, masks=masks)
@@ -356,7 +402,8 @@ class MultipactorTest:
         instrument_class: ABCMeta,
         power_growth_array_kw: dict[str, Any] | None = None,
         threshold_reducer: THRESHOLD_DETECTOR_T | None = None,
-        predicate: THRESHOLD_FILTER_T | None = None,
+        threshold_predicate: THRESHOLD_FILTER_T | None = None,
+        instrument_predicate: INSTRUMENT_FILTER | None = None,
         **kwargs,
     ) -> ThresholdSet:
         """Determine lower and upper multipactor thresholds.
@@ -376,9 +423,11 @@ class MultipactorTest:
             If provided, we consider that multipactor appears when one
             detecting :class:`.Instrument` detected it (``"any"``), or only
             when all detecting :class:`.Instrument` measured it (``"all"``).
-        predicate :
+        threshold_predicate :
             Function filtering the thresholds. Applied *after*
             ``threshold_reducer``.
+        instrument_predicate :
+            :class:`.Instrument` filtering function.
 
         Returns
         -------
@@ -387,14 +436,16 @@ class MultipactorTest:
             ``instrument_class``.
 
         """
-        detecting_instruments = self.get_instruments(instrument_class)
+        detecting_instruments = self.get_instruments(
+            instrument_class, predicate=instrument_predicate, **kwargs
+        )
         growth_array = self._power_growth_array(power_growth_array_kw)
         threshold_set = ThresholdSet.from_instruments(
             multipac_detector,
             detecting_instruments,
             growth_array,
             threshold_reducer=threshold_reducer,
-            predicate=predicate,
+            threshold_predicate=threshold_predicate,
         )
         return threshold_set
 
@@ -594,102 +645,173 @@ class MultipactorTest:
 
     def get_instruments(
         self,
-        instruments_id: (
-            ABCMeta
-            | Sequence[ABCMeta]
-            | Sequence[str]
-            | Sequence[Instrument]
-            | None
-        ) = None,
-        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
-        instruments_to_ignore: Sequence[Instrument | str] = (),
+        instruments_id: INSTRUMENTS_ID | None = None,
+        predicate: INSTRUMENT_FILTER | None = None,
+        measurement_points_to_exclude: MEASUREMENT_POINTS_ID = (),
+        instruments_to_ignore: INSTRUMENTS_ID = (),
     ) -> list[Instrument]:
-        """Get all instruments matching ``instrument_id``."""
-        match instruments_id:
-            case None:
-                points: Collection[IMeasurementPoint] = self.pick_ups
-                if self.global_diagnostics is not None:
-                    points.append(self.global_diagnostics)
-                instruments = [point.instruments for point in points]
-                return list(itertools.chain(*instruments))
+        """Get all instruments matching ``instrument_id``.
 
-            case list() | tuple() as instruments if types_match(
-                instruments, Instrument
-            ):
-                return instruments
+        Parameters
+        ----------
+        instruments_id :
+            Identifies :class:`.Instrument`. Can be one or several
+            :class:`.Instrument` types (*eg* :class:`.CurrentProbe`),
+            :class:`.Instrument` instances or :attr:`.Instrument.name`.
+        predicate :
+            :class:`.Instrument` filtering function.
+        measurement_points_to_exclude :
+            Exclude some measurement points from the filtering. Deprecated,
+            prefer using ``predicate``.
+        instruments_to_ignore :
+            Instruments to exclude from filtering. Deprecated, prefer using
+            ``predicate``.
 
-            case list() | tuple() as names if types_match(names, str):
-                out = self._instruments_by_name(names)
+        Returns
+        -------
+            List of desired instruments.
 
-            case list() | tuple() as classes if types_match(classes, ABCMeta):
-                measurement_points = self.get_measurement_points(
-                    to_exclude=measurement_points_to_exclude
-                )
-                out_2d = [
-                    self._instruments_by_class(
-                        instrument_class,
-                        measurement_points,
-                        instruments_to_ignore=instruments_to_ignore,
-                    )
-                    for instrument_class in classes
-                ]
-                out = list(itertools.chain.from_iterable(out_2d))
+        """
+        predicates: list[INSTRUMENT_FILTER] = []
+        if predicate is not None:
+            predicates.append(predicate)
 
-            case ABCMeta() as instrument_class:
-                measurement_points = self.get_measurement_points(
-                    to_exclude=measurement_points_to_exclude
-                )
-                out = self._instruments_by_class(
-                    instrument_class,
-                    measurement_points,
-                    instruments_to_ignore=instruments_to_ignore,
-                )
-            case _:
-                raise OSError(
-                    f"``instruments`` is {type(instruments_id)} which ",
-                    "is not supported.",
-                )
-        return out
+        if instruments_to_ignore:
+            logging.warning(
+                "`instruments_to_ignore` is deprecated. Prefer using "
+                "`instrument_excluder` predicate function."
+            )
+            predicates.append(instrument_excluder(instruments_to_ignore))
+
+        if measurement_points_to_exclude:
+            logging.warning(
+                "`measurement_points_to_exclude` is deprecated. Prefer using "
+                "`measurement_point_excluder` predicate function."
+            )
+            predicates.append(
+                measurement_point_excluder(measurement_points_to_exclude)
+            )
+
+        if instruments_id is None:
+            # Is it necessary?
+            # TODO: see what happens when there is no filter at all
+            predicates.append(dummy_instrument_filter)
+
+        elif isinstance(instruments_id, ABCMeta) or (
+            not isinstance(instruments_id, str)
+            and is_collection_of(instruments_id, ABCMeta)
+        ):
+            predicates.append(instrument_type_selector(instruments_id))
+
+        elif isinstance(instruments_id, str) or (
+            not isinstance(instruments_id, ABCMeta)
+            and is_collection_of(instruments_id, str)
+        ):
+            predicates.append(instrument_name_selector(instruments_id))
+
+        elif not isinstance(
+            instruments_id, (ABCMeta, str)
+        ) and is_collection_of(instruments_id, Instrument):
+            predicates.append(
+                instrument_name_selector([str(i) for i in instruments_id])
+            )
+
+        else:
+            raise ValueError(f"Unsupported {instruments_id = }")
+
+        return filter_instruments(
+            self.instruments, combine_predicates(*predicates)
+        )
 
     @overload
     def get_instrument(
         self,
-        instrument_id: ABCMeta | str | Instrument,
+        instrument_id: INSTRUMENT_ID | INSTRUMENTS_ID,
         raise_missing_error: Literal[False],
-        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
-        instruments_to_ignore: Sequence[Instrument | str] = (),
+        predicate: INSTRUMENT_FILTER | None = None,
+        measurement_points_to_exclude: MEASUREMENT_POINTS_ID = (),
+        instruments_to_ignore: INSTRUMENTS_ID = (),
     ) -> Instrument | None: ...
     @overload
     def get_instrument(
         self,
-        instrument_id: ABCMeta | str | Instrument,
+        instrument_id: INSTRUMENT_ID | INSTRUMENTS_ID,
         raise_missing_error: Literal[True] = True,
-        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
-        instruments_to_ignore: Sequence[Instrument | str] = (),
+        predicate: INSTRUMENT_FILTER | None = None,
+        measurement_points_to_exclude: MEASUREMENT_POINTS_ID = (),
+        instruments_to_ignore: INSTRUMENTS_ID = (),
     ) -> Instrument: ...
     def get_instrument(
         self,
-        instrument_id: ABCMeta | str | Instrument,
+        instrument_id: INSTRUMENT_ID | INSTRUMENTS_ID,
         raise_missing_error: bool = True,
-        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
-        instruments_to_ignore: Sequence[Instrument | str] = (),
+        predicate: INSTRUMENT_FILTER | None = None,
+        measurement_points_to_exclude: MEASUREMENT_POINTS_ID = (),
+        instruments_to_ignore: INSTRUMENTS_ID = (),
     ) -> Instrument | None:
-        """Get a single instrument matching ``instrument_id``."""
+        """Get a single instrument matching ``instrument_id``.
+
+        Parameters
+        ----------
+        instrument_id :
+            Identifies one (or several) :class:`.Instrument`. If several
+            :class:`.Instrument` instances can be returned, you must specify
+            ``predicate`` to filter all instances but one.
+        raise_missing_error :
+            If an error should be raised when no corresponding
+            :class:`.Instrument` is found.
+        predicate :
+            :class:`.Instrument` filtering function.
+        to_exclude :
+            Exclude some measurement points from the filtering. Deprecated,
+            prefer using ``predicate``.
+        instruments_to_ignore :
+            Instruments to exclude from filtering. Deprecated, prefer using
+            ``predicate``.
+
+        Returns
+        -------
+            A single :class:`.Instrument` instance. If several instances were
+            found, we raise a warning but still return an :class:`.Instrument`
+            (the *first* one; may change between executions!).
+
+        Raises
+        ------
+        MissingInstrumentError
+            When no matching :class:`.Instrument` was found, if
+            ``raise_missing_error`` is set to True.
+
+        """
+        instruments: list[Instrument] = []
         match instrument_id:
             case Instrument():
                 return instrument_id
             case str() as instrument_name:
-                instruments = self.get_instruments((instrument_name,))
+                instruments = self.get_instruments(
+                    instruments_id=(instrument_name,),
+                    predicate=predicate,
+                    measurement_points_to_exclude=measurement_points_to_exclude,
+                    instruments_to_ignore=instruments_to_ignore,
+                )
             case ABCMeta() as instrument_class:
                 instruments = self.get_instruments(
-                    instrument_class,
-                    measurement_points_to_exclude,
-                    instruments_to_ignore,
+                    instruments_id=instrument_class,
+                    predicate=predicate,
+                    measurement_points_to_exclude=measurement_points_to_exclude,
+                    instruments_to_ignore=instruments_to_ignore,
+                )
+            case _:
+                instruments = self.get_instruments(
+                    instruments_id=instrument_id,
+                    predicate=predicate,
+                    measurement_points_to_exclude=measurement_points_to_exclude,
+                    instruments_to_ignore=instruments_to_ignore,
                 )
 
         if len(instruments) == 0:
             if raise_missing_error:
                 raise MissingInstrumentError(f"No {instrument_id} found.")
+            logging.debug(f"No {instrument_id} found.")
             return None
         if len(instruments) > 1:
             logging.warning("Several instruments found. Returning first one.")
@@ -708,7 +830,7 @@ class MultipactorTest:
         ----------
         position :
             The position in meter to match. If it is ``np.nan``, we return
-            global instruments (their ``position`` is also ``np.nan``).
+            global instruments.
         instrument_id :
             Filter instruments by class, name, or instance. If not provided, we
             look for all stored instruments.
@@ -724,7 +846,7 @@ class MultipactorTest:
         """
         instruments = self.get_instruments(instrument_id, **kwargs)
         if np.isnan(position):
-            return [i for i in instruments if np.isnan(i.position)]
+            return [i for i in instruments if i.is_global]
 
         return [
             i
@@ -979,10 +1101,6 @@ class MultipactorTest:
         .. todo::
             Kwargs mixed up between the different methods.
 
-        .. todo::
-            Fix bug when ``threshold_set`` is provided along with an Instrument
-            type returning several instrument types, such as `Power`
-
         Parameters
         ----------
         *ydata :
@@ -1029,6 +1147,8 @@ class MultipactorTest:
         csv_path :
             If specified, save the data used to produce the plot in
             ``csv_path``.
+        csv_kwargs :
+            Keyword arguments passed to :func:`.plot.save_dataframe`.
         masks :
             A dictionary where each key is a suffix used to label the split
             columns, and each value is a boolean mask of the same length as the
@@ -1111,17 +1231,11 @@ class MultipactorTest:
         )
 
         if threshold_set is not None:
-            instruments = self.get_instruments(ydata)
-            label_to_color = threshold_set.get_threshold_label_color_map(
-                instruments
-            )
             assert dic_axes is not None
-            df_thresholds = _add_thresholds_on_axes(
+            df_thresholds = self._add_thresholds_on_axes(
+                *ydata,
                 dic_axes=dic_axes,
-                instruments=instruments,
                 threshold_set=threshold_set,
-                test=self,
-                label_to_color=label_to_color,
                 plot_extrema=kwargs.get("plot_extrema", False),
                 global_instruments=global_instruments,
                 global_multipactor=global_multipactor,
@@ -1135,6 +1249,119 @@ class MultipactorTest:
         if csv_path is not None:
             plot.save_dataframe(df_to_plot, csv_path, **(csv_kwargs or {}))
         return axes, df_to_plot
+
+    def _add_thresholds_on_axes(
+        self,
+        *ydata: ABCMeta,
+        dic_axes: dict[ABCMeta, Axes],
+        threshold_set: ThresholdSet,
+        plot_extrema: bool,
+        global_instruments: bool = False,
+        global_multipactor: bool = False,
+    ) -> pd.DataFrame:
+        """Mark position of lower and upper thresholds on pre-existing plot.
+
+        Parameters
+        ----------
+        *ydata :
+            Type(s) of :class:`.Instrument`(s) to plot.
+        dic_axes :
+            Links every type of :class:`.Instrument` with the `Axes` it must be
+            plotted on.
+        threshold_set :
+            Defines the position of the multipator thresholds of the current
+            multipactor test.
+        plot_extrema :
+            Add instrument to plot values at the power minima and maxima. Makes
+            most sense with voltage/power instruments.
+        global_instruments :
+            If global instruments in ``instruments`` should be included.
+        global_multipactor :
+            If non-local multipactor should be plotted.
+
+        Returns
+        -------
+            Instruments data at thresholds, as plotted in the figure.
+
+        """
+        if not ydata:
+            raise ValueError("At least one Instrument type must be provided")
+        dfs: list[pd.DataFrame] = []
+
+        for y in ydata:
+            instruments = self.get_instruments(y)
+            df = threshold_set.data_at_thresholds(
+                instruments,
+                global_instruments=global_instruments,
+                global_multipactor=global_multipactor,
+            )
+            if df.empty:
+                logging.warning(f"No thresholds found for {instruments}")
+                dfs.append(df)
+                continue
+
+            xticks = [
+                extremum.sample_index for extremum in threshold_set.extrema
+            ]
+            label_to_color = threshold_set.get_threshold_label_color_map(
+                instruments
+            )
+
+            axes = dic_axes[y]
+            pos_to_cols = group_columns_by_detector_position(
+                df, self, instrument_nature=y
+            )
+            for instr in instruments:
+                if not instr.relatable_thresholds:
+                    continue
+                position = instr.position
+                if not isinstance(position, float):
+                    logging.error(
+                        "Instruments storing 2D data, such as `Reconstructed`,"
+                        " are not supported."
+                    )
+                    continue
+
+                cols = pos_to_cols.get(position, [])
+                if global_instruments and instr.is_global:
+                    cols.extend(*[col for col in pos_to_cols.values()])
+
+                if (
+                    global_multipactor
+                    and (additional := pos_to_cols.get(np.nan, None))
+                    is not None
+                ):
+                    cols.extend(additional)
+                if not cols:
+                    continue
+
+                instrument_data_at_thresholds = df[cols]
+                assert isinstance(instrument_data_at_thresholds, pd.DataFrame)
+                plot.plot_df_threshold(
+                    df=instrument_data_at_thresholds,
+                    ylabel=getattr(instr, "ylabel", plot.default_ylabel)(),
+                    label_to_color=label_to_color,
+                    fig_title="",
+                    xticks=xticks,
+                    axes=axes,
+                )
+
+            dfs.append(df)
+
+            if not plot_extrema:
+                continue
+
+            ax_by_position = {
+                instr.position: ax
+                for instr, ax in zip(instruments, dic_axes.values())
+            }
+            plot.plot_extrema_markers(
+                ax_by_position=ax_by_position,
+                instruments=instruments,
+                extrema=threshold_set.extrema,
+            )
+
+        return pd.concat(dfs, axis=1)
 
     def plot_thresholds(
         self,
@@ -1155,11 +1382,12 @@ class MultipactorTest:
         test_color: str | None = None,
         **kwargs,
     ) -> tuple[Axes | NDArray[Axes], pd.DataFrame]:
-        """Plot ``to_plot`` data at multipactor threshold.
+        """Plot ``ydata`` instances data at multipactor threshold.
 
-        When ``to_plot`` is :class:`.ForwardPower` or :class:`.FieldProbe`,
-        the output is the threshold. But this method works with any instrument
-        type.
+        When ``ydata`` is :class:`.ForwardPower` or :class:`.FieldProbe`,
+        the figure represents the evolution of the power/voltage multpactor
+        threshold during the test. But this method can be used with any
+        instrument type.
 
         .. todo::
             Add a way to fit exponential (?) law on the thresholds. Will need
@@ -1238,7 +1466,7 @@ class MultipactorTest:
             logging.warning(f"No threshold to plot for {self}")
             return np.array([]), df
         title = str(self) if not title else title
-        ylabel = getattr(ydata, "ylabel", lambda: "???")()
+        ylabel = getattr(ydata, "ylabel", plot.default_ylabel)()
         xticks = [pow_ext.sample_index for pow_ext in threshold_set.extrema]
 
         pos_to_cols = group_columns_by_detector_position(df, self)
@@ -1526,6 +1754,62 @@ class MultipactorTest:
         )
         return fig, axes
 
+    def statistics(
+        self,
+        thresholds_set: ThresholdSet,
+        instrument_class: ABCMeta,
+        global_instruments: bool = False,
+        global_multipactor: bool = False,
+        csv_path: Path | None = None,
+        csv_kwargs: dict[str, Any] | None = None,
+        **kwargs,
+    ) -> pd.DataFrame:
+        """Compute some statistics on ``instrument_class`` at thresholds.
+
+        Parameters
+        ----------
+        thresholds_set :
+            Calculated multipactor thresholds.
+        instrument_class :
+            Class of instruments under study.
+        global_instruments :
+            If instruments not position-specific (eg :class:`.ForwardPower`)
+            should have their thresholds plotted.
+        global_multipactor :
+            If multipactor not position-specific (eg thresholds created by
+            merging several other multipactor arrays) should have their
+            thresholds plotted.
+        csv_path :
+            If specified, save the data used to produce the plot in
+            ``csv_path``.
+        csv_kwargs :
+            Keyword arguments passed to :func:`.plot.save_dataframe`.
+        kwargs :
+            Other keyword arguments passed to
+            :meth:`.ThresholdSet.data_at_thresholds`.
+
+        """
+        instruments = self.get_instruments(instrument_class)
+
+        df = thresholds_set.data_at_thresholds(
+            instruments,
+            global_instruments=global_instruments,
+            global_multipactor=global_multipactor,
+            **kwargs,
+        )
+        stats = df.describe() if not df.empty else df
+
+        if not stats.empty:
+            count = stats.loc["count"]
+            # 97.5th percentile of t distribution, since 95% CI is two-tailed
+            t_critical = scipy.stats.t.ppf(0.975, df=count - 1)
+            stats.loc["confidence interval"] = (
+                t_critical * stats.loc["std"] / np.sqrt(count)
+            )
+        if csv_path:
+            plot.save_dataframe(stats, csv_path, **(csv_kwargs or {}))
+        return stats
+
 
 def group_columns_by_detector_position(
     df: pd.DataFrame,
@@ -1570,72 +1854,3 @@ def group_columns_by_detector_position(
 
         pos_to_cols.setdefault(pos, []).append(col)
     return pos_to_cols
-
-
-def _add_thresholds_on_axes(
-    dic_axes: dict[ABCMeta, Axes],
-    instruments: list[Instrument],
-    threshold_set: ThresholdSet,
-    test: MultipactorTest,
-    label_to_color: dict[str, tuple[float, float, float]],
-    plot_extrema: bool,
-    global_instruments: bool = False,
-    global_multipactor: bool = False,
-    **kwargs,
-) -> pd.DataFrame:
-    """Add markers to identify MP entry/exit."""
-    data_at_thresholds = threshold_set.data_at_thresholds(
-        instruments,
-        global_instruments=global_instruments,
-        global_multipactor=global_multipactor,
-    )
-    if data_at_thresholds.empty:
-        logging.warning(f"No thresholds found for {instruments}")
-        return data_at_thresholds
-
-    xticks = [ext.sample_index for ext in threshold_set.extrema]
-
-    for instr in instruments:
-        instrument_nature = type(instr)
-        axes = dic_axes[instrument_nature]
-        position = instr.position
-        pos_to_cols = group_columns_by_detector_position(
-            data_at_thresholds, test, instrument_nature=instrument_nature
-        )
-        assert isinstance(
-            position, float
-        ), "Instruments storing 2D data, such as `Reconstructed`, are not supported."
-
-        cols = pos_to_cols.get(position, [])
-        if (
-            global_multipactor
-            and (additional := pos_to_cols.get(np.nan, None)) is not None
-        ):
-            cols.extend(additional)
-        if global_instruments:
-            raise NotImplementedError
-
-        if not cols:
-            continue
-
-        plot.plot_df_threshold(
-            df=data_at_thresholds[cols],
-            ylabel=getattr(instr, "ylabel", lambda: "???")(),
-            label_to_color=label_to_color,
-            fig_title="",
-            xticks=xticks,
-            axes=axes,
-        )
-
-    if plot_extrema:
-        ax_by_position = {
-            instr.position: ax
-            for instr, ax in zip(instruments, dic_axes.values())
-        }
-        plot.plot_extrema_markers(
-            ax_by_position=ax_by_position,
-            instruments=instruments,
-            extrema=threshold_set.extrema,
-        )
-
-    return data_at_thresholds

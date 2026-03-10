@@ -171,3 +171,4 @@ docs/source/manual/data/campaign_one_probe/*.csv
 docs/source/manual/notebooks/.ipynb_checkpoints/*
 docs/source/manual/.ipynb_checkpoints/*
 src/experimental/*
+.markdownlint.json

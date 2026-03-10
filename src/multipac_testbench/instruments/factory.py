@@ -7,10 +7,12 @@ from typing import Any, Literal
 
 import multipac_testbench.instruments as ins
 import pandas as pd
+from multipac_testbench.instruments.penning import DiffPenning, Penning
 from multipac_testbench.instruments.rpa import RPA
 
 STRING_TO_INSTRUMENT_CLASS = {
     "CurrentProbe": ins.CurrentProbe,
+    "DiffPenning": ins.DiffPenning,
     "ElectricFieldProbe": ins.FieldProbe,
     "FieldProbe": ins.FieldProbe,
     "ForwardPower": ins.ForwardPower,
@@ -23,6 +25,7 @@ STRING_TO_INSTRUMENT_CLASS = {
 }  #:
 INSTRUMENT_NAME_T = Literal[
     "CurrentProbe",
+    "DiffPenning",
     "ElectricFieldProbe",
     "FieldProbe",
     "ForwardPower",
@@ -171,6 +174,10 @@ class InstrumentFactory:
         if rpa is not None:
             virtuals.append(rpa)
 
+        diff_pennings = self._pressure_related(instruments, **kwargs)
+        if diff_pennings is not None:
+            virtuals += diff_pennings
+
         return virtuals
 
     def _power_related(
@@ -225,6 +232,22 @@ class InstrumentFactory:
             rpa_current=current, rpa_potential=potential, **kwargs
         )
         return rpa
+
+    def _pressure_related(
+        self, instruments: Sequence[ins.Instrument], **kwargs
+    ) -> list[DiffPenning] | None:
+        """Create :class:`.DiffPenning`."""
+        pennings = [x for x in instruments if isinstance(x, Penning)]
+        if len(pennings) == 0:
+            logging.debug("No Penning defined. Skipping.")
+            return
+        diff_pennings = [
+            ins.DiffPenning.from_penning(
+                penning=penning, name=f"DiffPenning_{i}", **kwargs
+            )
+            for i, penning in enumerate(pennings)
+        ]
+        return diff_pennings
 
     def _constant_values_defined_by_user(
         self,

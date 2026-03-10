@@ -1,9 +1,9 @@
 """Define general usage functions."""
 
 import logging
-from collections.abc import Callable, Iterable, Iterator, Sequence
+from collections.abc import Callable, Collection, Iterable, Iterator, Sequence
 from pathlib import Path
-from typing import Any, TypeVar
+from typing import Any, TypeGuard, TypeVar
 
 import numpy as np
 import pandas as pd
@@ -220,8 +220,25 @@ def types(my_list: Sequence) -> set[type]:
 
 
 def types_match(my_list: Sequence, to_match: type) -> bool:
-    """Check if all elements of ``my_list`` have type ``type``."""
+    """Check if all elements of ``my_list`` have type ``type``.
+
+    .. deprecated:: 1.9.0
+       Prefer :func:`is_sequence_of`.
+
+    """
+    logging.warning("Deprecated, prefer ``is_sequence_of``.")
     return types(my_list) == {to_match}
+
+
+def is_collection_of(
+    coll: Collection[object], typ: type[T]
+) -> TypeGuard[Collection[T]]:
+    """Return True if all elements of ``coll`` are instances of ``typ``.
+
+    This is a clean replacement of :func:`types_match`.
+
+    """
+    return all(isinstance(x, typ) for x in coll)
 
 
 def drop_repeated_col(

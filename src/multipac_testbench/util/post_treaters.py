@@ -1,24 +1,34 @@
-"""Define various smoothing/smoothing functions for measured data."""
+"""Define various smoothing functions for measured data."""
 
+import logging
 import math
 from typing import Literal
 
 import numpy as np
 from numpy.typing import NDArray
+from scipy.ndimage import minimum_filter1d, uniform_filter1d
 
-CONVOLUTION_MODES = Literal["full", "same", "valid"]
+#: Available modes for the running mean routine.
+CONVOLUTION_MODES_T = Literal[
+    "reflect", "constant", "nearest", "mirror", "wrap"
+]
+DEPRECATED_CONVOLUTION_MODES_T = Literal["full", "same", "valid"]
+#: Deprecated modes for the running mean routine.
+DEPRECATED_CONVOLUTION_MODES = ("full", "same", "valid")
 
 
 def running_mean(
     input_data: NDArray[np.float64],
     n_mean: int,
-    mode: CONVOLUTION_MODES = "full",
+    mode: CONVOLUTION_MODES_T | DEPRECATED_CONVOLUTION_MODES_T = "nearest",
     **kwargs,
 ) -> NDArray[np.float64]:
-    """Compute the runnning mean. Taken from `this link`_.
+    """Compute the running mean.
 
-    .. _this link: https://stackoverflow.com/questions/13728392/\
-moving-average-or-running-mean
+    .. deprecated:: 1.9.0
+       The modes listed in :data:`DEPRECATED_CONVOLUTION_MODES` will call the
+       :func:`numpy.convolve` function. Prefer the :data:`CONVOLUTION_MODES_T`,
+       which will call :func:`scipy.ndimage.uniform_filter1d`.
 
     See Also
     --------
@@ -31,27 +41,56 @@ moving-average-or-running-mean
     n_mean :
         Number of points on which running mean is ran.
     mode :
-        - By default, mode is ``'full``'.  This returns the convolution
-          at each point of overlap, with an output shape of ``(N+M-1,)``. At
-          the end-points of the convolution, the signals do not overlap
-          completely, and boundary effects may be seen.
-        - ``'same'``: Mode ``'same'`` returns output of length ``max(M, N)``.
-          Boundary effects are still visible.
-        - ``'valid'``: Mode ``'valid'`` returns output of length ``max(M, N) -
-          min(M, N) + 1``. The convolution product is only given for points
-          where the signals overlap completely. Values outside the signal
-          boundary have no effect.
-
-        (taken from numpy documentation)
+        Convolution modes. Refer to :func:`scipy.ndimage.uniform_filter1d`
+        documentation, which is the actual function that is called.
 
     Returns
     -------
         Smoothed data.
 
     """
-    return np.convolve(input_data, np.ones(n_mean) / n_mean, mode=mode).astype(
-        np.float64
-    )
+    if mode in DEPRECATED_CONVOLUTION_MODES:
+        logging.warning(
+            "Using deprecated mode, based on np.convolve. Prefer the scipy."
+            "ndimage.uniform_filter1d function, which is more robust on the "
+            "edges."
+        )
+        return np.convolve(
+            input_data, np.ones(n_mean) / n_mean, mode=mode
+        ).astype(np.float64)
+    return uniform_filter1d(input_data, size=n_mean, mode=mode)
+
+
+def lower_envelope(
+    input_data: NDArray[np.float64],
+    envelope_window: int,
+    mode: CONVOLUTION_MODES_T = "nearest",
+) -> NDArray[np.float64]:
+    """Compute the lower envelope, i.e. the signal minimum without the bumps.
+
+    .. todo::
+       Illustration in documentation.
+
+    .. todo::
+       May also use :func:`scipy.ndimage.percentile_filter`. May be more robust
+       with noisy data or occasional downward spikes. To test.
+
+    Parameters
+    ----------
+    input_data :
+        Data to smooth of shape ``N``.
+    envelope_window :
+        Number of points on which lower envelope is taken.
+    mode :
+        Convolution modes. Refer to :func:`scipy.ndimage.minimum_filter1d`
+        documentation, which is the actual function that is called.
+
+    Returns
+    -------
+        Smoothed data.
+
+    """
+    return minimum_filter1d(input_data, size=envelope_window, mode=mode)
 
 
 def average_y_for_nearby_x_within_distance(

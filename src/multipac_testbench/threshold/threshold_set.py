@@ -53,7 +53,7 @@ class ThresholdSet:
         multipac_detector: MULTIPAC_DETECTOR_T,
         detecting_instruments: Iterable[Instrument],
         growth_array: NDArray[np.float64],
-        predicate: THRESHOLD_FILTER_T | None = None,
+        threshold_predicate: THRESHOLD_FILTER_T | None = None,
         threshold_reducer: THRESHOLD_DETECTOR_T | None = None,
     ) -> Self:
         """Create a ThresholdSet using the specified detection strategy.
@@ -76,7 +76,7 @@ class ThresholdSet:
               of the provided detecting instrument.
             - "all": thresholds appear when multipactor is detected by *all*
               the provided detecting instrument.
-        predicate :
+        threshold_predicate :
             Function filtering the thresholds. Applied *after*
             ``threshold_reducer``.
 
@@ -91,7 +91,7 @@ class ThresholdSet:
                     growth_array,
                     detecting_instrument=instr.name,
                     position=instr.position,
-                    predicate=predicate,
+                    threshold_predicate=threshold_predicate,
                     color=instr.color,
                 )
             ]
@@ -108,7 +108,7 @@ class ThresholdSet:
                 growth_array,
                 detecting_instrument=threshold_reducer,
                 position=np.nan,
-                predicate=predicate,
+                threshold_predicate=threshold_predicate,
                 color=(0, 0, 0),
             )
         else:
@@ -119,7 +119,9 @@ class ThresholdSet:
 
     @classmethod
     def last(
-        cls, threshold_set: Self, predicate: THRESHOLD_FILTER_T | None = None
+        cls,
+        threshold_set: Self,
+        threshold_predicate: THRESHOLD_FILTER_T | None = None,
     ) -> Self:
         """
         Create object holding the last threshold measured by every instrument.
@@ -132,7 +134,7 @@ class ThresholdSet:
         ----------
         threshold_set :
             Holds all the detected thresholds.
-        predicate :
+        threshold_predicate :
             Additional predicate, *eg* to exclude thresholds measured during
             the first power cycles, from a specific detecting instrument, of
             a certain type...
@@ -144,7 +146,11 @@ class ThresholdSet:
 
         """
         filtered_thresholds = tuple(
-            [t for t in threshold_set if predicate is None or predicate(t)]
+            [
+                t
+                for t in threshold_set
+                if threshold_predicate is None or threshold_predicate(t)
+            ]
         )
         last_thresholds_by_instr: dict[str, Threshold] = {}
         for t in filtered_thresholds[::-1]:
@@ -155,19 +161,21 @@ class ThresholdSet:
 
     @classmethod
     def subset(
-        cls, threshold_set: Self, predicate: THRESHOLD_FILTER_T
+        cls, threshold_set: Self, threshold_predicate: THRESHOLD_FILTER_T
     ) -> Self:
         """Return object holding a subset of ``threshold_set``.
 
-        ``predicate`` is used to filter on the :class:`.Threshold`.
+        ``threshold_predicate`` is used to filter on the :class:`.Threshold`.
 
         """
-        thresholds = [t for t in threshold_set if predicate(t)]
+        thresholds = [t for t in threshold_set if threshold_predicate(t)]
         return cls(thresholds=thresholds, power_extrema=threshold_set.extrema)
 
     @classmethod
     def extreme(
-        cls, threshold_set: Self, predicate: THRESHOLD_FILTER_T | None = None
+        cls,
+        threshold_set: Self,
+        threshold_predicate: THRESHOLD_FILTER_T | None = None,
     ) -> Self:
         """Create object holding only the most *extreme* :class:`.Threshold`.
 
@@ -185,7 +193,7 @@ class ThresholdSet:
         ----------
         threshold_set :
             The full set of thresholds.
-        predicate :
+        threshold_predicate :
             A function to select relevant thresholds.
 
         Returns
@@ -200,7 +208,7 @@ class ThresholdSet:
 
         subset = []
         for key, thresholds in threshold_set._thresholds_by_half_power_cycle(
-            predicate=predicate
+            threshold_predicate=threshold_predicate
         ).items():
             if not thresholds:
                 continue
@@ -299,11 +307,13 @@ class ThresholdSet:
             pos_to_names[pos] = name
 
     def sample_indexes(
-        self, *, predicate: THRESHOLD_FILTER_T | None = None
+        self, *, threshold_predicate: THRESHOLD_FILTER_T | None = None
     ) -> list[int]:
         """Return sample indexes matching optional filter."""
         return [
-            t.sample_index for t in self if predicate is None or predicate(t)
+            t.sample_index
+            for t in self
+            if threshold_predicate is None or threshold_predicate(t)
         ]
 
     def apply_to(self, instrument: Instrument) -> NDArray[np.float64]:
@@ -335,11 +345,11 @@ class ThresholdSet:
 
         """
         return [
-            x
-            for x in self._thresholds
-            if math.isclose(x.position, position, abs_tol=tol)
+            thresh
+            for thresh in self._thresholds
+            if math.isclose(thresh.position, position, abs_tol=tol)
             or return_global
-            and (np.isnan(x.position) or np.isnan(position))
+            and (thresh.is_global or np.isnan(position))
         ]
 
     def data_at_thresholds(
@@ -395,8 +405,8 @@ class ThresholdSet:
                     math.isclose(
                         instrument.position, threshold.position, abs_tol=tol
                     )
-                    or (global_instruments and np.isnan(instrument.position))
-                    or (global_multipactor and np.isnan(threshold.position))
+                    or (global_instruments and instrument.is_global)
+                    or (global_multipactor and threshold.is_global)
                 )
 
                 if not is_close:
@@ -450,7 +460,7 @@ class ThresholdSet:
 
     def get_threshold_label_color_map(
         self, instruments: Sequence[Instrument]
-    ) -> dict[str, tuple[float, float, float] | None]:
+    ) -> dict[str, tuple[float, float, float]]:
         """Maps threshold dataframe column headers to corresponding colors.
 
         Assumes :attr:`.Threshold.color` is already set to the corresponding
@@ -475,7 +485,7 @@ class ThresholdSet:
         return {t.detecting_instrument for t in self}
 
     def _thresholds_by_half_power_cycle(
-        self, predicate: THRESHOLD_FILTER_T | None = None
+        self, threshold_predicate: THRESHOLD_FILTER_T | None = None
     ) -> dict[str, list[Threshold]]:
         """Group thresholds by half power cycle, based on sample index range.
 
@@ -493,7 +503,7 @@ class ThresholdSet:
 
         Parameters
         ----------
-        predicate :
+        threshold_predicate :
             Filter the :class:`.Threshold` instances.
 
         Returns
@@ -520,7 +530,7 @@ class ThresholdSet:
                 t
                 for t in self
                 if ext1.sample_index <= t.sample_index < ext2.sample_index
-                and (predicate is None or predicate(t))
+                and (threshold_predicate is None or threshold_predicate(t))
             ]
             thresholds_by_cycle[key] = thresholds
 
@@ -540,7 +550,7 @@ class AveragedThresholdSet(ThresholdSet):
     def from_threshold_set(
         cls,
         threshold_set: ThresholdSet,
-        predicate: THRESHOLD_FILTER_T | None = None,
+        threshold_predicate: THRESHOLD_FILTER_T | None = None,
     ) -> Self:
         """Create an object holding averaged thresholds.
 
@@ -548,7 +558,7 @@ class AveragedThresholdSet(ThresholdSet):
         ----------
         threshold_set :
             The thresholds to average.
-        predicate :
+        threshold_predicate :
             To filter thresholds to average. A typical example would be
             ``lambda t: t.sample_index > 200`` to keep only conditioned
             thresholds.
@@ -561,7 +571,9 @@ class AveragedThresholdSet(ThresholdSet):
 
         """
         subset = [
-            t for t in threshold_set if predicate is None or predicate(t)
+            t
+            for t in threshold_set
+            if threshold_predicate is None or threshold_predicate(t)
         ]
         return cls(subset, threshold_set.extrema)
 

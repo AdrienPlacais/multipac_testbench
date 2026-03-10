@@ -61,6 +61,7 @@ filterwarnings = ["ignore:.*cKDTree.*:DeprecationWarning"]
 markers = [
   "notebook: mark tests that rely on the execution of notebook without error",
   "slow: mark slow tests (typically > 5s)",
+  "implementation: mark tests currently under implementation",
 ]
 minversion = "6.0"
 testpaths = ["tests"]
