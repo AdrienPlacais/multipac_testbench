@@ -24,6 +24,7 @@ from multipac_testbench.instruments.predicates import (
     instrument_excluder,
     instrument_name_selector,
     instrument_type_selector,
+    measurement_point_excluder,
 )
 from multipac_testbench.measurement_point.i_measurement_point import (
     IMeasurementPoint,
@@ -67,6 +68,22 @@ def str_ids(instruments: list[Instrument]) -> list[str]:
 def object_ids(instruments: list[Instrument]) -> list[Instrument]:
     """Create a list of :class:`.Instrument` objets."""
     return instruments
+
+
+class _FakeMeasurementPoint(IMeasurementPoint):
+    def __init__(self, instruments: list[Instrument]) -> None:
+        self.instruments = instruments
+
+
+@pytest.fixture
+def measurement_points(
+    instruments: list[Instrument],
+) -> list[IMeasurementPoint]:
+    """Give dummy measurement points."""
+    return [
+        _FakeMeasurementPoint(instruments=instruments[:3]),
+        _FakeMeasurementPoint(instruments=instruments[3:]),
+    ]
 
 
 # =============================================================================
@@ -275,3 +292,78 @@ def test_instrument_excluder_invalid_input(
     """Check that :func:`.instrument_excluder` raises on invalid input."""
     with pytest.raises(InstrumentFilteringError):
         instrument_excluder(instruments_to_ignore)
+
+
+# =============================================================================
+# Test filtering on MeasurementPoints
+# =============================================================================
+@pytest.mark.implementation
+@pytest.mark.parametrize(
+    "instruments_id, predicate, expected",
+    [
+        pytest.param(
+            lf("object_ids"),
+            lfc(
+                lambda measurement_points: measurement_point_excluder(
+                    measurement_points[1:]
+                )
+            ),
+            lfc(lambda instruments: instruments[:3]),
+            id="Exclude mp2, applied on [Instrument instances] input.",
+        ),
+        pytest.param(
+            lf("object_ids"),
+            lfc(
+                lambda measurement_points: measurement_point_excluder(
+                    measurement_points[:1]
+                )
+            ),
+            lfc(lambda instruments: instruments[3:]),
+            id="Exclude mp1, applied on [Instrument instances] input.",
+        ),
+        pytest.param(
+            lf("object_ids"),
+            lfc(
+                lambda measurement_points: measurement_point_excluder(
+                    measurement_points
+                )
+            ),
+            [],
+            id="Exclude all measurement points, applied on [Instrument "
+            "instances] input.",
+        ),
+        pytest.param(
+            lf("str_ids"),
+            lfc(
+                lambda measurement_points: measurement_point_excluder(
+                    measurement_points[1:]
+                )
+            ),
+            lfc(lambda instruments: [str(i) for i in instruments[:3]]),
+            id="Exclude mp2, applied on [str] input.",
+        ),
+        pytest.param(
+            lf("class_ids"),
+            lfc(
+                lambda measurement_points: measurement_point_excluder(
+                    measurement_points[:1]
+                )
+            ),
+            RAISES,
+            id="Exclude mp2, applied on [ABCMeta] input raises.",
+        ),
+    ],
+)
+def test_measurement_point_excluder(
+    instruments_id: INSTRUMENTS_ID,
+    predicate: INSTRUMENT_FILTER,
+    expected: INSTRUMENTS_ID | object,
+) -> None:
+    """Check that :func:`.measurement_point_excluder` returns expected values."""
+    if expected is RAISES:
+        with pytest.raises(InstrumentFilteringError):
+            filter_instruments(instruments_id, predicate)
+        return
+
+    filtered = filter_instruments(instruments_id, predicate)
+    assert filtered == expected
