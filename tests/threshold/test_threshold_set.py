@@ -21,7 +21,7 @@ class MockThresholdSet(ThresholdSet):
         self._by_half_power_cycle = by_half_power_cycle
 
     def _thresholds_by_half_power_cycle(
-        self, predicate: THRESHOLD_FILTER_T | None = None
+        self, threshold_predicate: THRESHOLD_FILTER_T | None = None
     ) -> dict[str, list[Threshold]]:
         return dict(self._by_half_power_cycle)
 

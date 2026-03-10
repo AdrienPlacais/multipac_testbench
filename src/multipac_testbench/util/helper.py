@@ -231,14 +231,14 @@ def types_match(my_list: Sequence, to_match: type) -> bool:
 
 
 def is_collection_of(
-    seq: Collection[object], typ: type[T]
+    coll: Collection[object], typ: type[T]
 ) -> TypeGuard[Collection[T]]:
-    """Return True if all elements of ``seq`` are instances of ``typ``.
+    """Return True if all elements of ``coll`` are instances of ``typ``.
 
     This is a clean replacement of :func:`types_match`.
 
     """
-    return all(isinstance(x, typ) for x in seq)
+    return all(isinstance(x, typ) for x in coll)
 
 
 def drop_repeated_col(

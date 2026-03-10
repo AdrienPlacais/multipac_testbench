@@ -46,6 +46,7 @@ from multipac_testbench.instruments.predicates import (
     INSTRUMENT_FILTER,
     INSTRUMENT_ID,
     INSTRUMENTS_ID,
+    MEASUREMENT_POINTS_ID,
     combine_predicates,
     dummy_instrument_filter,
     filter_instruments,
@@ -83,6 +84,7 @@ from multipac_testbench.util.animate import get_limits
 from multipac_testbench.util.files import load_config
 from multipac_testbench.util.helper import (
     flatten,
+    is_collection_of,
     output_filepath,
     save_by_position,
     split_rows_by_masks,
@@ -252,22 +254,25 @@ class MultipactorTest:
     def _set_x_data(
         self,
         xdata: ABCMeta | None,
+        predicate: INSTRUMENT_FILTER | None = None,
         exclude: Sequence[str] = (),
     ) -> tuple[list[pd.Series], list[str] | None]:
-        """Set the data that will be used for x-axis.
+        r"""Set the data that will be used for x-axis.
 
         Parameters
         ----------
         xdata :
             Class of an instrument, or None (in this case, use default index).
         exclude :
-            Name of instruments to exclude.
+            Name of instruments to exclude. Deprecated, prefer ``predicate``.
+        predicate :
+            :class:`.Instrument` filtering function.
 
         Returns
         -------
-        data_to_plot :
+        data_to_plot : list[pd.Series]
             Contains the data used for x axis.
-        x_columns :
+        x_columns : list[str]  | None
             Name of the column(s) used for x axis.
 
         """
@@ -275,19 +280,18 @@ class MultipactorTest:
             return [], None
 
         instruments = self.get_instruments(
-            xdata, instruments_to_ignore=exclude
+            xdata,
+            instruments_to_ignore=exclude,
+            predicate=predicate,
         )
-        x_columns = [
-            instrument.name
-            for instrument in instruments
-            if instrument.name not in exclude
-        ]
+        x_columns = [instrument.name for instrument in instruments]
 
         data_to_plot = []
         for instrument in instruments:
             if isinstance(instrument.data_as_pd, pd.DataFrame):
                 logging.error(
-                    f"You want to plot {instrument}, which data is 2D. Not supported."
+                    f"You want to plot {instrument}, which data is 2D. Not "
+                    "supported."
                 )
                 continue
             data_to_plot.append(instrument.data_as_pd)
@@ -299,6 +303,7 @@ class MultipactorTest:
         data_to_plot: list[pd.Series | pd.DataFrame],
         *ydata: ABCMeta,
         exclude: Sequence[str] = (),
+        predicate: INSTRUMENT_FILTER | None = None,
         column_names: str | list[str] = "",
         masks: dict[str, NDArray[np.bool]] | None = None,
         **kwargs,
@@ -313,7 +318,10 @@ class MultipactorTest:
         *ydata :
             The class of the instruments to plot.
         exclude :
-            Name of some instruments to exclude.
+            Name of some instruments to exclude. Deprecated, prefer using
+            ``predicate``.
+        predicate :
+            :class:`.Instrument` filtering function.
         column_names :
             To override the default column names. This is used in particular
             with the method :meth:`.TestCampaign.sweet_plot`, when
@@ -343,7 +351,12 @@ class MultipactorTest:
             same :class:`.PickUp`.
 
         """
-        instruments = [self.get_instruments(y) for y in ydata]
+        instruments = [
+            self.get_instruments(
+                y, predicate=predicate, instruments_to_ignore=exclude
+            )
+            for y in ydata
+        ]
         y_columns = []
         color: dict[str, str] = {}
 
@@ -351,12 +364,6 @@ class MultipactorTest:
             sub_ycols = []
 
             for instrument in sublist:
-                if instrument.name in exclude:
-                    logging.debug(
-                        f"Skipping {instrument} because it is excluded."
-                    )
-                    continue
-
                 df = instrument.data_as_pd
                 if masks is not None:
                     df = split_rows_by_masks(df, masks=masks)
@@ -395,9 +402,8 @@ class MultipactorTest:
         instrument_class: ABCMeta,
         power_growth_array_kw: dict[str, Any] | None = None,
         threshold_reducer: THRESHOLD_DETECTOR_T | None = None,
-        predicate: THRESHOLD_FILTER_T | None = None,
-        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
-        instruments_to_ignore: Sequence[Instrument | str] = (),
+        threshold_predicate: THRESHOLD_FILTER_T | None = None,
+        instrument_predicate: INSTRUMENT_FILTER | None = None,
         **kwargs,
     ) -> ThresholdSet:
         """Determine lower and upper multipactor thresholds.
@@ -417,9 +423,11 @@ class MultipactorTest:
             If provided, we consider that multipactor appears when one
             detecting :class:`.Instrument` detected it (``"any"``), or only
             when all detecting :class:`.Instrument` measured it (``"all"``).
-        predicate :
+        threshold_predicate :
             Function filtering the thresholds. Applied *after*
             ``threshold_reducer``.
+        instrument_predicate :
+            :class:`.Instrument` filtering function.
 
         Returns
         -------
@@ -429,9 +437,7 @@ class MultipactorTest:
 
         """
         detecting_instruments = self.get_instruments(
-            instrument_class,
-            measurement_points_to_exclude=measurement_points_to_exclude,
-            instruments_to_ignore=instruments_to_ignore,
+            instrument_class, predicate=instrument_predicate, **kwargs
         )
         growth_array = self._power_growth_array(power_growth_array_kw)
         threshold_set = ThresholdSet.from_instruments(
@@ -439,7 +445,7 @@ class MultipactorTest:
             detecting_instruments,
             growth_array,
             threshold_reducer=threshold_reducer,
-            predicate=predicate,
+            threshold_predicate=threshold_predicate,
         )
         return threshold_set
 
@@ -640,9 +646,9 @@ class MultipactorTest:
     def get_instruments(
         self,
         instruments_id: INSTRUMENTS_ID | None = None,
-        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
-        instruments_to_ignore: INSTRUMENTS_ID = (),
         predicate: INSTRUMENT_FILTER | None = None,
+        measurement_points_to_exclude: MEASUREMENT_POINTS_ID = (),
+        instruments_to_ignore: INSTRUMENTS_ID = (),
     ) -> list[Instrument]:
         """Get all instruments matching ``instrument_id``.
 
@@ -652,14 +658,14 @@ class MultipactorTest:
             Identifies :class:`.Instrument`. Can be one or several
             :class:`.Instrument` types (*eg* :class:`.CurrentProbe`),
             :class:`.Instrument` instances or :attr:`.Instrument.name`.
+        predicate :
+            :class:`.Instrument` filtering function.
         measurement_points_to_exclude :
-            Exclude some measurement points from the filtering.
+            Exclude some measurement points from the filtering. Deprecated,
+            prefer using ``predicate``.
         instruments_to_ignore :
             Instruments to exclude from filtering. Deprecated, prefer using
-            :func:`.instrument_excluder` predicate.
-        predicate :
-            Filtering function; takes in an :class:`.Instrument` instance and
-            returns a boolean.
+            ``predicate``.
 
         Returns
         -------
@@ -670,14 +676,14 @@ class MultipactorTest:
         if predicate is not None:
             predicates.append(predicate)
 
-        if instruments_to_ignore != ():
+        if instruments_to_ignore:
             logging.warning(
                 "`instruments_to_ignore` is deprecated. Prefer using "
-                "`instruments_excluder` predicate function."
+                "`instrument_excluder` predicate function."
             )
             predicates.append(instrument_excluder(instruments_to_ignore))
 
-        if len(measurement_points_to_exclude) > 0:
+        if measurement_points_to_exclude:
             logging.warning(
                 "`measurement_points_to_exclude` is deprecated. Prefer using "
                 "`measurement_point_excluder` predicate function."
@@ -687,22 +693,31 @@ class MultipactorTest:
             )
 
         if instruments_id is None:
+            # Is it necessary?
+            # TODO: see what happens when there is no filter at all
             predicates.append(dummy_instrument_filter)
 
         elif isinstance(instruments_id, ABCMeta) or (
-            isinstance(instruments_id, (tuple, list, set))
-            and types_match(instruments_id, ABCMeta)
+            not isinstance(instruments_id, str)
+            and is_collection_of(instruments_id, ABCMeta)
         ):
             predicates.append(instrument_type_selector(instruments_id))
 
         elif isinstance(instruments_id, str) or (
-            isinstance(instruments_id, (tuple, list, set))
-            and types_match(instruments_id, str)
+            not isinstance(instruments_id, ABCMeta)
+            and is_collection_of(instruments_id, str)
         ):
             predicates.append(instrument_name_selector(instruments_id))
 
+        elif not isinstance(
+            instruments_id, (ABCMeta, str)
+        ) and is_collection_of(instruments_id, Instrument):
+            predicates.append(
+                instrument_name_selector([str(i) for i in instruments_id])
+            )
+
         else:
-            raise ValueError("Error in input data")
+            raise ValueError(f"Unsupported {instruments_id = }")
 
         return filter_instruments(
             self.instruments, combine_predicates(*predicates)
@@ -711,42 +726,92 @@ class MultipactorTest:
     @overload
     def get_instrument(
         self,
-        instrument_id: INSTRUMENT_ID,
+        instrument_id: INSTRUMENT_ID | INSTRUMENTS_ID,
         raise_missing_error: Literal[False],
-        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
-        instruments_to_ignore: Sequence[Instrument | str] = (),
+        predicate: INSTRUMENT_FILTER | None = None,
+        measurement_points_to_exclude: MEASUREMENT_POINTS_ID = (),
+        instruments_to_ignore: INSTRUMENTS_ID = (),
     ) -> Instrument | None: ...
     @overload
     def get_instrument(
         self,
-        instrument_id: INSTRUMENT_ID,
+        instrument_id: INSTRUMENT_ID | INSTRUMENTS_ID,
         raise_missing_error: Literal[True] = True,
-        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
-        instruments_to_ignore: Sequence[Instrument | str] = (),
+        predicate: INSTRUMENT_FILTER | None = None,
+        measurement_points_to_exclude: MEASUREMENT_POINTS_ID = (),
+        instruments_to_ignore: INSTRUMENTS_ID = (),
     ) -> Instrument: ...
     def get_instrument(
         self,
-        instrument_id: INSTRUMENT_ID,
+        instrument_id: INSTRUMENT_ID | INSTRUMENTS_ID,
         raise_missing_error: bool = True,
-        measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
-        instruments_to_ignore: Sequence[Instrument | str] = (),
+        predicate: INSTRUMENT_FILTER | None = None,
+        measurement_points_to_exclude: MEASUREMENT_POINTS_ID = (),
+        instruments_to_ignore: INSTRUMENTS_ID = (),
     ) -> Instrument | None:
-        """Get a single instrument matching ``instrument_id``."""
+        """Get a single instrument matching ``instrument_id``.
+
+        Parameters
+        ----------
+        instrument_id :
+            Identifies one (or several) :class:`.Instrument`. If several
+            :class:`.Instrument` instances can be returned, you must specify
+            ``predicate`` to filter all instances but one.
+        raise_missing_error :
+            If an error should be raised when no corresponding
+            :class:`.Instrument` is found.
+        predicate :
+            :class:`.Instrument` filtering function.
+        to_exclude :
+            Exclude some measurement points from the filtering. Deprecated,
+            prefer using ``predicate``.
+        instruments_to_ignore :
+            Instruments to exclude from filtering. Deprecated, prefer using
+            ``predicate``.
+
+        Returns
+        -------
+            A single :class:`.Instrument` instance. If several instances were
+            found, we raise a warning but still return an :class:`.Instrument`
+            (the *first* one; may change between executions!).
+
+        Raises
+        ------
+        MissingInstrumentError
+            When no matching :class:`.Instrument` was found, if
+            ``raise_missing_error`` is set to True.
+
+        """
+        instruments: list[Instrument] = []
         match instrument_id:
             case Instrument():
                 return instrument_id
             case str() as instrument_name:
-                instruments = self.get_instruments((instrument_name,))
+                instruments = self.get_instruments(
+                    instruments_id=(instrument_name,),
+                    predicate=predicate,
+                    measurement_points_to_exclude=measurement_points_to_exclude,
+                    instruments_to_ignore=instruments_to_ignore,
+                )
             case ABCMeta() as instrument_class:
                 instruments = self.get_instruments(
-                    instrument_class,
-                    measurement_points_to_exclude,
-                    instruments_to_ignore,
+                    instruments_id=instrument_class,
+                    predicate=predicate,
+                    measurement_points_to_exclude=measurement_points_to_exclude,
+                    instruments_to_ignore=instruments_to_ignore,
+                )
+            case _:
+                instruments = self.get_instruments(
+                    instruments_id=instrument_id,
+                    predicate=predicate,
+                    measurement_points_to_exclude=measurement_points_to_exclude,
+                    instruments_to_ignore=instruments_to_ignore,
                 )
 
         if len(instruments) == 0:
             if raise_missing_error:
                 raise MissingInstrumentError(f"No {instrument_id} found.")
+            logging.debug(f"No {instrument_id} found.")
             return None
         if len(instruments) > 1:
             logging.warning("Several instruments found. Returning first one.")

@@ -22,6 +22,9 @@ INSTRUMENTS_ID = (
 #: False if it should be discarded.
 INSTRUMENT_FILTER = Callable[[INSTRUMENT_ID], bool]
 
+#: Identifier for measurement points, used in deprecated filtering arguments.
+MEASUREMENT_POINTS_ID = Collection[IMeasurementPoint] | Collection[str]
+
 
 class InstrumentFilteringError(ValueError):
     """Error raised when filtering logic was inconsistent."""
@@ -197,7 +200,7 @@ def instrument_excluder(
 
 
 def measurement_point_excluder(
-    measurement_points: Collection[IMeasurementPoint] | Collection[str],
+    measurement_points: MEASUREMENT_POINTS_ID,
 ) -> INSTRUMENT_FILTER:
     """Create filter that rejects instruments located at `measurement_points`.
 

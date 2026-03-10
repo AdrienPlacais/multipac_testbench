@@ -18,6 +18,7 @@ from multipac_testbench.instruments.electric_field.field_probe import (
 )
 from multipac_testbench.instruments.instrument import Instrument
 from multipac_testbench.instruments.power import ForwardPower
+from multipac_testbench.instruments.predicates import INSTRUMENT_FILTER
 from multipac_testbench.instruments.reflection_coefficient import (
     ReflectionCoefficient,
 )
@@ -142,7 +143,8 @@ class TestCampaign(list[MultipactorTest]):
         instrument_class: ABCMeta,
         power_growth_array_kw: dict[str, Any] | None = None,
         threshold_reducer: THRESHOLD_DETECTOR_T | None = None,
-        predicate: THRESHOLD_FILTER_T | None = None,
+        threshold_predicate: THRESHOLD_FILTER_T | None = None,
+        instrument_predicate: INSTRUMENT_FILTER | None = None,
         **kwargs,
     ) -> dict[MultipactorTest, ThresholdSet]:
         """Determine every :class:`.MultipactorTest` multipactor thresholds.
@@ -162,9 +164,11 @@ class TestCampaign(list[MultipactorTest]):
             If provided, we consider that multipactor appears when one
             detecting :class:`.Instrument` detected it (``"any"``), or only
             when all detecting :class:`.Instrument` measured it (``"all"``).
-        predicate :
+        threshold_predicate :
             Function filtering the thresholds. Applied *after*
             ``threshold_reducer``.
+        instrument_predicate :
+            :class:`.Instrument` filtering function.
 
         Returns
         -------
@@ -179,7 +183,8 @@ class TestCampaign(list[MultipactorTest]):
                 instrument_class,
                 power_growth_array_kw,
                 threshold_reducer=threshold_reducer,
-                predicate=predicate,
+                threshold_predicate=threshold_predicate,
+                instrument_predicate=instrument_predicate,
                 **kwargs,
             )
             for test in self
