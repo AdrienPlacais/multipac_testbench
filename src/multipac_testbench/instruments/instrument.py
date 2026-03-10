@@ -70,6 +70,7 @@ class Instrument(ABC):
             file.
 
         """
+        #: Name of the instrument.
         self.name = name
         logging.debug(
             f"Creating a {self.__class__.__name__} named {name} at "
@@ -107,6 +108,10 @@ class Instrument(ABC):
         self._callbacks: list[CALLBACK_T] = []
 
     def __str__(self) -> str:
+        """Give concise information on instrument."""
+        return self.name
+
+    def __repr__(self) -> str:
         """Give concise information on instrument."""
         out = f"{self.class_name} ({self.name})"
         return out
@@ -635,6 +640,3 @@ class Instrument(ABC):
         ]
         is_growing[-1] = 0.0
         return np.array(is_growing, dtype=np.float64)
-
-
-INSTRUMENT_FILTER = Callable[[Instrument], bool]

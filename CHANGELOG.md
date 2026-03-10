@@ -13,6 +13,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `quantity_is_above_local_average` multipactor detector.
   - Use `scripts.multipactor_detection_quantity` to tune it.
 
+### Changed
+
+- Filtering of instruments is now performed thanks to predicates passed to
+  `MultipactorTest.get_instruments`:
+
+  ```python
+  # The predicates are defined in instruments.predicates
+  predicate = instrument_name_selector(("NI9205_MP5l", "NI9205_MP6l"))
+  some_current_probes = multipactor_test.get_instruments(predicate=predicate)
+
+  predicate = instrument_type_selector(CurrentProbe)
+  all_current_probes = multipactor_test.get_instruments(predicate=predicate)
+
+  # Note that several class/names can be given to these predicates
+  predicate = instrument_type_selector([CurrentProbe, FieldProbe])
+  # Other examples
+  predicate = measurement_point_excluder(["PU4", "PU8"])
+  ```
+
+  #TODO `measurement_point_excluder`
+
+- Use `instruments.predicates.combine_predicates` function to combine several
+  predicates:
+
+  ```python
+  predicate_current = instrument_type_selector(CurrentProbe)
+  predicate_exclud = instrument_excluder("NI9205_MP5l")
+  # Will return all current probes but the one named 'NI9205_MP5l'
+  predicate = combine_predicates(predicate_current, predicate_exclud)
+
+  ```
+
+### Deprecated
+
+- The `measurement_points_to_exclude`, `instruments_to_ignore` keyword
+  arguments Prefer passing predicates created with `instrument_excluder`,
+  `measurement_point_excluder`. Methods that used these keywords:
+  - `MultipactorTest.get_instruments()`
+  - `MultipactorTest.determine_thresholds()` #TODO
+  - `MultipactorTest.sweet_plot()` (`exclude` keyword) #TODO
+
 ### Fixed
 
 - `dBm` of `PowerStep` is read from the header instead of the file name.
@@ -23,7 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Missing dependency when running `pytest` from gh actions.
+- Missing dependency when running `pytest` from GitHub actions.
 
 ## [1.8.1] - 2025-08-01
 

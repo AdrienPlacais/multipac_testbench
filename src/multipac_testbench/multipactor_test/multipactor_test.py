@@ -42,12 +42,28 @@ from multipac_testbench.instruments import (
     Reconstructed,
     ReflectionCoefficient,
 )
+from multipac_testbench.instruments.predicates import (
+    INSTRUMENT_FILTER,
+    INSTRUMENT_ID,
+    INSTRUMENTS_ID,
+    combine_predicates,
+    dummy_instrument_filter,
+    filter,
+    instrument_excluder,
+    instrument_name_selector,
+    instrument_type_selector,
+    measurement_point_excluder,
+)
 from multipac_testbench.measurement_point.factory import (
     IMeasurementPointFactory,
+)
+from multipac_testbench.measurement_point.global_diagnostics import (
+    GlobalDiagnostics,
 )
 from multipac_testbench.measurement_point.i_measurement_point import (
     IMeasurementPoint,
 )
+from multipac_testbench.measurement_point.pick_up import PickUp
 from multipac_testbench.multipactor_test.loader import TRIGGER_POLICIES, load
 from multipac_testbench.threshold.helper import (
     extract_detecting_name,
@@ -74,6 +90,7 @@ from multipac_testbench.util.helper import (
 )
 from multipac_testbench.util.physics import swr_to_reflection
 from multipac_testbench.util.types import MULTIPAC_DETECTOR_T
+from numpy.typing import NDArray
 
 T = TypeVar("T", bound=Callable[..., Any])
 
@@ -219,6 +236,18 @@ class MultipactorTest:
         if isinstance(measurement_point, str):
             measurement_point = self.get_measurement_point(measurement_point)
         measurement_point.add_instrument(instrument)
+
+    @property
+    def instruments(self) -> list[Instrument]:
+        """Get all stored instruments."""
+        points: list[PickUp | GlobalDiagnostics] = []
+        points.extend(self.pick_ups)
+        if self.global_diagnostics is not None:
+            points.append(self.global_diagnostics)
+
+        instruments = [point.instruments for point in points]
+
+        return list(itertools.chain(*instruments))
 
     def _set_x_data(
         self,
@@ -610,67 +639,77 @@ class MultipactorTest:
 
     def get_instruments(
         self,
-        instruments_id: (
-            ABCMeta
-            | Sequence[ABCMeta]
-            | Sequence[str]
-            | Sequence[Instrument]
-            | None
-        ) = None,
+        instruments_id: INSTRUMENTS_ID | None = None,
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
-        instruments_to_ignore: Sequence[Instrument | str] = (),
+        instruments_to_ignore: INSTRUMENTS_ID = (),
+        predicate: INSTRUMENT_FILTER | None = None,
     ) -> list[Instrument]:
-        """Get all instruments matching ``instrument_id``."""
-        match instruments_id:
-            case None:
-                points: Collection[IMeasurementPoint] = self.pick_ups
-                if self.global_diagnostics is not None:
-                    points.append(self.global_diagnostics)
-                instruments = [point.instruments for point in points]
-                return list(itertools.chain(*instruments))
+        """Get all instruments matching ``instrument_id``.
 
-            case list() | tuple() as instruments if types_match(
-                instruments, Instrument
-            ):
-                return instruments
+        Parameters
+        ----------
+        instruments_id :
+            Identifies :class:`.Instrument`. Can be one or several
+            :class:`.Instrument` types (*eg* :class:`.CurrentProbe`),
+            :class:`.Instrument` instances or :attr:`.Instrument.name`.
+        measurement_points_to_exclude :
+            Exclude some measurement points from the filtering.
+        instruments_to_ignore :
+            Instruments to exclude from filtering. Deprecated, prefer using
+            :func:`.instrument_excluder` predicate.
+        predicate :
+            Filtering function; takes in an :class:`.Instrument` instance and
+            returns a boolean.
 
-            case list() | tuple() as names if types_match(names, str):
-                out = self._instruments_by_name(names)
+        Returns
+        -------
+            List of desired instruments.
 
-            case list() | tuple() as classes if types_match(classes, ABCMeta):
-                measurement_points = self.get_measurement_points(
-                    to_exclude=measurement_points_to_exclude
-                )
-                out_2d = [
-                    self._instruments_by_class(
-                        instrument_class,
-                        measurement_points,
-                        instruments_to_ignore=instruments_to_ignore,
-                    )
-                    for instrument_class in classes
-                ]
-                out = list(itertools.chain.from_iterable(out_2d))
+        """
+        predicates: list[INSTRUMENT_FILTER] = []
+        if predicate is not None:
+            predicates.append(predicate)
 
-            case ABCMeta() as instrument_class:
-                measurement_points = self.get_measurement_points(
-                    to_exclude=measurement_points_to_exclude
-                )
-                out = self._instruments_by_class(
-                    instrument_class,
-                    measurement_points,
-                    instruments_to_ignore=instruments_to_ignore,
-                )
-            case _:
-                raise OSError(
-                    f"``instruments`` is {type(instruments_id)} which ",
-                    "is not supported.",
-                )
-        return out
+        if instruments_to_ignore != ():
+            logging.warning(
+                "`instruments_to_ignore` is deprecated. Prefer using "
+                "`instruments_excluder` predicate function."
+            )
+            predicates.append(instrument_excluder(instruments_to_ignore))
+
+        if len(measurement_points_to_exclude) > 0:
+            logging.warning(
+                "`measurement_points_to_exclude` is deprecated. Prefer using "
+                "`measurement_point_excluder` predicate function."
+            )
+            predicates.append(
+                measurement_point_excluder(measurement_points_to_exclude)
+            )
+
+        if instruments_id is None:
+            predicates.append(dummy_instrument_filter)
+
+        elif isinstance(instruments_id, ABCMeta) or (
+            isinstance(instruments_id, (tuple, list, set))
+            and types_match(instruments_id, ABCMeta)
+        ):
+            predicates.append(instrument_type_selector(instruments_id))
+
+        elif isinstance(instruments_id, str) or (
+            isinstance(instruments_id, (tuple, list, set))
+            and types_match(instruments_id, str)
+        ):
+            predicates.append(instrument_name_selector(instruments_id))
+
+        else:
+            raise ValueError("Error in input data")
+
+        return filter(self.instruments, combine_predicates(*predicates))
 
     @overload
     def get_instrument(
         self,
-        instrument_id: ABCMeta | str | Instrument,
+        instrument_id: INSTRUMENT_ID,
         raise_missing_error: Literal[False],
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
         instruments_to_ignore: Sequence[Instrument | str] = (),
@@ -678,14 +717,14 @@ class MultipactorTest:
     @overload
     def get_instrument(
         self,
-        instrument_id: ABCMeta | str | Instrument,
+        instrument_id: INSTRUMENT_ID,
         raise_missing_error: Literal[True] = True,
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
         instruments_to_ignore: Sequence[Instrument | str] = (),
     ) -> Instrument: ...
     def get_instrument(
         self,
-        instrument_id: ABCMeta | str | Instrument,
+        instrument_id: INSTRUMENT_ID,
         raise_missing_error: bool = True,
         measurement_points_to_exclude: Sequence[IMeasurementPoint | str] = (),
         instruments_to_ignore: Sequence[Instrument | str] = (),
