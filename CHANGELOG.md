@@ -32,7 +32,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   predicate = measurement_point_excluder(["PU4", "PU8"])
   ```
 
-  #TODO `measurement_point_excluder`
   - The actual function called under the hood is `filter` in the
     `instruments.predicates` module.
 
@@ -53,8 +52,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   arguments Prefer passing predicates created with `instrument_excluder`,
   `measurement_point_excluder`. Methods that used these keywords:
   - `MultipactorTest.get_instruments()`
-  - `MultipactorTest.determine_thresholds()` #TODO
-  - `MultipactorTest.sweet_plot()` (`exclude` keyword) #TODO
+  - `MultipactorTest.determine_thresholds()`
+  - `MultipactorTest.sweet_plot()` (`exclude` keyword)
+  - `TestCampaign.determine_thresholds()`
 
 ### Fixed
 
