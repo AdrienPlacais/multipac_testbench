@@ -16,7 +16,9 @@ from matplotlib.figure import Figure
 from multipac_testbench.instruments.electric_field.field_probe import (
     FieldProbe,
 )
+from multipac_testbench.instruments.instrument import Instrument
 from multipac_testbench.instruments.power import ForwardPower
+from multipac_testbench.instruments.predicates import INSTRUMENT_FILTER
 from multipac_testbench.instruments.reflection_coefficient import (
     ReflectionCoefficient,
 )
@@ -36,7 +38,7 @@ from multipac_testbench.threshold.threshold import (
 from multipac_testbench.threshold.threshold_set import ThresholdSet
 from multipac_testbench.util import log_manager, plot
 from multipac_testbench.util.files import load_config
-from multipac_testbench.util.types import MULTIPAC_DETECTOR_T
+from multipac_testbench.util.types import MULTIPAC_DETECTOR_T, POST_TREATER_T
 
 T = TypeVar("T", bound=Callable[..., Any])
 
@@ -126,10 +128,14 @@ class TestCampaign(list[MultipactorTest]):
             multipactor_tests.append(multipactor_test)
         return cls(multipactor_tests)
 
-    def add_post_treater(self, *args, **kwargs) -> None:
+    def add_post_treater(
+        self,
+        post_treater: POST_TREATER_T,
+        instrument_class: ABCMeta = Instrument,
+    ) -> None:
         """Add post-treatment functions to instruments."""
         for test in self:
-            test.add_post_treater(*args, **kwargs)
+            test.add_post_treater(post_treater, instrument_class)
 
     def determine_thresholds(
         self,
@@ -137,7 +143,8 @@ class TestCampaign(list[MultipactorTest]):
         instrument_class: ABCMeta,
         power_growth_array_kw: dict[str, Any] | None = None,
         threshold_reducer: THRESHOLD_DETECTOR_T | None = None,
-        predicate: THRESHOLD_FILTER_T | None = None,
+        threshold_predicate: THRESHOLD_FILTER_T | None = None,
+        instrument_predicate: INSTRUMENT_FILTER | None = None,
         **kwargs,
     ) -> dict[MultipactorTest, ThresholdSet]:
         """Determine every :class:`.MultipactorTest` multipactor thresholds.
@@ -157,9 +164,11 @@ class TestCampaign(list[MultipactorTest]):
             If provided, we consider that multipactor appears when one
             detecting :class:`.Instrument` detected it (``"any"``), or only
             when all detecting :class:`.Instrument` measured it (``"all"``).
-        predicate :
+        threshold_predicate :
             Function filtering the thresholds. Applied *after*
             ``threshold_reducer``.
+        instrument_predicate :
+            :class:`.Instrument` filtering function.
 
         Returns
         -------
@@ -174,7 +183,8 @@ class TestCampaign(list[MultipactorTest]):
                 instrument_class,
                 power_growth_array_kw,
                 threshold_reducer=threshold_reducer,
-                predicate=predicate,
+                threshold_predicate=threshold_predicate,
+                instrument_predicate=instrument_predicate,
                 **kwargs,
             )
             for test in self
@@ -343,12 +353,15 @@ class TestCampaign(list[MultipactorTest]):
         png_folder: Path | str | None = None,
         png_kwargs: dict[str, Any] | None = None,
         csv_folder: str | None = None,
+        all_on_same_plot: bool = True,
         **kwargs,
     ) -> tuple[list[list[Axes]], list[pd.DataFrame]]:
         """Recursively call :meth:`.MultipactorTest.plot_thresholds`."""
         all_axes = []
         all_df = []
-        for test, threshold_set in thresholds_sets.items():
+        axes = None
+        colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
+        for i, (test, threshold_set) in enumerate(thresholds_sets.items()):
             png_path = (
                 test.output_filepath(png_folder, ".png")
                 if png_folder is not None
@@ -360,6 +373,12 @@ class TestCampaign(list[MultipactorTest]):
                 else None
             )
 
+            if not all_on_same_plot:
+                axes = None
+                test_color = None
+            else:
+                test_color = colors[i]
+
             axes, df_plot = test.plot_thresholds(
                 to_plot,
                 threshold_set,
@@ -367,6 +386,8 @@ class TestCampaign(list[MultipactorTest]):
                 png_path=png_path,
                 png_kwargs=png_kwargs,
                 csv_path=csv_path,
+                axes=axes,
+                test_color=test_color,
                 **kwargs,
             )
             all_axes.append(axes)
@@ -858,7 +879,7 @@ class TestCampaign(list[MultipactorTest]):
 
         fig_kwargs = {
             "df": df,
-            "ylabel": getattr(ydata, "ylabel", lambda: "???")(),
+            "ylabel": getattr(ydata, "ylabel", plot.default_ylabel)(),
             "xlim": xlim or (80, 700),
             "ylim": ylim or (1e1, 1e7),
         } | (fig_kwargs or {})

@@ -71,7 +71,7 @@ def fix_wrong_e_field_calibration(
         they should be read from ``filepath_bad`` directly.
 
     """
-    data = load(filepath_bad, sep=sep)
+    data, _ = load(filepath_bad, sep=sep)
 
     if not all((g_probe_bad, a_rack_bad, b_rack_bad)):
         g_probe_bad, a_rack_bad, b_rack_bad = read_e_field_probe_calibration(

@@ -3,6 +3,7 @@
 import inspect
 import logging
 from abc import ABC
+from copy import deepcopy
 from typing import Callable, Self
 
 import numpy as np
@@ -12,7 +13,7 @@ from matplotlib.container import StemContainer
 from matplotlib.lines import Line2D
 from multipac_testbench.util.filtering import (
     array_is_growing,
-    remove_isolated_false,
+    clean_boolean_mask,
     remove_trailing_true,
 )
 from multipac_testbench.util.types import CALLBACK_T, POST_TREATER_T
@@ -32,6 +33,7 @@ class Instrument(ABC):
         is_2d: bool = False,
         color: tuple[float, float, float] | None = None,
         is_raw: bool = False,
+        relatable_thresholds: bool = True,
         **kwargs,
     ) -> None:
         """Instantiate the class.
@@ -59,11 +61,16 @@ class Instrument(ABC):
             :attr:`._transfer_functions` are directly appended to the list of
             post-treaters. They are used to convert raw data (ie: acquisition
             voltages) to physical quantities.
+        relatable_thresholds :
+            Whether ``threshold_set`` argument of ``sweet_plot`` methods should
+            produce scatter plots marking thresholds positions for this
+            instrument.
         kwargs :
             Additional keyword arguments coming from the ``TOML`` configuration
             file.
 
         """
+        #: Name of the instrument.
         self.name = name
         logging.debug(
             f"Creating a {self.__class__.__name__} named {name} at "
@@ -91,6 +98,7 @@ class Instrument(ABC):
         if is_raw:
             for func in self._transfer_functions:
                 self.add_post_treater(func)
+        self.relatable_thresholds = relatable_thresholds
 
         #: Functions to call when a post-treater is added to current object.
         #:
@@ -101,8 +109,30 @@ class Instrument(ABC):
 
     def __str__(self) -> str:
         """Give concise information on instrument."""
+        return self.name
+
+    def __repr__(self) -> str:
+        """Give concise information on instrument."""
         out = f"{self.class_name} ({self.name})"
         return out
+
+    @property
+    def is_global(self) -> bool:
+        """Tell if instrument is global by checking if ``position`` is nan."""
+        return bool(np.isnan(self.position))
+
+    def copy(self) -> Self:
+        """Deep copy of the instrument."""
+        return deepcopy(self)
+
+    def replace(self, **overrides) -> Self:
+        """Copy with modified attributes."""
+        new = self.copy()
+        for name, value in overrides.items():
+            if not hasattr(new, name):
+                raise AttributeError(name)
+            setattr(new, name, value)
+        return new
 
     @classmethod
     def ylabel(cls) -> str:
@@ -314,10 +344,9 @@ class Instrument(ABC):
 
     def _get_plot_methods(self, is_2d: bool) -> tuple[Callable, Callable]:
         """Give the proper plotting functions according to ``is_2d``."""
-        plotters = (self._plot_vs_position_for_1d, self._scatter_data_1d)
         if is_2d:
-            plotters = (self._plot_vs_position_for_2d, self._scatter_data_2d)
-        return plotters
+            return self._plot_vs_position_for_2d, self._scatter_data_2d
+        return self._plot_vs_position_for_1d, self._scatter_data_1d
 
     def _plot_vs_position_for_1d(
         self,
@@ -548,10 +577,9 @@ class Instrument(ABC):
         growth_mask = np.array(is_growing, dtype=np.bool)
 
         # Remove isolated False (useful for noisy instruments)
-        if minimum_number_of_points > 0:
-            growth_mask = remove_isolated_false(
-                growth_mask, minimum_number_of_points
-            )
+        growth_mask = clean_boolean_mask(
+            growth_mask, min_true=0, max_false_gap=minimum_number_of_points
+        )
 
         # Ensure that last growth is False (useful for Power)
         if n_trailing_points_to_check > 0:

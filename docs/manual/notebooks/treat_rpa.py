@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Define a classic workflow to study the RPA signals."""
+
 import tomllib
 from pathlib import Path
 

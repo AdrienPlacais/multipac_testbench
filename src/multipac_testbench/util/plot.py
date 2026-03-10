@@ -721,6 +721,7 @@ def add_thresholds(
     **kwargs,
 ) -> Axes | list[Axes]:
     """Add the thresholds position to a pre-existing plot."""
+    raise NotImplementedError("This is deprecated I think.")
     if isinstance(axes, list):
         axes_aslist = [
             add_instrument_multipactor_bands(
@@ -888,3 +889,8 @@ def styles_from_column_cycle(
             style_map[col] = {"linestyle": next(cycle)}
 
     return style_map
+
+
+def default_ylabel() -> str:
+    """Produce a default y-label."""
+    return "???"

@@ -53,13 +53,18 @@ class Threshold:
     #: Color of the :class:`.Instrument` that detected this threshold.
     color: tuple[float, float, float] = (1.0, 1.0, 1.0)
 
+    @property
+    def is_global(self) -> bool:
+        """Tell if threshold is global by checking if ``position`` is nan."""
+        return bool(np.isnan(self.position))
+
 
 def create_thresholds(
     multipactor: NDArray[np.bool],
     growth_array: NDArray[np.float64],
     detecting_instrument: str | THRESHOLD_DETECTOR_T,
     position: float,
-    predicate: THRESHOLD_FILTER_T | None = None,
+    threshold_predicate: THRESHOLD_FILTER_T | None = None,
     color: tuple[float, float, float] | None = None,
 ) -> list[Threshold]:
     """Create threshold objects corresponding to a single detecting instrument.
@@ -78,7 +83,7 @@ def create_thresholds(
     position :
         Position of :class:`.Instrument` that created the ``multipactor``
         array.
-    predicate :
+    threshold_predicate :
         Function filtering the created thresholds.
     color :
         Color of the detecting instrument.
@@ -137,7 +142,11 @@ def create_thresholds(
                 color=actual_color,
             )
         )
-    return [t for t in thresholds if predicate is None or predicate(t)]
+    return [
+        t
+        for t in thresholds
+        if threshold_predicate is None or threshold_predicate(t)
+    ]
 
 
 @dataclass
