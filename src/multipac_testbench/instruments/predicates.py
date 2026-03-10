@@ -8,7 +8,7 @@ from multipac_testbench.instruments import Instrument
 from multipac_testbench.measurement_point.i_measurement_point import (
     IMeasurementPoint,
 )
-from multipac_testbench.util.helper import types_match
+from multipac_testbench.util.helper import is_sequence_of
 
 #: :class:`Instrument` identifier.
 INSTRUMENT_ID = ABCMeta | Instrument | str
@@ -24,18 +24,32 @@ class InstrumentFilteringError(ValueError):
     """Error raised when filtering logic was inconsistent."""
 
 
-def _to_name_set(
-    instruments_to_ignore: Sequence[Instrument | str],
-) -> set[str]:
-    """Normalize a sequence of instruments or names into a set of strings."""
-    if types_match(instruments_to_ignore, Instrument):
-        return {str(i) for i in instruments_to_ignore}
-    if types_match(instruments_to_ignore, str):
-        return {str(i) for i in instruments_to_ignore}
-    raise InstrumentFilteringError(
+def _to_name_set(instruments_to_ignore: INSTRUMENTS_ID) -> set[str]:
+    """Normalize instruments or names into a set of strings.
+
+    Raises
+    ------
+    InstrumentFilteringError
+        If ``instruments_to_ignore`` contains or is an :class:`ABCMeta`.
+
+    """
+    _error = InstrumentFilteringError(
         "name-based filters must be created with (list of) names or "
         "Instrument instances."
     )
+    if isinstance(instruments_to_ignore, ABCMeta):
+        raise _error
+    if not isinstance(instruments_to_ignore, Sequence) or isinstance(
+        instruments_to_ignore, str
+    ):
+        instruments_to_ignore = (instruments_to_ignore,)
+    if is_sequence_of(instruments_to_ignore, ABCMeta):
+        raise _error
+    if is_sequence_of(instruments_to_ignore, Instrument) or is_sequence_of(
+        instruments_to_ignore, str
+    ):
+        return {str(i) for i in instruments_to_ignore}
+    raise _error
 
 
 def dummy_instrument_filter(instrument_id: INSTRUMENT_ID) -> bool:
@@ -146,17 +160,7 @@ def instrument_excluder(
         :class:`.Instrument` types.
 
     """
-    if isinstance(instruments_to_ignore, ABCMeta):
-        raise InstrumentFilteringError(
-            "name-based filters must be created with (list of) names or "
-            "Instrument instances."
-        )
-    if not isinstance(instruments_to_ignore, Sequence) or isinstance(
-        instruments_to_ignore, str
-    ):
-        instruments_to_ignore = (instruments_to_ignore,)
-
-    as_set = _to_name_set(instruments_to_ignore)
+    as_set_of_names = _to_name_set(instruments_to_ignore)
 
     def predicate(instrument_id: INSTRUMENT_ID) -> bool:
         """Reject instruments whose name is in ``as_set``.
@@ -172,7 +176,7 @@ def instrument_excluder(
                     "names, they do not work on Instrument classes."
                 )
             case Instrument():
-                return as_set.isdisjoint(
+                return as_set_of_names.isdisjoint(
                     (
                         str(instrument_id),
                         repr(instrument_id),
@@ -180,11 +184,10 @@ def instrument_excluder(
                     )
                 )
             case str():
-                return instrument_id not in as_set
+                return instrument_id not in as_set_of_names
             case _:
                 raise InstrumentFilteringError(
-                    f"instrument_id is a {type(instrument_id)}, which is not"
-                    "supported."
+                    f"instrument_id is a {type(instrument_id)}, which is not supported."
                 )
 
     return predicate
