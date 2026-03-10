@@ -20,7 +20,7 @@ from multipac_testbench.instruments.predicates import (
     InstrumentFilteringError,
     combine_predicates,
     dummy_instrument_filter,
-    filter,
+    filter_instruments,
     instrument_excluder,
     instrument_name_selector,
     instrument_type_selector,
@@ -67,15 +67,15 @@ def test_filter_return_type(
     class_ids: list[ABCMeta], str_ids: list[str], object_ids: list[Instrument]
 ) -> None:
     """Check that :func:`.predicates.filter` returns the correct type."""
-    filtered = filter(class_ids, dummy_instrument_filter)
+    filtered = filter_instruments(class_ids, dummy_instrument_filter)
     assert isinstance(filtered, list)
     assert all(isinstance(x, ABCMeta) for x in filtered)
 
-    filtered = filter(str_ids, dummy_instrument_filter)
+    filtered = filter_instruments(str_ids, dummy_instrument_filter)
     assert isinstance(filtered, list)
     assert all(isinstance(x, str) for x in filtered)
 
-    filtered = filter(object_ids, dummy_instrument_filter)
+    filtered = filter_instruments(object_ids, dummy_instrument_filter)
     assert isinstance(filtered, list)
     assert all(isinstance(x, Instrument) for x in filtered)
 
@@ -244,9 +244,9 @@ def test_filter_returned_values(
 ) -> None:
     """Check that :func:`.predicates.filter` returns the expected values."""
     if expected is not None:
-        filtered = filter(instruments_id, predicate)
+        filtered = filter_instruments(instruments_id, predicate)
         assert filtered == expected
         return
 
     with pytest.raises(InstrumentFilteringError):
-        filter(instruments_id, predicate)
+        filter_instruments(instruments_id, predicate)

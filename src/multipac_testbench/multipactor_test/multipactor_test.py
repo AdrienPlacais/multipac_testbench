@@ -48,7 +48,7 @@ from multipac_testbench.instruments.predicates import (
     INSTRUMENTS_ID,
     combine_predicates,
     dummy_instrument_filter,
-    filter,
+    filter_instruments,
     instrument_excluder,
     instrument_name_selector,
     instrument_type_selector,
@@ -704,7 +704,9 @@ class MultipactorTest:
         else:
             raise ValueError("Error in input data")
 
-        return filter(self.instruments, combine_predicates(*predicates))
+        return filter_instruments(
+            self.instruments, combine_predicates(*predicates)
+        )
 
     @overload
     def get_instrument(

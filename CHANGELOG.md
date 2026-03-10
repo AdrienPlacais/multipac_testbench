@@ -33,6 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ```
 
   #TODO `measurement_point_excluder`
+  - The actual function called under the hood is `filter` in the
+    `instruments.predicates` module.
 
 - Use `instruments.predicates.combine_predicates` function to combine several
   predicates:
