@@ -25,7 +25,13 @@ from multipac_testbench.instruments.predicates import (
     instrument_name_selector,
     instrument_type_selector,
 )
+from multipac_testbench.measurement_point.i_measurement_point import (
+    IMeasurementPoint,
+)
 from pytest_lazy_fixtures import lf, lfc
+
+# Sentinel value indicating that a test case should raise an error.
+RAISES = object()
 
 
 @pytest.fixture
@@ -35,6 +41,7 @@ def data() -> pd.Series:
 
 @pytest.fixture
 def instruments(data: pd.Series) -> list[Instrument]:
+    """Give dummy instruments."""
     return [
         Instrument("first", data, np.nan),
         Instrument("second", data, np.nan),
@@ -62,6 +69,9 @@ def object_ids(instruments: list[Instrument]) -> list[Instrument]:
     return instruments
 
 
+# =============================================================================
+# Test type of returned values
+# =============================================================================
 @pytest.mark.implementation
 def test_filter_return_type(
     class_ids: list[ABCMeta], str_ids: list[str], object_ids: list[Instrument]
@@ -80,6 +90,9 @@ def test_filter_return_type(
     assert all(isinstance(x, Instrument) for x in filtered)
 
 
+# =============================================================================
+# Test returned values
+# =============================================================================
 @pytest.mark.implementation
 @pytest.mark.parametrize(
     "instruments_id, predicate, expected",
@@ -111,7 +124,7 @@ def test_filter_return_type(
         pytest.param(
             lf("class_ids"),
             instrument_name_selector("second"),
-            None,
+            RAISES,
             id="Name filter applied on [ABCMeta] input",
         ),
         pytest.param(
@@ -144,7 +157,7 @@ def test_filter_return_type(
         pytest.param(
             lf("str_ids"),
             instrument_type_selector(CurrentProbe),
-            None,  # Should raise an error
+            RAISES,
             id="CurrentProbe filter applied on [str] input",
         ),
         pytest.param(
@@ -162,7 +175,7 @@ def test_filter_return_type(
         pytest.param(
             lf("str_ids"),
             instrument_type_selector(Instrument),
-            None,  # Should raise an error
+            RAISES,
             id="Instrument filter applied on [str] input",
         ),
         pytest.param(
@@ -175,7 +188,8 @@ def test_filter_return_type(
             lf("object_ids"),
             instrument_type_selector([CurrentProbe, Penning]),
             lfc(lambda instruments: instruments[2:]),
-            id="CurrentProbe+Penning filter applied on [Instrument instances] input",
+            id="CurrentProbe+Penning filter applied on [Instrument instances] "
+            "input",
         ),
         # =====================================================================
         # Instrument exclusion
@@ -183,26 +197,15 @@ def test_filter_return_type(
         pytest.param(
             lf("class_ids"),
             instrument_excluder(["second", "fourth"]),
-            None,
-            id="Exclude 2 and 4 applied on [ABCMeta] input.",
+            RAISES,
+            id="Exclude 2 and 4 applied on [ABCMeta] input should raise "
+            "error.",
         ),
         pytest.param(
             lf("str_ids"),
             instrument_excluder(["second", "fourth"]),
             ["first", "third", "fifth"],
             id="Exclude 2 and 4 applied on [str] input.",
-        ),
-        pytest.param(
-            lf("object_ids"),
-            instrument_excluder(["second", "fourth"]),
-            lfc(
-                lambda instruments: [
-                    instruments[0],
-                    instruments[2],
-                    instruments[4],
-                ]
-            ),
-            id="Exclude 2 and 4 applied on [Instrument instances] input.",
         ),
         pytest.param(
             lf("object_ids"),
@@ -223,7 +226,7 @@ def test_filter_return_type(
             lf("object_ids"),
             combine_predicates(
                 instrument_type_selector(CurrentProbe),
-                instrument_excluder("third"),
+                instrument_excluder(["third"]),
             ),
             lfc(
                 lambda instruments: [
@@ -240,13 +243,35 @@ def test_filter_return_type(
 def test_filter_returned_values(
     instruments_id: INSTRUMENTS_ID,
     predicate: INSTRUMENT_FILTER,
-    expected: INSTRUMENTS_ID | None,
+    expected: INSTRUMENTS_ID | object,
 ) -> None:
     """Check that :func:`.predicates.filter` returns the expected values."""
-    if expected is not None:
-        filtered = filter_instruments(instruments_id, predicate)
-        assert filtered == expected
+    if expected is RAISES:
+        with pytest.raises(InstrumentFilteringError):
+            filter_instruments(instruments_id, predicate)
         return
 
+    filtered = filter_instruments(instruments_id, predicate)
+    assert filtered == expected
+
+
+# =============================================================================
+# Test construction of predicates
+# =============================================================================
+@pytest.mark.implementation
+@pytest.mark.parametrize(
+    "instruments_to_ignore",
+    [
+        pytest.param(CurrentProbe, id="Bare ABCMeta raises."),
+        pytest.param([CurrentProbe], id="Sequence of ABCMeta raises."),
+        pytest.param(
+            [CurrentProbe, Penning], id="Sequence of multiple ABCMeta raises."
+        ),
+    ],
+)
+def test_instrument_excluder_invalid_input(
+    instruments_to_ignore: INSTRUMENTS_ID,
+) -> None:
+    """Check that :func:`.instrument_excluder` raises on invalid input."""
     with pytest.raises(InstrumentFilteringError):
-        filter_instruments(instruments_id, predicate)
+        instrument_excluder(instruments_to_ignore)

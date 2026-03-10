@@ -18,7 +18,8 @@ INSTRUMENT_ID = ABCMeta | Instrument | str
 INSTRUMENTS_ID = (
     ABCMeta | Sequence[ABCMeta] | Sequence[str] | Sequence[Instrument]
 )
-#: Function to filter :class:`Instrument`.
+#: Function to filter :class:`Instrument`. Returns True if it should be kept,
+#: False if it should be discarded.
 INSTRUMENT_FILTER = Callable[[INSTRUMENT_ID], bool]
 
 
@@ -106,7 +107,6 @@ def instrument_name_selector(
 
     Returns
     -------
-    INSTRUMENT_FILTER
         A predicate that returns True if the instrument's name (str, repr, or
         .name) matches any of the provided names.
 
@@ -189,7 +189,8 @@ def instrument_excluder(
                 return instrument_id not in as_set_of_names
             case _:
                 raise InstrumentFilteringError(
-                    f"instrument_id is a {type(instrument_id)}, which is not supported."
+                    f"instrument_id is a {type(instrument_id)}, which is not "
+                    "supported."
                 )
 
     return predicate
@@ -201,7 +202,7 @@ def measurement_point_excluder(
     """Create filter that rejects instruments located at `measurement_points`.
 
     .. todo::
-       Implement this predicate.
+       Implement predicate applying on measurement points names?
 
     Parameters
     ----------
@@ -210,19 +211,40 @@ def measurement_point_excluder(
 
     Returns
     -------
-        Can be applied to :class:`.Instrument` instances, names or types.
+        A predicate that returns True if the instrument is NOT in a measurement
+        point to exclude (*ie* if the instrument should be kept).
 
     """
-    if is_collection_of(measurement_points, str):
+    if is_collection_of(measurement_points, IMeasurementPoint):
+        names_to_exclude = {
+            i.name for point in measurement_points for i in point.instruments
+        }
+
+    else:
         raise NotImplementedError(
-            "To filter on measurement_points, you must provide actual objects, not just their names."
+            "To filter on measurement_points, you must provide actual objects,"
+            " not just their names."
         )
 
-    raise NotImplementedError(
-        "Filtering on measurement_points not implemented."
-    )
+    def predicate(instrument_id: INSTRUMENT_ID) -> bool:
+        """Reject instruments belonging to a given measurement point."""
+        match instrument_id:
+            case type():
+                raise InstrumentFilteringError(
+                    "name-based filters apply on Instrument instances "
+                    "names, they do not work on Instrument classes."
+                )
+            case Instrument():
+                return instrument_id.name not in names_to_exclude
+            case str():
+                return instrument_id not in names_to_exclude
+            case _:
+                raise InstrumentFilteringError(
+                    f"instrument_id is a {type(instrument_id)}, which is not "
+                    "supported."
+                )
 
-    raise InstrumentFilteringError(f"{measurement_points = } is invalid.")
+    return predicate
 
 
 def combine_predicates(*predicates: INSTRUMENT_FILTER) -> INSTRUMENT_FILTER:
