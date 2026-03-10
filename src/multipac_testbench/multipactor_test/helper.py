@@ -3,39 +3,26 @@
 import logging
 from collections.abc import Callable
 from pathlib import Path
+from typing import Sequence
 
 import numpy as np
 from numpy.typing import NDArray
 
 
-def infer_dbm(filepath: Path) -> float:
-    """Determine the dBm of current step from filename."""
-    filename = filepath.name
-    left_delim = "_"
-    right_delim = "_dBm"
-    for delim in (left_delim, right_delim):
-        assert (
-            delim in filename
-        ), f"Need a {delim} character in {filename = } to determine dBm."
-
-    try:
-        dbm = filename.split(left_delim)[1].split(right_delim)[0]
-    except Exception as e:
-        logging.critical(
-            f"An exception was raised trying to split {filename = }. Returning"
-            f" 0dBm and hoping for the best. Exception:\n{e}"
+def infer_dbm(commented_lines: Sequence[str]) -> float:
+    """Determine :unit:`dBm` of current step from power step file header."""
+    if len(commented_lines) < 7:
+        raise ValueError(
+            "There is too few lines in the headers. We expect the dBm to be "
+            "on the 7th line."
         )
-        return 0.0
-
-    try:
-        value = float(dbm)
-    except Exception as e:
-        logging.critical(
-            f"An exception was raised trying to convert {dbm = } to float. "
-            f"Returning 0dBm and hoping for the best. Exception:\n{e}"
+    expected_line = commented_lines[6]
+    splitted = expected_line.split()
+    if splitted[0] != "SM300_Level":
+        raise ValueError(
+            "We expect the 7th header line to start with 'SM300_Level'."
         )
-        return 0.0
-    return value
+    return float(splitted[-1])
 
 
 #: Functions converting an :meth:`.Instrument._raw_data` to a single float
@@ -57,7 +44,7 @@ def take_maximum(raw_data: NDArray) -> float:
 
 
 def take_median(
-    raw_data: NDArray, first_index: int = -100, last_index: int = -1
+    raw_data: NDArray, first_index: int = 0, last_index: int = -1
 ) -> float:
     """Take median from ``first_index`` to ``last_index``."""
     size = len(raw_data)
@@ -104,5 +91,5 @@ def powerstep_files(
 
     """
     files = sorted(path for path in folder.iterdir() if file_recognizer(path))
-    file_index_mapping = {folder / f: i for i, f in enumerate(files)}
+    file_index_mapping = {f.absolute(): i for i, f in enumerate(files)}
     return file_index_mapping

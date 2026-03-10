@@ -82,11 +82,11 @@ class PowerStep(MultipactorTest):
         out_index_col :
             Where to store ``sample_index`` in the output file.
         dbm :
-            To override the dBm values inferred from filename.
+            To override the dBm values inferred from commented lines.
         out_dbm_column :
             Where to store the dBm value in the output file.
         comment :
-            Comment string in the given file.
+            Comment character.
         create_virtual_instruments :
             If virtual instruments should be created.
         kwargs :
@@ -112,7 +112,7 @@ class PowerStep(MultipactorTest):
             )
         self._sample_index = sample_index
         self._out_index_col = out_index_col
-        self._dbm = infer_dbm(filepath) if dbm is None else dbm
+        self._dbm = infer_dbm(self._commented_lines) if dbm is None else dbm
         self._out_dbm_column = out_dbm_column
 
     def to_single_values(

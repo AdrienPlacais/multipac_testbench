@@ -5,7 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# [1.8.x]
+## [1.9.0] - unreleased
+
+### Fixed
+
+- `dBm` of `PowerStep` is read from the header instead of the file name.
 
 ## [1.8.2] - 2025-08-01
 
@@ -45,8 +49,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `MultipactorBand` objects removed, and replaced by `Threshold` and `ThresholdSet`.
   This is much more robust, as `MultipactorBand` implied the existence of two consecutive `Threshold` objects.
-
-# [1.7.x]
 
 ## [1.7.4] - 2025-06-23
 

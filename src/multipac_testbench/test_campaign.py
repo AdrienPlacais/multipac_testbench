@@ -343,12 +343,15 @@ class TestCampaign(list[MultipactorTest]):
         png_folder: Path | str | None = None,
         png_kwargs: dict[str, Any] | None = None,
         csv_folder: str | None = None,
+        all_on_same_plot: bool = True,
         **kwargs,
     ) -> tuple[list[list[Axes]], list[pd.DataFrame]]:
         """Recursively call :meth:`.MultipactorTest.plot_thresholds`."""
         all_axes = []
         all_df = []
-        for test, threshold_set in thresholds_sets.items():
+        axes = None
+        colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
+        for i, (test, threshold_set) in enumerate(thresholds_sets.items()):
             png_path = (
                 test.output_filepath(png_folder, ".png")
                 if png_folder is not None
@@ -360,6 +363,12 @@ class TestCampaign(list[MultipactorTest]):
                 else None
             )
 
+            if not all_on_same_plot:
+                axes = None
+                test_color = None
+            else:
+                test_color = colors[i]
+
             axes, df_plot = test.plot_thresholds(
                 to_plot,
                 threshold_set,
@@ -367,6 +376,8 @@ class TestCampaign(list[MultipactorTest]):
                 png_path=png_path,
                 png_kwargs=png_kwargs,
                 csv_path=csv_path,
+                axes=axes,
+                test_color=test_color,
                 **kwargs,
             )
             all_axes.append(axes)
