@@ -2,13 +2,13 @@
 
 from abc import ABCMeta
 from collections.abc import Collection
-from typing import Callable, Sequence, overload
+from typing import Callable, Sequence, cast, overload
 
 from multipac_testbench.instruments import Instrument
 from multipac_testbench.measurement_point.i_measurement_point import (
     IMeasurementPoint,
 )
-from multipac_testbench.util.helper import is_sequence_of
+from multipac_testbench.util.helper import is_collection_of
 
 #: A single :class:`Instrument` identifier, as accepted by filter predicates.
 #: Used for building predicates, sometimes for applying predicates.
@@ -45,9 +45,9 @@ def _to_name_set(instruments_to_ignore: INSTRUMENTS_ID) -> set[str]:
         instruments_to_ignore, str
     ):
         instruments_to_ignore = (instruments_to_ignore,)
-    if is_sequence_of(instruments_to_ignore, ABCMeta):
+    if is_collection_of(instruments_to_ignore, ABCMeta):
         raise _error
-    if is_sequence_of(instruments_to_ignore, Instrument) or is_sequence_of(
+    if is_collection_of(instruments_to_ignore, Instrument) or is_collection_of(
         instruments_to_ignore, str
     ):
         return {str(i) for i in instruments_to_ignore}
@@ -60,7 +60,7 @@ def dummy_instrument_filter(instrument_id: INSTRUMENT_ID) -> bool:
 
 
 def instrument_type_selector(
-    instrument_types: ABCMeta | Sequence[ABCMeta],
+    instrument_types: ABCMeta | Collection[ABCMeta],
 ) -> INSTRUMENT_FILTER:
     """Return instruments of any (sub)types of ``instrument_types``.
 
@@ -94,7 +94,7 @@ def instrument_type_selector(
 
 
 def instrument_name_selector(
-    instrument_names: str | Sequence[str],
+    instrument_names: str | Collection[str],
 ) -> INSTRUMENT_FILTER:
     """Return instruments whose name matches any of ``instrument_names``.
 
@@ -196,7 +196,7 @@ def instrument_excluder(
 
 
 def measurement_point_excluder(
-    measurement_points: Collection[IMeasurementPoint | str],
+    measurement_points: Collection[IMeasurementPoint] | Collection[str],
 ) -> INSTRUMENT_FILTER:
     """Create filter that rejects instruments located at `measurement_points`.
 
@@ -213,6 +213,10 @@ def measurement_point_excluder(
         Can be applied to :class:`.Instrument` instances, names or types.
 
     """
+    if is_collection_of(measurement_points, str):
+        raise NotImplementedError(
+            "To filter on measurement_points, you must provide actual objects, not just their names."
+        )
 
     raise NotImplementedError(
         "Filtering on measurement_points not implemented."
@@ -266,4 +270,7 @@ def filter_instruments(
     """Apply ``predicate`` filter on given instruments."""
     if isinstance(instruments_id, ABCMeta):
         raise NotImplementedError("Filtering class is not implemented yet.")
-    return [x for x in instruments_id if predicate(x)]
+    return cast(
+        list[ABCMeta] | list[Instrument] | list[str],
+        [x for x in instruments_id if predicate(x)],
+    )

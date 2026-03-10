@@ -1,7 +1,7 @@
 """Define general usage functions."""
 
 import logging
-from collections.abc import Callable, Iterable, Iterator, Sequence
+from collections.abc import Callable, Collection, Iterable, Iterator, Sequence
 from pathlib import Path
 from typing import Any, TypeGuard, TypeVar
 
@@ -230,9 +230,9 @@ def types_match(my_list: Sequence, to_match: type) -> bool:
     return types(my_list) == {to_match}
 
 
-def is_sequence_of(
-    seq: Sequence[object], typ: type[T]
-) -> TypeGuard[Sequence[T]]:
+def is_collection_of(
+    seq: Collection[object], typ: type[T]
+) -> TypeGuard[Collection[T]]:
     """Return True if all elements of ``seq`` are instances of ``typ``.
 
     This is a clean replacement of :func:`types_match`.
