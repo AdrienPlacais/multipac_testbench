@@ -10,9 +10,11 @@ from multipac_testbench.measurement_point.i_measurement_point import (
 )
 from multipac_testbench.util.helper import is_sequence_of
 
-#: :class:`Instrument` identifier.
+#: A single :class:`Instrument` identifier, as accepted by filter predicates.
+#: Used for building predicates, sometimes for applying predicates.
 INSTRUMENT_ID = ABCMeta | Instrument | str
-#: Identifier for several :class:`Instrument` s.
+#: Identifier for one or several :class:`Instrument` classes or a collection of
+#: instances/names. Used to apply predicates.
 INSTRUMENTS_ID = (
     ABCMeta | Sequence[ABCMeta] | Sequence[str] | Sequence[Instrument]
 )
@@ -220,6 +222,20 @@ def measurement_point_excluder(
 
 
 def combine_predicates(*predicates: INSTRUMENT_FILTER) -> INSTRUMENT_FILTER:
+    """Combine multiple predicates into a single filter using logical AND.
+
+    Parameters
+    ----------
+    *predicates :
+        Filters to combine. All must return ``True`` for an instrument to pass.
+
+    Returns
+    -------
+        A filter that returns ``True`` only if all ``predicates`` return
+        ``True``. Returns ``True`` for any input if no predicates are given.
+
+    """
+
     def combined(instrument_id: INSTRUMENT_ID) -> bool:
         return all(p(instrument_id) for p in predicates)
 
