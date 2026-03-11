@@ -3,9 +3,6 @@
 Also define a place-holder to mark when a minimum or maximum of threshold was
 reached.
 
-.. todo::
-   Fix the typing of ``THRESHOLD_FILTER_T``.
-
 """
 
 from __future__ import annotations
@@ -13,7 +10,7 @@ from __future__ import annotations
 import logging
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, Protocol
 
 import numpy as np
 from numpy.typing import NDArray
@@ -26,6 +23,20 @@ POWER_EXTREMUM_T = Literal["minimum", "maximum"]
 
 #: Function taking in a :class:`.Threshold`, and returning a boolean.
 THRESHOLD_FILTER_T = Callable[["Threshold"], bool]
+
+
+class ThresholdFilter(Protocol):
+    """Function taking in a :class:`.Threshold`, and returning a boolean.
+
+    This resolves, in contrary to classic:
+
+    .. code-block:: python
+
+        THRESHOLD_FILTER_T = Callable[["Threshold"], bool]
+
+    """
+
+    def __call__(self, threshold: Threshold) -> bool: ...
 
 
 @dataclass
@@ -64,7 +75,7 @@ def create_thresholds(
     growth_array: NDArray[np.float64],
     detecting_instrument: str | THRESHOLD_DETECTOR_T,
     position: float,
-    threshold_predicate: THRESHOLD_FILTER_T | None = None,
+    threshold_predicate: ThresholdFilter | None = None,
     color: tuple[float, float, float] | None = None,
 ) -> list[Threshold]:
     """Create threshold objects corresponding to a single detecting instrument.

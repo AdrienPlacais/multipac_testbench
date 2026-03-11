@@ -1,10 +1,9 @@
 name: 🚀🏷️ Release tagged versions
 
 on:
-  workflow_dispatch:
   push:
     tags:
-      - 'v*'
+      - "v[0-9]+.[0-9]+.[0-9]+"
 
 jobs:
   build_and_publish:
@@ -15,13 +14,21 @@ jobs:
       id-token: write
     steps:
       - name: 🔍 Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
 
       - name: 🔧 Build SDist and Wheel
         run: |
           pipx run build
+
+      - name: 🔍 Check dist
+        run: pipx run twine check dist/*
 
       - name: 🚀 Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

@@ -20,7 +20,7 @@ sys.path.append(os.path.abspath("./_ext"))
 
 project = "MULTIPAC test bench"
 author = "Adrien Plaçais"
-copyright = "2025, " + author
+copyright = "2026, " + author
 
 version = multipac_testbench.__version__
 
@@ -51,8 +51,8 @@ autodoc_default_options = {
     "members": True,
     "member-order": "bysource",
     "private-members": True,
-    "special-members": "__init__, __post_init__, __str__",  # Document those special members
-    "undoc-members": True,  # Document members without doc
+    "special-members": "__post_init__",  # Document those special members
+    "undoc-members": False,
     "show_inheritance": True,
 }
 autodoc_mock_imports = []
@@ -85,22 +85,21 @@ bibtex_bibfiles = ["references.bib"]
 nitpicky = True
 nitpick_ignore = [
     # Not recognized by Sphinx, don't know if this is normal
-    ("py:class", "optional"),
-    ("py:class", "T"),
+    ("py:class", "NDArray"),
+    ("py:class", "np.bool"),
     ("py:class", "np.float64"),
     ("py:class", "numpy.float64"),
+    ("py:class", "numpy._typing._array_like._ScalarT"),
+    ("py:obj", "numpy._typing._array_like._ScalarT"),
     ("py:class", "numpy.int32"),
     ("py:obj", "numpy._typing._array_like._ScalarType_co"),
-    # Temporary fix, see https://github.com/sphinx-doc/sphinx/issues/13178
-    ("py:class", "pathlib._local.Path"),
-    ("py:class", "Path"),
 ]
 
 # Link to other libraries
 intersphinx_mapping = {
     "matplotlib": ("https://matplotlib.org/stable/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
-    "pandas": ("https://pandas.pydata.org/docs", None),
+    "pandas": ("https://pandas.pydata.org/pandas-docs/version/2.2", None),
     "python": ("https://docs.python.org/3", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
 }

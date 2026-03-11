@@ -195,7 +195,7 @@ class FieldProbe(IElectricField):
 
         Returns
         -------
-        g_probe : float
+        float
             Attenuation for this probe at ``freq_mhz``.
 
         """

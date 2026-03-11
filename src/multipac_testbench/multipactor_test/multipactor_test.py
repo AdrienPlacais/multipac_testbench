@@ -73,7 +73,7 @@ from multipac_testbench.threshold.helper import (
 from multipac_testbench.threshold.threshold import (
     THRESHOLD_DETECTOR,
     THRESHOLD_DETECTOR_T,
-    THRESHOLD_FILTER_T,
+    ThresholdFilter,
 )
 from multipac_testbench.threshold.threshold_set import (
     AveragedThresholdSet,
@@ -88,7 +88,6 @@ from multipac_testbench.util.helper import (
     output_filepath,
     save_by_position,
     split_rows_by_masks,
-    types_match,
 )
 from multipac_testbench.util.physics import swr_to_reflection
 from multipac_testbench.util.types import MULTIPAC_DETECTOR_T
@@ -270,9 +269,9 @@ class MultipactorTest:
 
         Returns
         -------
-        data_to_plot : list[pd.Series]
+        list[pd.Series]
             Contains the data used for x axis.
-        x_columns : list[str]  | None
+        list[str]  | None
             Name of the column(s) used for x axis.
 
         """
@@ -402,7 +401,7 @@ class MultipactorTest:
         instrument_class: ABCMeta,
         power_growth_array_kw: dict[str, Any] | None = None,
         threshold_reducer: THRESHOLD_DETECTOR_T | None = None,
-        threshold_predicate: THRESHOLD_FILTER_T | None = None,
+        threshold_predicate: ThresholdFilter | None = None,
         instrument_predicate: INSTRUMENT_FILTER | None = None,
         **kwargs,
     ) -> ThresholdSet:
@@ -1259,12 +1258,12 @@ class MultipactorTest:
         global_instruments: bool = False,
         global_multipactor: bool = False,
     ) -> pd.DataFrame:
-        """Mark position of lower and upper thresholds on pre-existing plot.
+        r"""Mark position of lower and upper thresholds on pre-existing plot.
 
         Parameters
         ----------
         *ydata :
-            Type(s) of :class:`.Instrument`(s) to plot.
+            Type(s) of :class:`.Instrument`\(s) to plot.
         dic_axes :
             Links every type of :class:`.Instrument` with the `Axes` it must be
             plotted on.

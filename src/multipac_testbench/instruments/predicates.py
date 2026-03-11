@@ -10,15 +10,15 @@ from multipac_testbench.measurement_point.i_measurement_point import (
 )
 from multipac_testbench.util.helper import is_collection_of
 
-#: A single :class:`Instrument` identifier, as accepted by filter predicates.
+#: A single :class:`.Instrument` identifier, as accepted by filter predicates.
 #: Used for building predicates, sometimes for applying predicates.
 INSTRUMENT_ID = ABCMeta | Instrument | str
-#: Identifier for one or several :class:`Instrument` classes or a collection of
-#: instances/names. Used to apply predicates.
+#: Identifier for one or several :class:`.Instrument` classes or a collection
+#: of instances/names. Used to apply predicates.
 INSTRUMENTS_ID = (
     ABCMeta | Sequence[ABCMeta] | Sequence[str] | Sequence[Instrument]
 )
-#: Function to filter :class:`Instrument`. Returns True if it should be kept,
+#: Function to filter :class:`.Instrument`. Returns True if it should be kept,
 #: False if it should be discarded.
 INSTRUMENT_FILTER = Callable[[INSTRUMENT_ID], bool]
 
@@ -36,7 +36,7 @@ def _to_name_set(instruments_to_ignore: INSTRUMENTS_ID) -> set[str]:
     Raises
     ------
     InstrumentFilteringError
-        If ``instruments_to_ignore`` contains or is an :class:`ABCMeta`.
+        If ``instruments_to_ignore`` contains or is an :class:`abc.ABCMeta`.
 
     """
     _error = InstrumentFilteringError(

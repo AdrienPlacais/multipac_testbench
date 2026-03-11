@@ -27,6 +27,7 @@ Submodules
    multipac_testbench.instruments.optical_fibre
    multipac_testbench.instruments.penning
    multipac_testbench.instruments.power
+   multipac_testbench.instruments.predicates
    multipac_testbench.instruments.reflection_coefficient
    multipac_testbench.instruments.rpa
    multipac_testbench.instruments.swr

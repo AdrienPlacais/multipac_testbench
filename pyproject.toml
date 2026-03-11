@@ -5,46 +5,51 @@ classifiers = [
   "Intended Audience :: Science/Research",
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Topic :: Scientific/Engineering :: Physics",
 ]
 dependencies = [
-  "matplotlib>=3.9.1, <4",
-  "numpy>=2, <3",
-  "openpyxl>=3.1,<4",
-  "pandas>=2.2, <3",
-  "pre-commit>=4, <5",
-  "scipy>=1.15,<2",
+  "matplotlib>=3.10.8, <4",
+  "numpy>=2.4.2, <3",
+  "openpyxl>=3.1.5,<4",
+  "pandas>=3.0.1, <4",
+  "pandas-stubs>=3.0.0,<4",
+  "pre-commit>=4.5.1, <5",
+  "scipy>=1.17.1, <2",
 ]
 description = "Post-treat the data produced by the MULTIPAC test bench."
 dynamic = ["version"]
 keywords = ["post treatment", "multipactor"]
 name = "multipac_testbench"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 
 [project.optional-dependencies]
 docs = [
-  "sphinx>=8.1,<9",
-  "myst-parser>=4, <5",
-  "nbsphinx>=0.9.7, <1",
-  "sphinx-autodoc-typehints>=3.0.1, <4",
-  "sphinx-rtd-theme>=3, <4",
-  "sphinx-tabs>=3.4,<4",
-  "sphinxcontrib-bibtex>=2.6,<3",
+  "myst-parser>=5.0.0, <6",
+  "nbsphinx>=0.9.8, <1",
+  "sphinx>=9.1.0,<10",
+  "sphinx-autodoc-typehints>=3.7.0, <4",
+  "sphinx-rtd-theme>=3.1.0, <4",
+  "sphinx-tabs>=3.4.7,<4",
+  "sphinxcontrib-bibtex>=2.6.5,<3",
 ]
-notebooks = ["jupyter>=1.1,<2"]
+notebooks = ["jupyter>=1.1.1,<2"]
 test = [
-  "nbconvert>=7.16.6,<8",
-  "nbmake>=1.5.4,<2",
-  "pytest-mock>=3.14, <4",
-  "pytest>=8.3.2, <9",
+  "nbconvert>=7.17.0,<8",
+  "nbmake>=1.5.5,<2",
+  "pytest-mock>=3.15.1, <4",
+  "pytest>=9.0.2, <10",
+  "pytest-lazy-fixtures>=1.4.0,<2",
 ]
 
 [project.scripts]
 
 [project.urls]
-Documentation = "https://adrienplacais.github.io/multipac_testbench/html/index.html"
+Documentation = "https://multipac-testbench.readthedocs.io/en/latest/"
 Homepage = "https://github.com/AdrienPlacais/multipac_testbench"
 
 [tool.black]

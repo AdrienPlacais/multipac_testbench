@@ -89,7 +89,6 @@ def measurement_points(
 # =============================================================================
 # Test type of returned values
 # =============================================================================
-@pytest.mark.implementation
 def test_filter_return_type(
     class_ids: list[ABCMeta], str_ids: list[str], object_ids: list[Instrument]
 ) -> None:
@@ -110,7 +109,6 @@ def test_filter_return_type(
 # =============================================================================
 # Test returned values
 # =============================================================================
-@pytest.mark.implementation
 @pytest.mark.parametrize(
     "instruments_id, predicate, expected",
     [
@@ -275,7 +273,6 @@ def test_filter_returned_values(
 # =============================================================================
 # Test construction of predicates
 # =============================================================================
-@pytest.mark.implementation
 @pytest.mark.parametrize(
     "instruments_to_ignore",
     [
@@ -297,7 +294,6 @@ def test_instrument_excluder_invalid_input(
 # =============================================================================
 # Test filtering on MeasurementPoints
 # =============================================================================
-@pytest.mark.implementation
 @pytest.mark.parametrize(
     "instruments_id, predicate, expected",
     [
