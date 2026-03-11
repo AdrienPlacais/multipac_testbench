@@ -33,7 +33,7 @@ from multipac_testbench.theoretical.somersalo import (
 )
 from multipac_testbench.threshold.threshold import (
     THRESHOLD_DETECTOR_T,
-    THRESHOLD_FILTER_T,
+    ThresholdFilter,
 )
 from multipac_testbench.threshold.threshold_set import ThresholdSet
 from multipac_testbench.util import log_manager, plot
@@ -143,7 +143,7 @@ class TestCampaign(list[MultipactorTest]):
         instrument_class: ABCMeta,
         power_growth_array_kw: dict[str, Any] | None = None,
         threshold_reducer: THRESHOLD_DETECTOR_T | None = None,
-        threshold_predicate: THRESHOLD_FILTER_T | None = None,
+        threshold_predicate: ThresholdFilter | None = None,
         instrument_predicate: INSTRUMENT_FILTER | None = None,
         **kwargs,
     ) -> dict[MultipactorTest, ThresholdSet]:

@@ -183,11 +183,11 @@ def save_by_position(
     ----------
     items :
         Objects to save, grouped by position.
-    base_path : Path
+    base_path :
         Common path of all objects to save.
-    save_fn : Callable
+    save_fn :
         Function to call for saving the objects.
-    kwargs : dict
+    kwargs :
         Passed to ``save_fn``.
 
     """
@@ -223,7 +223,7 @@ def types_match(my_list: Sequence, to_match: type) -> bool:
     """Check if all elements of ``my_list`` have type ``type``.
 
     .. deprecated:: 1.9.0
-       Prefer :func:`is_sequence_of`.
+       Prefer :func:`is_collection_of`.
 
     """
     logging.warning("Deprecated, prefer ``is_sequence_of``.")

@@ -122,7 +122,7 @@ def clean_boolean_mask(
 
     Parameters
     ----------
-    mask : NDArray[np.bool]
+    mask :
         Boolean mask array. Typically, a multipactor array.
     min_true :
         Minimum size for the multipactor zone. Under this number of samples,

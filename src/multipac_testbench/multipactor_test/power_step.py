@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Define an object corresponding to a power step file."""
 
 import logging

@@ -21,13 +21,13 @@ def read_e_field_probe_calibration(data: pd.DataFrame) -> tuple[
 
     Returns
     -------
-    g_probe : dict[str, float]
+    dict[str, float]
         Associates every field probe name (eg ``"E1"``) with it's attenuation
         in :unit:`dBm`.
-    a_rack : dict[str, float]
+    dict[str, float]
         Associates every field probe name (eg ``"E1"``) with it's rack
         calibration slope in :unit:`dBm/V`.
-    b_rack : dict[str, float]
+    dict[str, float]
         Associates every field probe name (eg ``"E1"``) with it's rack
         calibration offset in :unit:`dBm`.
 
