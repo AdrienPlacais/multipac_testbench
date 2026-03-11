@@ -1,11 +1,12 @@
 name: 🚦 Test last push
 
 on:
+  workflow_dispatch:
   pull_request:
   push:
     branches:
       - main
-      - 1.7.x
+      - "[0-9]+.[0-9]+.x"
 
 jobs:
   tests:
@@ -14,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.12"]
+        python-version: ["3.14"]
 
     steps:
       - name: 🔍 Checkout current repo
@@ -33,3 +34,29 @@ jobs:
 
       - name: 🚦 Run tests
         run: python -m pytest -m "not implementation"
+
+  build_validation:
+    name: 🔧 Build Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🔍 Checkout current repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: 🔧 Build SDist and Wheel
+        run: pipx run build
+
+      - name: 🔍 Check dist metadata
+        run: pipx run twine check dist/*
+
+      - name: 🧪 Install from wheel
+        run: |
+          pip install dist/*.whl
+          python -c "multipac_testbench"
