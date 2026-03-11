@@ -60,4 +60,4 @@ jobs:
       - name: 🧪 Install from wheel
         run: |
           pip install dist/*.whl
-          python -c "multipac_testbench"
+          python -c "import multipac_testbench"
