@@ -264,6 +264,7 @@ class PowerStepSet:
         reducer: REDUCER_T | None = None,
         index_col: str = "Sample index",
         special_reducers: dict[str, REDUCER_T] | None = None,
+        sep: str = ",",
         **kwargs,
     ) -> None:
         """Create a file that can be loaded by :class:`.MultipactorTest`.
@@ -281,6 +282,11 @@ class PowerStepSet:
             Name of the column that will contain each power step index.
         special_reducers :
             Different functions to apply to some specific columns.
+        sep :
+            Column delimiter in the resulting file.
+        **kwargs :
+            Other keyword arguments passed down to
+            :meth:`pandas.DataFrame.to_csv`.
 
         """
         series = (
@@ -291,6 +297,6 @@ class PowerStepSet:
             for power_step in sorted(self, key=lambda step: step._sample_index)
         )
         df = pd.concat(series, axis=1).transpose().set_index(index_col)
-        df.to_csv(csv_path, **kwargs)
+        df.to_csv(csv_path, sep=sep, **kwargs)
         logging.info(f"MultipactorTest file saved to {csv_path}")
         return
