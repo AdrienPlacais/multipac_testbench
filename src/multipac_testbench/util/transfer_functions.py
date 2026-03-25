@@ -47,7 +47,7 @@ def field_probe(
     This is the transfer function of :class:`.FieldProbe`.
 
     .. math::
-        P = \sqrt{2\times Z_0 \times 10^{-3} \times 10^{
+        V_\mathrm{coax} = \sqrt{2\times Z_0 \times 10^{-3} \times 10^{
             \frac{
                 a_\mathrm{rack}V_\mathrm{acq} + b_\mathrm{rack}
                 + G_\mathrm{probe} + 3\mathrm{dB}
