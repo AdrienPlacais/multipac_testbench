@@ -1256,7 +1256,12 @@ class MultipactorTest:
         return axes, df_to_plot
 
     def interactive_sweet_plot(
-        self, *ydata: ABCMeta, xdata: ABCMeta | None = None, **kwargs
+        self,
+        *ydata: ABCMeta,
+        xdata: ABCMeta | None = None,
+        pre_trig: int | None = None,
+        trig: int | None = None,
+        **kwargs,
     ) -> tuple[list[Axes], pd.DataFrame]:
         """Like sweet_plot, but clicking opens the corresponding PowerStep plot.
 
@@ -1278,6 +1283,14 @@ class MultipactorTest:
             :meth:`.PowerStep.sweet_plot` on click.
         xdata :
             Passed to :meth:`sweet_plot`. Must be ``None`` for interactivity.
+        pre_trig :
+            Index at which the pulse should start. If both ``pre_trig`` and
+            ``trig`` are provided, the times with power on are highlighted in
+            red in :class:`.PowerStep` plots.
+        trig :
+            Pulse duration in indexes. If both ``pre_trig`` and ``trig`` are
+            provided, the times with power on are highlighted in red in
+            :class:`.PowerStep` plots.
         **kwargs :
             Passed to :meth:`sweet_plot`.
 
@@ -1320,7 +1333,9 @@ class MultipactorTest:
                 )
                 return
 
-            axes, _ = power_step.sweet_plot(*ydata, **kwargs)
+            axes, _ = power_step.sweet_plot(
+                *ydata, pre_trig=pre_trig, trig=trig, **kwargs
+            )
             plt.show()
             return axes
 
