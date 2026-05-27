@@ -3,8 +3,8 @@ util package
 
 .. automodule:: multipac_testbench.util
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------
@@ -13,6 +13,7 @@ Submodules
    :maxdepth: 5
 
    multipac_testbench.util.animate
+   multipac_testbench.util.convert
    multipac_testbench.util.files
    multipac_testbench.util.filtering
    multipac_testbench.util.fixers

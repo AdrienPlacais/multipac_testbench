@@ -3,8 +3,8 @@ data package
 
 .. automodule:: multipac_testbench.data
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Subpackages
 -----------

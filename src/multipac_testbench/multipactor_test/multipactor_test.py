@@ -193,7 +193,7 @@ class MultipactorTest:
         #: Objective SWR for the test.
         self.swr = swr
         self.info = info
-        #: :class:`PowerStepSet` this test was built from, if any. Enables
+        #: :class:`.PowerStepSet` this test was built from, if any. Enables
         #: interactive plots.
         self.power_step_set: PowerStepSet | None = None
 

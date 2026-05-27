@@ -3,8 +3,8 @@ threshold package
 
 .. automodule:: multipac_testbench.threshold
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

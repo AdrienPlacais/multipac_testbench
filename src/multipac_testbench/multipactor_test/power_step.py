@@ -113,6 +113,7 @@ class PowerStep(MultipactorTest):
                 create_virtual_instruments=create_virtual_instruments,
                 **kwargs,
             )
+        #: Position of the step in the complete :class:`.MultipactorTest`
         self._sample_index = sample_index
         self._out_index_col = out_index_col
         self._dbm = infer_dbm(self._commented_lines) if dbm is None else dbm

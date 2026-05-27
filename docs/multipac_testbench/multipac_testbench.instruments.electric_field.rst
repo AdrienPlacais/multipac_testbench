@@ -3,8 +3,8 @@ electric\_field package
 
 .. automodule:: multipac_testbench.instruments.electric_field
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

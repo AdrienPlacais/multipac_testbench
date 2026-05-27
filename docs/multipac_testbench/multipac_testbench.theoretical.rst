@@ -3,8 +3,8 @@ theoretical package
 
 .. automodule:: multipac_testbench.theoretical
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------
