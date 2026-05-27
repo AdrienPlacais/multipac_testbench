@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.0] - 2026-05-27
+
+### Added
+
+- `PowerStep.sweet_plot` accepts arguments `pre_trig` and `trig`, indicating
+  first index of power pulse and power pulse duration. If these arguments are
+  provided, position of the pulse is plotted.
+- `PowerStepSet.to_multipactor_test` to create a `MultipactorTest` from a
+  `PowerStepSet`.
+- `MultipactorTest.interactive_sweet_plot` that allows to click the plot, a new
+  figure opens with the associated `PowerStep`. Only works if `MultipactorTest`
+  was created using `PowerStepSet.to_multipactor_test`.
+
 ## [1.9.1] - 2026-03-11
 
 ### Changed

@@ -62,6 +62,12 @@ defined in `pyproject.toml`. Then, add `multipac_testbench.src` to your
       and `ReflectionCoefficient` calculations.
 - [x] Add notebook execution to normal test workflow.
   - [x] Add jupyter installation to `pip` deps for test
+- [ ] Add filtering of the 50Hz noise (for `PowerStep` only)
+- [ ] Interactive plots:
+  - [ ] Make possible the visualization of `PowerStep` from a `MultipactorTest`,
+        like in Labviewer.
+  - [ ] Toggle raw/physical plot.
+  - [ ] Post-treaters should add info to the plots: window, median, etc.
 
 ## Labviewer to-do
 
@@ -70,3 +76,28 @@ defined in `pyproject.toml`. Then, add `multipac_testbench.src` to your
 - [x] Allow to take last value from individual power step file rather than
       highest
 - [ ] Fix synchro of dBm column
+- [x] Exported continuous files `CSV` are inconsistent with power step:
+  - Continuous files:
+    - `;` delim
+    - `,` floating point separator
+    - Named `RAW_MC_Data_YYYYMMDD_hhmmss.csv`
+    - Column names are different from pulsed files:
+      - `dBm` instead of `NI9205_dBm`
+      - `MP1` instead of `NI9205_MP1l`
+      - `MP1` instead of `NI9205_MP1l`
+        - Speaking of that... Why the `l` at the end of the column name?
+      - Header line starts with a comment character and a space: `#`
+  - Power step folders:
+    - Stored files have `\t` delimiter
+    - Named `YYMMDD-hhmmss-blabla_RAW_CSV`
+  - What I would like:
+    - `.` floating point separator
+    - `,` column delimiter
+    - Name of file/folder always start by date and time in ISO 8601-ish format:
+      - `2025-12-25T13-44-21`
+      - Actual ISO 8601 format would be: `2025-12-25T13:44:21` but it would mess
+        up Windows file naming conventions.
+    - Complete file/folder name: `<ISOdate>_informations-typed-by-usr_RAW`
+      (with `.csv` if it is continuous measurement)
+    - Identical column names, no comment character at the start of the columns
+      header.

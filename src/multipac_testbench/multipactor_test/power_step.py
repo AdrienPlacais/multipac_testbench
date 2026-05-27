@@ -1,11 +1,14 @@
 """Define an object corresponding to a power step file."""
 
 import logging
-from collections.abc import Iterator, Mapping
+from abc import ABCMeta
+from collections.abc import Iterable, Iterator, Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import pandas as pd
+from matplotlib.axes import Axes
 from multipac_testbench.multipactor_test import MultipactorTest
 from multipac_testbench.multipactor_test.helper import (
     POWERSTEP_FILE_RECOGNIZER_T,
@@ -15,6 +18,7 @@ from multipac_testbench.multipactor_test.helper import (
     powerstep_files,
     take_maximum,
 )
+from multipac_testbench.threshold.threshold_set import ThresholdSet
 from multipac_testbench.util.files import load_config
 from multipac_testbench.util.log_manager import suppress_log_messages
 from numpy.typing import NDArray
@@ -154,6 +158,148 @@ class PowerStep(MultipactorTest):
         series[self._out_index_col] = self._sample_index
         return series
 
+    def sweet_plot(
+        self,
+        *ydata: ABCMeta,
+        xdata: ABCMeta | None = None,
+        exclude: Sequence[str] = (),
+        tail: int | None = None,
+        xlabel: str = "",
+        ylabel: str | Iterable = "",
+        grid: bool = True,
+        title: str | list[str] = "",
+        threshold_set: ThresholdSet | None = None,
+        global_instruments: bool = False,
+        global_multipactor: bool = False,
+        column_names: str | list[str] = "",
+        test_color: str | None = None,
+        png_path: Path | None = None,
+        png_kwargs: dict | None = None,
+        csv_path: Path | None = None,
+        csv_kwargs: dict | None = None,
+        axes: list[Axes] | None = None,
+        masks: dict[str, NDArray[np.bool]] | None = None,
+        drop_repeated_x: bool = False,
+        pre_trig: int | None = None,
+        trig: int | None = None,
+        **kwargs,
+    ) -> tuple[list[Axes], pd.DataFrame]:
+        """Plot ``ydata`` versus ``xdata``.
+
+        .. todo::
+            Kwargs mixed up between the different methods.
+
+        Parameters
+        ----------
+        *ydata :
+            Class of the instruments to plot.
+        xdata :
+            Class of instrument to use as x-data. If there is several
+            instruments which have this class, only one ``ydata`` is allowed
+            and number of ``x`` and ``y`` instruments must match. The default
+            is None, in which case data is plotted vs sample index.
+        exclude :
+            Name of the instruments that you do not want to see plotted.
+        tail :
+            Specify this to only plot the last ``tail`` points. Useful to
+            select only the last power cycle.
+        xlabel :
+            Label of x axis.
+        ylabel :
+            Label of y axis.
+        grid :
+            To show the grid.
+        title :
+            Title of the plot or of the subplots.
+        threshold_set :
+            If provided, mark lower (circle) and upper (star) thresholds on top
+            of every :class:`.Instrument` data.
+        global_instruments :
+            If instruments not position-specific (eg :class:`.ForwardPower`)
+            should have their thresholds plotted.
+        global_multipactor :
+            If multipactor not position-specific (eg thresholds created by
+            merging several other multipactor arrays) should have their
+            thresholds plotted.
+        column_names :
+            To override the default column names. This is used in particular
+            with the method :meth:`.TestCampaign.sweet_plot` when
+            ``all_on_same_plot=True``.
+        test_color :
+            Color used by :meth:`.TestCampaign.sweet_plot` when
+            ``all_on_same_plot=True``. It overrides the :class:`.Instrument`
+            color and is used to discriminate every :class:`.MultipactorTest`
+            from another.
+        png_path :
+            If specified, save the figure at ``png_path``.
+        csv_path :
+            If specified, save the data used to produce the plot in
+            ``csv_path``.
+        csv_kwargs :
+            Keyword arguments passed to :func:`.plot.save_dataframe`.
+        masks :
+            A dictionary where each key is a suffix used to label the split
+            columns, and each value is a boolean mask of the same length as the
+            input data. Keys must start with two underscores (``__``) to enable
+            consistent column naming and compatibility with downstream styling
+            logic (e.g., grouping lines by base column in plots). If multiple
+            masks are ``True`` at the same row index, a ``ValueError`` is
+            raised.
+        drop_repeated_x :
+            If True, remove consecutive rows with identical x values.
+        pre_trig :
+            Index at which the pulse should start. If both ``pre_trig`` and
+            ``trig`` are provided, the times with power on are highlighted in
+            red.
+        trig :
+            Pulse duration in indexes. If both ``pre_trig`` and ``trig`` are
+            provided, the times with power on are highlighted in red.
+        **kwargs :
+            Other keyword arguments passed to :meth:`pandas.DataFrame.plot`,
+            :meth:`._set_y_data`, :func:`.create_df_to_plot`,
+            :func:`.set_labels`.
+
+        Returns
+        -------
+        axes :
+            Objects holding the plot.
+        df_to_plot :
+            DataFrame holding the data that is plotted.
+
+        """
+        axes, df = super().sweet_plot(
+            *ydata,
+            xdata=xdata,
+            exclude=exclude,
+            tail=tail,
+            xlabel=xlabel,
+            ylabel=ylabel,
+            grid=grid,
+            title=title,
+            threshold_set=threshold_set,
+            global_instruments=global_instruments,
+            global_multipactor=global_multipactor,
+            column_names=column_names,
+            test_color=test_color,
+            png_path=png_path,
+            png_kwargs=png_kwargs,
+            csv_path=csv_path,
+            csv_kwargs=csv_kwargs,
+            axes=axes,
+            masks=masks,
+            drop_repeated_x=drop_repeated_x,
+            **kwargs,
+        )
+        if pre_trig is not None and trig is not None:
+            for ax in axes:
+                ax.axvspan(
+                    xmin=pre_trig,
+                    xmax=pre_trig + trig,
+                    facecolor="r",
+                    alpha=0.1,
+                )
+        return axes, df
+
 
 class PowerStepSet:
     """Define all the files consituting a :class:`.MultipactorTest`."""
@@ -207,6 +353,11 @@ class PowerStepSet:
 
         """
         self._folder = folder
+        self._freq_mhz = freq_mhz
+        self._swr = swr
+        self._config: dict[str, Any] = (
+            config if isinstance(config, dict) else load_config(config)
+        )
         file_recognizer = (
             file_recognizer
             if file_recognizer
@@ -217,9 +368,7 @@ class PowerStepSet:
         self._power_steps = [
             PowerStep(
                 filepath=filepath,
-                config=(
-                    config if isinstance(config, dict) else load_config(config)
-                ),
+                config=self._config,
                 freq_mhz=freq_mhz,
                 swr=swr,
                 sample_index=sample_index,
@@ -258,12 +407,32 @@ class PowerStepSet:
         """Get number of loaded files."""
         return len(self._power_steps)
 
+    def get_power_step(self, sample_index: int) -> PowerStep:
+        """Return the :class:`.PowerStep` with the given ``sample_index``.
+
+        Parameters
+        ----------
+        sample_index :
+            The index as stored in :attr:`.PowerStep._sample_index`.
+
+        Raises
+        ------
+        KeyError
+            If no :class:`.PowerStep` with that index exists.
+
+        """
+        for step in self._power_steps:
+            if step._sample_index == sample_index:
+                return step
+        raise KeyError(f"No PowerStep with {sample_index=} in {self}")
+
     def to_multipactor_test_file(
         self,
         csv_path: Path,
         reducer: REDUCER_T | None = None,
         index_col: str = "Sample index",
         special_reducers: dict[str, REDUCER_T] | None = None,
+        sep: str = ",",
         **kwargs,
     ) -> None:
         """Create a file that can be loaded by :class:`.MultipactorTest`.
@@ -281,6 +450,11 @@ class PowerStepSet:
             Name of the column that will contain each power step index.
         special_reducers :
             Different functions to apply to some specific columns.
+        sep :
+            Column delimiter in the resulting file.
+        **kwargs :
+            Other keyword arguments passed down to
+            :meth:`pandas.DataFrame.to_csv`.
 
         """
         series = (
@@ -291,6 +465,54 @@ class PowerStepSet:
             for power_step in sorted(self, key=lambda step: step._sample_index)
         )
         df = pd.concat(series, axis=1).transpose().set_index(index_col)
-        df.to_csv(csv_path, **kwargs)
+        df.to_csv(csv_path, sep=sep, **kwargs)
         logging.info(f"MultipactorTest file saved to {csv_path}")
         return
+
+    def to_multipactor_test(
+        self,
+        csv_path: Path,
+        reducer: REDUCER_T | None = None,
+        special_reducers: dict[str, REDUCER_T] | None = None,
+        **kwargs,
+    ) -> MultipactorTest:
+        """
+        Write the summary ``CSV`` and load it as a :class:`.MultipactorTest`.
+
+        Convenience wrapper around :meth:`to_multipactor_test_file` that
+        additionally back-links the returned :class:`.MultipactorTest` to this
+        :class:`.PowerStepSet`, enabling
+        :meth:`.MultipactorTest.interactive_sweet_plot`.
+
+        Parameters
+        ----------
+        csv_path :
+            Where the summary ``CSV`` will be written (and loaded from).
+        reducer :
+            Passed to :meth:`to_multipactor_test_file`.
+        special_reducers :
+            Passed to :meth:`to_multipactor_test_file`.
+        **kwargs :
+            Passed to :class:`.MultipactorTest` constructor (e.g.
+            ``trigger_policy``, ``info``).
+
+        Returns
+        -------
+            A fully-constructed :class:`.MultipactorTest` with
+            :attr:`~.MultipactorTest.power_step_set` set to ``self``.
+
+        """
+        self.to_multipactor_test_file(
+            csv_path,
+            reducer=reducer,
+            special_reducers=special_reducers,
+        )
+        test = MultipactorTest(
+            filepath=csv_path,
+            config=self._config,
+            freq_mhz=self._freq_mhz,
+            swr=self._swr,
+            **kwargs,
+        )
+        test.power_step_set = self
+        return test

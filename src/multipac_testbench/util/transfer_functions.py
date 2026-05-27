@@ -6,6 +6,7 @@ quantities.
 """
 
 import numpy as np
+from multipac_testbench.util.convert import dBm_to_watt, watt_to_dBm
 from numpy.typing import NDArray
 
 
@@ -47,7 +48,7 @@ def field_probe(
     This is the transfer function of :class:`.FieldProbe`.
 
     .. math::
-        P = \sqrt{2\times Z_0 \times 10^{-3} \times 10^{
+        V_\mathrm{coax} = \sqrt{2\times Z_0 \times 10^{-3} \times 10^{
             \frac{
                 a_\mathrm{rack}V_\mathrm{acq} + b_\mathrm{rack}
                 + G_\mathrm{probe} + 3\mathrm{dB}
@@ -75,8 +76,7 @@ def field_probe(
 
     """
     p_acq = v_acq * a_rack + b_rack
-    p_dbm = abs(g_probe + 3.0) + p_acq
-    p_w = 10 ** ((p_dbm - 30.0) / 10.0)
+    p_w = dBm_to_watt(abs(g_probe + 3.0) + p_acq)
     v_coax = np.sqrt(2.0 * z_0 * p_w)
     return v_coax
 
@@ -111,8 +111,7 @@ def field_probe_inv(
         Acquisition voltage in :math:`[0, 10~\mathrm{V}]`.
 
     """
-    p_w = v_coax**2 / (2.0 * z_0)
-    p_dbm = 30.0 + 10.0 * np.log10(p_w)
+    p_dbm = watt_to_dBm(v_coax**2 / (2.0 * z_0))
     p_acq = p_dbm - abs(g_probe + 3.0)
     v_acq = ((p_acq - b_rack) / a_rack).astype(np.float64)
     return v_acq
