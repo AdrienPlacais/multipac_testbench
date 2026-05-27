@@ -353,6 +353,11 @@ class PowerStepSet:
 
         """
         self._folder = folder
+        self._freq_mhz = freq_mhz
+        self._swr = swr
+        self._config: dict[str, Any] = (
+            config if isinstance(config, dict) else load_config(config)
+        )
         file_recognizer = (
             file_recognizer
             if file_recognizer
@@ -363,9 +368,7 @@ class PowerStepSet:
         self._power_steps = [
             PowerStep(
                 filepath=filepath,
-                config=(
-                    config if isinstance(config, dict) else load_config(config)
-                ),
+                config=self._config,
                 freq_mhz=freq_mhz,
                 swr=swr,
                 sample_index=sample_index,
@@ -403,6 +406,25 @@ class PowerStepSet:
     def __len__(self) -> int:
         """Get number of loaded files."""
         return len(self._power_steps)
+
+    def get_power_step(self, sample_index: int) -> PowerStep:
+        """Return the :class:`.PowerStep` with the given ``sample_index``.
+
+        Parameters
+        ----------
+        sample_index :
+            The index as stored in :attr:`.PowerStep._sample_index`.
+
+        Raises
+        ------
+        KeyError
+            If no :class:`.PowerStep` with that index exists.
+
+        """
+        for step in self._power_steps:
+            if step._sample_index == sample_index:
+                return step
+        raise KeyError(f"No PowerStep with {sample_index=} in {self}")
 
     def to_multipactor_test_file(
         self,
@@ -446,3 +468,51 @@ class PowerStepSet:
         df.to_csv(csv_path, sep=sep, **kwargs)
         logging.info(f"MultipactorTest file saved to {csv_path}")
         return
+
+    def to_multipactor_test(
+        self,
+        csv_path: Path,
+        reducer: REDUCER_T | None = None,
+        special_reducers: dict[str, REDUCER_T] | None = None,
+        **kwargs,
+    ) -> MultipactorTest:
+        """
+        Write the summary ``CSV`` and load it as a :class:`.MultipactorTest`.
+
+        Convenience wrapper around :meth:`to_multipactor_test_file` that
+        additionally back-links the returned :class:`.MultipactorTest` to this
+        :class:`.PowerStepSet`, enabling
+        :meth:`.MultipactorTest.interactive_sweet_plot`.
+
+        Parameters
+        ----------
+        csv_path :
+            Where the summary ``CSV`` will be written (and loaded from).
+        reducer :
+            Passed to :meth:`to_multipactor_test_file`.
+        special_reducers :
+            Passed to :meth:`to_multipactor_test_file`.
+        **kwargs :
+            Passed to :class:`.MultipactorTest` constructor (e.g.
+            ``trigger_policy``, ``info``).
+
+        Returns
+        -------
+            A fully-constructed :class:`.MultipactorTest` with
+            :attr:`~.MultipactorTest.power_step_set` set to ``self``.
+
+        """
+        self.to_multipactor_test_file(
+            csv_path,
+            reducer=reducer,
+            special_reducers=special_reducers,
+        )
+        test = MultipactorTest(
+            filepath=csv_path,
+            config=self._config,
+            freq_mhz=self._freq_mhz,
+            swr=self._swr,
+            **kwargs,
+        )
+        test.power_step_set = self
+        return test

@@ -23,8 +23,9 @@ import math
 from abc import ABCMeta
 from collections.abc import Collection, Iterable, Mapping, Sequence
 from pathlib import Path
-from typing import Any, Callable, Literal, TypeVar, overload
+from typing import TYPE_CHECKING, Any, Callable, Literal, TypeVar, overload
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import scipy
@@ -93,6 +94,8 @@ from multipac_testbench.util.physics import swr_to_reflection
 from multipac_testbench.util.types import MULTIPAC_DETECTOR_T
 from numpy.typing import NDArray
 
+if TYPE_CHECKING:
+    from multipac_testbench.multipactor_test.power_step import PowerStepSet
 T = TypeVar("T", bound=Callable[..., Any])
 
 
@@ -190,6 +193,9 @@ class MultipactorTest:
         #: Objective SWR for the test.
         self.swr = swr
         self.info = info
+        #: :class:`PowerStepSet` this test was built from, if any. Enables
+        #: interactive plots.
+        self.power_step_set: PowerStepSet | None = None
 
     def __str__(self) -> str:
         """Print info on object."""
@@ -1248,6 +1254,78 @@ class MultipactorTest:
         if csv_path is not None:
             plot.save_dataframe(df_to_plot, csv_path, **(csv_kwargs or {}))
         return axes, df_to_plot
+
+    def interactive_sweet_plot(
+        self, *ydata: ABCMeta, xdata: ABCMeta | None = None, **kwargs
+    ) -> tuple[list[Axes], pd.DataFrame]:
+        """Like sweet_plot, but clicking opens the corresponding PowerStep plot.
+
+        Clicking on the figure takes the x-position of the click, resolves the
+        nearest ``sample_index``, and calls :meth:`.PowerStep.sweet_plot` on the
+        associated :class:`.PowerStep`.
+
+        .. note::
+            Only works when ``xdata`` is ``None`` (x-axis = Sample index) and
+            when this object was created via
+            :meth:`.PowerStepSet.to_multipactor_test`, which sets
+            :attr:`power_step_set`. Falls back to a plain
+            :meth:`sweet_plot` otherwise.
+
+        Parameters
+        ----------
+        *ydata :
+            Passed to :meth:`sweet_plot` and to the per-step
+            :meth:`.PowerStep.sweet_plot` on click.
+        xdata :
+            Passed to :meth:`sweet_plot`. Must be ``None`` for interactivity.
+        **kwargs :
+            Passed to :meth:`sweet_plot`.
+
+        Returns
+        -------
+        axes :
+            Objects holding the overview plot.
+        df_to_plot :
+            DataFrame holding the data that is plotted.
+
+        """
+        if self.power_step_set is None:
+            logging.warning(
+                "This MultipactorTest has no associated PowerStepSet. "
+                "Falling back to non-interactive sweet_plot."
+            )
+            return self.sweet_plot(*ydata, xdata=xdata, **kwargs)
+
+        if xdata is not None:
+            logging.warning(
+                "interactive_sweet_plot only supports xdata=None (x-axis = "
+                "Sample index). Falling back to non-interactive sweet_plot."
+            )
+            return self.sweet_plot(*ydata, xdata=xdata, **kwargs)
+
+        axes, df = self.sweet_plot(*ydata, xdata=xdata, **kwargs)
+        fig = axes[0].get_figure()
+
+        def _on_click(event) -> list[Axes] | None:
+            """Get x-position of click, plot corresp :class:`.PowerStep`."""
+            if event.inaxes is None:
+                return
+            sample_index = round(event.xdata)
+            try:
+                power_step = self.power_step_set.get_power_step(sample_index)
+            except KeyError:
+                logging.warning(
+                    f"No PowerStep found for {sample_index=}. "
+                    "Click may be out of range."
+                )
+                return
+
+            axes, _ = power_step.sweet_plot(*ydata, **kwargs)
+            plt.show()
+            return axes
+
+        fig.canvas.mpl_connect("button_press_event", _on_click)
+        return axes, df
 
     def _add_thresholds_on_axes(
         self,
