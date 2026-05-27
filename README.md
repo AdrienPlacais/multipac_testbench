@@ -62,6 +62,12 @@ defined in `pyproject.toml`. Then, add `multipac_testbench.src` to your
       and `ReflectionCoefficient` calculations.
 - [x] Add notebook execution to normal test workflow.
   - [x] Add jupyter installation to `pip` deps for test
+- [ ] Add filtering of the 50Hz noise (for `PowerStep` only)
+- [ ] Interactive plots:
+  - [ ] Make possible the visualization of `PowerStep` from a `MultipactorTest`,
+        like in Labviewer.
+  - [ ] Toggle raw/physical plot.
+  - [ ] Post-treaters should add info to the plots: window, median, etc.
 
 ## Labviewer to-do
 
@@ -70,7 +76,7 @@ defined in `pyproject.toml`. Then, add `multipac_testbench.src` to your
 - [x] Allow to take last value from individual power step file rather than
       highest
 - [ ] Fix synchro of dBm column
-- [ ] Exported continuous files `CSV` are inconsistent with power step:
+- [x] Exported continuous files `CSV` are inconsistent with power step:
   - Continuous files:
     - `;` delim
     - `,` floating point separator

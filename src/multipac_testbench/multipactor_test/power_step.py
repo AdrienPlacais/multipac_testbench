@@ -1,11 +1,14 @@
 """Define an object corresponding to a power step file."""
 
 import logging
-from collections.abc import Iterator, Mapping
+from abc import ABCMeta
+from collections.abc import Iterable, Iterator, Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import pandas as pd
+from matplotlib.axes import Axes
 from multipac_testbench.multipactor_test import MultipactorTest
 from multipac_testbench.multipactor_test.helper import (
     POWERSTEP_FILE_RECOGNIZER_T,
@@ -15,6 +18,7 @@ from multipac_testbench.multipactor_test.helper import (
     powerstep_files,
     take_maximum,
 )
+from multipac_testbench.threshold.threshold_set import ThresholdSet
 from multipac_testbench.util.files import load_config
 from multipac_testbench.util.log_manager import suppress_log_messages
 from numpy.typing import NDArray
@@ -153,6 +157,148 @@ class PowerStep(MultipactorTest):
         series[self._out_dbm_column] = self._dbm
         series[self._out_index_col] = self._sample_index
         return series
+
+    def sweet_plot(
+        self,
+        *ydata: ABCMeta,
+        xdata: ABCMeta | None = None,
+        exclude: Sequence[str] = (),
+        tail: int | None = None,
+        xlabel: str = "",
+        ylabel: str | Iterable = "",
+        grid: bool = True,
+        title: str | list[str] = "",
+        threshold_set: ThresholdSet | None = None,
+        global_instruments: bool = False,
+        global_multipactor: bool = False,
+        column_names: str | list[str] = "",
+        test_color: str | None = None,
+        png_path: Path | None = None,
+        png_kwargs: dict | None = None,
+        csv_path: Path | None = None,
+        csv_kwargs: dict | None = None,
+        axes: list[Axes] | None = None,
+        masks: dict[str, NDArray[np.bool]] | None = None,
+        drop_repeated_x: bool = False,
+        pre_trig: int | None = None,
+        trig: int | None = None,
+        **kwargs,
+    ) -> tuple[list[Axes], pd.DataFrame]:
+        """Plot ``ydata`` versus ``xdata``.
+
+        .. todo::
+            Kwargs mixed up between the different methods.
+
+        Parameters
+        ----------
+        *ydata :
+            Class of the instruments to plot.
+        xdata :
+            Class of instrument to use as x-data. If there is several
+            instruments which have this class, only one ``ydata`` is allowed
+            and number of ``x`` and ``y`` instruments must match. The default
+            is None, in which case data is plotted vs sample index.
+        exclude :
+            Name of the instruments that you do not want to see plotted.
+        tail :
+            Specify this to only plot the last ``tail`` points. Useful to
+            select only the last power cycle.
+        xlabel :
+            Label of x axis.
+        ylabel :
+            Label of y axis.
+        grid :
+            To show the grid.
+        title :
+            Title of the plot or of the subplots.
+        threshold_set :
+            If provided, mark lower (circle) and upper (star) thresholds on top
+            of every :class:`.Instrument` data.
+        global_instruments :
+            If instruments not position-specific (eg :class:`.ForwardPower`)
+            should have their thresholds plotted.
+        global_multipactor :
+            If multipactor not position-specific (eg thresholds created by
+            merging several other multipactor arrays) should have their
+            thresholds plotted.
+        column_names :
+            To override the default column names. This is used in particular
+            with the method :meth:`.TestCampaign.sweet_plot` when
+            ``all_on_same_plot=True``.
+        test_color :
+            Color used by :meth:`.TestCampaign.sweet_plot` when
+            ``all_on_same_plot=True``. It overrides the :class:`.Instrument`
+            color and is used to discriminate every :class:`.MultipactorTest`
+            from another.
+        png_path :
+            If specified, save the figure at ``png_path``.
+        csv_path :
+            If specified, save the data used to produce the plot in
+            ``csv_path``.
+        csv_kwargs :
+            Keyword arguments passed to :func:`.plot.save_dataframe`.
+        masks :
+            A dictionary where each key is a suffix used to label the split
+            columns, and each value is a boolean mask of the same length as the
+            input data. Keys must start with two underscores (``__``) to enable
+            consistent column naming and compatibility with downstream styling
+            logic (e.g., grouping lines by base column in plots). If multiple
+            masks are ``True`` at the same row index, a ``ValueError`` is
+            raised.
+        drop_repeated_x :
+            If True, remove consecutive rows with identical x values.
+        pre_trig :
+            Index at which the pulse should start. If both ``pre_trig`` and
+            ``trig`` are provided, the times with power on are highlighted in
+            red.
+        trig :
+            Pulse duration in indexes. If both ``pre_trig`` and ``trig`` are
+            provided, the times with power on are highlighted in red.
+        **kwargs :
+            Other keyword arguments passed to :meth:`pandas.DataFrame.plot`,
+            :meth:`._set_y_data`, :func:`.create_df_to_plot`,
+            :func:`.set_labels`.
+
+        Returns
+        -------
+        axes :
+            Objects holding the plot.
+        df_to_plot :
+            DataFrame holding the data that is plotted.
+
+        """
+        axes, df = super().sweet_plot(
+            *ydata,
+            xdata=xdata,
+            exclude=exclude,
+            tail=tail,
+            xlabel=xlabel,
+            ylabel=ylabel,
+            grid=grid,
+            title=title,
+            threshold_set=threshold_set,
+            global_instruments=global_instruments,
+            global_multipactor=global_multipactor,
+            column_names=column_names,
+            test_color=test_color,
+            png_path=png_path,
+            png_kwargs=png_kwargs,
+            csv_path=csv_path,
+            csv_kwargs=csv_kwargs,
+            axes=axes,
+            masks=masks,
+            drop_repeated_x=drop_repeated_x,
+            **kwargs,
+        )
+        if pre_trig is not None and trig is not None:
+            for ax in axes:
+                ax.axvspan(
+                    xmin=pre_trig,
+                    xmax=pre_trig + trig,
+                    facecolor="r",
+                    alpha=0.1,
+                )
+        return axes, df
 
 
 class PowerStepSet:
