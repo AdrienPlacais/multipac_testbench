@@ -319,6 +319,7 @@ class PowerStepSet:
         file_recognizer: POWERSTEP_FILE_RECOGNIZER_T | None = None,
         comment: str = "#",
         create_virtual_instruments: bool = True,
+        are_raw: bool = True,
         **kwargs,
     ) -> None:
         """Load all ``MV`` files in ``folder``, create :class:`.PowerStep`.
@@ -351,6 +352,9 @@ class PowerStepSet:
             Comment delimiter, to skip the first lines in the source ``CSV``.
         create_virtual_instruments :
             If virtual instruments should be created.
+        are_raw :
+            Set to True if the ``CSV`` files in ``folder`` hold acquisition
+            voltages, set to False if they hold physical quantities.
 
         """
         self._folder = folder
@@ -359,6 +363,7 @@ class PowerStepSet:
         self._config: dict[str, Any] = (
             config if isinstance(config, dict) else load_config(config)
         )
+        self._are_raw = are_raw
         file_recognizer = (
             file_recognizer
             if file_recognizer
@@ -382,6 +387,7 @@ class PowerStepSet:
                 out_index_col=out_index_col,
                 comment=comment,
                 create_virtual_instruments=create_virtual_instruments,
+                is_raw=are_raw,
                 **kwargs,
             )
             for filepath, sample_index in file_index_mapping.items()
@@ -513,6 +519,7 @@ class PowerStepSet:
             config=self._config,
             freq_mhz=self._freq_mhz,
             swr=self._swr,
+            is_raw=self._are_raw,
             **kwargs,
         )
         test.power_step_set = self
