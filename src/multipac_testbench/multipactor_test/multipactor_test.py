@@ -25,6 +25,7 @@ from collections.abc import Collection, Iterable, Mapping, Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Literal, TypeVar, overload
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -33,6 +34,7 @@ from matplotlib import animation
 from matplotlib.artist import Artist
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+from matplotlib.widgets import Button
 from multipac_testbench.instruments import (
     SWR,
     FieldPowerError,
@@ -193,7 +195,7 @@ class MultipactorTest:
         #: Objective SWR for the test.
         self.swr = swr
         self.info = info
-        #: :class:`PowerStepSet` this test was built from, if any. Enables
+        #: :class:`.PowerStepSet` this test was built from, if any. Enables
         #: interactive plots.
         self.power_step_set: PowerStepSet | None = None
 
@@ -311,6 +313,7 @@ class MultipactorTest:
         predicate: INSTRUMENT_FILTER | None = None,
         column_names: str | list[str] = "",
         masks: dict[str, NDArray[np.bool]] | None = None,
+        raw: bool = False,
         **kwargs,
     ) -> tuple[list[pd.Series], list[list[str]], dict[str, str]]:
         """Set the y-data that will be plotted.
@@ -339,6 +342,9 @@ class MultipactorTest:
             logic (e.g., grouping lines by base column in plots). If multiple
             masks are ``True`` at the same row index, a ``ValueError`` is
             raised.
+        raw :
+            To get raw data (generally acquisition voltage) instead of physical
+            data.
         kwargs :
             Other keyword arguments.
 
@@ -369,7 +375,9 @@ class MultipactorTest:
             sub_ycols = []
 
             for instrument in sublist:
-                df = instrument.data_as_pd
+                df = (
+                    instrument.raw_data_as_pd if raw else instrument.data_as_pd
+                )
                 if masks is not None:
                     df = split_rows_by_masks(df, masks=masks)
 
@@ -1099,6 +1107,7 @@ class MultipactorTest:
         axes: list[Axes] | None = None,
         masks: dict[str, NDArray[np.bool]] | None = None,
         drop_repeated_x: bool = False,
+        raw: bool = False,
         **kwargs,
     ) -> tuple[list[Axes], pd.DataFrame]:
         """Plot ``ydata`` versus ``xdata``.
@@ -1164,6 +1173,8 @@ class MultipactorTest:
             raised.
         drop_repeated_x :
             If True, remove consecutive rows with identical x values.
+        raw :
+            If True, plots raw data instead of physical data.
         **kwargs :
             Other keyword arguments passed to :meth:`pandas.DataFrame.plot`,
             :meth:`._set_y_data`, :func:`.create_df_to_plot`,
@@ -1184,6 +1195,7 @@ class MultipactorTest:
             exclude=exclude,
             column_names=column_names,
             masks=masks,
+            raw=raw,
             **kwargs,
         )
         if test_color is not None:
@@ -1302,7 +1314,25 @@ class MultipactorTest:
             DataFrame holding the data that is plotted.
 
         """
-        if self.power_step_set is None:
+        _backend = matplotlib.get_backend()
+        if "inline" in _backend.lower() or _backend.lower() == "agg":
+            logging.warning(
+                f"Backend {_backend} does not support mouse events. "
+                "If you really need to use a Jupyter/VSCode notebook, run "
+                "'%matplotlib widget' (requires ipympl: pip install ipympl) "
+                "before importing. Falling back to non-interactive sweet_plot."
+            )
+            return self.sweet_plot(*ydata, xdata=xdata, **kwargs)
+
+        if kwargs.get("threshold_set") is not None:
+            logging.warning(
+                "threshold_set is not supported in interactive_sweet_plot. "
+                "Ignoring."
+            )
+            kwargs.pop("threshold_set")
+
+        power_step_set = self.power_step_set
+        if power_step_set is None:
             logging.warning(
                 "This MultipactorTest has no associated PowerStepSet. "
                 "Falling back to non-interactive sweet_plot."
@@ -1316,16 +1346,59 @@ class MultipactorTest:
             )
             return self.sweet_plot(*ydata, xdata=xdata, **kwargs)
 
-        axes, df = self.sweet_plot(*ydata, xdata=xdata, **kwargs)
+        _state = {"raw": False}
+        axes, df = self.sweet_plot(*ydata, xdata=xdata, raw=False, **kwargs)
         fig = axes[0].get_figure()
+        assert isinstance(fig, Figure)
+        fig.subplots_adjust(bottom=0.12)
+        btn_ax = fig.add_axes([0.45, 0.02, 0.12, 0.04])
+        toggle_btn = Button(btn_ax, "Show raw")
 
-        def _on_click(event) -> list[Axes] | None:
+        vlines = [
+            ax.axvline(x=0, color="gray", lw=0.8, ls="--", visible=False)
+            for ax in axes
+        ]
+
+        def _redraw() -> None:
+            for ax in axes:
+                ax.cla()
+            self.sweet_plot(
+                *ydata, xdata=xdata, axes=axes, raw=_state["raw"], **kwargs
+            )
+            vlines.clear()
+            vlines.extend(
+                ax.axvline(x=0, color="gray", lw=0.8, ls="--", visible=False)
+                for ax in axes
+            )
+            fig.canvas.draw_idle()
+
+        def _on_toggle(_event) -> None:
+            _state["raw"] = not _state["raw"]
+            toggle_btn.label.set_text(
+                "Show physical" if _state["raw"] else "Show raw"
+            )
+            _redraw()
+
+        toggle_btn.on_clicked(_on_toggle)
+
+        def _on_motion(event) -> None:
+            """Show previously drawn ``vlines`` when mouse hovers it."""
+            if event.inaxes not in axes:
+                for vl in vlines:
+                    vl.set_visible(False)
+            else:
+                for vl in vlines:
+                    vl.set_visible(True)
+                    vl.set_xdata([round(event.xdata)])
+            fig.canvas.draw_idle()
+
+        def _on_click(event) -> None:
             """Get x-position of click, plot corresp :class:`.PowerStep`."""
-            if event.inaxes is None:
+            if event.inaxes not in axes:
                 return
             sample_index = round(event.xdata)
             try:
-                power_step = self.power_step_set.get_power_step(sample_index)
+                power_step = power_step_set.get_power_step(sample_index)
             except KeyError:
                 logging.warning(
                     f"No PowerStep found for {sample_index=}. "
@@ -1333,12 +1406,17 @@ class MultipactorTest:
                 )
                 return
 
-            axes, _ = power_step.sweet_plot(
-                *ydata, pre_trig=pre_trig, trig=trig, **kwargs
+            _ = power_step.sweet_plot(
+                *ydata,
+                pre_trig=pre_trig,
+                trig=trig,
+                raw=_state["raw"],
+                **kwargs,
             )
-            plt.show()
-            return axes
+            plt.show(block=False)
+            return
 
+        fig.canvas.mpl_connect("motion_notify_event", _on_motion)
         fig.canvas.mpl_connect("button_press_event", _on_click)
         return axes, df
 

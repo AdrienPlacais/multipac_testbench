@@ -3,8 +3,8 @@ measurement\_point package
 
 .. automodule:: multipac_testbench.measurement_point
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

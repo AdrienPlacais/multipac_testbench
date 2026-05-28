@@ -3,8 +3,8 @@ instruments package
 
 .. automodule:: multipac_testbench.instruments
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Subpackages
 -----------

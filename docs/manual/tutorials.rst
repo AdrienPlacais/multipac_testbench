@@ -15,6 +15,7 @@ Just know that every useful method from :py:class:`.MultipactorTest` has its equ
 
    notebooks/plot_signals_measured_by_instruments.ipynb
    notebooks/plot_signal_measured_by_instruments_vs_another_signal.ipynb
+   notebooks/interactive-plots.ipynb
    notebooks/compare_several_tests.ipynb
 
    notebooks/plot_evolution_thresholds.ipynb

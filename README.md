@@ -63,10 +63,10 @@ defined in `pyproject.toml`. Then, add `multipac_testbench.src` to your
 - [x] Add notebook execution to normal test workflow.
   - [x] Add jupyter installation to `pip` deps for test
 - [ ] Add filtering of the 50Hz noise (for `PowerStep` only)
-- [ ] Interactive plots:
-  - [ ] Make possible the visualization of `PowerStep` from a `MultipactorTest`,
+- [x] Interactive plots:
+  - [x] Make possible the visualization of `PowerStep` from a `MultipactorTest`,
         like in Labviewer.
-  - [ ] Toggle raw/physical plot.
+  - [x] Toggle raw/physical plot.
   - [ ] Post-treaters should add info to the plots: window, median, etc.
 
 ## Labviewer to-do

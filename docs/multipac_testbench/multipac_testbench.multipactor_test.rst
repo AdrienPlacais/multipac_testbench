@@ -3,8 +3,8 @@ multipactor\_test package
 
 .. automodule:: multipac_testbench.multipactor_test
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

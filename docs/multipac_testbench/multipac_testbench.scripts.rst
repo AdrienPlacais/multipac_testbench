@@ -3,8 +3,8 @@ scripts package
 
 .. automodule:: multipac_testbench.scripts
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------
