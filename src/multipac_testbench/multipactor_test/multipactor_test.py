@@ -1313,7 +1313,8 @@ class MultipactorTest:
             )
             return self.sweet_plot(*ydata, xdata=xdata, **kwargs)
 
-        if self.power_step_set is None:
+        power_step_set = self.power_step_set
+        if power_step_set is None:
             logging.warning(
                 "This MultipactorTest has no associated PowerStepSet. "
                 "Falling back to non-interactive sweet_plot."
@@ -1329,14 +1330,33 @@ class MultipactorTest:
 
         axes, df = self.sweet_plot(*ydata, xdata=xdata, **kwargs)
         fig = axes[0].get_figure()
+        assert fig is not None
 
-        def _on_click(event) -> list[Axes] | None:
+        vlines = [
+            ax.axvline(x=0, color="gray", lw=0.8, ls="--", visible=False)
+            for ax in axes
+        ]
+
+        def _on_motion(event) -> None:
+            """Show previously drawn ``vlines`` when mouse hovers it."""
+            if event.inaxes not in axes:
+                for vl in vlines:
+                    vl.set_visible(False)
+            else:
+                for vl in vlines:
+                    vl.set_visible(True)
+                    vl.set_xdata([round(event.xdata)])
+            fig.canvas.draw_idle()
+
+        fig.canvas.mpl_connect("motion_notify_event", _on_motion)
+
+        def _on_click(event) -> None:
             """Get x-position of click, plot corresp :class:`.PowerStep`."""
             if event.inaxes is None:
                 return
             sample_index = round(event.xdata)
             try:
-                power_step = self.power_step_set.get_power_step(sample_index)
+                power_step = power_step_set.get_power_step(sample_index)
             except KeyError:
                 logging.warning(
                     f"No PowerStep found for {sample_index=}. "
@@ -1344,11 +1364,11 @@ class MultipactorTest:
                 )
                 return
 
-            axes, _ = power_step.sweet_plot(
+            _ = power_step.sweet_plot(
                 *ydata, pre_trig=pre_trig, trig=trig, **kwargs
             )
             plt.show(block=False)
-            return axes
+            return
 
         fig.canvas.mpl_connect("button_press_event", _on_click)
         return axes, df
