@@ -66,7 +66,7 @@ defined in `pyproject.toml`. Then, add `multipac_testbench.src` to your
 - [x] Interactive plots:
   - [x] Make possible the visualization of `PowerStep` from a `MultipactorTest`,
         like in Labviewer.
-  - [ ] Toggle raw/physical plot.
+  - [x] Toggle raw/physical plot.
   - [ ] Post-treaters should add info to the plots: window, median, etc.
 
 ## Labviewer to-do

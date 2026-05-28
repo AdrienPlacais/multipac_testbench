@@ -261,6 +261,11 @@ class Instrument(ABC):
         self._data_as_pd = pd.Series(self.data, index=index, name=self.name)
         return self._data_as_pd
 
+    @property
+    def raw_data_as_pd(self) -> pd.Series | pd.DataFrame:
+        """Get the raw (untreated) data as a pandas object, without post-treating."""
+        return self._raw_data
+
     def register_callback(self, cb: CALLBACK_T) -> None:
         """Register the callback function.
 
@@ -478,16 +483,8 @@ class Instrument(ABC):
             xdata = np.full(len(data), xdata)
         assert isinstance(xdata, np.ndarray)
 
-        mp_kwargs = {
-            "c": "r",
-            "marker": "s",
-            "alpha": 0.1,
-        }
-        no_mp_kwargs = {
-            "c": "k",
-            "alpha": 0.1,
-            "marker": "x",
-        }
+        mp_kwargs = {"c": "r", "marker": "s", "alpha": 0.1}
+        no_mp_kwargs = {"c": "k", "alpha": 0.1, "marker": "x"}
         if axes.get_legend_handles_labels() == ([], []):
             mp_kwargs["label"] = "MP"
             no_mp_kwargs["label"] = "No MP"

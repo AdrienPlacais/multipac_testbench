@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Vertical line in interactive plots to show x-position of the mouse.
+- Possibility to switch between raw data and physical data in interactive plots.
+
+### Fixed
+
+- `MultipactorTest` created by `PowerStepSet.to_multipactor_test` where always
+  raw.
 
 ## [1.10.0] - 2026-05-27
 
