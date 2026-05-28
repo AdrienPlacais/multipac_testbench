@@ -25,6 +25,7 @@ from collections.abc import Collection, Iterable, Mapping, Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Literal, TypeVar, overload
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -1302,6 +1303,16 @@ class MultipactorTest:
             DataFrame holding the data that is plotted.
 
         """
+        _backend = matplotlib.get_backend()
+        if "inline" in _backend.lower() or _backend.lower() == "agg":
+            logging.warning(
+                f"Backend {_backend} does not support mouse events. "
+                "If you really need to use a Jupyter/VSCode notebook, run "
+                "'%matplotlib widget' (requires ipympl: pip install ipympl) "
+                "before importing. Falling back to non-interactive sweet_plot."
+            )
+            return self.sweet_plot(*ydata, xdata=xdata, **kwargs)
+
         if self.power_step_set is None:
             logging.warning(
                 "This MultipactorTest has no associated PowerStepSet. "
@@ -1336,7 +1347,7 @@ class MultipactorTest:
             axes, _ = power_step.sweet_plot(
                 *ydata, pre_trig=pre_trig, trig=trig, **kwargs
             )
-            plt.show()
+            plt.show(block=False)
             return axes
 
         fig.canvas.mpl_connect("button_press_event", _on_click)
