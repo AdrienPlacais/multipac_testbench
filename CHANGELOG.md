@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0]
+
+### Added
+
+- `HeaderConstant` instruments read data from power step individual `CSV` files.
+  - Currently, they are three to be implemented: `PolarizationSetpoint`,
+    `NewPowerSetpoint` (will eventually replace `PowerSetpoint`),
+    `FrequencySetpoint`.
+
+```toml
+
+#                      Instrument name. Will be name of column in exported
+#                      `MultipactorTest` `CSV` file.
+[global.instruments_kw.SM300_Level]
+class_name = "NewPowerSetpoint"  # Class name
+header_key = "SM300_Level"       # Value to read from power step `CSV` header
+
+[global.instruments_kw.SM300_Frequency]
+class_name = "FrequencySetpoint"
+header_key = "SM300_Frequency"
+
+#                      Note that for this one, we decided to change the name
+#                      in the `CSV` header
+[global.instruments_kw.NI9205_Polarization]
+class_name = "PolarizationSetpoint"
+header_key = "Polarisation_2"
+```
+
 ## [1.10.2] - 2026-06-01
 
 ### Fixed
