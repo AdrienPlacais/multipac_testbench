@@ -46,6 +46,7 @@ class InstrumentFactory:
         freq_mhz: float | None = None,
         is_raw: bool = False,
         create_virtual_instruments: bool = True,
+        commented_lines: Sequence[str] | None = None,
     ) -> None:
         """Set user-defined constants to create correspondig instrument.
 
@@ -58,11 +59,17 @@ class InstrumentFactory:
             contain acquisition voltages instead of physical quantities.
         create_virtual_instruments :
             If virtual instruments should be created.
+        commented_lines :
+            Lines from a power step ``CSV`` file header, stripped of their
+            comment character. Will be ``None`` in the context of
+            :class:`.MultipactorTest`, but will be set within
+            :class:`.PowerStep`.
 
         """
         self.freq_mhz = freq_mhz
         self._is_raw = is_raw
         self._create_virtual_instruments = create_virtual_instruments
+        self._commented_lines: Sequence[str] = commented_lines or ()
 
     def run(
         self,
@@ -70,6 +77,7 @@ class InstrumentFactory:
         df_data: pd.DataFrame,
         class_name: INSTRUMENT_NAME_T,
         column_header: str | list[str] | None = None,
+        header_key: str | None = None,
         **instruments_kw: Any,
     ) -> ins.Instrument | None:
         """Take the proper subclass, instantiate it and return it.
@@ -89,6 +97,9 @@ class InstrumentFactory:
             set to ``name``. In general it is not necessary to provide it. An
             exception is when several ``CSV`` columns should be loaded in the
             instrument.
+        header_key :
+            Key to look for in a power step ``CSV`` header. Used to instantiate
+            :class:`.HeaderConstant` in the context of :class:`.PowerStep`.
         instruments_kw :
             Other keyword arguments in the ``TOML`` file.
 
