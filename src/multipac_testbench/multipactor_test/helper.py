@@ -10,7 +10,13 @@ from numpy.typing import NDArray
 
 
 def infer_dbm(commented_lines: Sequence[str]) -> float:
-    """Determine :unit:`dBm` of current step from power step file header."""
+    """Determine :unit:`dBm` of current step from power step file header.
+
+    .. todo::
+       Remove this and replace by :func:`parse_header_value`.
+
+    """
+    return parse_header_value(commented_lines, "SM300_Level")
     if len(commented_lines) < 7:
         raise ValueError(
             "There is too few lines in the headers. We expect the dBm to be "
@@ -23,6 +29,34 @@ def infer_dbm(commented_lines: Sequence[str]) -> float:
             "We expect the 7th header line to start with 'SM300_Level'."
         )
     return float(splitted[-1])
+
+
+def parse_header_value(commented_lines: Sequence[str], key: str) -> float:
+    """Extract a scalar value from the ``CSV`` commented header.
+
+    Parameters
+    ----------
+    commented_lines :
+        Lines from the file header, already stripped of their comment
+        character.
+    key :
+        The header key to look up (e.g. ``"Polarisation_2"``).
+
+    Returns
+    -------
+        The parsed float value, or ``np.nan`` if the key is absent or the
+        value cannot be converted (including ``"NaN"`` entries).
+
+    """
+    for line in commented_lines:
+        parts = line.strip().split("\t")
+        if len(parts) >= 2 and parts[0].strip() == key:
+            try:
+                return float(parts[1].strip())
+            except ValueError:
+                return np.nan
+    logging.warning(f"{key = } not found in header. Returning NaN.")
+    return np.nan
 
 
 #: Functions converting an :meth:`.Instrument._raw_data` to a single float
