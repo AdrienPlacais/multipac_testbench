@@ -71,13 +71,14 @@ class ReflectionCoefficient(VirtualInstrument):
         forward: ForwardPower,
         reflected: ReflectedPower,
         name: str = "Reflection_coefficient",
+        position: float = np.nan,
         **kwargs,
     ) -> Self:
         """Compute the reflection coefficient from given :class:`.Power`."""
         return cls(
             name=name,
             raw_data=powers_to_reflection(forward.data, reflected.data, name),
-            position=np.nan,
+            position=position,
             forward=forward,
             reflected=reflected,
             **kwargs,
