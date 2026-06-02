@@ -144,7 +144,6 @@ def add_lower_envelope_instrument(
         color=(0, 0, 0),
         relatable_thresholds=False,
     )
-    __import__("pdb").set_trace()
 
     measurement_point.add_instrument(envelope)
     return measurement_point, detecting, envelope
