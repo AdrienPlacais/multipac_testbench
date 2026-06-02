@@ -174,6 +174,8 @@ class InstrumentFactory:
         if len(power_related) > 0:
             virtuals += power_related
 
+        if len(instruments) == 0:
+            return []
         n_points = len(instruments[0].data_as_pd)
         constants = []
         if is_global:
