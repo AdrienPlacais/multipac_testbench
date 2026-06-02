@@ -96,12 +96,11 @@ class PowerStep(MultipactorTest):
             Other kwargs passed to :func:`.load`.
 
         """
+        config = config if isinstance(config, dict) else load_config(config)
         with suppress_log_messages("", self.log_messages_to_suppress):
             super().__init__(
                 filepath=filepath,
-                config=(
-                    config if isinstance(config, dict) else load_config(config)
-                ),
+                config=config,
                 freq_mhz=freq_mhz,
                 swr=swr,
                 info=f"Sample index #{sample_index}",
@@ -123,6 +122,7 @@ class PowerStep(MultipactorTest):
         self,
         reducer: REDUCER_T,
         special_reducers: dict[str, REDUCER_T] | None = None,
+        operate_on_raw_data: bool = True,
     ) -> pd.Series:
         """Convert arrays of :class:`.Instrument` values to single floats.
 
@@ -148,13 +148,17 @@ class PowerStep(MultipactorTest):
             actual_reducer = special_reducers.get(col, reducer)
             return actual_reducer(values)
 
-        series = pd.Series(
-            {
-                col: dispatch(col, self.df_data[col].values)
-                for col in self.df_data.columns
-            }
-        )
-
+        all_data = {}
+        for instrument in self.instruments:
+            values = (
+                instrument._raw_data.to_numpy()
+                if operate_on_raw_data
+                else instrument.data
+            )
+            col = instrument.name
+            reduced = dispatch(col, values)
+            all_data[col] = reduced
+        series = pd.Series(all_data)
         series[self._out_dbm_column] = self._dbm
         series[self._out_index_col] = self._sample_index
         return series
@@ -303,7 +307,7 @@ class PowerStep(MultipactorTest):
 
 
 class PowerStepSet:
-    """Define all the files consituting a :class:`.MultipactorTest`."""
+    """Define all the files constituting a :class:`.MultipactorTest`."""
 
     def __init__(
         self,
