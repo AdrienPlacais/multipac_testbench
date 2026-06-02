@@ -7,6 +7,8 @@ from typing import Any, Literal
 
 import multipac_testbench.instruments as ins
 import pandas as pd
+from multipac_testbench.instruments.header_constant import HeaderConstant
+from multipac_testbench.instruments.instrument import Instrument
 from multipac_testbench.instruments.penning import DiffPenning, Penning
 from multipac_testbench.instruments.rpa import RPA
 
@@ -16,21 +18,28 @@ STRING_TO_INSTRUMENT_CLASS = {
     "ElectricFieldProbe": ins.FieldProbe,
     "FieldProbe": ins.FieldProbe,
     "ForwardPower": ins.ForwardPower,
+    "FrequencySetpoint": ins.FrequencySetpoint,
+    "NewPowerSetpoint": ins.NewPowerSetpoint,
     "OpticalFibre": ins.OpticalFibre,
     "Penning": ins.Penning,
+    "PolarizationSetpoint": ins.PolarizationSetpoint,
     "PowerSetpoint": ins.PowerSetpoint,
     "RPACurrent": ins.RPACurrent,
     "RPAPotential": ins.RPAPotential,
     "ReflectedPower": ins.ReflectedPower,
 }  #:
+
 INSTRUMENT_NAME_T = Literal[
     "CurrentProbe",
     "DiffPenning",
     "ElectricFieldProbe",
     "FieldProbe",
     "ForwardPower",
+    "FrequencySetpoint",
+    "NewPowerSetpoint",
     "OpticalFibre",
     "Penning",
+    "PolarizationSetpoint",
     "PowerSetpoint",
     "RPACurrent",
     "RPAPotential",
@@ -108,11 +117,20 @@ class InstrumentFactory:
             Instrument properly subclassed.
 
         """
-        assert class_name in STRING_TO_INSTRUMENT_CLASS, (
-            f"{class_name = } not recognized, allowed values are:\n"
-            f"{pformat(INSTRUMENT_NAME_T)}\nSee: instruments/factory.py"
-        )
-        instrument_class = STRING_TO_INSTRUMENT_CLASS[class_name]
+        constructor = _get_constructor(class_name)
+
+        if (
+            issubclass(constructor, HeaderConstant)
+            and header_key is not None
+            and self._commented_lines
+        ):
+            return constructor.from_single_csv_header(
+                name=name,
+                commented_lines=self._commented_lines,
+                n_points=len(df_data),
+                header_key=header_key,
+                **instruments_kw,
+            )
 
         if column_header is None:
             column_header = name
@@ -127,10 +145,10 @@ class InstrumentFactory:
         raw_data = df_data[column_header]
 
         if isinstance(raw_data, pd.DataFrame):
-            return instrument_class.from_pd_dataframe(
+            return constructor.from_pd_dataframe(
                 name, raw_data, **instruments_kw
             )
-        return instrument_class(
+        return constructor(
             name,
             raw_data,
             is_raw=self._is_raw,
@@ -275,3 +293,13 @@ class InstrumentFactory:
                 )
             )
         return constants
+
+
+def _get_constructor(class_name: INSTRUMENT_NAME_T) -> type[Instrument]:
+    """Get fail-safe proper instrument constructor."""
+    if class_name not in STRING_TO_INSTRUMENT_CLASS:
+        raise KeyError(
+            f"{class_name = } not recognized, allowed values are:\n"
+            f"{pformat(INSTRUMENT_NAME_T)}\nSee: instruments/factory.py"
+        )
+    return STRING_TO_INSTRUMENT_CLASS[class_name]

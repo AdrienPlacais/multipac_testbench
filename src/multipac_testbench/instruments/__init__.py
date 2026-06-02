@@ -12,6 +12,12 @@ from multipac_testbench.instruments.electric_field.reconstructed import (
     Reconstructed,
 )
 from multipac_testbench.instruments.frequency import Frequency
+from multipac_testbench.instruments.header_constant import (
+    FrequencySetpoint,
+    HeaderConstant,
+    NewPowerSetpoint,
+    PolarizationSetpoint,
+)
 from multipac_testbench.instruments.instrument import Instrument
 from multipac_testbench.instruments.optical_fibre import OpticalFibre
 from multipac_testbench.instruments.penning import DiffPenning, Penning
@@ -37,8 +43,12 @@ __all__ = [
     "Frequency",
     "IElectricField",
     "Instrument",
+    "FrequencySetpoint",
+    "NewPowerSetpoint",
     "OpticalFibre",
     "Penning",
+    "PolarizationSetpoint",
+    "HeaderConstant",
     "Power",
     "PowerSetpoint",
     "Reconstructed",
