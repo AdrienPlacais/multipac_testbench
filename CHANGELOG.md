@@ -9,16 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- New `HeaderConstant`: `PreTrigger`, `PostTrigger`, and `CurrentCalibre`.
+- New `StepConstant`: `PreTrigger`, `PostTrigger`, `Trigger`, `CurrentCalibre`.
 - New `Instrument`: `Sync`, holding the trigger command. Has a `trigger`
   property that computes the value of the trigger.
 
 ### Changed
 
+- `HeaderConstant` is now `StepConstant`
 - Frequency should be given in `TOML` via a `FrequencySetpoint`, even though
   it can still be given as a `MultipactorTest` argument.
 - Old `PowerSetpoint` inheriting from `VirtualInstrument` are removed. They are
-  replaced by equivalent `PowerSetpoint` inheriting from `HeaderConstant`.
+  replaced by equivalent `PowerSetpoint` inheriting from `StepConstant`.
 
 ### Removed
 

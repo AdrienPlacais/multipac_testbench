@@ -10,7 +10,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 from matplotlib.axes import Axes
-from multipac_testbench.instruments.power import Sync
+from multipac_testbench.instruments import Sync, Trigger
 from multipac_testbench.multipactor_test import MultipactorTest
 from multipac_testbench.multipactor_test.helper import (
     POWERSTEP_FILE_RECOGNIZER_T,
@@ -113,10 +113,18 @@ class PowerStep(MultipactorTest):
         #: Position of the step in the complete :class:`.MultipactorTest`
         self._sample_index = sample_index
         self._out_index_col = out_index_col
-        self.trigger: float | None = None
+
         sync = self.get_instrument(Sync, raise_missing_error=False)
-        if sync is not None:
-            self.trigger = sync.trigger
+        if sync is None:
+            return
+
+        assert isinstance(sync, Sync)
+        trigger_instrument = Trigger.from_sync(
+            n_points=self._n_points, sync=sync
+        )
+        if self.global_diagnostics is not None:
+            self.global_diagnostics.add_instrument(trigger_instrument)
+        self.test_conditions.trigger = int(sync.trigger)
 
     def to_single_values(
         self,
@@ -303,6 +311,11 @@ class PowerStep(MultipactorTest):
                     alpha=0.1,
                 )
         return axes, df
+
+    @property
+    def trigger(self) -> int | None:
+        """Trigger sample index. Shorthand for ``test_conditions.trigger``."""
+        return self.test_conditions.trigger
 
 
 class PowerStepSet:

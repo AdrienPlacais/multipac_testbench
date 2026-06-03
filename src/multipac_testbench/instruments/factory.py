@@ -7,10 +7,10 @@ from typing import Any, Literal
 
 import multipac_testbench.instruments as ins
 import pandas as pd
-from multipac_testbench.instruments.header_constant import HeaderConstant
 from multipac_testbench.instruments.instrument import Instrument
 from multipac_testbench.instruments.penning import DiffPenning, Penning
 from multipac_testbench.instruments.rpa import RPA
+from multipac_testbench.instruments.step_constant import StepConstant
 
 STRING_TO_INSTRUMENT_CLASS = {
     "CurrentCalibre": ins.CurrentCalibre,
@@ -30,6 +30,7 @@ STRING_TO_INSTRUMENT_CLASS = {
     "RPAPotential": ins.RPAPotential,
     "ReflectedPower": ins.ReflectedPower,
     "Sync": ins.Sync,
+    "Trigger": ins.Trigger,
 }  #:
 
 INSTRUMENT_NAME_T = Literal[
@@ -50,6 +51,7 @@ INSTRUMENT_NAME_T = Literal[
     "RPAPotential",
     "ReflectedPower",
     "Sync",
+    "Trigger",
 ]
 
 
@@ -114,7 +116,7 @@ class InstrumentFactory:
             instrument.
         header_key :
             Key to look for in a power step ``CSV`` header. Used to instantiate
-            :class:`.HeaderConstant` in the context of :class:`.PowerStep`.
+            :class:`.StepConstant` in the context of :class:`.PowerStep`.
         instruments_kw :
             Other keyword arguments in the ``TOML`` file.
 
@@ -126,7 +128,7 @@ class InstrumentFactory:
         constructor = _get_constructor(class_name)
 
         if (
-            issubclass(constructor, HeaderConstant)
+            issubclass(constructor, StepConstant)
             and header_key is not None
             and self._commented_lines
         ):

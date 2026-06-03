@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import numpy as np
+from multipac_testbench.instruments.step_constant import StepConstant
 
 if TYPE_CHECKING:
     from multipac_testbench.measurement_point.global_diagnostics import (
@@ -51,9 +52,9 @@ class TestConditions:
         global_diagnostics: GlobalDiagnostics | None = None,
     ) -> TestConditions:
         """
-        Build from constructor args and :class:`.HeaderConstant` instruments.
+        Build from constructor args and :class:`.StepConstant` instruments.
 
-        Scans ``global_diagnostics`` for :class:`.HeaderConstant` instruments
+        Scans ``global_diagnostics`` for :class:`.StepConstant` instruments
         whose :attr:`_should_be_constant` is ``True`` and whose
         :attr:`_field_name` matches a field of this dataclass. Warns if a
         supposed-to-be-constant instrument has more than one distinct value,
@@ -72,7 +73,7 @@ class TestConditions:
         trigger :
             Number of steps with power ON during a power pulse.
         global_diagnostics :
-            Searched for :class:`.HeaderConstant` instruments.
+            Searched for :class:`.StepConstant` instruments.
 
         Returns
         -------
@@ -86,9 +87,8 @@ class TestConditions:
 
         """
         # Local import avoids circular dependency at module level.
-        from multipac_testbench.instruments.header_constant import (
+        from multipac_testbench.instruments.step_constant import (
             FrequencySetpoint,
-            HeaderConstant,
         )
 
         kwargs: dict[str, float] = {}
@@ -96,7 +96,7 @@ class TestConditions:
 
         if global_diagnostics is not None:
             for instrument in global_diagnostics.instruments:
-                if not isinstance(instrument, HeaderConstant):
+                if not isinstance(instrument, StepConstant):
                     continue
                 if not instrument._should_be_constant:
                     continue

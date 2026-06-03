@@ -9,13 +9,14 @@ from typing import Self
 
 import numpy as np
 import pandas as pd
+from multipac_testbench.instruments.power import Sync
 from multipac_testbench.instruments.virtual_instrument import VirtualInstrument
 from multipac_testbench.multipactor_test.helper import parse_header_value
 from multipac_testbench.util.types import POST_TREATER_T
 from numpy.typing import NDArray
 
 
-class HeaderConstant(VirtualInstrument):
+class StepConstant(VirtualInstrument):
     """A :class:`.VirtualInstrument` with a constant value from a ``CSV`` header.
 
     The value is read once from the commented lines at the top of a
@@ -92,7 +93,7 @@ class HeaderConstant(VirtualInstrument):
         return []
 
 
-class CurrentCalibre(HeaderConstant):
+class CurrentCalibre(StepConstant):
     """Store the current calibre.
 
     It influences the calibration constant of the :class:`.CurrentProbe`.
@@ -105,7 +106,7 @@ class CurrentCalibre(HeaderConstant):
     _field_name = "current_calibre"
 
 
-class FrequencySetpoint(HeaderConstant):
+class FrequencySetpoint(StepConstant):
     """Store the frequency set by the user.
 
     By default, the frequency is in :unit:`MHz`.
@@ -124,7 +125,7 @@ class FrequencySetpoint(HeaderConstant):
 
         See Also
         --------
-        :class:`HeaderConstant`
+        :class:`StepConstant`
 
         """
         freq = super().from_single_csv_header(*args, **kwargs)
@@ -141,7 +142,7 @@ class Frequency(FrequencySetpoint):
     """Alias to :class:`.FrequencySetpoint`."""
 
 
-class PowerSetpoint(HeaderConstant):
+class PowerSetpoint(StepConstant):
     """Store the power asked by user.
 
     It should be preferred over :class:`.ForwardPower` to determine wether
@@ -176,7 +177,7 @@ class PowerSetpoint(HeaderConstant):
         )
 
 
-class PolarizationSetpoint(HeaderConstant):
+class PolarizationSetpoint(StepConstant):
     """Store the probes polarization read from the :class:`.PowerStep` header.
 
     The header key should in general be ``Polarisation_2``.
@@ -190,7 +191,7 @@ class PolarizationSetpoint(HeaderConstant):
         return r"Probes polarization $[\mathrm{V}]$"
 
 
-class PostTrigger(HeaderConstant):
+class PostTrigger(StepConstant):
     """Store the post-trigger.
 
     The header key should in general be ``NI9205 _Post-Trig``.
@@ -200,7 +201,7 @@ class PostTrigger(HeaderConstant):
     _field_name = "post_trigger"
 
 
-class PreTrigger(HeaderConstant):
+class PreTrigger(StepConstant):
     """Store the pre-trigger.
 
     The header key should in general be ``NI9205_Pre-Trig``.
@@ -208,3 +209,22 @@ class PreTrigger(HeaderConstant):
     """
 
     _field_name = "pre_trigger"
+
+
+class Trigger(StepConstant):
+    """Store the trigger.
+
+    This one is special because it is not present in the header, but must be
+    calculated from a :class:`.Sync` signal.
+
+    """
+
+    _field_name = "trigger"
+
+    @classmethod
+    def from_sync(
+        cls, n_points: int, sync: Sync, name: str = "NI9205_Sync", **kwargs
+    ) -> Self:
+        """Instantiate from a complete :class:`.Sync` signal."""
+        raw_data = pd.Series(np.full(n_points, sync.trigger), name=name)
+        return cls(name=name, raw_data=raw_data, **kwargs)

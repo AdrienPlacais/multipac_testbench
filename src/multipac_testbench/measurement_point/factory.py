@@ -91,7 +91,7 @@ class IMeasurementPointFactory:
                 instrument_factory=self.instrument_factory,
                 **config_value,
             )
-        if "header_constants" in config_key:
+        if "step_constants" in config_key:
             # Handled in PowerSet
             return
         return PickUp(
