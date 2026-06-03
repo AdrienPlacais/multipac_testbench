@@ -7,43 +7,51 @@ from typing import Any, Literal
 
 import multipac_testbench.instruments as ins
 import pandas as pd
-from multipac_testbench.instruments.header_constant import HeaderConstant
 from multipac_testbench.instruments.instrument import Instrument
 from multipac_testbench.instruments.penning import DiffPenning, Penning
 from multipac_testbench.instruments.rpa import RPA
+from multipac_testbench.instruments.step_constant import StepConstant
 
 STRING_TO_INSTRUMENT_CLASS = {
+    "CurrentCalibre": ins.CurrentCalibre,
     "CurrentProbe": ins.CurrentProbe,
     "DiffPenning": ins.DiffPenning,
     "ElectricFieldProbe": ins.FieldProbe,
     "FieldProbe": ins.FieldProbe,
     "ForwardPower": ins.ForwardPower,
     "FrequencySetpoint": ins.FrequencySetpoint,
-    "NewPowerSetpoint": ins.NewPowerSetpoint,
+    "PowerSetpoint": ins.PowerSetpoint,
     "OpticalFibre": ins.OpticalFibre,
     "Penning": ins.Penning,
     "PolarizationSetpoint": ins.PolarizationSetpoint,
-    "PowerSetpoint": ins.PowerSetpoint,
+    "PostTrigger": ins.PostTrigger,
+    "PreTrigger": ins.PreTrigger,
     "RPACurrent": ins.RPACurrent,
     "RPAPotential": ins.RPAPotential,
     "ReflectedPower": ins.ReflectedPower,
+    "Sync": ins.Sync,
+    "Trigger": ins.Trigger,
 }  #:
 
 INSTRUMENT_NAME_T = Literal[
+    "CurrentCalibre",
     "CurrentProbe",
     "DiffPenning",
     "ElectricFieldProbe",
     "FieldProbe",
     "ForwardPower",
     "FrequencySetpoint",
-    "NewPowerSetpoint",
     "OpticalFibre",
     "Penning",
     "PolarizationSetpoint",
+    "PostTrigger",
     "PowerSetpoint",
+    "PreTrigger",
     "RPACurrent",
     "RPAPotential",
     "ReflectedPower",
+    "Sync",
+    "Trigger",
 ]
 
 
@@ -108,7 +116,7 @@ class InstrumentFactory:
             instrument.
         header_key :
             Key to look for in a power step ``CSV`` header. Used to instantiate
-            :class:`.HeaderConstant` in the context of :class:`.PowerStep`.
+            :class:`.StepConstant` in the context of :class:`.PowerStep`.
         instruments_kw :
             Other keyword arguments in the ``TOML`` file.
 
@@ -120,7 +128,7 @@ class InstrumentFactory:
         constructor = _get_constructor(class_name)
 
         if (
-            issubclass(constructor, HeaderConstant)
+            issubclass(constructor, StepConstant)
             and header_key is not None
             and self._commented_lines
         ):
@@ -194,12 +202,6 @@ class InstrumentFactory:
 
         if len(instruments) == 0:
             return []
-        n_points = len(instruments[0].data_as_pd)
-        constants = []
-        if is_global:
-            constants = self._constant_values_defined_by_user(n_points)
-        if len(constants) > 0:
-            virtuals += constants
 
         rpa = self._rpa_related(instruments, **kwargs)
         if rpa is not None:
@@ -279,20 +281,6 @@ class InstrumentFactory:
             for i, penning in enumerate(pennings)
         ]
         return diff_pennings
-
-    def _constant_values_defined_by_user(
-        self,
-        n_points: int,
-    ) -> list[ins.VirtualInstrument]:
-        """Define a fake frequency probe. Maybe a fake SWR, fake R later."""
-        constants = []
-        if self.freq_mhz is not None:
-            constants.append(
-                ins.Frequency.from_user_defined_frequency(
-                    self.freq_mhz, n_points
-                )
-            )
-        return constants
 
 
 def _get_constructor(class_name: INSTRUMENT_NAME_T) -> type[Instrument]:

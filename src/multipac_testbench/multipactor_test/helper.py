@@ -9,28 +9,6 @@ import numpy as np
 from numpy.typing import NDArray
 
 
-def infer_dbm(commented_lines: Sequence[str]) -> float:
-    """Determine :unit:`dBm` of current step from power step file header.
-
-    .. todo::
-       Remove this and replace by :func:`parse_header_value`.
-
-    """
-    return parse_header_value(commented_lines, "SM300_Level")
-    if len(commented_lines) < 7:
-        raise ValueError(
-            "There is too few lines in the headers. We expect the dBm to be "
-            "on the 7th line."
-        )
-    expected_line = commented_lines[6]
-    splitted = expected_line.split()
-    if splitted[0] != "SM300_Level":
-        raise ValueError(
-            "We expect the 7th header line to start with 'SM300_Level'."
-        )
-    return float(splitted[-1])
-
-
 def parse_header_value(commented_lines: Sequence[str], key: str) -> float:
     """Extract a scalar value from the ``CSV`` commented header.
 

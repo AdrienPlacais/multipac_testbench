@@ -11,52 +11,60 @@ from multipac_testbench.instruments.electric_field.reconstructed import (
     FieldPowerError,
     Reconstructed,
 )
-from multipac_testbench.instruments.frequency import Frequency
-from multipac_testbench.instruments.header_constant import (
-    FrequencySetpoint,
-    HeaderConstant,
-    NewPowerSetpoint,
-    PolarizationSetpoint,
-)
 from multipac_testbench.instruments.instrument import Instrument
 from multipac_testbench.instruments.optical_fibre import OpticalFibre
 from multipac_testbench.instruments.penning import DiffPenning, Penning
 from multipac_testbench.instruments.power import (
     ForwardPower,
     Power,
-    PowerSetpoint,
     ReflectedPower,
+    Sync,
 )
 from multipac_testbench.instruments.reflection_coefficient import (
     ReflectionCoefficient,
 )
 from multipac_testbench.instruments.rpa import RPA, RPACurrent, RPAPotential
+from multipac_testbench.instruments.step_constant import (
+    CurrentCalibre,
+    Frequency,
+    FrequencySetpoint,
+    PolarizationSetpoint,
+    PostTrigger,
+    PowerSetpoint,
+    PreTrigger,
+    StepConstant,
+    Trigger,
+)
 from multipac_testbench.instruments.swr import SWR
 from multipac_testbench.instruments.virtual_instrument import VirtualInstrument
 
 __all__ = [
+    "CurrentCalibre",
     "CurrentProbe",
     "DiffPenning",
     "FieldPowerError",
     "FieldProbe",
     "ForwardPower",
     "Frequency",
+    "FrequencySetpoint",
+    "StepConstant",
     "IElectricField",
     "Instrument",
-    "FrequencySetpoint",
-    "NewPowerSetpoint",
     "OpticalFibre",
     "Penning",
     "PolarizationSetpoint",
-    "HeaderConstant",
+    "PostTrigger",
     "Power",
     "PowerSetpoint",
-    "Reconstructed",
-    "ReflectedPower",
-    "ReflectionCoefficient",
+    "PreTrigger",
     "RPA",
     "RPACurrent",
     "RPAPotential",
+    "Reconstructed",
+    "ReflectedPower",
+    "ReflectionCoefficient",
     "SWR",
+    "Sync",
+    "Trigger",
     "VirtualInstrument",
 ]

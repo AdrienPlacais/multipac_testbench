@@ -69,6 +69,7 @@ from multipac_testbench.measurement_point.i_measurement_point import (
 )
 from multipac_testbench.measurement_point.pick_up import PickUp
 from multipac_testbench.multipactor_test.loader import TRIGGER_POLICIES, load
+from multipac_testbench.multipactor_test.test_conditions import TestConditions
 from multipac_testbench.threshold.helper import (
     extract_detecting_name,
     extract_measured_name,
@@ -114,9 +115,10 @@ class MultipactorTest:
         self,
         filepath: Path,
         config: dict[str, Any] | str | Path,
-        freq_mhz: float,
-        swr: float,
+        freq_mhz: float | None = None,
+        swr: float = 1.0,
         info: str = "",
+        trigger: int | None = None,
         sep: str = ",",
         trigger_policy: TRIGGER_POLICIES = "keep_all",
         index_col: str = "Sample index",
@@ -134,11 +136,14 @@ class MultipactorTest:
         config :
             Configuration ``TOML`` of the testbench.
         freq_mhz :
-            Frequency of the test in :unit:`MHz`.
+            Explicit frequency of the test in :unit:`MHz`. Prefer defining a
+            :class:`.FrequencySetpoint` in the ``TOML``.
         swr :
             Expected Voltage Signal Wave Ratio.
         info :
             An additional string to identify this test in plots.
+        trigger :
+            Number of steps with power ON during a power pulse.
         sep :
             Delimiter between two columns in ``filepath``.
         trigger_policy :
@@ -192,10 +197,13 @@ class MultipactorTest:
         #: (e.g. forward/reflected power)
         self.global_diagnostics = imeasurement_points[0]
 
-        self.freq_mhz = freq_mhz
-        #: Objective SWR for the test.
-        self.swr = swr
-        self.info = info
+        self.test_conditions = TestConditions.from_components(
+            freq_mhz=freq_mhz,
+            swr=swr,
+            info=info,
+            trigger=trigger,
+            global_diagnostics=self.global_diagnostics,
+        )
         #: :class:`.PowerStepSet` this test was built from, if any. Enables
         #: interactive plots.
         self.power_step_set: PowerStepSet | None = None
@@ -1269,12 +1277,7 @@ class MultipactorTest:
         return axes, df_to_plot
 
     def interactive_sweet_plot(
-        self,
-        *ydata: ABCMeta,
-        xdata: ABCMeta | None = None,
-        pre_trig: int | None = None,
-        trig: int | None = None,
-        **kwargs,
+        self, *ydata: ABCMeta, xdata: ABCMeta | None = None, **kwargs
     ) -> tuple[list[Axes], pd.DataFrame]:
         """Like sweet_plot, but clicking opens the corresponding PowerStep plot.
 
@@ -1296,14 +1299,6 @@ class MultipactorTest:
             :meth:`.PowerStep.sweet_plot` on click.
         xdata :
             Passed to :meth:`sweet_plot`. Must be ``None`` for interactivity.
-        pre_trig :
-            Index at which the pulse should start. If both ``pre_trig`` and
-            ``trig`` are provided, the times with power on are highlighted in
-            red in :class:`.PowerStep` plots.
-        trig :
-            Pulse duration in indexes. If both ``pre_trig`` and ``trig`` are
-            provided, the times with power on are highlighted in red in
-            :class:`.PowerStep` plots.
         **kwargs :
             Passed to :meth:`sweet_plot`.
 
@@ -1409,9 +1404,9 @@ class MultipactorTest:
 
             _ = power_step.sweet_plot(
                 *ydata,
-                pre_trig=pre_trig,
-                trig=trig,
                 raw=_state["raw"],
+                pre_trig=self.test_conditions.pre_trigger,
+                trig=self.test_conditions.trigger,
                 **kwargs,
             )
             plt.show(block=False)
@@ -1980,6 +1975,21 @@ class MultipactorTest:
         if csv_path:
             plot.save_dataframe(stats, csv_path, **(csv_kwargs or {}))
         return stats
+
+    @property
+    def freq_mhz(self) -> float:
+        """Frequency in :unit:`MHz`."""
+        return self.test_conditions.freq_mhz
+
+    @property
+    def swr(self) -> float:
+        """Expected Standing Wave Ratio."""
+        return self.test_conditions.swr
+
+    @property
+    def info(self) -> str:
+        """Human-readable label for this test."""
+        return self.test_conditions.info
 
 
 def group_columns_by_detector_position(

@@ -9,13 +9,14 @@ from typing import Self
 
 import numpy as np
 import pandas as pd
+from multipac_testbench.instruments.power import Sync
 from multipac_testbench.instruments.virtual_instrument import VirtualInstrument
 from multipac_testbench.multipactor_test.helper import parse_header_value
 from multipac_testbench.util.types import POST_TREATER_T
 from numpy.typing import NDArray
 
 
-class HeaderConstant(VirtualInstrument):
+class StepConstant(VirtualInstrument):
     """A :class:`.VirtualInstrument` with a constant value from a ``CSV`` header.
 
     The value is read once from the commented lines at the top of a
@@ -30,6 +31,11 @@ class HeaderConstant(VirtualInstrument):
     :class:`PolarizationSetpoint` studies).
 
     """
+
+    #: Whether this property is expected to not vary from ``CSV`` to ``CSV``.
+    _should_be_constant: bool = True
+    #: Name in :class:`.TestConditions`
+    _field_name: str | None = None
 
     def __init__(
         self,
@@ -87,19 +93,56 @@ class HeaderConstant(VirtualInstrument):
         return []
 
 
-class PolarizationSetpoint(HeaderConstant):
-    """Store the probes polarization read from the :class:`.PowerStep` header.
+class CurrentCalibre(StepConstant):
+    """Store the current calibre.
 
-    The header key should in general be ``Polarisation_2``.
+    It influences the calibration constant of the :class:`.CurrentProbe`.
+
+
+    The header key should in general be ``Gamme_mA``.
 
     """
 
+    _field_name = "current_calibre"
+
+
+class FrequencySetpoint(StepConstant):
+    """Store the frequency set by the user.
+
+    By default, the frequency is in :unit:`MHz`.
+
+    The header key should in general be ``SM300_Frequency``.
+
+    """
+
+    _field_name = "freq_mhz"
+
+    @classmethod
+    def from_single_csv_header(cls, *args, **kwargs) -> Self:
+        """Instantiate from a parsed ``CSV`` header.
+
+        Data is converted from :unit:`Hz` to :unit:`MHz`.
+
+        See Also
+        --------
+        :class:`StepConstant`
+
+        """
+        freq = super().from_single_csv_header(*args, **kwargs)
+        freq._raw_data /= 1e3
+        return freq
+
     @classmethod
     def ylabel(cls) -> str:
-        return r"Probes polarization $[\mathrm{V}]$"
+        """Label used for plots."""
+        return r"RF frequency $f~[\mathrm{MHz}]$"
 
 
-class NewPowerSetpoint(HeaderConstant):
+class Frequency(FrequencySetpoint):
+    """Alias to :class:`.FrequencySetpoint`."""
+
+
+class PowerSetpoint(StepConstant):
     """Store the power asked by user.
 
     It should be preferred over :class:`.ForwardPower` to determine wether
@@ -112,6 +155,8 @@ class NewPowerSetpoint(HeaderConstant):
     Does not inherit from :class:`Power`.
 
     """
+
+    _should_be_constant = False
 
     @classmethod
     def ylabel(cls) -> str:
@@ -132,31 +177,54 @@ class NewPowerSetpoint(HeaderConstant):
         )
 
 
-class FrequencySetpoint(HeaderConstant):
-    """Store the frequency set by the user.
+class PolarizationSetpoint(StepConstant):
+    """Store the probes polarization read from the :class:`.PowerStep` header.
 
-    By default, the frequency is in :unit:`MHz`.
-
-    The header key should in general be ``SM300_Frequency``.
+    The header key should in general be ``Polarisation_2``.
 
     """
 
-    @classmethod
-    def from_single_csv_header(cls, *args, **kwargs) -> Self:
-        """Instantiate from a parsed ``CSV`` header.
-
-        Data is converted from :unit:`Hz` to :unit:`MHz`.
-
-        See Also
-        --------
-        :class:`HeaderConstant`
-
-        """
-        freq = super().from_single_csv_header(*args, **kwargs)
-        freq._raw_data /= 1e3
-        return freq
+    _field_name = "polarization"
 
     @classmethod
     def ylabel(cls) -> str:
-        """Label used for plots."""
-        return r"RF frequency $f~[\mathrm{MHz}]$"
+        return r"Probes polarization $[\mathrm{V}]$"
+
+
+class PostTrigger(StepConstant):
+    """Store the post-trigger.
+
+    The header key should in general be ``NI9205 _Post-Trig``.
+
+    """
+
+    _field_name = "post_trigger"
+
+
+class PreTrigger(StepConstant):
+    """Store the pre-trigger.
+
+    The header key should in general be ``NI9205_Pre-Trig``.
+
+    """
+
+    _field_name = "pre_trigger"
+
+
+class Trigger(StepConstant):
+    """Store the trigger.
+
+    This one is special because it is not present in the header, but must be
+    calculated from a :class:`.Sync` signal.
+
+    """
+
+    _field_name = "trigger"
+
+    @classmethod
+    def from_sync(
+        cls, n_points: int, sync: Sync, name: str = "NI9205_Sync", **kwargs
+    ) -> Self:
+        """Instantiate from a complete :class:`.Sync` signal."""
+        raw_data = pd.Series(np.full(n_points, sync.trigger), name=name)
+        return cls(name=name, raw_data=raw_data, **kwargs)

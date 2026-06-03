@@ -28,7 +28,6 @@ def load(
     filepath: Path,
     sep: str = "\t",
     trigger_policy: TRIGGER_POLICIES = "keep_all",
-    dbm_column: str = "NI9205_dBm",
     index_col: str = "Sample index",
     remove_metadata_columns: bool = False,
     **kwargs,
@@ -46,8 +45,6 @@ def load(
         Column separator.
     trigger_policy :
         How consecutive measures at the same power should be treated.
-    dbm_column :
-        Name of the column holding the power.
     index_col :
         Name of the column holding indexes.
     remove_metadata_columns :
@@ -72,7 +69,7 @@ def load(
         data = data.select_dtypes(include=["float", "int"])
 
     filtered = _apply_trigger_filtering(
-        trigger_policy, data, dbm_column=dbm_column
+        trigger_policy, data, dbm_column="NI9205_dBm"
     ).reset_index(drop=True)
     filtered.index.name = index_col
 

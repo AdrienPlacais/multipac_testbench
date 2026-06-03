@@ -1,20 +1,21 @@
 """Define an object corresponding to a power step file."""
 
 import logging
+import random
 from abc import ABCMeta
-from collections.abc import Iterable, Iterator, Mapping, Sequence
+from collections.abc import Iterable, Iterator, Sequence
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import pandas as pd
 from matplotlib.axes import Axes
+from multipac_testbench.instruments import Sync, Trigger
 from multipac_testbench.multipactor_test import MultipactorTest
 from multipac_testbench.multipactor_test.helper import (
     POWERSTEP_FILE_RECOGNIZER_T,
     REDUCER_T,
     default_powerstep_file_valider,
-    infer_dbm,
     powerstep_files,
     take_maximum,
 )
@@ -40,13 +41,12 @@ class PowerStep(MultipactorTest):
         self,
         filepath: Path,
         config: dict[str, Any] | str | Path,
-        freq_mhz: float,
-        swr: float,
         sample_index: int,
+        freq_mhz: float | None = None,
+        swr: float = 1.0,
+        info: str = "",
         sep: str = "\t",
         index_col: str = "Index",
-        dbm: float | None = None,
-        out_dbm_column: str = "NI9205_dBm",
         out_index_col: str = "Sample index",
         comment: str = "#",
         create_virtual_instruments: bool = True,
@@ -72,22 +72,20 @@ class PowerStep(MultipactorTest):
             Path to the results file produced by LabViewer.
         config :
             Configuration ``TOML`` of the testbench.
+        sample_index :
+            Index of power step.
         freq_mhz :
             Frequency of the test in :unit:`MHz`.
         swr :
             Expected Voltage Signal Wave Ratio.
-        sample_index :
-            Index of power step.
+        info :
+            An additional string to identify this test in plots.
         sep :
             Delimiter between two columns in ``filepath``.
         index_col :
             Name of the column holding index data.
         out_index_col :
             Where to store ``sample_index`` in the output file.
-        dbm :
-            To override the dBm values inferred from commented lines.
-        out_dbm_column :
-            Where to store the dBm value in the output file.
         comment :
             Comment character.
         create_virtual_instruments :
@@ -103,7 +101,7 @@ class PowerStep(MultipactorTest):
                 config=config,
                 freq_mhz=freq_mhz,
                 swr=swr,
-                info=f"Sample index #{sample_index}",
+                info=f"Sample index #{sample_index}" + info,
                 sep=sep,
                 index_col=index_col,
                 trigger_policy="keep_all",
@@ -115,8 +113,18 @@ class PowerStep(MultipactorTest):
         #: Position of the step in the complete :class:`.MultipactorTest`
         self._sample_index = sample_index
         self._out_index_col = out_index_col
-        self._dbm = infer_dbm(self._commented_lines) if dbm is None else dbm
-        self._out_dbm_column = out_dbm_column
+
+        sync = self.get_instrument(Sync, raise_missing_error=False)
+        if sync is None:
+            return
+
+        assert isinstance(sync, Sync)
+        trigger_instrument = Trigger.from_sync(
+            n_points=self._n_points, sync=sync
+        )
+        if self.global_diagnostics is not None:
+            self.global_diagnostics.add_instrument(trigger_instrument)
+        self.test_conditions.trigger = int(sync.trigger)
 
     def to_single_values(
         self,
@@ -159,7 +167,6 @@ class PowerStep(MultipactorTest):
             reduced = dispatch(col, values)
             all_data[col] = reduced
         series = pd.Series(all_data)
-        series[self._out_dbm_column] = self._dbm
         series[self._out_index_col] = self._sample_index
         return series
 
@@ -305,6 +312,11 @@ class PowerStep(MultipactorTest):
                 )
         return axes, df
 
+    @property
+    def trigger(self) -> int | None:
+        """Trigger sample index. Shorthand for ``test_conditions.trigger``."""
+        return self.test_conditions.trigger
+
 
 class PowerStepSet:
     """Define all the files constituting a :class:`.MultipactorTest`."""
@@ -313,12 +325,11 @@ class PowerStepSet:
         self,
         folder: Path,
         config: dict[str, Any] | str | Path,
-        freq_mhz: float,
-        swr: float,
+        freq_mhz: float | None = None,
+        swr: float = 1.0,
+        info: str = "",
         sep: str = "\t",
         index_col: str = "Index",
-        dbms: Mapping[str, float] | None = None,
-        out_dbm_column: str = "NI9205_dBm",
         out_index_col: str = "Sample index",
         file_recognizer: POWERSTEP_FILE_RECOGNIZER_T | None = None,
         comment: str = "#",
@@ -335,17 +346,16 @@ class PowerStepSet:
         config :
             Configuration file for the test.
         freq_mhz :
-            RF frequency in :unit:`.MHz`.
+            Explicit frequency of the test in :unit:`MHz`. Prefer defining a
+            :class:`.FrequencySetpoint` in the ``TOML``.
         swr :
-            SWR of the test.
+            Expected Voltage Signal Wave Ratio.
+        info :
+            An additional string to identify this test in plots.
         sep :
             Column delimiter.
         index_col :
             Name of the column holding indexes in every power step file.
-        dbms :
-            Maps filenames to their :unit:`dBm`, when they are shifted.
-        out_dbm_column :
-            Name of column where power setpoint in :unit:`dBm` will be stored.
         out_index_col :
             Name of column where sample indexes will be stored.
         file_recognizer :
@@ -364,6 +374,7 @@ class PowerStepSet:
         self._folder = folder
         self._freq_mhz = freq_mhz
         self._swr = swr
+        self._info = info
         self._config: dict[str, Any] = (
             config if isinstance(config, dict) else load_config(config)
         )
@@ -379,15 +390,11 @@ class PowerStepSet:
             PowerStep(
                 filepath=filepath,
                 config=self._config,
-                freq_mhz=freq_mhz,
-                swr=swr,
+                freq_mhz=self._freq_mhz,
+                swr=self._swr,
                 sample_index=sample_index,
                 sep=sep,
                 index_col=index_col,
-                dbm=(
-                    dbms.get(filepath.name, None) if dbms is not None else None
-                ),
-                out_dbm_column=out_dbm_column,
                 out_index_col=out_index_col,
                 comment=comment,
                 create_virtual_instruments=create_virtual_instruments,
@@ -398,6 +405,16 @@ class PowerStepSet:
         ]
         if len(self) == 0:
             logging.warning(f"No valid file found in {folder}")
+
+        some_power_steps = random.sample(self._power_steps, 10)
+        triggers = [
+            p.trigger for p in some_power_steps if p.trigger is not None
+        ]
+        if len(triggers) > 5:
+            self._trigger = int(np.median(triggers))
+        else:
+            self._trigger = None
+            logging.warning("Trigger value could not be calculated.")
 
     def __iter__(self) -> Iterator[PowerStep]:
         """Iterate over :class:`.PowerStep` objects.
@@ -523,6 +540,8 @@ class PowerStepSet:
             config=self._config,
             freq_mhz=self._freq_mhz,
             swr=self._swr,
+            info=self._info,
+            trigger=self._trigger,
             is_raw=self._are_raw,
             **kwargs,
         )
