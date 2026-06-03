@@ -40,9 +40,10 @@ class PowerStep(MultipactorTest):
         self,
         filepath: Path,
         config: dict[str, Any] | str | Path,
-        freq_mhz: float,
-        swr: float,
         sample_index: int,
+        freq_mhz: float | None = None,
+        swr: float = 1.0,
+        info: str = "",
         sep: str = "\t",
         index_col: str = "Index",
         dbm: float | None = None,
@@ -72,12 +73,14 @@ class PowerStep(MultipactorTest):
             Path to the results file produced by LabViewer.
         config :
             Configuration ``TOML`` of the testbench.
+        sample_index :
+            Index of power step.
         freq_mhz :
             Frequency of the test in :unit:`MHz`.
         swr :
             Expected Voltage Signal Wave Ratio.
-        sample_index :
-            Index of power step.
+        info :
+            An additional string to identify this test in plots.
         sep :
             Delimiter between two columns in ``filepath``.
         index_col :
@@ -103,7 +106,7 @@ class PowerStep(MultipactorTest):
                 config=config,
                 freq_mhz=freq_mhz,
                 swr=swr,
-                info=f"Sample index #{sample_index}",
+                info=f"Sample index #{sample_index}" + info,
                 sep=sep,
                 index_col=index_col,
                 trigger_policy="keep_all",
@@ -313,8 +316,9 @@ class PowerStepSet:
         self,
         folder: Path,
         config: dict[str, Any] | str | Path,
-        freq_mhz: float,
-        swr: float,
+        freq_mhz: float | None = None,
+        swr: float = 1.0,
+        info: str = "",
         sep: str = "\t",
         index_col: str = "Index",
         dbms: Mapping[str, float] | None = None,
@@ -335,9 +339,12 @@ class PowerStepSet:
         config :
             Configuration file for the test.
         freq_mhz :
-            RF frequency in :unit:`.MHz`.
+            Explicit frequency of the test in :unit:`MHz`. Prefer defining a
+            :class:`.FrequencySetpoint` in the ``TOML``.
         swr :
-            SWR of the test.
+            Expected Voltage Signal Wave Ratio.
+        info :
+            An additional string to identify this test in plots.
         sep :
             Column delimiter.
         index_col :
@@ -364,6 +371,7 @@ class PowerStepSet:
         self._folder = folder
         self._freq_mhz = freq_mhz
         self._swr = swr
+        self._info = info
         self._config: dict[str, Any] = (
             config if isinstance(config, dict) else load_config(config)
         )
@@ -379,8 +387,8 @@ class PowerStepSet:
             PowerStep(
                 filepath=filepath,
                 config=self._config,
-                freq_mhz=freq_mhz,
-                swr=swr,
+                freq_mhz=self._freq_mhz,
+                swr=self._swr,
                 sample_index=sample_index,
                 sep=sep,
                 index_col=index_col,
@@ -523,6 +531,7 @@ class PowerStepSet:
             config=self._config,
             freq_mhz=self._freq_mhz,
             swr=self._swr,
+            info=self._info,
             is_raw=self._are_raw,
             **kwargs,
         )
