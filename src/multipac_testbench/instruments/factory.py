@@ -13,6 +13,7 @@ from multipac_testbench.instruments.penning import DiffPenning, Penning
 from multipac_testbench.instruments.rpa import RPA
 
 STRING_TO_INSTRUMENT_CLASS = {
+    "CurrentCalibre": ins.CurrentCalibre,
     "CurrentProbe": ins.CurrentProbe,
     "DiffPenning": ins.DiffPenning,
     "ElectricFieldProbe": ins.FieldProbe,
@@ -23,13 +24,16 @@ STRING_TO_INSTRUMENT_CLASS = {
     "OpticalFibre": ins.OpticalFibre,
     "Penning": ins.Penning,
     "PolarizationSetpoint": ins.PolarizationSetpoint,
+    "PostTrigger": ins.PostTrigger,
     "PowerSetpoint": ins.PowerSetpoint,
+    "PreTrigger": ins.PreTrigger,
     "RPACurrent": ins.RPACurrent,
     "RPAPotential": ins.RPAPotential,
     "ReflectedPower": ins.ReflectedPower,
 }  #:
 
 INSTRUMENT_NAME_T = Literal[
+    "CurrentCalibre",
     "CurrentProbe",
     "DiffPenning",
     "ElectricFieldProbe",
@@ -40,7 +44,9 @@ INSTRUMENT_NAME_T = Literal[
     "OpticalFibre",
     "Penning",
     "PolarizationSetpoint",
+    "PostTrigger",
     "PowerSetpoint",
+    "PreTrigger",
     "RPACurrent",
     "RPAPotential",
     "ReflectedPower",

@@ -13,10 +13,13 @@ from multipac_testbench.instruments.electric_field.reconstructed import (
 )
 from multipac_testbench.instruments.frequency import Frequency
 from multipac_testbench.instruments.header_constant import (
+    CurrentCalibre,
     FrequencySetpoint,
     HeaderConstant,
     NewPowerSetpoint,
     PolarizationSetpoint,
+    PostTrigger,
+    PreTrigger,
 )
 from multipac_testbench.instruments.instrument import Instrument
 from multipac_testbench.instruments.optical_fibre import OpticalFibre
@@ -35,28 +38,31 @@ from multipac_testbench.instruments.swr import SWR
 from multipac_testbench.instruments.virtual_instrument import VirtualInstrument
 
 __all__ = [
+    "CurrentCalibre",
     "CurrentProbe",
     "DiffPenning",
     "FieldPowerError",
     "FieldProbe",
     "ForwardPower",
     "Frequency",
+    "FrequencySetpoint",
+    "HeaderConstant",
     "IElectricField",
     "Instrument",
-    "FrequencySetpoint",
     "NewPowerSetpoint",
     "OpticalFibre",
     "Penning",
     "PolarizationSetpoint",
-    "HeaderConstant",
+    "PostTrigger",
     "Power",
     "PowerSetpoint",
-    "Reconstructed",
-    "ReflectedPower",
-    "ReflectionCoefficient",
+    "PreTrigger",
     "RPA",
     "RPACurrent",
     "RPAPotential",
+    "Reconstructed",
+    "ReflectedPower",
+    "ReflectionCoefficient",
     "SWR",
     "VirtualInstrument",
 ]

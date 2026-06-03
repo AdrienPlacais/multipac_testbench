@@ -87,16 +87,45 @@ class HeaderConstant(VirtualInstrument):
         return []
 
 
-class PolarizationSetpoint(HeaderConstant):
-    """Store the probes polarization read from the :class:`.PowerStep` header.
+class CurrentCalibre(HeaderConstant):
+    """Store the current calibre.
 
-    The header key should in general be ``Polarisation_2``.
+    It influences the calibration constant of the :class:`.CurrentProbe`.
+
+
+    The header key should in general be ``Gamme_mA``.
+
+    """
+
+
+class FrequencySetpoint(HeaderConstant):
+    """Store the frequency set by the user.
+
+    By default, the frequency is in :unit:`MHz`.
+
+    The header key should in general be ``SM300_Frequency``.
 
     """
 
     @classmethod
+    def from_single_csv_header(cls, *args, **kwargs) -> Self:
+        """Instantiate from a parsed ``CSV`` header.
+
+        Data is converted from :unit:`Hz` to :unit:`MHz`.
+
+        See Also
+        --------
+        :class:`HeaderConstant`
+
+        """
+        freq = super().from_single_csv_header(*args, **kwargs)
+        freq._raw_data /= 1e3
+        return freq
+
+    @classmethod
     def ylabel(cls) -> str:
-        return r"Probes polarization $[\mathrm{V}]$"
+        """Label used for plots."""
+        return r"RF frequency $f~[\mathrm{MHz}]$"
 
 
 class NewPowerSetpoint(HeaderConstant):
@@ -132,31 +161,29 @@ class NewPowerSetpoint(HeaderConstant):
         )
 
 
-class FrequencySetpoint(HeaderConstant):
-    """Store the frequency set by the user.
+class PolarizationSetpoint(HeaderConstant):
+    """Store the probes polarization read from the :class:`.PowerStep` header.
 
-    By default, the frequency is in :unit:`MHz`.
-
-    The header key should in general be ``SM300_Frequency``.
+    The header key should in general be ``Polarisation_2``.
 
     """
 
     @classmethod
-    def from_single_csv_header(cls, *args, **kwargs) -> Self:
-        """Instantiate from a parsed ``CSV`` header.
-
-        Data is converted from :unit:`Hz` to :unit:`MHz`.
-
-        See Also
-        --------
-        :class:`HeaderConstant`
-
-        """
-        freq = super().from_single_csv_header(*args, **kwargs)
-        freq._raw_data /= 1e3
-        return freq
-
-    @classmethod
     def ylabel(cls) -> str:
-        """Label used for plots."""
-        return r"RF frequency $f~[\mathrm{MHz}]$"
+        return r"Probes polarization $[\mathrm{V}]$"
+
+
+class PostTrigger(HeaderConstant):
+    """Store the post-trigger.
+
+    The header key should in general be ``NI9205 _Post-Trig``.
+
+    """
+
+
+class PreTrigger(HeaderConstant):
+    """Store the pre-trigger.
+
+    The header key should in general be ``NI9205_Pre-Trig``.
+
+    """
