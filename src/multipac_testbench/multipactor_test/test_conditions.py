@@ -25,6 +25,9 @@ def _warn_freq_mhz_override_once() -> None:
     )
 
 
+_INT_FIELDS = {"pre_trigger", "post_trigger", "trigger"}
+
+
 @dataclass
 class TestConditions:
     """Compact record of the conditions under which a test was run."""
@@ -33,8 +36,9 @@ class TestConditions:
     swr: float
     info: str = ""
     polarization: float = np.nan
-    pre_trigger: float = np.nan
-    post_trigger: float = np.nan
+    pre_trigger: int | None = None
+    trigger: int | None = None
+    post_trigger: int | None = None
     current_calibre: float = np.nan
 
     @classmethod
@@ -43,6 +47,7 @@ class TestConditions:
         freq_mhz: float | None,
         swr: float,
         info: str = "",
+        trigger: int | None = None,
         global_diagnostics: GlobalDiagnostics | None = None,
     ) -> TestConditions:
         """
@@ -64,6 +69,8 @@ class TestConditions:
             Standing Wave Ratio, always supplied by the user.
         info :
             Human-readable label for this test.
+        trigger :
+            Number of steps with power ON during a power pulse.
         global_diagnostics :
             Searched for :class:`.HeaderConstant` instruments.
 
@@ -104,8 +111,12 @@ class TestConditions:
                         f"{series.nunique()} distinct values. Saving median in"
                         " TestConditions."
                     )
-                value = float(np.nanmedian(instrument.data))
-
+                value_f = float(np.nanmedian(instrument.data))
+                value = (
+                    int(round(value_f))
+                    if field_name in _INT_FIELDS
+                    else value_f
+                )
                 if isinstance(instrument, FrequencySetpoint):
                     freq_from_instrument = value
                 else:
@@ -123,4 +134,6 @@ class TestConditions:
                 "or via FrequencySetpoint defined in the TOML."
             )
 
-        return cls(freq_mhz=final_freq, swr=swr, info=info, **kwargs)
+        return cls(
+            freq_mhz=final_freq, swr=swr, info=info, trigger=trigger, **kwargs
+        )

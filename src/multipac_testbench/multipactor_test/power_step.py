@@ -1,6 +1,7 @@
 """Define an object corresponding to a power step file."""
 
 import logging
+import random
 from abc import ABCMeta
 from collections.abc import Iterable, Iterator, Sequence
 from pathlib import Path
@@ -9,6 +10,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 from matplotlib.axes import Axes
+from multipac_testbench.instruments.power import Sync
 from multipac_testbench.multipactor_test import MultipactorTest
 from multipac_testbench.multipactor_test.helper import (
     POWERSTEP_FILE_RECOGNIZER_T,
@@ -111,6 +113,10 @@ class PowerStep(MultipactorTest):
         #: Position of the step in the complete :class:`.MultipactorTest`
         self._sample_index = sample_index
         self._out_index_col = out_index_col
+        self.trigger: float | None = None
+        sync = self.get_instrument(Sync, raise_missing_error=False)
+        if sync is not None:
+            self.trigger = sync.trigger
 
     def to_single_values(
         self,
@@ -387,6 +393,16 @@ class PowerStepSet:
         if len(self) == 0:
             logging.warning(f"No valid file found in {folder}")
 
+        some_power_steps = random.sample(self._power_steps, 10)
+        triggers = [
+            p.trigger for p in some_power_steps if p.trigger is not None
+        ]
+        if len(triggers) > 5:
+            self._trigger = int(np.median(triggers))
+        else:
+            self._trigger = None
+            logging.warning("Trigger value could not be calculated.")
+
     def __iter__(self) -> Iterator[PowerStep]:
         """Iterate over :class:`.PowerStep` objects.
 
@@ -512,6 +528,7 @@ class PowerStepSet:
             freq_mhz=self._freq_mhz,
             swr=self._swr,
             info=self._info,
+            trigger=self._trigger,
             is_raw=self._are_raw,
             **kwargs,
         )

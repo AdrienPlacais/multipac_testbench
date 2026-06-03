@@ -118,6 +118,7 @@ class MultipactorTest:
         freq_mhz: float | None = None,
         swr: float = 1.0,
         info: str = "",
+        trigger: int | None = None,
         sep: str = ",",
         trigger_policy: TRIGGER_POLICIES = "keep_all",
         index_col: str = "Sample index",
@@ -141,6 +142,8 @@ class MultipactorTest:
             Expected Voltage Signal Wave Ratio.
         info :
             An additional string to identify this test in plots.
+        trigger :
+            Number of steps with power ON during a power pulse.
         sep :
             Delimiter between two columns in ``filepath``.
         trigger_policy :
@@ -198,6 +201,7 @@ class MultipactorTest:
             freq_mhz=freq_mhz,
             swr=swr,
             info=info,
+            trigger=trigger,
             global_diagnostics=self.global_diagnostics,
         )
         #: :class:`.PowerStepSet` this test was built from, if any. Enables
