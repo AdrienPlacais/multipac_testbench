@@ -140,10 +140,10 @@ def _load_file(
         )
     except Exception as e:
         logging.error(
-            f"There was a mismatch is the number of columns in {filepath}"
+            f"There was a mismatch in the number of columns in {filepath}"
             ". Check that the number of column header match the number of "
-            "columns, and that the trailing comments in the first lines "
-            "were removed."
+            "columns, that the trailing comments in the first lines "
+            "were removed, and that you set the appropriate column separator."
         )
         logging.exception(e)
         raise e

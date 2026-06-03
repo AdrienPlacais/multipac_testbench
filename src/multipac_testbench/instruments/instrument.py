@@ -146,10 +146,7 @@ class Instrument(ABC):
 
     @classmethod
     def from_pd_dataframe(
-        cls,
-        name: str,
-        raw_data: pd.DataFrame,
-        **kwargs,
+        cls, name: str, raw_data: pd.DataFrame, **kwargs
     ) -> Self:
         """Instantiate the object from several ``CSV`` file columns.
 

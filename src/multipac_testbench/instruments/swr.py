@@ -62,13 +62,14 @@ class SWR(VirtualInstrument):
         cls,
         reflection_coefficient: ReflectionCoefficient,
         name: str = "SWR",
+        position: float = np.nan,
         **kwargs,
     ) -> Self:
         """Compute the SWR from given :class:`.ReflectionCoefficient`."""
         return cls(
             name=name,
             raw_data=reflection_to_swr(reflection_coefficient.data, name),
-            position=np.nan,
+            position=position,
             reflection_coefficient=reflection_coefficient,
             **kwargs,
         )

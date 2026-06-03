@@ -90,12 +90,16 @@ class DiffPenning(VirtualInstrument):
 
     @classmethod
     def from_penning(
-        cls, penning: Penning, name: str = "Diff_penning", **kwargs
+        cls,
+        penning: Penning,
+        name: str = "Diff_penning",
+        position: float | None = None,
+        **kwargs,
     ) -> Self:
         return cls(
             name=name,
             raw_data=diff(penning.data, name),
-            position=penning.position,
+            position=position or penning.position,
             penning=penning,
             color=penning.color,
             **kwargs,

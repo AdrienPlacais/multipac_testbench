@@ -1,6 +1,7 @@
 """Define a class to create the proper :class:`.IMeasurementPoint`."""
 
 import logging
+from collections.abc import Sequence
 from itertools import cycle
 
 import matplotlib.pyplot as plt
@@ -28,6 +29,7 @@ class IMeasurementPointFactory:
         self,
         is_raw: bool = False,
         create_virtual_instruments: bool = True,
+        commented_lines: Sequence[str] | None = None,
         **kwargs,
     ) -> None:
         """Instantiate the class with its :class:`.InstrumentFactory`.
@@ -39,6 +41,11 @@ class IMeasurementPointFactory:
             contain acquisition voltages instead of physical quantities.
         create_virtual_instruments :
             If virtual instruments should be created.
+        commented_lines :
+            Lines from a power step ``CSV`` file header, stripped of their
+            comment character. Will be ``None`` in the context of
+            :class:`.MultipactorTest`, but will be set within
+            :class:`.PowerStep`.
         kwargs :
             Keyword arguments that are directly passed down to the
             :class:`.InstrumentFactory`.
@@ -47,6 +54,7 @@ class IMeasurementPointFactory:
         self.instrument_factory = InstrumentFactory(
             is_raw=is_raw,
             create_virtual_instruments=create_virtual_instruments,
+            commented_lines=commented_lines,
             **kwargs,
         )
 
@@ -56,7 +64,7 @@ class IMeasurementPointFactory:
         config_value: dict,
         df_data: pd.DataFrame,
         color: tuple[float, float, float],
-    ) -> IMeasurementPoint:
+    ) -> IMeasurementPoint | None:
         """Create a single measurement point.
 
         Parameters
@@ -83,6 +91,9 @@ class IMeasurementPointFactory:
                 instrument_factory=self.instrument_factory,
                 **config_value,
             )
+        if "header_constants" in config_key:
+            # Handled in PowerSet
+            return
         return PickUp(
             name=config_key,
             df_data=df_data,
@@ -99,15 +110,18 @@ class IMeasurementPointFactory:
     ) -> tuple[GlobalDiagnostics | None, list[PickUp]]:
         """Create all the measurement points."""
         colors = cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
-        measurement_points = [
-            self.run_single(
+        measurement_points = []
+
+        for key, val in config.items():
+            mp = self.run_single(
                 key,
                 val,
                 df_data,
                 color=(0, 0, 0) if "global" in key else next(colors),
             )
-            for key, val in config.items()
-        ]
+            if mp is None:
+                continue
+            measurement_points.append(mp)
 
         global_diagnostics = self._filter_global_diagnostics(
             measurement_points, verbose

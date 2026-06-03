@@ -179,6 +179,7 @@ class MultipactorTest:
             freq_mhz=freq_mhz,
             is_raw=is_raw,
             create_virtual_instruments=create_virtual_instruments,
+            commented_lines=self._commented_lines,
         )
         imeasurement_points = imeasurement_point_factory.run(
             config if isinstance(config, dict) else load_config(config),
