@@ -137,6 +137,10 @@ class FrequencySetpoint(HeaderConstant):
         return r"RF frequency $f~[\mathrm{MHz}]$"
 
 
+class Frequency(FrequencySetpoint):
+    """Alias to :class:`.FrequencySetpoint`."""
+
+
 class PowerSetpoint(HeaderConstant):
     """Store the power asked by user.
 

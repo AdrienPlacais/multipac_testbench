@@ -11,9 +11,9 @@ from multipac_testbench.instruments.electric_field.reconstructed import (
     FieldPowerError,
     Reconstructed,
 )
-from multipac_testbench.instruments.frequency import Frequency
 from multipac_testbench.instruments.header_constant import (
     CurrentCalibre,
+    Frequency,
     FrequencySetpoint,
     HeaderConstant,
     PolarizationSetpoint,

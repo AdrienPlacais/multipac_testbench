@@ -198,12 +198,6 @@ class InstrumentFactory:
 
         if len(instruments) == 0:
             return []
-        n_points = len(instruments[0].data_as_pd)
-        constants = []
-        if is_global:
-            constants = self._constant_values_defined_by_user(n_points)
-        if len(constants) > 0:
-            virtuals += constants
 
         rpa = self._rpa_related(instruments, **kwargs)
         if rpa is not None:
@@ -283,20 +277,6 @@ class InstrumentFactory:
             for i, penning in enumerate(pennings)
         ]
         return diff_pennings
-
-    def _constant_values_defined_by_user(
-        self,
-        n_points: int,
-    ) -> list[ins.VirtualInstrument]:
-        """Define a fake frequency probe. Maybe a fake SWR, fake R later."""
-        constants = []
-        if self.freq_mhz is not None:
-            constants.append(
-                ins.Frequency.from_user_defined_frequency(
-                    self.freq_mhz, n_points
-                )
-            )
-        return constants
 
 
 def _get_constructor(class_name: INSTRUMENT_NAME_T) -> type[Instrument]:

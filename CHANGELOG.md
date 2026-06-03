@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Old `PowerSetpoint` inheriting from `VirtualInstrument` are removed. They are
   replaced by equivalent `PowerSetpoint` inheriting from `HeaderConstant`.
 
+### Removed
+
+- `Frequency` implementation. This is now an alias to `FrequencySetpoint`.
+
 ## [2.0.0] - 2026-06-03
 
 ### Added
