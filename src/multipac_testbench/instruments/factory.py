@@ -29,6 +29,7 @@ STRING_TO_INSTRUMENT_CLASS = {
     "RPACurrent": ins.RPACurrent,
     "RPAPotential": ins.RPAPotential,
     "ReflectedPower": ins.ReflectedPower,
+    "Sync": ins.Sync,
 }  #:
 
 INSTRUMENT_NAME_T = Literal[
@@ -48,6 +49,7 @@ INSTRUMENT_NAME_T = Literal[
     "RPACurrent",
     "RPAPotential",
     "ReflectedPower",
+    "Sync",
 ]
 
 

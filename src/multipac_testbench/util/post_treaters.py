@@ -252,3 +252,46 @@ def return_constant(
 ) -> NDArray[np.float64]:
     """Always return same value."""
     return np.full_like(input_data, constant)
+
+
+def get_data_above_noise(
+    data: NDArray,
+    noise_level: float | None = None,
+    level: float | None = None,
+) -> NDArray:
+    """Detect signal above noise, return it.
+
+    Parameters
+    ----------
+    data :
+        Array of data in pulsed shape, such as power pulse or synch.
+    noise_level :
+        Absolute level of noise. If not provided, we use ``level`` to compute
+        it.
+    level :
+        Noise percentile wrt ``data``, in :unit:`\\%`.
+
+    Returns
+    -------
+    NDArray
+        Only the widest pulse detected in the signal.
+
+    """
+    if noise_level is None:
+        if level is None:
+            raise ValueError("You must provide ``noise_level`` or ``level``.")
+        noise_level = np.percentile(np.abs(data), level)
+    above = data > noise_level
+
+    # Detect rising and falling edges
+    padded = np.concatenate(([0], above.astype(int), [0]))
+    diff = np.diff(padded)
+    starts = np.where(diff == 1)[0]
+    ends = np.where(diff == -1)[0]
+
+    if len(starts) == 0:
+        logging.warning("No active pulse found above the noise floor.")
+
+    # Take the longest one
+    best = int(np.argmax(ends - starts))
+    return data[int(starts[best]) : int(ends[best])]

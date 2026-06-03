@@ -5,6 +5,8 @@ from functools import partial
 
 import numpy as np
 from multipac_testbench.instruments.instrument import Instrument
+from multipac_testbench.instruments.virtual_instrument import VirtualInstrument
+from multipac_testbench.util.post_treaters import get_data_above_noise
 from multipac_testbench.util.transfer_functions import power, power_channel_b
 from multipac_testbench.util.types import POST_TREATER_T
 from numpy.typing import NDArray
@@ -173,3 +175,33 @@ class ReflectedPower(Power):
     def ylabel(cls) -> str:
         """Label used for plots."""
         return r"Reflected power $P_r$ [W]"
+
+
+class Sync(VirtualInstrument):
+    """Store when power is ON or OFF.
+
+    Note
+    ----
+    Do not use it in :class:`.MultipactorTest`, it only makes sense in a
+    :class:`.PowerStep`.
+
+    """
+
+    def __init__(
+        self, *args, position: NDArray[np.float64] | float = np.nan, **kwargs
+    ) -> None:
+        super().__init__(*args, position=position, **kwargs)
+
+    @property
+    def trigger(self) -> int:
+        """Compute width of the trigger in samples."""
+        return len(get_data_above_noise(self.data, noise_level=0))
+
+    @classmethod
+    def ylabel(cls) -> str:
+        """Label used for plots."""
+        return r"Sync $[\mathrm{V}]$"
+
+    @property
+    def _transfer_functions(self) -> list[POST_TREATER_T]:
+        return []

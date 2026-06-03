@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - New `HeaderConstant`: `PreTrigger`, `PostTrigger`, and `CurrentCalibre`.
+- New `Instrument`: `Sync`, holding the trigger command. Has a `trigger`
+  property that computes the value of the trigger.
 
 ### Changed
 

@@ -28,6 +28,7 @@ from multipac_testbench.instruments.power import (
     ForwardPower,
     Power,
     ReflectedPower,
+    Sync,
 )
 from multipac_testbench.instruments.reflection_coefficient import (
     ReflectionCoefficient,
@@ -62,5 +63,6 @@ __all__ = [
     "ReflectedPower",
     "ReflectionCoefficient",
     "SWR",
+    "Sync",
     "VirtualInstrument",
 ]
