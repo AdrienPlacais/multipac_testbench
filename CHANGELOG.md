@@ -33,6 +33,11 @@ class_name = "PolarizationSetpoint"
 header_key = "Polarisation_2"
 ```
 
+> [!WARNING]
+> Very soon, frequency will be read from the instrument instead of the user
+> argument to `MultipactorTest`. It may break compatibility of older scripts,
+> as they do not define the frequency setpoint instrument in their `TOML`.
+
 ## [1.10.2] - 2026-06-01
 
 ### Fixed
