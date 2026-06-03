@@ -137,7 +137,7 @@ class FrequencySetpoint(HeaderConstant):
         return r"RF frequency $f~[\mathrm{MHz}]$"
 
 
-class NewPowerSetpoint(HeaderConstant):
+class PowerSetpoint(HeaderConstant):
     """Store the power asked by user.
 
     It should be preferred over :class:`.ForwardPower` to determine wether

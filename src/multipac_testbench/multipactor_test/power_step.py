@@ -2,7 +2,7 @@
 
 import logging
 from abc import ABCMeta
-from collections.abc import Iterable, Iterator, Mapping, Sequence
+from collections.abc import Iterable, Iterator, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -14,7 +14,6 @@ from multipac_testbench.multipactor_test.helper import (
     POWERSTEP_FILE_RECOGNIZER_T,
     REDUCER_T,
     default_powerstep_file_valider,
-    infer_dbm,
     powerstep_files,
     take_maximum,
 )
@@ -46,8 +45,6 @@ class PowerStep(MultipactorTest):
         info: str = "",
         sep: str = "\t",
         index_col: str = "Index",
-        dbm: float | None = None,
-        out_dbm_column: str = "NI9205_dBm",
         out_index_col: str = "Sample index",
         comment: str = "#",
         create_virtual_instruments: bool = True,
@@ -87,10 +84,6 @@ class PowerStep(MultipactorTest):
             Name of the column holding index data.
         out_index_col :
             Where to store ``sample_index`` in the output file.
-        dbm :
-            To override the dBm values inferred from commented lines.
-        out_dbm_column :
-            Where to store the dBm value in the output file.
         comment :
             Comment character.
         create_virtual_instruments :
@@ -118,8 +111,6 @@ class PowerStep(MultipactorTest):
         #: Position of the step in the complete :class:`.MultipactorTest`
         self._sample_index = sample_index
         self._out_index_col = out_index_col
-        self._dbm = infer_dbm(self._commented_lines) if dbm is None else dbm
-        self._out_dbm_column = out_dbm_column
 
     def to_single_values(
         self,
@@ -162,7 +153,6 @@ class PowerStep(MultipactorTest):
             reduced = dispatch(col, values)
             all_data[col] = reduced
         series = pd.Series(all_data)
-        series[self._out_dbm_column] = self._dbm
         series[self._out_index_col] = self._sample_index
         return series
 
@@ -321,8 +311,6 @@ class PowerStepSet:
         info: str = "",
         sep: str = "\t",
         index_col: str = "Index",
-        dbms: Mapping[str, float] | None = None,
-        out_dbm_column: str = "NI9205_dBm",
         out_index_col: str = "Sample index",
         file_recognizer: POWERSTEP_FILE_RECOGNIZER_T | None = None,
         comment: str = "#",
@@ -349,10 +337,6 @@ class PowerStepSet:
             Column delimiter.
         index_col :
             Name of the column holding indexes in every power step file.
-        dbms :
-            Maps filenames to their :unit:`dBm`, when they are shifted.
-        out_dbm_column :
-            Name of column where power setpoint in :unit:`dBm` will be stored.
         out_index_col :
             Name of column where sample indexes will be stored.
         file_recognizer :
@@ -392,10 +376,6 @@ class PowerStepSet:
                 sample_index=sample_index,
                 sep=sep,
                 index_col=index_col,
-                dbm=(
-                    dbms.get(filepath.name, None) if dbms is not None else None
-                ),
-                out_dbm_column=out_dbm_column,
                 out_index_col=out_index_col,
                 comment=comment,
                 create_virtual_instruments=create_virtual_instruments,

@@ -16,9 +16,9 @@ from multipac_testbench.instruments.header_constant import (
     CurrentCalibre,
     FrequencySetpoint,
     HeaderConstant,
-    NewPowerSetpoint,
     PolarizationSetpoint,
     PostTrigger,
+    PowerSetpoint,
     PreTrigger,
 )
 from multipac_testbench.instruments.instrument import Instrument
@@ -27,7 +27,6 @@ from multipac_testbench.instruments.penning import DiffPenning, Penning
 from multipac_testbench.instruments.power import (
     ForwardPower,
     Power,
-    PowerSetpoint,
     ReflectedPower,
 )
 from multipac_testbench.instruments.reflection_coefficient import (
@@ -49,13 +48,12 @@ __all__ = [
     "HeaderConstant",
     "IElectricField",
     "Instrument",
-    "NewPowerSetpoint",
+    "PowerSetpoint",
     "OpticalFibre",
     "Penning",
     "PolarizationSetpoint",
     "PostTrigger",
     "Power",
-    "PowerSetpoint",
     "PreTrigger",
     "RPA",
     "RPACurrent",
