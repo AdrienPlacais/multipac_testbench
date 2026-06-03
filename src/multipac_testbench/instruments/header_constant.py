@@ -31,6 +31,11 @@ class HeaderConstant(VirtualInstrument):
 
     """
 
+    #: Whether this property is expected to not vary from ``CSV`` to ``CSV``.
+    _should_be_constant: bool = True
+    #: Name in :class:`.TestConditions`
+    _field_name: str | None = None
+
     def __init__(
         self,
         name: str,
@@ -97,6 +102,8 @@ class CurrentCalibre(HeaderConstant):
 
     """
 
+    _field_name = "current_calibre"
+
 
 class FrequencySetpoint(HeaderConstant):
     """Store the frequency set by the user.
@@ -106,6 +113,8 @@ class FrequencySetpoint(HeaderConstant):
     The header key should in general be ``SM300_Frequency``.
 
     """
+
+    _field_name = "freq_mhz"
 
     @classmethod
     def from_single_csv_header(cls, *args, **kwargs) -> Self:
@@ -142,6 +151,8 @@ class NewPowerSetpoint(HeaderConstant):
 
     """
 
+    _should_be_constant = False
+
     @classmethod
     def ylabel(cls) -> str:
         return r"Power setpoint $[\mathrm{dBm}]$"
@@ -168,6 +179,8 @@ class PolarizationSetpoint(HeaderConstant):
 
     """
 
+    _field_name = "polarization"
+
     @classmethod
     def ylabel(cls) -> str:
         return r"Probes polarization $[\mathrm{V}]$"
@@ -180,6 +193,8 @@ class PostTrigger(HeaderConstant):
 
     """
 
+    _field_name = "post_trigger"
+
 
 class PreTrigger(HeaderConstant):
     """Store the pre-trigger.
@@ -187,3 +202,5 @@ class PreTrigger(HeaderConstant):
     The header key should in general be ``NI9205_Pre-Trig``.
 
     """
+
+    _field_name = "pre_trigger"
