@@ -68,8 +68,9 @@ defined in `pyproject.toml`. Then, add `multipac_testbench.src` to your
         like in Labviewer.
   - [x] Toggle raw/physical plot.
   - [ ] Post-treaters should add info to the plots: window, median, etc.
-- [ ] Bugfix: handle gracefully when an `Instrument` is declared in `TOML` but
+- [x] Bugfix: handle gracefully when an `Instrument` is declared in `TOML` but
       is absent from the data files. Raises bug when `sweet_plot`ing.
+- [ ] Document the new HeaderConstant instruments
 
 ## Labviewer to-do
 

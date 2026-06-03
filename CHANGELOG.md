@@ -38,6 +38,11 @@ header_key = "Polarisation_2"
 > argument to `MultipactorTest`. It may break compatibility of older scripts,
 > as they do not define the frequency setpoint instrument in their `TOML`.
 
+### Fixed
+
+- An `Instrument` declared in the `TOML` but missing from the data files do not
+  make the code crash anymore.
+
 ## [1.10.2] - 2026-06-01
 
 ### Fixed
