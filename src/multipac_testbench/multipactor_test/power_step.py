@@ -21,6 +21,7 @@ from multipac_testbench.multipactor_test.helper import (
     take_maximum,
     take_median,
 )
+from multipac_testbench.multipactor_test.loader import save
 from multipac_testbench.multipactor_test.reduction_info import ReductionInfo
 from multipac_testbench.threshold.threshold_set import ThresholdSet
 from multipac_testbench.util.files import load_config
@@ -573,8 +574,7 @@ class PowerStepSet:
             for power_step in sorted(self, key=lambda step: step._sample_index)
         )
         df = pd.concat(series, axis=1).transpose().set_index(index_col)
-        df.to_csv(csv_path, sep=sep, **kwargs)
-        logging.info(f"MultipactorTest file saved to {csv_path}")
+        save(csv_path, df, sep=sep, **kwargs)
         return
 
     def to_multipactor_test(
