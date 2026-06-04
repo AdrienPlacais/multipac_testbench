@@ -17,6 +17,7 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from matplotlib.typing import ColorType
 from multipac_testbench.instruments.instrument import Instrument
+from multipac_testbench.multipactor_test.loader import save
 from multipac_testbench.threshold.threshold import PowerExtremum
 from multipac_testbench.threshold.threshold_set import ThresholdSet
 from multipac_testbench.util.helper import drop_repeated_col, is_nested_list
@@ -619,9 +620,14 @@ def save_dataframe(
         Other keyword arguments for the ``DataFrame.to_csv`` method.
 
     """
-    df_to_plot.to_csv(csv_path, sep=sep, **csv_kwargs)
-    if verbose:
-        logging.info(f"DataFrame saved @ {csv_path = }")
+    save(
+        csv_path,
+        df_to_plot,
+        info="plotted data",
+        sep=sep,
+        verbose=verbose,
+        **csv_kwargs,
+    )
 
 
 def add_background_color_according_to_power_growth(
