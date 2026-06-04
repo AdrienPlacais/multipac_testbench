@@ -1,5 +1,6 @@
 """Define an object corresponding to a power step file."""
 
+import functools
 import logging
 import random
 from abc import ABCMeta
@@ -10,7 +11,8 @@ from typing import Any
 import numpy as np
 import pandas as pd
 from matplotlib.axes import Axes
-from multipac_testbench.instruments import Sync, Trigger
+from multipac_testbench.instruments import Penning, Power, Sync, Trigger
+from multipac_testbench.instruments.instrument import Instrument
 from multipac_testbench.multipactor_test import MultipactorTest
 from multipac_testbench.multipactor_test.helper import (
     POWERSTEP_FILE_RECOGNIZER_T,
@@ -18,11 +20,23 @@ from multipac_testbench.multipactor_test.helper import (
     default_powerstep_file_valider,
     powerstep_files,
     take_maximum,
+    take_median,
 )
 from multipac_testbench.threshold.threshold_set import ThresholdSet
 from multipac_testbench.util.files import load_config
 from multipac_testbench.util.log_manager import suppress_log_messages
 from numpy.typing import NDArray
+
+#: For :class:`.Instrument` for which taking the median over the trigger window
+#: does not make sense.
+#: For :class:`.Penning`, this is because the signal takes time to rise and the
+#: main info lies after the trigger window.
+#: For :class:`.Power`, this is because the signals are delayed wrt to the
+#: trigger window.
+_DEFAULT_SPECIAL_REDUCERS: dict[str | type[Instrument], REDUCER_T] = {
+    Penning: take_maximum,
+    Power: take_maximum,
+}
 
 
 class PowerStep(MultipactorTest):
@@ -128,47 +142,104 @@ class PowerStep(MultipactorTest):
 
     def to_single_values(
         self,
-        reducer: REDUCER_T,
-        special_reducers: dict[str, REDUCER_T] | None = None,
+        generic_reducer: REDUCER_T | None = None,
+        special_reducers: (
+            dict[str | type[Instrument], REDUCER_T] | None
+        ) = None,
         operate_on_raw_data: bool = True,
     ) -> pd.Series:
         """Convert arrays of :class:`.Instrument` values to single floats.
 
         Parameters
         ----------
-        reducer :
-            Function converting array to float. The default in LabViewer is to
-            take the maximum. But we generally want to take the median of the
-            signal recorded during the pulse.
+        generic_reducer :
+            Function converting array to float. The default is
+            :func:`.take_median` applied to the pulse window ``[pre_trigger,
+            pre_trigger + trigger]`` as read from :attr:`.TestConditions`.
+            Falls back to :func:`.take_maximum` on the full array if those
+            values are unavailable, and logs an error.
         special_reducers :
-            Different functions to apply to some specific columns.
+            Different functions to apply to specific columns. Keys can be an
+            instrument name string (e.g. ``"NI9205_Penning1"``) for a single
+            instrument, or an instrument class (e.g. :class:`.Penning`) to
+            apply to all instruments of that type. String keys take priority
+            over class keys. Defaults to ``{Penning: take_maximum, Power:
+            take_maximum}``. If you really do not want to use defaults, provide
+            an empty dict.
 
         Note
         ----
         As the synchronism of the watt-metre is bad, measured powers are
         shifted wrt NI9205 measurements. So you will generally want to take the
-        maximum of ``NI9205_Power1`` and ``NI9205_Power2`` columns.
+        maximum of ``NI9205_Power1`` and ``NI9205_Power2`` columns, which is
+        handled by the default ``special_reducers``.
 
         """
-        special_reducers = special_reducers or {}
+        if generic_reducer is None:
+            pre_trig = self.test_conditions.pre_trigger
+            trigger = self.test_conditions.trigger
+            if pre_trig is None or trigger is None:
+                logging.error(
+                    f"{self}: pre_trigger or trigger is None; "
+                    "falling back to take_maximum on the full array."
+                )
+                generic_reducer = take_maximum
+            else:
+                generic_reducer = functools.partial(
+                    take_median,
+                    first_index=pre_trig,
+                    last_index=pre_trig + trigger,
+                )
+        if special_reducers is None:
+            special_reducers = _DEFAULT_SPECIAL_REDUCERS
 
-        def dispatch(col: str, values: NDArray) -> float:
-            actual_reducer = special_reducers.get(col, reducer)
-            return actual_reducer(values)
+        def dispatch(instrument: Instrument) -> float:
+            """Compute proper reducer for given instrument.
 
-        all_data = {}
-        for instrument in self.instruments:
+            First, we check if the name of the :class:`.Instrument` is present
+            in ``special_reducers``. If not, we check if its type is present in
+            ``special_reducers``. If not, we fall back on the generic reducer.
+
+            The generic reducer is the median over the trigger window if
+            ``pre_trigger`` and ``trigger`` are defined, else it is the maximum
+            of the signal.
+
+            Parameters
+            ----------
+            instrument :
+                Instance which we want to reduce data to a single float.
+
+            Returns
+            -------
+            float
+                A single value representing measurement of the ``instrument``
+                on a single :class:`.PowerStep`.
+
+            """
             values = (
                 instrument._raw_data.to_numpy()
                 if operate_on_raw_data
                 else instrument.data
             )
-            col = instrument.name
-            reduced = dispatch(col, values)
-            all_data[col] = reduced
-        series = pd.Series(all_data)
-        series[self._out_index_col] = self._sample_index
-        return series
+            name = instrument.name
+
+            if name in special_reducers:
+                return special_reducers[name](values)
+
+            for key, r in special_reducers.items():
+                if isinstance(key, type) and isinstance(instrument, key):
+                    return r(values)
+            return generic_reducer(values)
+
+        all_data = {
+            instrument.name: dispatch(instrument)
+            for instrument in self.instruments
+        }
+        assert (
+            self._out_index_col not in all_data
+        ), f"{self._out_index_col} collides with an instrument name."
+        all_data[self._out_index_col] = self._sample_index
+        return pd.Series(all_data)
 
     def sweet_plot(
         self,

@@ -42,7 +42,7 @@ def parse_header_value(commented_lines: Sequence[str], key: str) -> float:
 REDUCER_T = Callable[[NDArray], float]
 
 
-def take_maximum(raw_data: NDArray) -> float:
+def take_maximum(raw_data: NDArray, warn_nan=False) -> float:
     """Take the maximum of the array.
 
     This is the default behavior for LabViewer.
@@ -50,7 +50,8 @@ def take_maximum(raw_data: NDArray) -> float:
     """
     value = np.max(raw_data)
     if np.isnan(value):
-        logging.warning("NaN detected. Returning highest float instead.")
+        if warn_nan:
+            logging.warning("NaN detected. Returning highest float instead.")
         value = np.nanmax(raw_data)
     return float(value)
 
