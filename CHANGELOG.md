@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.2] - 2026-06-04
+
+### Added
+
+- It is now possible to provide a dict of calibres for the `CurrentProbes`. It
+  will use the `CurrentCalibre` to use the appropriate value. Minimum working
+  example:
+
+```toml
+[global.instruments_kw.NI9205_Current-Calibre]
+class_name = "CurrentCalibre" # Class name
+header_key = "Gamme_mA"       # Value to read from power step `CSV` header
+
+[E1]
+position = 0e0
+
+[E1.instruments_kw]
+[E1.instruments_kw.NI9205_MP1l]
+class_name = "CurrentProbe"
+a_probe = { calibre_1mA = 102, calibre_10mA = 1005 }
+```
+
 ## [2.0.1] - 2026-06-03
 
 ### Added

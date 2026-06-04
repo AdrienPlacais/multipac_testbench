@@ -25,3 +25,7 @@ MULTIPAC_DETECTOR_T = Callable[[NDArray[np.float64]], NDArray[np.bool]]
 #: A function that takes in the data of an instrument and returns an array with
 #: same shape
 POST_TREATER_T = Callable[[NDArray[np.float64]], NDArray[np.float64]]
+
+#: Functions converting an :meth:`.Instrument._raw_data` to a single float
+#: value
+REDUCER_T = Callable[[NDArray], float]

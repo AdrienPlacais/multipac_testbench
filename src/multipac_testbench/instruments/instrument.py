@@ -11,6 +11,7 @@ import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.container import StemContainer
 from matplotlib.lines import Line2D
+from multipac_testbench.multipactor_test.reduction_info import ReductionInfo
 from multipac_testbench.util.filtering import (
     array_is_growing,
     clean_boolean_mask,
@@ -106,6 +107,8 @@ class Instrument(ABC):
         #:    :meth:`register_callback`
         #:
         self._callbacks: list[CALLBACK_T] = []
+        #: Set by :meth:`.PowerStep.to_single_values`. None until reduction occurs.
+        self.reduction_info: ReductionInfo | None = None
 
     def __str__(self) -> str:
         """Give concise information on instrument."""
