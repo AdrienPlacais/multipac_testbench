@@ -4,7 +4,7 @@ import functools
 import logging
 import random
 from abc import ABCMeta
-from collections.abc import Iterable, Iterator, Sequence
+from collections.abc import Iterable, Iterator, Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -16,15 +16,16 @@ from multipac_testbench.instruments.instrument import Instrument
 from multipac_testbench.multipactor_test import MultipactorTest
 from multipac_testbench.multipactor_test.helper import (
     POWERSTEP_FILE_RECOGNIZER_T,
-    REDUCER_T,
     default_powerstep_file_valider,
     powerstep_files,
     take_maximum,
     take_median,
 )
+from multipac_testbench.multipactor_test.reduction_info import ReductionInfo
 from multipac_testbench.threshold.threshold_set import ThresholdSet
 from multipac_testbench.util.files import load_config
 from multipac_testbench.util.log_manager import suppress_log_messages
+from multipac_testbench.util.types import REDUCER_T
 from numpy.typing import NDArray
 
 #: For :class:`.Instrument` for which taking the median over the trigger window
@@ -144,7 +145,7 @@ class PowerStep(MultipactorTest):
         self,
         generic_reducer: REDUCER_T | None = None,
         special_reducers: (
-            dict[str | type[Instrument], REDUCER_T] | None
+            Mapping[str | type[Instrument], REDUCER_T] | None
         ) = None,
         operate_on_raw_data: bool = True,
     ) -> pd.Series:
@@ -224,12 +225,18 @@ class PowerStep(MultipactorTest):
             name = instrument.name
 
             if name in special_reducers:
-                return special_reducers[name](values)
+                actual_reducer = special_reducers[name]
+            else:
+                actual_reducer = generic_reducer
 
-            for key, r in special_reducers.items():
-                if isinstance(key, type) and isinstance(instrument, key):
-                    return r(values)
-            return generic_reducer(values)
+                for key, r in special_reducers.items():
+                    if isinstance(key, type) and isinstance(instrument, key):
+                        actual_reducer = r
+                        break
+            instrument.reduction_info = ReductionInfo.from_reducer(
+                actual_reducer, operated_on_raw=operate_on_raw_data
+            )
+            return actual_reducer(values)
 
         all_data = {
             instrument.name: dispatch(instrument)
@@ -530,7 +537,9 @@ class PowerStepSet:
         csv_path: Path,
         reducer: REDUCER_T | None = None,
         index_col: str = "Sample index",
-        special_reducers: dict[str, REDUCER_T] | None = None,
+        special_reducers: (
+            Mapping[str | type[Instrument], REDUCER_T] | None
+        ) = None,
         sep: str = ",",
         **kwargs,
     ) -> None:
@@ -558,7 +567,7 @@ class PowerStepSet:
         """
         series = (
             power_step.to_single_values(
-                reducer if reducer is not None else take_maximum,
+                generic_reducer=reducer,
                 special_reducers=special_reducers,
             )
             for power_step in sorted(self, key=lambda step: step._sample_index)
@@ -572,7 +581,9 @@ class PowerStepSet:
         self,
         csv_path: Path,
         reducer: REDUCER_T | None = None,
-        special_reducers: dict[str, REDUCER_T] | None = None,
+        special_reducers: (
+            Mapping[str | type[Instrument], REDUCER_T] | None
+        ) = None,
         **kwargs,
     ) -> MultipactorTest:
         """
@@ -617,4 +628,13 @@ class PowerStepSet:
             **kwargs,
         )
         test.power_step_set = self
+
+        if self._power_steps:
+            info_by_name = {
+                instrument.name: instrument.reduction_info
+                for instrument in self._power_steps[0].instruments
+                if instrument.reduction_info is not None
+            }
+            for instrument in test.instruments:
+                instrument.reduction_info = info_by_name.get(instrument.name)
         return test

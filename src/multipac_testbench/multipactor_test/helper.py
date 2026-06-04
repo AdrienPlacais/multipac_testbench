@@ -37,11 +37,6 @@ def parse_header_value(commented_lines: Sequence[str], key: str) -> float:
     return np.nan
 
 
-#: Functions converting an :meth:`.Instrument._raw_data` to a single float
-#: value
-REDUCER_T = Callable[[NDArray], float]
-
-
 def take_maximum(raw_data: NDArray, warn_nan=False) -> float:
     """Take the maximum of the array.
 

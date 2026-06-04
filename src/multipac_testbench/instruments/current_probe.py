@@ -35,9 +35,9 @@ class CurrentProbe(Instrument):
         """
         self.__a_probe: float
         self._a_probe_spec = a_probe
+        super().__init__(*args, **kwargs)
         if isinstance(a_probe, (float, int)):
-            self._set_a_probe(a_probe=a_probe, calibre=None)
-        return super().__init__(*args, **kwargs)
+            self._set_a_probe(calibre=None)
 
     @property
     def _a_probe(self) -> float:
@@ -48,6 +48,12 @@ class CurrentProbe(Instrument):
     def _a_probe(self, value: float) -> None:
         """Clean the cached data at each update of the calibration constant."""
         self.__a_probe = value
+        self._post_treaters = [
+            pt
+            for pt in self._post_treaters
+            if not (isinstance(pt, partial) and pt.func is current_probe)
+        ]
+        self._post_treaters.append(partial(current_probe, a_probe=value))
         for attr in ("_data", "_data_as_pd"):
             if hasattr(self, attr):
                 delattr(self, attr)
@@ -66,21 +72,17 @@ class CurrentProbe(Instrument):
         voltages.
 
         """
-        if not hasattr(self, "_a_probe"):
+        if not hasattr(self, "__a_probe"):
             return []
         return [partial(current_probe, a_probe=self._a_probe)]
 
-    def _set_a_probe(
-        self,
-        a_probe: AProbeCalibres | float | None = None,
-        calibre: Literal[1, 10] | None = None,
-    ) -> None:
+    def _set_a_probe(self, calibre: Literal[1, 10] | None = None) -> None:
         """Set the appropriate calibration constant."""
-        if isinstance(a_probe, (float, int)):
-            self._a_probe = a_probe
+        if isinstance(self._a_probe_spec, (float, int)):
+            self._a_probe = self._a_probe_spec
             return
 
-        if a_probe is None:
+        if self._a_probe_spec is None:
             logging.error("Provided `a_probe` is None.")
             return
 
@@ -94,10 +96,12 @@ class CurrentProbe(Instrument):
             return
 
         if calibre == 1:
-            self._a_probe = a_probe["calibre_1mA"]
+            self._a_probe = self._a_probe_spec["calibre_1mA"]
             return
         if calibre == 10:
-            self._a_probe = a_probe["calibre_10mA"]
+            self._a_probe = self._a_probe_spec["calibre_10mA"]
             return
 
-        logging.error(f"Error in arguments: {a_probe = }, {calibre = }")
+        logging.error(
+            f"Error in arguments: {self._a_probe_spec = }, {calibre = }"
+        )

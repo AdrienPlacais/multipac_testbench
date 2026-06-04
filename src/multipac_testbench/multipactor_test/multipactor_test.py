@@ -209,9 +209,7 @@ class MultipactorTest:
         if calibre is not None:
             for instrument in self.get_instruments(CurrentProbe):
                 assert isinstance(instrument, CurrentProbe)
-                instrument._set_a_probe(
-                    instrument._a_probe_spec, calibre=calibre
-                )
+                instrument._set_a_probe(calibre=calibre)
         #: :class:`.PowerStepSet` this test was built from, if any. Enables
         #: interactive plots.
         self.power_step_set: PowerStepSet | None = None
