@@ -5,7 +5,7 @@ from __future__ import annotations
 import functools
 import logging
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 from multipac_testbench.instruments.step_constant import StepConstant
@@ -26,7 +26,7 @@ def _warn_freq_mhz_override_once() -> None:
     )
 
 
-_INT_FIELDS = {"pre_trigger", "post_trigger", "trigger"}
+_INT_FIELDS = {"pre_trigger", "post_trigger", "trigger", "current_calibre"}
 
 
 @dataclass
@@ -40,7 +40,7 @@ class TestConditions:
     pre_trigger: int | None = None
     trigger: int | None = None
     post_trigger: int | None = None
-    current_calibre: float = np.nan
+    current_calibre: Literal[1, 10] | None = None
 
     @classmethod
     def from_components(

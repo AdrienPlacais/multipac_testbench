@@ -45,6 +45,7 @@ from multipac_testbench.instruments import (
     Reconstructed,
     ReflectionCoefficient,
 )
+from multipac_testbench.instruments.current_probe import CurrentProbe
 from multipac_testbench.instruments.predicates import (
     INSTRUMENT_FILTER,
     INSTRUMENT_ID,
@@ -204,6 +205,13 @@ class MultipactorTest:
             trigger=trigger,
             global_diagnostics=self.global_diagnostics,
         )
+        calibre = self.test_conditions.current_calibre
+        if calibre is not None:
+            for instrument in self.get_instruments(CurrentProbe):
+                assert isinstance(instrument, CurrentProbe)
+                instrument._set_a_probe(
+                    instrument._a_probe_spec, calibre=calibre
+                )
         #: :class:`.PowerStepSet` this test was built from, if any. Enables
         #: interactive plots.
         self.power_step_set: PowerStepSet | None = None

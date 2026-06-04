@@ -20,6 +20,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   it can still be given as a `MultipactorTest` argument.
 - Old `PowerSetpoint` inheriting from `VirtualInstrument` are removed. They are
   replaced by equivalent `PowerSetpoint` inheriting from `StepConstant`.
+- It is now possible to provide a dict of calibres for the `CurrentProbes`. It
+  will use the `CurrentCalibre` to use the appropriate value. Minimum working
+  example:
+
+```toml
+[global.instruments_kw.NI9205_Current-Calibre]
+class_name = "CurrentCalibre" # Class name
+header_key = "Gamme_mA"       # Value to read from power step `CSV` header
+
+[E1]
+position = 0e0
+
+[E1.instruments_kw]
+[E1.instruments_kw.NI9205_MP1l]
+class_name = "CurrentProbe"
+a_probe = { calibre_1mA = 102, calibre_10mA = 1005 }
+```
 
 ### Removed
 
