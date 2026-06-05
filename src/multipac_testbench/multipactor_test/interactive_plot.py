@@ -6,8 +6,10 @@ from __future__ import annotations
 
 import logging
 from abc import ABCMeta
-from typing import TYPE_CHECKING, Any
+from functools import cached_property
+from typing import TYPE_CHECKING, Any, cast
 
+import matplotlib
 import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.backend_bases import Event, KeyEvent, MouseEvent
@@ -44,7 +46,7 @@ class InteractivePlot:
         _power_step_set = test.power_step_set
         assert _power_step_set is not None
         self._power_step_set = _power_step_set
-        self._ydata = ydata
+        self._ydata: list[ABCMeta] = list(ydata)
         self._xdata = xdata
         self._kwargs = kwargs
 
@@ -81,7 +83,9 @@ class InteractivePlot:
         ]
 
         self._fig.canvas.mpl_connect("motion_notify_event", self._on_motion)
-        self._fig.canvas.mpl_connect("button_press_event", self._on_click)
+        self._fig.canvas.mpl_connect(
+            "button_press_event", self._on_mouse_press
+        )
         self._fig.canvas.mpl_connect("key_press_event", self._on_key)
         return axes, df
 
@@ -92,12 +96,27 @@ class InteractivePlot:
         assert isinstance(fig, Figure)
         return fig
 
-    def _on_click(self, event: Event) -> None:
-        """Draw a :class:`.PowerStep` when clicking on main plot."""
+    @cached_property
+    def _plottable(self) -> list[type[Instrument]]:
+        """Unique instrument classes present in the test, preserving order."""
+        seen: set[type[Instrument]] = set()
+        result: list[type[Instrument]] = []
+        for instrument in self._test.get_instruments(Instrument):
+            cls = type(instrument)
+            if cls not in seen:
+                seen.add(cls)
+                result.append(cls)
+        return result
+
+    def _on_mouse_press(self, event: Event) -> None:
+        """Left-click draws a PowerStep; right-click opens instrument menu."""
         assert isinstance(event, MouseEvent)
         if event.inaxes not in self._axes:
             return
-        self._draw_power_step(round(event.xdata))  # type: ignore[arg-type]
+        if event.button == 1:
+            self._draw_power_step(round(event.xdata))  # type: ignore[arg-type]
+        elif event.button == 3:
+            self._show_instrument_menu(event, self._axes.index(event.inaxes))
 
     def _on_key(self, event: Event) -> None:
         """Update :class:`.PowerStep` plot when hitting left/right."""
@@ -223,3 +242,45 @@ class InteractivePlot:
                 for label in labels
             ]
             ax.legend(handles, new_labels)
+
+    def _show_instrument_menu(self, event: MouseEvent, ax_index: int) -> None:
+        """Show a Qt context menu to pick the instrument type for ``ax_index``."""
+        if not self._plottable:
+            return
+
+        if "qt" not in matplotlib.get_backend().lower():
+            logging.warning(
+                "Right-click instrument selection requires a Qt backend. "
+                f"Current backend: {matplotlib.get_backend()}. Add "
+                "`matplotlib.use('QtAgg')` before importing matplotlib to "
+                "enable this feature."
+            )
+            return
+        from matplotlib.backends.qt_compat import QtCore  # type: ignore[attr-defined]
+        from matplotlib.backends.qt_compat import (
+            QtWidgets,  # type: ignore[attr-defined]
+        )
+
+        menu = QtWidgets.QMenu()
+        current_cls = self._ydata[ax_index]
+        for cls in self._plottable:
+            action = menu.addAction(cls.__name__)
+            action.setCheckable(True)
+            action.setChecked(cls is current_cls)
+            action.triggered.connect(
+                lambda _, c=cls, i=ax_index: self._set_ydata(i, c)
+            )
+
+        canvas = self._fig.canvas
+        qt_canvas = cast(Any, canvas)
+        qt_pos = qt_canvas.mapToGlobal(
+            QtCore.QPoint(int(event.x), qt_canvas.height() - int(event.y))
+        )
+        menu.exec(qt_pos)
+
+    def _set_ydata(self, ax_index: int, cls: type[Instrument]) -> None:
+        """Update the instrument type for subplot ``ax_index`` and redraw."""
+        if cls is self._ydata[ax_index]:
+            return
+        self._ydata[ax_index] = cls
+        self._redraw()
