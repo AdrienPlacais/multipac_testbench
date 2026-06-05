@@ -24,6 +24,7 @@ if TYPE_CHECKING:
         MultipactorTest,
     )
     from multipac_testbench.multipactor_test.power_step import PowerStep
+_INTERACTIVE_BACKENDS = {"qtagg", "qt5agg", "tkagg", "wxagg", "macosx"}
 
 
 class InteractivePlot:
@@ -43,6 +44,14 @@ class InteractivePlot:
         kwargs: dict[str, Any],
     ) -> None:
         """Instantiate object."""
+        _backend = matplotlib.get_backend().lower()
+        if _backend not in _INTERACTIVE_BACKENDS:
+            logging.warning(
+                f"Backend {matplotlib.get_backend()} may not support mouse "
+                "events. If the plot is not interactive, add "
+                "`matplotlib.use('QtAgg')` before importing matplotlib."
+            )
+
         self._test = test
         _power_step_set = test.power_step_set
         assert _power_step_set is not None
