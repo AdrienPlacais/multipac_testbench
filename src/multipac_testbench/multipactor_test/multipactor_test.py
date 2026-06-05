@@ -1367,13 +1367,6 @@ class MultipactorTest:
             )
             return self.sweet_plot(*ydata, xdata=xdata, **kwargs)
 
-        if kwargs.get("threshold_set") is not None:
-            logging.warning(
-                "threshold_set is not supported in interactive_sweet_plot. "
-                "Ignoring."
-            )
-            kwargs.pop("threshold_set")
-
         power_step_set = self.power_step_set
         if power_step_set is None:
             logging.warning(
