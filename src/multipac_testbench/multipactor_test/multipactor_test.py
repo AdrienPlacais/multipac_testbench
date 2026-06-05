@@ -217,10 +217,7 @@ class MultipactorTest:
 
     def __str__(self) -> str:
         """Print info on object."""
-        out = [f"{self.freq_mhz}MHz", f"SWR {self.swr}"]
-        if len(self.info) > 0:
-            out.append(f"{self.info}")
-        return ", ".join(out)
+        return str(self.test_conditions)
 
     def add_post_treater(
         self,
