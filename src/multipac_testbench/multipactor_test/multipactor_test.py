@@ -26,7 +26,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Literal, TypeVar, overload
 
 import matplotlib
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import scipy
@@ -34,7 +33,6 @@ from matplotlib import animation
 from matplotlib.artist import Artist
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from matplotlib.widgets import Button
 from multipac_testbench.instruments import (
     SWR,
     FieldPowerError,
@@ -69,6 +67,9 @@ from multipac_testbench.measurement_point.i_measurement_point import (
     IMeasurementPoint,
 )
 from multipac_testbench.measurement_point.pick_up import PickUp
+from multipac_testbench.multipactor_test.interactive_plot import (
+    InteractivePlot,
+)
 from multipac_testbench.multipactor_test.loader import TRIGGER_POLICIES, load
 from multipac_testbench.multipactor_test.test_conditions import TestConditions
 from multipac_testbench.threshold.helper import (
@@ -1391,140 +1392,7 @@ class MultipactorTest:
             )
             return self.sweet_plot(*ydata, xdata=xdata, **kwargs)
 
-        _state = {
-            "raw": False,
-            "sample_index": None,
-            "ps_fig": None,
-            "ps_axes": None,
-        }
-        axes, df = self.sweet_plot(*ydata, xdata=xdata, raw=False, **kwargs)
-        fig = axes[0].get_figure()
-        assert isinstance(fig, Figure)
-
-        fig.subplots_adjust(bottom=0.12)
-        btn_ax = fig.add_axes((0.45, 0.02, 0.12, 0.04))
-        toggle_btn = Button(btn_ax, "Show raw")
-
-        vlines = [
-            ax.axvline(x=0, color="gray", lw=0.8, ls="--", visible=False)
-            for ax in axes
-        ]
-
-        def _draw_power_step(sample_index: int) -> None:
-            try:
-                power_step = power_step_set.get_power_step(sample_index)
-            except KeyError:
-                logging.warning(f"No PowerStep found for {sample_index = }.")
-                return
-
-            def _annotate_legends_with_reduction_info(
-                ps_axes: list[Axes],
-            ) -> None:
-                info_by_name = {
-                    instrument.name: instrument.reduction_info
-                    for instrument in power_step.get_instruments(Instrument)
-                    if instrument.reduction_info is not None
-                }
-                for ax in ps_axes:
-                    handles, labels = ax.get_legend_handles_labels()
-                    if not handles:
-                        continue
-                    new_labels = [
-                        (
-                            f"{label}\n{info_by_name[label]}"
-                            if label in info_by_name
-                            else label
-                        )
-                        for label in labels
-                    ]
-                    ax.legend(handles, new_labels)
-
-            _state["sample_index"] = sample_index
-            if _state["ps_fig"] is None:
-                ps_axes, _ = power_step.sweet_plot(*ydata, raw=_state["raw"])
-                _state["ps_axes"] = ps_axes
-                _annotate_legends_with_reduction_info(ps_axes)
-                _state["ps_fig"] = ps_axes[0].get_figure()
-                _state["ps_fig"].canvas.mpl_connect("key_press_event", _on_key)
-            else:
-                for ax in _state["ps_axes"]:
-                    ax.cla()
-                power_step.sweet_plot(
-                    *ydata,
-                    axes=_state["ps_axes"],
-                    raw=_state["raw"],
-                    pre_trig=power_step.test_conditions.pre_trigger,
-                    trig=power_step.test_conditions.trigger,
-                )
-                _annotate_legends_with_reduction_info(_state["ps_axes"])
-                _state["ps_fig"].canvas.draw_idle()
-            for vl in vlines:
-                vl.set_visible(True)
-                vl.set_xdata([sample_index])
-            fig.canvas.draw_idle()
-            plt.show(block=False)
-
-        def _on_key(event) -> None:
-            if event.key not in ("left", "right"):
-                return
-            if _state["sample_index"] is None:
-                return
-            delta = -1 if event.key == "left" else 1
-            try:
-                power_step_set.get_power_step(_state["sample_index"] + delta)
-            except KeyError:
-                return
-            _draw_power_step(_state["sample_index"] + delta)
-
-        def _redraw() -> None:
-            for ax in axes:
-                ax.cla()
-            self.sweet_plot(
-                *ydata, xdata=xdata, axes=axes, raw=_state["raw"], **kwargs
-            )
-            vlines.clear()
-            vlines.extend(
-                ax.axvline(x=0, color="gray", lw=0.8, ls="--", visible=False)
-                for ax in axes
-            )
-            if _state["sample_index"] is not None:
-                for vl in vlines:
-                    vl.set_visible(True)
-                    vl.set_xdata([_state["sample_index"]])
-            if _state["ps_fig"] is not None:
-                _draw_power_step(_state["sample_index"])
-            fig.canvas.draw_idle()
-
-        def _on_toggle(_event) -> None:
-            _state["raw"] = not _state["raw"]
-            toggle_btn.label.set_text(
-                "Show physical" if _state["raw"] else "Show raw"
-            )
-            _redraw()
-
-        toggle_btn.on_clicked(_on_toggle)
-
-        def _on_motion(event) -> None:
-            """Show previously drawn ``vlines`` when mouse hovers it."""
-            if event.inaxes not in axes:
-                for vl in vlines:
-                    vl.set_visible(False)
-            else:
-                for vl in vlines:
-                    vl.set_visible(True)
-                    vl.set_xdata([round(event.xdata)])
-            fig.canvas.draw_idle()
-
-        def _on_click(event) -> None:
-            """Get x-position of click, plot corresp :class:`.PowerStep`."""
-            if event.inaxes not in axes:
-                return
-            _draw_power_step(round(event.xdata))
-
-        fig.canvas.mpl_connect("motion_notify_event", _on_motion)
-        fig.canvas.mpl_connect("button_press_event", _on_click)
-        fig.canvas.mpl_connect("key_press_event", _on_key)
-        return axes, df
+        return InteractivePlot(self, ydata, xdata, kwargs).show()
 
     def _add_thresholds_on_axes(
         self,
