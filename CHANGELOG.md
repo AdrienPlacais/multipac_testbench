@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.7]
 
+### Added
+
+- Titles of `PowerStep` interactive plots keep track of current sample index.
+
 ### Fixed
 
 - Is is now possible to re-open a `PowerStep` figure by clicking on interactive

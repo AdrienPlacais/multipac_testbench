@@ -206,7 +206,11 @@ class InteractivePlot:
 
         if self._ps_fig is None:
             ps_axes, _ = power_step.sweet_plot(
-                *self._ydata, raw=self._raw, pre_trig=pre_trig, trig=trig
+                *self._ydata,
+                raw=self._raw,
+                pre_trig=pre_trig,
+                trig=trig,
+                title=str(power_step),
             )
             self._ps_axes = ps_axes
             ps_fig = ps_axes[0].get_figure()
@@ -227,6 +231,7 @@ class InteractivePlot:
             )
             self._ps_fig.canvas.draw_idle()
 
+        self._ps_fig.suptitle(str(power_step))
         self._annotate_reduction_info(self._ps_axes, power_step)
 
         for vl in self._vlines:
