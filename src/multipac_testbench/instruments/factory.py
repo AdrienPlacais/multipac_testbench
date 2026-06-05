@@ -144,7 +144,7 @@ class InstrumentFactory:
             column_header = name
 
         if column_header not in df_data:
-            logging.error(
+            logging.warning(
                 f"{column_header = } not present in provided file. Skipping "
                 "associated instrument."
             )

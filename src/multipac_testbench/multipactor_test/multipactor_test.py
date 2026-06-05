@@ -95,7 +95,7 @@ from multipac_testbench.util.helper import (
     split_rows_by_masks,
 )
 from multipac_testbench.util.physics import swr_to_reflection
-from multipac_testbench.util.types import MULTIPAC_DETECTOR_T
+from multipac_testbench.util.types import MULTIPAC_DETECTOR_T, POST_TREATER_T
 from numpy.typing import NDArray
 
 if TYPE_CHECKING:
@@ -222,7 +222,10 @@ class MultipactorTest:
         return ", ".join(out)
 
     def add_post_treater(
-        self, *args, only_pick_up_which_name_is: Collection[str] = (), **kwargs
+        self,
+        post_treater: POST_TREATER_T,
+        instrument_class: ABCMeta = Instrument,
+        only_pick_up_which_name_is: Collection[str] = (),
     ) -> None:
         """Add post-treatment functions to instruments.
 
@@ -234,7 +237,6 @@ class MultipactorTest:
                 measurement_points: list[IMeasurementPoint] = self.pick_ups
                 if self.global_diagnostics is not None:
                     measurement_points.append(self.global_diagnostics)
-
 
         """
         measurement_points: list[IMeasurementPoint] = self.pick_ups
@@ -249,7 +251,48 @@ class MultipactorTest:
             ]
 
         for point in measurement_points:
-            point.add_post_treater(*args, **kwargs)
+            point.add_post_treater(
+                post_treater=post_treater, instrument_class=instrument_class
+            )
+
+    def remove_post_treater(
+        self,
+        post_treater: POST_TREATER_T | None = None,
+        index: int | None = None,
+        instrument_class: ABCMeta = Instrument,
+        only_pick_up_which_name_is: Collection[str] = (),
+    ) -> None:
+        """Remove post-treatment functions from instruments.
+
+        Parameters
+        ----------
+        only_pick_up_which_name_is :
+            To select only some measurement points by their name.
+        post_treater :
+            Post-treater to remove. Has priority over ``index``.
+        index :
+            Index of post-treater to remove.
+        instrument_class :
+            Type of instruments concerned by removing.
+
+        """
+        measurement_points: list[IMeasurementPoint] = self.pick_ups
+        if self.global_diagnostics is not None:
+            measurement_points = self.pick_ups + [self.global_diagnostics]
+
+        if len(only_pick_up_which_name_is) > 0:
+            measurement_points = [
+                point
+                for point in measurement_points
+                if point.name in only_pick_up_which_name_is
+            ]
+
+        for point in measurement_points:
+            point.remove_post_treater(
+                post_treater=post_treater,
+                index=index,
+                instrument_class=instrument_class,
+            )
 
     def add_instrument(
         self,

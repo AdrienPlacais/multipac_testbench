@@ -137,6 +137,30 @@ class IMeasurementPoint(ABC):
         for instrument in instruments:
             instrument.add_post_treater(post_treater)
 
+    def remove_post_treater(
+        self,
+        post_treater: POST_TREATER_T | None = None,
+        index: int | None = None,
+        instrument_class: ABCMeta = Instrument,
+    ) -> None:
+        """Remove post-treatment function from instruments.
+
+        Parameters
+        ----------
+        post_treater :
+            Post-treater to remove. Has priority over ``index``.
+        index :
+            Index of post-treater to remove.
+        instrument_class :
+            Type of instruments concerned by removing.
+
+        """
+        instruments = self.get_instruments(instrument_class)
+        for instrument in instruments:
+            instrument.remove_post_treater(
+                post_treater=post_treater, index=index
+            )
+
     def scatter_instruments_data(
         self,
         instrument_class_axes: dict[ABCMeta, Axes],
