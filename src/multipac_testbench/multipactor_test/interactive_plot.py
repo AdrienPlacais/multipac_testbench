@@ -10,6 +10,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING, Any, cast
 
 import matplotlib
+import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.backend_bases import Event, KeyEvent, MouseEvent
@@ -186,6 +187,13 @@ class InteractivePlot:
 
         pre_trig = power_step.test_conditions.pre_trigger
         trig = power_step.test_conditions.trigger
+        # Re-create power step fig if it was closed
+        if (
+            self._ps_fig is not None
+            and self._ps_fig.number not in plt.get_fignums()
+        ):
+            self._ps_fig = None
+            self._ps_axes = None
 
         if self._ps_fig is None:
             ps_axes, _ = power_step.sweet_plot(
