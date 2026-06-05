@@ -137,3 +137,10 @@ class TestConditions:
         return cls(
             freq_mhz=final_freq, swr=swr, info=info, trigger=trigger, **kwargs
         )
+
+    def __str__(self) -> str:
+        """Give info on the object."""
+        out = [f"{self.freq_mhz}MHz"]
+        if self.info:
+            out.append(self.info)
+        return ", ".join(out)

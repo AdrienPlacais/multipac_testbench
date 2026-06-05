@@ -10,6 +10,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING, Any, cast
 
 import matplotlib
+import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.backend_bases import Event, KeyEvent, MouseEvent
@@ -23,6 +24,7 @@ if TYPE_CHECKING:
         MultipactorTest,
     )
     from multipac_testbench.multipactor_test.power_step import PowerStep
+_INTERACTIVE_BACKENDS = {"qtagg", "qt5agg", "tkagg", "wxagg", "macosx"}
 
 
 class InteractivePlot:
@@ -42,6 +44,14 @@ class InteractivePlot:
         kwargs: dict[str, Any],
     ) -> None:
         """Instantiate object."""
+        _backend = matplotlib.get_backend().lower()
+        if _backend not in _INTERACTIVE_BACKENDS:
+            logging.warning(
+                f"Backend {matplotlib.get_backend()} may not support mouse "
+                "events. If the plot is not interactive, add "
+                "`matplotlib.use('QtAgg')` before importing matplotlib."
+            )
+
         self._test = test
         _power_step_set = test.power_step_set
         assert _power_step_set is not None
@@ -186,10 +196,21 @@ class InteractivePlot:
 
         pre_trig = power_step.test_conditions.pre_trigger
         trig = power_step.test_conditions.trigger
+        # Re-create power step fig if it was closed
+        if (
+            self._ps_fig is not None
+            and self._ps_fig.number not in plt.get_fignums()
+        ):
+            self._ps_fig = None
+            self._ps_axes = None
 
         if self._ps_fig is None:
             ps_axes, _ = power_step.sweet_plot(
-                *self._ydata, raw=self._raw, pre_trig=pre_trig, trig=trig
+                *self._ydata,
+                raw=self._raw,
+                pre_trig=pre_trig,
+                trig=trig,
+                title=str(power_step),
             )
             self._ps_axes = ps_axes
             ps_fig = ps_axes[0].get_figure()
@@ -210,6 +231,7 @@ class InteractivePlot:
             )
             self._ps_fig.canvas.draw_idle()
 
+        self._ps_fig.suptitle(str(power_step))
         self._annotate_reduction_info(self._ps_axes, power_step)
 
         for vl in self._vlines:

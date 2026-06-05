@@ -52,8 +52,8 @@ defined in `pyproject.toml`. Then, add `multipac_testbench.src` to your
   - [ ] Allow for `head` argument, working similarly to `tail`.
 - [ ] Option to plot maximum of a signal per power cycle.
 - [ ] Add filtering of the 50Hz noise
-- [ ] Interactive plots:
-  - [ ] Post-treaters should add info to the plots: window, median, etc.
+- [x] Interactive plots:
+  - [x] Post-treaters should add info to the plots: window, median, etc.
     - [x] Info is saved in every `Instrument.reduction_info: ReductionInfo`.
   - [x] Keep only one window for `PowerStep` plot
   - [x] In the `PowerStep` window, navigate between steps with left/right

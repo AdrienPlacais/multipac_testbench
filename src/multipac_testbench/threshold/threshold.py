@@ -220,9 +220,7 @@ def create_power_extrema(
             extrema.append(PowerExtremum(i, "minimum"))
             continue
 
-        logging.warning(
-            f"Detected noise or plateau around {i = }. Ignoring..."
-        )
+        logging.debug(f"Detected noise or plateau around {i = }. Ignoring...")
 
     extrema.append(PowerExtremum(i_max, "minimum"))
     return extrema
