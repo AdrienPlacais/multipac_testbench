@@ -1416,10 +1416,34 @@ class MultipactorTest:
             except KeyError:
                 logging.warning(f"No PowerStep found for {sample_index = }.")
                 return
+
+            def _annotate_legends_with_reduction_info(
+                ps_axes: list[Axes],
+            ) -> None:
+                info_by_name = {
+                    instrument.name: instrument.reduction_info
+                    for instrument in power_step.get_instruments(Instrument)
+                    if instrument.reduction_info is not None
+                }
+                for ax in ps_axes:
+                    handles, labels = ax.get_legend_handles_labels()
+                    if not handles:
+                        continue
+                    new_labels = [
+                        (
+                            f"{label}\n{info_by_name[label]}"
+                            if label in info_by_name
+                            else label
+                        )
+                        for label in labels
+                    ]
+                    ax.legend(handles, new_labels)
+
             _state["sample_index"] = sample_index
             if _state["ps_fig"] is None:
                 ps_axes, _ = power_step.sweet_plot(*ydata, raw=_state["raw"])
                 _state["ps_axes"] = ps_axes
+                _annotate_legends_with_reduction_info(ps_axes)
                 _state["ps_fig"] = ps_axes[0].get_figure()
                 _state["ps_fig"].canvas.mpl_connect("key_press_event", _on_key)
             else:
@@ -1432,6 +1456,7 @@ class MultipactorTest:
                     pre_trig=power_step.test_conditions.pre_trigger,
                     trig=power_step.test_conditions.trigger,
                 )
+                _annotate_legends_with_reduction_info(_state["ps_axes"])
                 _state["ps_fig"].canvas.draw_idle()
             for vl in vlines:
                 vl.set_visible(True)

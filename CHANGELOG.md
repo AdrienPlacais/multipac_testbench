@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - In interactive plots, navigate between power steps with left/right arrows.
+- In interactive plots, `PowerStep` display reduction info for each
+  `Instrument`.
 
 ## [2.0.4] - 2026-06-05
 

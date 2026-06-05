@@ -55,7 +55,7 @@ defined in `pyproject.toml`. Then, add `multipac_testbench.src` to your
 - [ ] Interactive plots:
   - [ ] Post-treaters should add info to the plots: window, median, etc.
     - [x] Info is saved in every `Instrument.reduction_info: ReductionInfo`.
-  - [ ] Keep only one window for `PowerStep` plot
-  - [ ] In the `PowerStep` window, navigate between steps with left/right
+  - [x] Keep only one window for `PowerStep` plot
+  - [x] In the `PowerStep` window, navigate between steps with left/right
         arrows.
 - [ ] Document the new HeaderConstant instruments.
