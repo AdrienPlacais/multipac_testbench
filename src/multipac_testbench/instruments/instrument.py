@@ -335,6 +335,57 @@ class Instrument(ABC):
         self._post_treaters.append(post_treater)
         self._notify_callbacks()
 
+    def remove_post_treater(
+        self,
+        post_treater: POST_TREATER_T | None = None,
+        index: int | None = None,
+    ) -> None:
+        """Remove ``post_treater`` or the post-treater at index ``index``.
+
+        Parameters
+        ----------
+        post_treater :
+            Post-treater to remove. Has priority over ``index``.
+        index :
+            Index of post-treater to remove.
+
+        """
+        if post_treater is None and index is None:
+            logging.error(
+                f"{self}.remove_post_treater: `post_treater` or `index` must be provided."
+            )
+            return
+
+        if post_treater is not None:
+            try:
+                self._post_treaters.remove(post_treater)
+            except ValueError as e:
+                logging.error(f"{self}: {e}. Not doing anything.")
+                return
+
+            logging.debug(f"{self}: removed {post_treater = }")
+
+            if index is not None:
+                logging.error(
+                    f"Will not remove post-treater at {index = } because "
+                    f"already removed {post_treater = } in {self}"
+                )
+                index = None
+
+        if index is not None:
+            try:
+                del self._post_treaters[index]
+            except IndexError as e:
+                logging.error(f"{self}: {e}. Not doing anything.")
+                return
+            logging.debug(f"{self}: removed post-treater at {index = }")
+
+        if hasattr(self, "_data"):
+            delattr(self, "_data")
+        if hasattr(self, "_data_as_pd"):
+            delattr(self, "_data_as_pd")
+        self._notify_callbacks()
+
     def _post_treat(self, data: NDArray[np.float64]) -> NDArray[np.float64]:
         """Apply all post-treatment functions."""
         original_data_shape = data.shape
