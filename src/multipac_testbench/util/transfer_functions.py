@@ -56,6 +56,9 @@ def field_probe(
                 10
             }}}
 
+    .. warning::
+       This transfer function is now invalid.
+
     Parameters
     ----------
     v_acq :
@@ -134,8 +137,8 @@ def power(
         Original transfer function in LabView is:
 
         .. math::
-            P = |V_\mathrm{acq}| \times (``REC_LIM_UPP`` - ``REC_LIM_LOW``)
-            + ``REC_LIM_LOW``.
+            P = |V_\mathrm{acq}| \times (\texttt{REC\_LIM\_UPP} - \texttt{REC\_LIM\_LOW})
+            + \texttt{REC\_LIM\_LOW}.
 
         We removed the absolute value; to avoid negative powers (should not
         appear), use ``ensure_no_negative=True``.
