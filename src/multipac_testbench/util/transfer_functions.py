@@ -140,6 +140,10 @@ def power(
         We removed the absolute value; to avoid negative powers (should not
         appear), use ``ensure_no_negative=True``.
 
+    See Also
+    --------
+    :func:`.fix_power_channel_b`
+
     Parameters
     ----------
     v_acq :
@@ -162,34 +166,6 @@ def power(
     if ensure_no_negative:
         watt[watt < 0.0] = 0.0
     return watt
-
-
-def power_channel_b(
-    p_bad: NDArray[np.float64], k_fix: float, alpha_fix: float
-) -> NDArray[np.float64]:
-    r"""Fix power measured on channel B.
-
-    Transfer function proposed by M. Vénière.
-
-    .. math::
-        P_\mathrm{ok} =
-        k_\mathrm{fix} \times P_\mathrm{bad}^{\alpha_\mathrm{fix}}
-
-    Parameters
-    ----------
-    p_bad :
-        Power measured on channel B in :unit:`W`.
-    k_fix :
-        Fix slope constant.
-    alpha_fix :
-        Fix exponent constant.
-
-    Returns
-    -------
-        Fixed power in :unit:`W`.
-
-    """
-    return k_fix * p_bad**alpha_fix
 
 
 def pressure(
