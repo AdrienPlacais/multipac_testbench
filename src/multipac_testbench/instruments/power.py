@@ -32,7 +32,7 @@ class Power(Instrument):
         See Also
         --------
         :func:`.transfer_functions.power`
-        :func:`.transfer_functions.power_channel_b`
+        :func:`.fixers.fix_power_channel_b`
 
         Notes
         -----
