@@ -6,7 +6,12 @@
 class_name = "ForwardPower"
 
 [global.instruments_kw.NI9205_Power2]
+alpha_fix = 1.0783
 class_name = "ReflectedPower"
+ensure_no_negative = false
+k_fix = 0.71
+p_high = 1200
+p_low = 1.0
 
 # ==================================
 [E1]
