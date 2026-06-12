@@ -94,6 +94,12 @@ nitpick_ignore = [
     ("py:class", "numpy.int32"),
     ("py:obj", "numpy._typing._array_like._ScalarType_co"),
 ]
+# https://github.com/utopia-foss/dantro/blob/master/doc/.nitpick-ignore
+nitpick_ignore_regex = [
+    ("py:class", ".*Update D from mapping.*"),
+    ("py:class", ".*remove specified key and return.*"),
+]
+
 
 # Link to other libraries
 intersphinx_mapping = {
