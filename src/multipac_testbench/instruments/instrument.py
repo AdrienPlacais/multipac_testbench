@@ -571,8 +571,8 @@ class Instrument(ABC):
 
         The method performs three main operations:
 
-        #. It uses a sliding-window heuristic (*via* :func:`.array_is_growing`)
-           to detect growth.
+        #. It uses a sliding-window heuristic (*via*
+           :func:`.noisy_array_is_growing`) to detect growth.
         #. It removes short, isolated ``False`` segments, enforcing a minimum
            number of consecutive ``True`` values to be considered valid.
         #. It clears any trailing ``True`` values near the end of the array to
@@ -591,7 +591,8 @@ class Instrument(ABC):
         width :
             Width of the sample to determine increase.
         **kwargs :
-            Additional keyword arguments passed to :func:`.array_is_growing`.
+            Additional keyword arguments passed to
+            :func:`.noisy_array_is_growing`.
 
         Returns
         -------
@@ -600,7 +601,7 @@ class Instrument(ABC):
         Notes
         -----
         - The detection is influenced by the choice of parameters and the
-          behavior of :func:`.array_is_growing`.
+          behavior of :func:`.noisy_array_is_growing`.
         - Trailing regions and short noise-like fluctuations are filtered out.
 
         .. todo::
@@ -660,7 +661,8 @@ class Instrument(ABC):
             Value to put in growth mask when we did not manage to find whether
             measured signal increased or not.
         **kwargs :
-            Additional keyword arguments passed to :func:`.array_is_growing`.
+            Additional keyword arguments passed to
+            :func:`.noisy_array_is_growing`.
 
         Returns
         -------
