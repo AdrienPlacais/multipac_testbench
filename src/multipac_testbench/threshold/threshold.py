@@ -15,11 +15,12 @@ from typing import Literal, Protocol
 import numpy as np
 from numpy.typing import NDArray
 
-THRESHOLD_NATURE_T = Literal["upper", "lower"]
+_THRESHOLD_NATURE_T = Literal["upper", "lower"]
 THRESHOLD_WAY_T = Literal["enter", "exit"]
 THRESHOLD_DETECTOR_T = Literal["any", "all"]
 THRESHOLD_DETECTOR = ("any", "all")
-POWER_EXTREMUM_T = Literal["minimum", "maximum"]
+_POWER_EXTREMUM_T = Literal["minimum", "maximum"]
+_GROWTH_STATUS_T = Literal["increasing", "decreasing", "constant"]
 
 #: Function taking in a :class:`.Threshold`, and returning a boolean.
 THRESHOLD_FILTER_T = Callable[["Threshold"], bool]
@@ -53,7 +54,7 @@ class Threshold:
     #: At which sample index the threshold was detected.
     sample_index: int
     #: If the threshold is a lower threshold or an upper threshold.
-    nature: THRESHOLD_NATURE_T
+    nature: _THRESHOLD_NATURE_T
     #: If the threshold was measured during an entry or an exit of the
     #: multipator band
     way: THRESHOLD_WAY_T
@@ -167,7 +168,7 @@ class PowerExtremum:
     #: At which sample index the power reached an extremum.
     sample_index: int
     #: If the extremum is mini/maxi
-    nature: POWER_EXTREMUM_T
+    nature: _POWER_EXTREMUM_T
     #: Clear interpretation of what was detected
     info: Literal[
         "First point forced to a minimum",
@@ -191,9 +192,6 @@ class PowerExtremum:
             and self.nature == other.nature
             and self.smooth == other.smooth
         )
-
-
-_GROWTH_STATUS_T = Literal["increasing", "decreasing", "constant"]
 
 
 def create_power_extrema(
