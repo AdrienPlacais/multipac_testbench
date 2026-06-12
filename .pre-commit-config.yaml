@@ -1,4 +1,8 @@
 repos:
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.9.1
+    hooks:
+      - id: nbstripout
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: "v6.0.0"
     hooks:
@@ -27,8 +31,8 @@ repos:
   - repo: https://github.com/asottile/pyupgrade
     rev: v3.21.2
     hooks:
-    -   id: pyupgrade
-  - repo: https://github.com/pycqa/isort  # args set in pyproject.toml
+      - id: pyupgrade
+  - repo: https://github.com/pycqa/isort # args set in pyproject.toml
     rev: 9.0.0a3
     hooks:
       - id: isort
@@ -36,7 +40,7 @@ repos:
       - id: isort
         name: isort (cython)
         types: [cython]
-  - repo: https://github.com/psf/black-pre-commit-mirror  # args set in pyproject.toml
+  - repo: https://github.com/psf/black-pre-commit-mirror # args set in pyproject.toml
     rev: 26.5.1
     hooks:
       - id: black

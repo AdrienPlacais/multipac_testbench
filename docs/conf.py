@@ -100,7 +100,6 @@ nitpick_ignore_regex = [
     ("py:class", ".*remove specified key and return.*"),
 ]
 
-
 # Link to other libraries
 intersphinx_mapping = {
     "matplotlib": ("https://matplotlib.org/stable/", None),
@@ -120,6 +119,20 @@ html_sidebars = {
         "versions.html",
     ],
 }
+
+# -- Options for IPYNB --------------------------------------------------------
+# In particular: options for automatic re-execution
+# (they are auto-cleaned by pre-commit to avoid cluttering github repo)
+
+on_rtd = os.environ.get("READTHEDOCS") == "True"
+
+# We should rebuild if we are on ReadTheDocs
+if on_rtd:
+    nbsphinx_execute = "auto"
+# Locally, we rebuild if we ran `make ci`, but not if we `make html`
+else:
+    # This `NB_EXEC` env constant is defined in the docs/Makefile
+    nbsphinx_execute = os.environ.get("NB_EXEC", "auto")
 
 
 # -- Constants display fix ---------------------------------------------------
