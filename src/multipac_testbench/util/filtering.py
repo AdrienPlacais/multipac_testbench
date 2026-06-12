@@ -45,8 +45,26 @@ def remove_trailing_true(
     return data
 
 
+def not_noisy_array_is_growing(
+    array: NDArray[np.float64], tol: float = 1e-7
+) -> NDArray[np.float64]:
+    """Tell where array is locally growing.
+
+    Adapted to not noisy instruments such as :class:`.PowerSetpoint`.
+
+    Returns
+    -------
+        ``+1`` where it increases, ``-1`` where it decreases, ``0`` where it
+        remains the same.
+
+    """
+    diffs = np.diff(array.data)
+    result = np.where(diffs > tol, 1.0, np.where(diffs < -tol, -1.0, 0.0))
+    return np.append(result, 0.0)  # last point is always 0 (no next value)
+
+
 @overload
-def array_is_growing(
+def noisy_array_is_growing(
     array: NDArray[np.float64],
     index: int,
     width: int = 10,
@@ -57,7 +75,7 @@ def array_is_growing(
 
 
 @overload
-def array_is_growing(
+def noisy_array_is_growing(
     array: NDArray[np.float64],
     index: int,
     width: int = 10,
@@ -67,7 +85,7 @@ def array_is_growing(
 ) -> bool | None: ...
 
 
-def array_is_growing(
+def noisy_array_is_growing(
     array: NDArray[np.float64],
     index: int,
     width: int = 10,

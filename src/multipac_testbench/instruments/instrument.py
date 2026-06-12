@@ -13,8 +13,8 @@ from matplotlib.container import StemContainer
 from matplotlib.lines import Line2D
 from multipac_testbench.multipactor_test.reduction_info import ReductionInfo
 from multipac_testbench.util.filtering import (
-    array_is_growing,
     clean_boolean_mask,
+    noisy_array_is_growing,
     remove_trailing_true,
 )
 from multipac_testbench.util.types import CALLBACK_T, POST_TREATER_T
@@ -612,7 +612,7 @@ class Instrument(ABC):
 
         local_is_growing = True
         for i in range(n_points):
-            local_is_growing = array_is_growing(
+            local_is_growing = noisy_array_is_growing(
                 self.data,
                 i,
                 no_change_value=local_is_growing,
@@ -639,10 +639,7 @@ class Instrument(ABC):
 
         return growth_mask
 
-    def growth_array(
-        self,
-        **kwargs,
-    ) -> NDArray[np.float64]:
+    def growth_array(self, **kwargs) -> NDArray[np.float64]:
         """Identify regions where the signal is increasing ("growing").
 
         This method analyzes a signal to determine where it exhibits a growing
@@ -650,8 +647,6 @@ class Instrument(ABC):
         signal, where ``1.0`` indicates a region of growth and ``-1.0``
         otherwise. ``0.0`` means constant signal.
         *A priori*, will be useful for:
-
-        - :class:`.PowerSetpoint` to determine power cycles
 
         Notes
         -----
@@ -675,7 +670,7 @@ class Instrument(ABC):
         bool_to_float = {True: 1.0, False: -1.0, None: 0.0}
         is_growing = [
             bool_to_float[
-                array_is_growing(
+                noisy_array_is_growing(
                     self.data,
                     i,
                     width=2,
