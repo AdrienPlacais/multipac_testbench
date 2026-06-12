@@ -199,7 +199,8 @@ class MultipactorTest:
         #: (e.g. forward/reflected power)
         self.global_diagnostics = imeasurement_points[0]
 
-        #: Store info read from power step headers: frequency, triggers, etc.
+        #: Store info read from power step headers (frequency, triggers, etc.)
+        self.test_conditions: TestConditions
         self.test_conditions = TestConditions.from_components(
             freq_mhz=freq_mhz,
             swr=swr,
