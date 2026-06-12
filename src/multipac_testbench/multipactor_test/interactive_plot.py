@@ -194,8 +194,13 @@ class InteractivePlot:
             return
         self._sample_index = sample_index
 
-        pre_trig = power_step.test_conditions.pre_trigger
-        trig = power_step.test_conditions.trigger
+        kwargs = {
+            "raw": self._raw,
+            "pre_trig": power_step.test_conditions.pre_trigger,
+            "trig": power_step.test_conditions.trigger,
+            "threshold_set": None,
+            "title": str(power_step),
+        }
         # Re-create power step fig if it was closed
         if (
             self._ps_fig is not None
@@ -205,13 +210,7 @@ class InteractivePlot:
             self._ps_axes = None
 
         if self._ps_fig is None:
-            ps_axes, _ = power_step.sweet_plot(
-                *self._ydata,
-                raw=self._raw,
-                pre_trig=pre_trig,
-                trig=trig,
-                title=str(power_step),
-            )
+            ps_axes, _ = power_step.sweet_plot(*self._ydata, **kwargs)
             self._ps_axes = ps_axes
             ps_fig = ps_axes[0].get_figure()
             assert isinstance(ps_fig, Figure)
@@ -222,13 +221,7 @@ class InteractivePlot:
             assert self._ps_axes is not None
             for ax in self._ps_axes:
                 ax.cla()
-            power_step.sweet_plot(
-                *self._ydata,
-                axes=self._ps_axes,
-                raw=self._raw,
-                pre_trig=pre_trig,
-                trig=trig,
-            )
+            power_step.sweet_plot(*self._ydata, axes=self._ps_axes, **kwargs)
             self._ps_fig.canvas.draw_idle()
 
         self._ps_fig.suptitle(str(power_step))

@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.8] - 2026-06-12
+
+### Fixed
+
+- M. Vénière correction function was not applied.
+- Power evolution with seesaw-like profile is better handled. In particular,
+  detection of multipactor.
+
 ## [2.0.7] - 2026-06-05
 
 ### Added

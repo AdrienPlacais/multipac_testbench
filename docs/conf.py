@@ -94,6 +94,11 @@ nitpick_ignore = [
     ("py:class", "numpy.int32"),
     ("py:obj", "numpy._typing._array_like._ScalarType_co"),
 ]
+# https://github.com/utopia-foss/dantro/blob/master/doc/.nitpick-ignore
+nitpick_ignore_regex = [
+    ("py:class", ".*Update D from mapping.*"),
+    ("py:class", ".*remove specified key and return.*"),
+]
 
 # Link to other libraries
 intersphinx_mapping = {
@@ -114,6 +119,20 @@ html_sidebars = {
         "versions.html",
     ],
 }
+
+# -- Options for IPYNB --------------------------------------------------------
+# In particular: options for automatic re-execution
+# (they are auto-cleaned by pre-commit to avoid cluttering github repo)
+
+on_rtd = os.environ.get("READTHEDOCS") == "True"
+
+# We should rebuild if we are on ReadTheDocs
+if on_rtd:
+    nbsphinx_execute = "auto"
+# Locally, we rebuild if we ran `make ci`, but not if we `make html`
+else:
+    # This `NB_EXEC` env constant is defined in the docs/Makefile
+    nbsphinx_execute = os.environ.get("NB_EXEC", "auto")
 
 
 # -- Constants display fix ---------------------------------------------------

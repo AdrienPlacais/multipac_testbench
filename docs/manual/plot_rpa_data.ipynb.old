@@ -1,0 +1,510 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "0",
+   "metadata": {},
+   "source": [
+    "# Plot RPA data"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "1",
+   "metadata": {},
+   "source": [
+    "Show how we can exploit the signals from the Retarding Potential Analyzer/Retarding Field Analyzer."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "2",
+   "metadata": {},
+   "source": [
+    "## Set up"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3",
+   "metadata": {},
+   "source": [
+    "Load some libraries"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "4",
+   "metadata": {
+    "editable": true,
+    "slideshow": {
+     "slide_type": ""
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "import tomllib\n",
+    "import pandas as pd\n",
+    "from pathlib import Path\n",
+    "from pprint import pprint\n",
+    "\n",
+    "from multipac_testbench.instruments import RPACurrent, RPAPotential, RPA\n",
+    "from multipac_testbench.multipactor_test import MultipactorTest"
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "id": "5",
+   "metadata": {
+    "editable": true,
+    "raw_mimetype": "text/restructuredtext",
+    "slideshow": {
+     "slide_type": ""
+    },
+    "tags": []
+   },
+   "source": [
+    "Here is a sample of the ``TOML`` we will load, with some comments.\n",
+    "\n",
+    ".. code-block:: toml\n",
+    "   \n",
+    "   [global.instruments_kw.NI9205_ERPA]\n",
+    "   caliber_mA = 20.0  # Caliber for the current data; used to rescale the measured signal\n",
+    "   class_name = \"RPACurrent\"\n",
+    "   # keyword arguments for the `average_y_for_nearby_x_within_distance` function\n",
+    "   # it is used to average RPACurrent values measured at the same RPAPotential\n",
+    "   average = true          # Activate averaging\n",
+    "   keep_shape = true       # Recommended\n",
+    "   max_index_distance = 1  # Averaging is performed on neighboring identical potential values.\n",
+    "                           # Increase it to like 1000 if you want to average over the whole tests\n",
+    "                           # (eg several power cycles) \n",
+    "   tol = 1e-6\n",
+    "\n",
+    "   [global.instruments_kw.NI9205_Spellman]\n",
+    "   class_name = \"RPAPotential\"\n",
+    "\n",
+    ".. seealso::\n",
+    "   Check the documentation of :func:`.average_y_for_nearby_x_within_distance` for more information on the the averaging arguments."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "6",
+   "metadata": {
+    "editable": true,
+    "slideshow": {
+     "slide_type": ""
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "project = Path(\"../data/campaign_ERPA\")\n",
+    "config_path = Path(project, \"testbench_configuration.toml\")\n",
+    "\n",
+    "with open(config_path, \"rb\") as f:\n",
+    "    config = tomllib.load(f)\n",
+    "\n",
+    "results_path = Path(project, \"MVE5-120MHz-50Ohm-BDTcomp-ERPA1_1dBm.csv\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7",
+   "metadata": {
+    "editable": true,
+    "slideshow": {
+     "slide_type": ""
+    },
+    "tags": []
+   },
+   "source": [
+    "Load data. Note that the `info` key will be appended to plots titles."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "8",
+   "metadata": {
+    "editable": true,
+    "slideshow": {
+     "slide_type": ""
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "multipactor_test = MultipactorTest(results_path, config, freq_mhz=120.0, swr=1.0, sep=\",\", info=\"1dBm (175W)\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "9",
+   "metadata": {
+    "editable": true,
+    "slideshow": {
+     "slide_type": ""
+    },
+    "tags": []
+   },
+   "source": [
+    "## Plot collected current vs grid potential"
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "id": "10",
+   "metadata": {
+    "editable": true,
+    "raw_mimetype": "text/restructuredtext",
+    "slideshow": {
+     "slide_type": ""
+    },
+    "tags": []
+   },
+   "source": [
+    "In this test, RPA Current was measured twice at every potential.\n",
+    "This is why we averaged it.\n",
+    "\n",
+    "As we want to keep the shape of averaged data consistent with all the other instruments, we introduced ``NaN`` numbers for duplicated potential values."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "11",
+   "metadata": {
+    "editable": true,
+    "slideshow": {
+     "slide_type": ""
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "rpa_potential = multipactor_test.get_instrument(RPAPotential)\n",
+    "rpa_potential_data = rpa_potential.data_as_pd.copy()\n",
+    "rpa_potential_data.name = \"RPA potential [V]\"\n",
+    "\n",
+    "rpa_current = multipactor_test.get_instrument(RPACurrent)\n",
+    "rpa_current_data = rpa_current.data_as_pd.copy()\n",
+    "rpa_current_data.name = \"Averaged RPA current [uA]\"\n",
+    "\n",
+    "\n",
+    "resume_rpa = pd.concat([rpa_potential_data, rpa_current_data], axis=1)\n",
+    "display(resume_rpa[40:50])"
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "id": "12",
+   "metadata": {
+    "editable": true,
+    "raw_mimetype": "text/restructuredtext",
+    "slideshow": {
+     "slide_type": ""
+    },
+    "tags": []
+   },
+   "source": [
+    "In the above table, you can see that the second measurement point at 5V is ``NaN``.\n",
+    "It is because the first measurement point is now a mean of both points."
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "id": "13",
+   "metadata": {
+    "editable": true,
+    "raw_mimetype": "",
+    "slideshow": {
+     "slide_type": ""
+    },
+    "tags": []
+   },
+   "source": [
+    "The inconvenient is that plot lines are interrupted by these ``NaN`` values:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "14",
+   "metadata": {
+    "editable": true,
+    "slideshow": {
+     "slide_type": ""
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "_, _ = multipactor_test.sweet_plot(\n",
+    "    RPACurrent,\n",
+    "    xdata=RPAPotential,\n",
+    "    marker=\"o\",\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "15",
+   "metadata": {
+    "editable": true,
+    "slideshow": {
+     "slide_type": ""
+    },
+    "tags": []
+   },
+   "source": [
+    "Use the `drop_repeated_x` argument to force the display of lines anyway."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "16",
+   "metadata": {
+    "editable": true,
+    "slideshow": {
+     "slide_type": ""
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "_, _ = multipactor_test.sweet_plot(\n",
+    "    RPACurrent,\n",
+    "    xdata=RPAPotential,\n",
+    "    drop_repeated_x=True,\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "17",
+   "metadata": {
+    "editable": true,
+    "slideshow": {
+     "slide_type": ""
+    },
+    "tags": []
+   },
+   "source": [
+    "## Tip for clearer plots"
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "id": "18",
+   "metadata": {
+    "editable": true,
+    "raw_mimetype": "test/restructuredtext",
+    "slideshow": {
+     "slide_type": ""
+    },
+    "tags": []
+   },
+   "source": [
+    "Here is another use case for the ``masks` option.\n",
+    "\n",
+    ".. seealso::\n",
+    "   See :func:`.split_rows_by_masks` for more information."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "19",
+   "metadata": {
+    "editable": true,
+    "slideshow": {
+     "slide_type": ""
+    },
+    "tags": []
+   },
+   "source": [
+    "We start by calculating, for each measurement point, if potential was increased."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "20",
+   "metadata": {
+    "editable": true,
+    "slideshow": {
+     "slide_type": ""
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "rpa_potential_growth_mask = rpa_potential.growth_mask(\n",
+    "    minimum_number_of_points=2, n_trailing_points_to_check=0\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "21",
+   "metadata": {
+    "editable": true,
+    "slideshow": {
+     "slide_type": ""
+    },
+    "tags": []
+   },
+   "source": [
+    "Now we set the `masks` dictionary. Remember that keys should start with double underscore (`__`)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "22",
+   "metadata": {
+    "editable": true,
+    "slideshow": {
+     "slide_type": ""
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "masks = {\n",
+    "    \"__(potential grows)\": rpa_potential_growth_mask,\n",
+    "    \"__(potential decreases)\": ~rpa_potential_growth_mask,\n",
+    "}"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "23",
+   "metadata": {
+    "editable": true,
+    "slideshow": {
+     "slide_type": ""
+    },
+    "tags": []
+   },
+   "source": [
+    "And we are ready to plot!"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "24",
+   "metadata": {
+    "editable": true,
+    "slideshow": {
+     "slide_type": ""
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "_, _ = multipactor_test.sweet_plot(\n",
+    "    RPACurrent,\n",
+    "    xdata=RPAPotential,\n",
+    "    drop_repeated_x=True,\n",
+    "    masks=masks,\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "25",
+   "metadata": {
+    "editable": true,
+    "slideshow": {
+     "slide_type": ""
+    },
+    "tags": []
+   },
+   "source": [
+    "## Plot energy distribution"
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "id": "26",
+   "metadata": {
+    "editable": true,
+    "raw_mimetype": "text/restructuredtext",
+    "slideshow": {
+     "slide_type": ""
+    },
+    "tags": []
+   },
+   "source": [
+    "The :class:`.RPA` object is automatically created when a :class:`.RPACurrent` and a :class:`.RPAPotential` are defined in the configuration ``TOML``.\n",
+    "It holds the electrons energy distribution, directly calculated from the RPA current and potential.\n",
+    "To visualize it, you just need to:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "27",
+   "metadata": {
+    "editable": true,
+    "slideshow": {
+     "slide_type": ""
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "rpa = multipactor_test.get_instrument(RPA)\n",
+    "axes = rpa.data_as_pd.plot(x=0, y=1, grid=True, xlabel=\"Electrons energy [eV]\", ylabel=\"Distribution\", title=str(multipactor_test))\n",
+    "_ = axes.set_ylim([-0.05, 0.35])"
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "id": "28",
+   "metadata": {
+    "editable": true,
+    "raw_mimetype": "text/restructuredtext",
+    "slideshow": {
+     "slide_type": ""
+    },
+    "tags": []
+   },
+   "source": [
+    "Currently, no dedicated method for this plot.\n",
+    "Don't know yet how I will implement this.\n",
+    "\n",
+    ".. todo::\n",
+    "   - Integrate to :meth:`.MultipactorTest.sweet_plot`? Maybe a dedicated method is more suited.\n",
+    "   - Handle increasing/decreasing potentials to avoid superposition of the two distributions."
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.13.2"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

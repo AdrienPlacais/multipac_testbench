@@ -6,8 +6,9 @@ from functools import partial
 import numpy as np
 from multipac_testbench.instruments.instrument import Instrument
 from multipac_testbench.instruments.virtual_instrument import VirtualInstrument
+from multipac_testbench.util.fixers import fix_power_channel_b
 from multipac_testbench.util.post_treaters import get_data_above_noise
-from multipac_testbench.util.transfer_functions import power, power_channel_b
+from multipac_testbench.util.transfer_functions import power
 from multipac_testbench.util.types import POST_TREATER_T
 from numpy.typing import NDArray
 
@@ -31,7 +32,7 @@ class Power(Instrument):
         See Also
         --------
         :func:`.transfer_functions.power`
-        :func:`.transfer_functions.power_channel_b`
+        :func:`.fixers.fix_power_channel_b`
 
         Notes
         -----
@@ -126,10 +127,10 @@ class Power(Instrument):
                 ensure_no_negative=self._ensure_no_negative,
             )
         ]
-        if hasattr(self, "_alpha_fix") and hasattr(self, "k_fix"):
+        if hasattr(self, "_alpha_fix") and hasattr(self, "_k_fix"):
             funcs.append(
                 partial(
-                    power_channel_b,
+                    fix_power_channel_b,
                     k_fix=self._k_fix,
                     alpha_fix=self._alpha_fix,
                 )

@@ -157,7 +157,7 @@ class PowerStep(MultipactorTest):
         generic_reducer :
             Function converting array to float. The default is
             :func:`.take_median` applied to the pulse window ``[pre_trigger,
-            pre_trigger + trigger]`` as read from :attr:`.TestConditions`.
+            pre_trigger + trigger]`` as read from :attr:`test_conditions`.
             Falls back to :func:`.take_maximum` on the full array if those
             values are unavailable, and logs an error.
         special_reducers :

@@ -17,6 +17,7 @@ Welcome to MULTIPAC test bench's documentation!
    manual/load_experimental_data
    manual/gallery
    manual/tutorials
+   manual/transfer_functions
    manual/bibliography
    API Reference <multipac_testbench/modules>
 

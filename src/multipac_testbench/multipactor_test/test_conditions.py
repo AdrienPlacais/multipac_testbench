@@ -55,8 +55,8 @@ class TestConditions:
         Build from constructor args and :class:`.StepConstant` instruments.
 
         Scans ``global_diagnostics`` for :class:`.StepConstant` instruments
-        whose :attr:`_should_be_constant` is ``True`` and whose
-        :attr:`_field_name` matches a field of this dataclass. Warns if a
+        whose `_should_be_constant` attribute is ``True`` and whose
+        `_field_name` attribute matches a field of this dataclass. Warns if a
         supposed-to-be-constant instrument has more than one distinct value,
         and stores the median in that case.
 
