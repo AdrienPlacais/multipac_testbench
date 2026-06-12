@@ -27,7 +27,7 @@ class StepConstant(VirtualInstrument):
     When associated with a :class:`.PowerStep`, this :class:`.Instrument`
     always store constant data.
     When associated with a :class:`.MultipactorTest`, it will generally be
-    constant (eg :class:`FrequencySetPoint`), but may vary (eg
+    constant (eg :class:`FrequencySetpoint`), but may vary (eg
     :class:`PolarizationSetpoint` studies).
 
     """
@@ -152,7 +152,7 @@ class PowerSetpoint(StepConstant):
 
     Note
     ----
-    Does not inherit from :class:`Power`.
+    Does not inherit from :class:`.Power`.
 
     """
 

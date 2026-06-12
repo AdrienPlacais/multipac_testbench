@@ -6,4 +6,3 @@ Transfer functions
 
 .. include::
    ../multipac_testbench/multipac_testbench.util.transfer_functions.rst
-
