@@ -519,42 +519,6 @@ class MultipactorTest:
         )
         return threshold_set
 
-    def _power_growth_mask(
-        self, growth_mask_kw: dict[str, Any] | None = None
-    ) -> NDArray[np.bool]:
-        """Determine where the power is growing.
-
-        Parameters
-        ----------
-        growth_mask_kw :
-            Keyword arguments passed to :meth:`.ForwardPower.growth_mask`.
-
-        Returns
-        -------
-            ``True`` where power increases, ``False`` where it decreases.
-
-        """
-        power_instrument = self.get_instrument(
-            PowerSetpoint, raise_missing_error=False
-        )
-        if power_instrument is None:
-            logging.warning(
-                "The power cycles will be determined using the ForwardPower "
-                "(NI9205_Power1) instead of the PowerSetpoint (NI9205_dBm). "
-                "This is more error-prone, in particular if consecutive Sample"
-                " index corresond to different powers. In this case, you may "
-                "see that all multipactor bands are merged. You can fix this by"
-                "setting ``consecutive_criterions`` to 0."
-            )
-            power_instrument = self.get_instrument(ForwardPower)
-
-        assert power_instrument is not None
-
-        if growth_mask_kw is None:
-            growth_mask_kw = {}
-        mask = power_instrument.growth_mask(**growth_mask_kw)
-        return mask
-
     def _power_growth_array(
         self, growth_array_kw: dict[str, Any] | None = None
     ) -> NDArray[np.float64]:
@@ -1316,7 +1280,7 @@ class MultipactorTest:
             )
             df_to_plot = pd.concat([df_to_plot, df_thresholds], axis=1)
             for ax in dic_axes.values():
-                ax.legend(loc="lower left", ncols=2, fontsize="xx-small")
+                ax.legend(ncols=2, fontsize="xx-small")
 
         if png_path is not None:
             plot.save_figure(axes, png_path, **(png_kwargs or {}))

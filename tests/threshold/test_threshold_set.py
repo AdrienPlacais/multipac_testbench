@@ -44,7 +44,7 @@ def test_extreme_thresholds_ideal():
     }
     threshold_set = MockThresholdSet(thresholds_by_half_power)
     extreme = ThresholdSet.extreme(threshold_set)
-    assert extreme._thresholds == [a, b, c, d]
+    assert extreme.thresholds == [a, b, c, d]
 
 
 def test_extreme_thresholds_mixed_up_ideal():
@@ -67,7 +67,7 @@ def test_extreme_thresholds_mixed_up_ideal():
     }
     threshold_set = MockThresholdSet(thresholds_by_half_power)
     extreme = ThresholdSet.extreme(threshold_set)
-    assert extreme._thresholds == [a, b, c, d]
+    assert extreme.thresholds == [a, b, c, d]
 
 
 def test_extreme_thresholds_did_not_reach():
@@ -86,7 +86,7 @@ def test_extreme_thresholds_did_not_reach():
     }
     threshold_set = MockThresholdSet(thresholds_by_half_power)
     extreme = ThresholdSet.extreme(threshold_set)
-    assert extreme._thresholds == [a, d]
+    assert extreme.thresholds == [a, d]
 
 
 def test_extreme_thresholds_two_bands_per_cycle():
@@ -107,7 +107,7 @@ def test_extreme_thresholds_two_bands_per_cycle():
     }
     threshold_set = MockThresholdSet(thresholds_by_half_power)
     extreme = ThresholdSet.extreme(threshold_set)
-    assert extreme._thresholds == [a, b, c, d]
+    assert extreme.thresholds == [a, b, c, d]
 
 
 def test_extreme_thresholds_one_full_band_one_half():
@@ -126,7 +126,7 @@ def test_extreme_thresholds_one_full_band_one_half():
     }
     threshold_set = MockThresholdSet(thresholds_by_half_power)
     extreme = ThresholdSet.extreme(threshold_set)
-    assert extreme._thresholds == [a, d]
+    assert extreme.thresholds == [a, d]
 
 
 def test_extreme_thresholds_single_point():
@@ -143,7 +143,7 @@ def test_extreme_thresholds_single_point():
     }
     threshold_set = MockThresholdSet(thresholds_by_half_power)
     extreme = ThresholdSet.extreme(threshold_set)
-    assert extreme._thresholds == [a, b, c, d]
+    assert extreme.thresholds == [a, b, c, d]
 
 
 def test_extreme_thresholds_mixed_up_single_point():
@@ -165,4 +165,4 @@ def test_extreme_thresholds_mixed_up_single_point():
     }
     threshold_set = MockThresholdSet(thresholds_by_half_power)
     extreme = ThresholdSet.extreme(threshold_set)
-    assert extreme._thresholds == [a, b, c, d]
+    assert extreme.thresholds == [a, b, c, d]
