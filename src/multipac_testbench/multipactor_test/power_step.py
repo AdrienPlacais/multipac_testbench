@@ -587,7 +587,7 @@ class PowerStepSet:
         **kwargs,
     ) -> MultipactorTest:
         """
-        Write the summary ``CSV`` and load it as a :class:`.MultipactorTest`.
+        Create a :class:`.MultipactorTest` from power step files.
 
         Convenience wrapper around :meth:`to_multipactor_test_file` that
         additionally back-links the returned :class:`.MultipactorTest` to this
