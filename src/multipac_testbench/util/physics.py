@@ -21,32 +21,51 @@ def powers_to_reflection(
     We use the definition:
 
     .. math::
-
         R = \frac{V_r}{V_f} = \sqrt{\frac{P_r}{P_f}}
 
+    Points where ``forward_power`` is zero or negative, where
+    ``reflected_power`` is negative, or where the ratio exceeds unity are
+    set to ``NaN`` and optionally warned about.
+
     """
-    reflection_coefficient = np.abs(np.sqrt(reflected_power / forward_power))
+    invalid = (forward_power <= 0.0) | (reflected_power < 0.0)
+    n_invalid = int(np.count_nonzero(invalid))
+    if n_invalid > 0:
+        logging.debug(
+            f"{n_invalid} points with non-physical power values (zero or "
+            "negative) were set to NaN before computing R."
+        )
+
+    ratio = np.where(
+        invalid,
+        np.nan,
+        reflected_power / np.where(invalid, 1.0, forward_power),
+    )
+    reflection_coefficient = np.where(
+        ratio >= 0.0, np.sqrt(np.where(ratio >= 0.0, ratio, 0.0)), np.nan
+    )
 
     mask = reflection_coefficient > 1.0
-    n_invalid = np.count_nonzero(mask)
-    if n_invalid > 0:
+    n_above = int(np.count_nonzero(mask))
+    if n_above > 0:
         reflection_coefficient[mask] = np.nan
         if warn_reflected_higher_than_forward:
             logging.warning(
-                f"{n_invalid} points were removed in R calculation, where "
+                f"{n_above} points were removed in R calculation, where "
                 "reflected power was higher than forward power."
             )
 
     mask = np.isclose(reflection_coefficient, 1.0, atol=tol)
-    n_invalid = np.count_nonzero(mask)
-    if n_invalid > 0:
+    n_close = int(np.count_nonzero(mask))
+    if n_close > 0:
         reflection_coefficient[mask] = np.nan
         if warn_gamma_too_close_to_unity:
             logging.warning(
-                f"{n_invalid} points were removed in R calculation, where "
-                "reflected power was too close to forward power. Tolerance "
-                f"was: {tol = }."
+                f"{n_close} points were removed in R calculation, where "
+                "reflected power was too close to forward power. "
+                f"Tolerance was: {tol = }."
             )
+
     return pd.Series(reflection_coefficient, name=name)
 
 
