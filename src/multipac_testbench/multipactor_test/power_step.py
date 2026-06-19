@@ -645,7 +645,7 @@ class PowerStepSet:
         """
         logging.warning(
             "PowerStepSet.to_multipactor_test() is deprecated. Use "
-            "MultipactorTest.from_folder() instead.",
+            "MultipactorTest.from_folder() instead."
         )
         self.to_multipactor_test_file(
             csv_path,
