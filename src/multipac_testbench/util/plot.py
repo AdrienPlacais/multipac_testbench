@@ -599,7 +599,7 @@ def save_figure(
 
 
 def save_dataframe(
-    df_to_plot: pd.DataFrame,
+    df_to_plot: pd.DataFrame | None,
     csv_path: Path,
     sep: str = ",",
     verbose: bool = False,
@@ -621,6 +621,11 @@ def save_dataframe(
         Other keyword arguments for the ``DataFrame.to_csv`` method.
 
     """
+    if df_to_plot is None:
+        logging.warning(
+            f"Could not save df to {csv_path = } because it is None."
+        )
+        return
     save(
         csv_path,
         df_to_plot,
