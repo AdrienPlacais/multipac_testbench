@@ -54,9 +54,9 @@ class TestCampaign(list[MultipactorTest]):
     def from_filepaths(
         cls,
         filepaths: Sequence[Path],
-        frequencies: Sequence[float],
-        swrs: Sequence[float],
         config: dict[str, Any] | str | Path,
+        frequencies: Sequence[float | None] | None = None,
+        swrs: Sequence[float] | None = None,
         info: Sequence[str] = (),
         sep: str = ",",
         trigger_policy: TRIGGER_POLICIES = "keep_all",
@@ -70,12 +70,12 @@ class TestCampaign(list[MultipactorTest]):
         ----------
         filepaths :
            Filepaths to the LabViewer files.
+        config :
+            Configuration of the test bench.
         frequencies :
             Frequencies matching the filepaths.
         swrs :
             SWRs matching the filepaths.
-        config :
-            Configuration of the test bench.
         info :
             Other information string to identify each multipactor test.
         sep :
@@ -99,20 +99,25 @@ class TestCampaign(list[MultipactorTest]):
         logfile = Path(filepaths[0].parent / "multipac_testbench.log")
         log_manager.set_up_logging(logfile_file=logfile)
 
+        if frequencies is None:
+            frequencies = [None for _ in filepaths]
+        if swrs is None:
+            swrs = [1.0 for _ in filepaths]
+
         args = zip(filepaths, frequencies, swrs, info, strict=True)
         multipactor_tests = []
         for filepath, freq_mhz, swr, info in args:
             try:
                 multipactor_test = MultipactorTest(
                     filepath,
-                    (
+                    config=(
                         config
                         if isinstance(config, dict)
                         else load_config(config)
                     ),
-                    freq_mhz,
-                    swr,
-                    info,
+                    freq_mhz=freq_mhz,
+                    swr=swr,
+                    info=info,
                     sep=sep,
                     trigger_policy=trigger_policy,
                     index_col=index_col,
@@ -122,10 +127,65 @@ class TestCampaign(list[MultipactorTest]):
             except Exception as e:
                 logging.error(
                     f"Exception raised during loading of {filepath}:\n{e}"
-                    "Skipping this file."
+                    " Skipping this file."
+                )
+                continue
+            logging.info(f"Loaded MultipactorTest {filepath = }")
+            multipactor_tests.append(multipactor_test)
+        return cls(multipactor_tests)
+
+    @classmethod
+    def from_folders(
+        cls,
+        folders: Sequence[Path],
+        config: dict[str, Any] | str | Path,
+        frequencies: Sequence[float | None] | None = None,
+        swrs: Sequence[float] | None = None,
+        info: Sequence[str] = (),
+        sep: str = "\t",
+        trigger_policy: TRIGGER_POLICIES = "keep_all",
+        **kwargs,
+    ) -> Self:
+        """Instantiate the :class:`.MultipactorTest` and :class:`TestCampaign`.
+
+        From folders of raw power steps.
+
+        """
+        if len(info) == 0:
+            info = ["" for _ in folders]
+
+        if frequencies is None:
+            frequencies = [None for _ in folders]
+        if swrs is None:
+            swrs = [1.0 for _ in folders]
+
+        args = zip(folders, frequencies, swrs, info, strict=True)
+        multipactor_tests = []
+        for folder, freq_mhz, swr, info in args:
+            try:
+                multipactor_test = MultipactorTest.from_folder(
+                    folder=folder,
+                    config=(
+                        config
+                        if isinstance(config, dict)
+                        else load_config(config)
+                    ),
+                    freq_mhz=freq_mhz,
+                    swr=swr,
+                    info=info,
+                    sep=sep,
+                    trigger_policy=trigger_policy,
+                    **kwargs,
+                )
+
+            except Exception as e:
+                logging.error(
+                    f"Exception raised during loading of {folder}:\n{e}"
+                    " Skipping this file."
                 )
                 continue
             multipactor_tests.append(multipactor_test)
+            logging.info(f"Loaded MultipactorTest {folder = }")
         return cls(multipactor_tests)
 
     def add_post_treater(
