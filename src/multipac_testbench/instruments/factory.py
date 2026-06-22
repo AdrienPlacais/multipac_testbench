@@ -135,23 +135,13 @@ class InstrumentFactory:
             and header_key is not None
             and self._commented_lines
         ):
-            instrument = constructor.from_single_csv_header(
+            return constructor.from_single_csv_header(
                 name=name,
                 commented_lines=self._commented_lines,
                 n_points=len(df_data),
                 header_key=header_key,
                 **instruments_kw,
             )
-            if (
-                isinstance(instrument, FrequencySetpoint)
-                and self.freq_mhz is None
-            ):
-                logging.info(
-                    f"Set frequency to {self.freq_mhz}MHz following "
-                    "FrequencySetpoint."
-                )
-                self.freq_mhz = instrument.data[0]
-            return instrument
 
         if column_header is None:
             column_header = name

@@ -9,6 +9,7 @@ import pandas as pd
 from multipac_testbench.instruments.electric_field.i_electric_field import (
     IElectricField,
 )
+from multipac_testbench.instruments.step_constant import MissingFrequencyError
 from multipac_testbench.util.files import resolve_path
 from multipac_testbench.util.transfer_functions import field_probe
 from multipac_testbench.util.types import POST_TREATER_T
@@ -55,17 +56,19 @@ class FieldProbe(IElectricField):
         self._b_rack: float
 
         if calibration_file is not None:
-            assert (
-                freq_mhz is not None
-            ), "Frequency is mandatory to calibrate racks."
+            if freq_mhz is None:
+                raise MissingFrequencyError(
+                    "Frequency is mandatory to calibrate racks."
+                )
             self._a_rack, self._b_rack = self._rf_rack_calibration_constants(
                 calibration_file,
                 freq_mhz=freq_mhz,
             )
         if attenuation_file is not None:
-            assert (
-                freq_mhz is not None
-            ), "Frequency is mandatory to calibrate probes."
+            if freq_mhz is None:
+                raise MissingFrequencyError(
+                    "Frequency is mandatory to calibrate probes."
+                )
             self._g_probe = self._probe_attenuation(
                 Path(attenuation_file), freq_mhz=freq_mhz, name=name
             )

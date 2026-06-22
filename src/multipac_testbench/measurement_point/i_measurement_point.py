@@ -9,6 +9,7 @@ import pandas as pd
 from matplotlib.axes import Axes
 from multipac_testbench.instruments.factory import InstrumentFactory
 from multipac_testbench.instruments.instrument import Instrument
+from multipac_testbench.instruments.step_constant import FrequencySetpoint
 from multipac_testbench.util.types import POST_TREATER_T
 
 
@@ -52,16 +53,21 @@ class IMeasurementPoint(ABC):
         self.position = position
         self.color = color
         #: Holds all :class:`.Instrument` instances at this location
-        self.instruments = [
-            instrument
-            for instr_name, instr_kw in instruments_kw.items()
-            if (
-                instrument := instrument_factory.run(
-                    instr_name, df_data, color=color, **instr_kw
-                )
+        self.instruments: list[Instrument] = []
+
+        for instr_name, instr_kw in instruments_kw.items():
+            instrument = instrument_factory.run(
+                instr_name, df_data, color=color, **instr_kw
             )
-            is not None
-        ]
+            if instrument is None:
+                continue
+            if (
+                isinstance(instrument, FrequencySetpoint)
+                and instrument_factory.freq_mhz is None
+            ):
+                instrument_factory.freq_mhz = instrument.data[0]
+            self.instruments.append(instrument)
+
         virtual_instruments = instrument_factory.run_virtual(
             self.instruments,
             position=position,

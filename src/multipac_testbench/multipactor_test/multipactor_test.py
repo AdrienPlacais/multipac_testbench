@@ -67,6 +67,9 @@ from multipac_testbench.measurement_point.i_measurement_point import (
     IMeasurementPoint,
 )
 from multipac_testbench.measurement_point.pick_up import PickUp
+from multipac_testbench.multipactor_test.helper import (
+    POWERSTEP_FILE_RECOGNIZER_T,
+)
 from multipac_testbench.multipactor_test.interactive_plot import (
     InteractivePlot,
 )
@@ -96,7 +99,11 @@ from multipac_testbench.util.helper import (
     split_rows_by_masks,
 )
 from multipac_testbench.util.physics import swr_to_reflection
-from multipac_testbench.util.types import MULTIPAC_DETECTOR_T, POST_TREATER_T
+from multipac_testbench.util.types import (
+    MULTIPAC_DETECTOR_T,
+    POST_TREATER_T,
+    REDUCER_T,
+)
 from numpy.typing import NDArray
 
 if TYPE_CHECKING:
@@ -127,6 +134,7 @@ class MultipactorTest:
         is_raw: bool = False,
         create_virtual_instruments: bool = True,
         remove_metadata_columns: bool = False,
+        _df_data: pd.DataFrame | None = None,
         **kwargs,
     ) -> None:
         r"""Create all the pick-ups.
@@ -159,20 +167,37 @@ class MultipactorTest:
             contain acquisition voltages instead of physical quantities.
         create_virtual_instruments :
             If virtual instruments should be created.
+        _df_data :
+            Contains the dataframe, concatenating all :class:`.PowerStep`
+            individual ``CSV`` files. Used by :meth:`from_folder`. Allows
+            skipping :meth:`load`.
         kwargs :
             Other kwargs passed to :func:`.load`.
 
         """
+        if filepath.is_dir() and _df_data is None:
+            raise TypeError(
+                f"{filepath} is a directory. Use MultipactorTest.from_folder()"
+                " instead."
+            )
         self.filepath = filepath
 
-        df_data, self._commented_lines = load(
-            filepath,
-            sep=sep,
-            trigger_policy=trigger_policy,
-            index_col=index_col,
-            remove_metadata_columns=remove_metadata_columns,
-            **kwargs,
-        )
+        self._commented_lines: list[str]
+
+        if _df_data is not None:
+            df_data = _df_data
+            self._commented_lines = []
+        else:
+
+            df_data, self._commented_lines = load(
+                filepath,
+                sep=sep,
+                trigger_policy=trigger_policy,
+                index_col=index_col,
+                remove_metadata_columns=remove_metadata_columns,
+                **kwargs,
+            )
+
         self._n_points = len(df_data)
         self.df_data = df_data
 
@@ -220,6 +245,172 @@ class MultipactorTest:
     def __str__(self) -> str:
         """Print info on object."""
         return str(self.test_conditions)
+
+    @classmethod
+    def _from_dataframe(
+        cls,
+        df_data: pd.DataFrame,
+        config: dict[str, Any] | str | Path,
+        freq_mhz: float | None = None,
+        swr: float = 1.0,
+        info: str = "",
+        trigger: int | None = None,
+        is_raw: bool = False,
+        create_virtual_instruments: bool = True,
+        trigger_policy: TRIGGER_POLICIES = "keep_all",
+    ) -> MultipactorTest:
+        """Construct directly from a DataFrame, bypassing file I/O.
+
+        This is a private constructor used by :meth:`from_folder`. The
+        ``_df_data`` kwarg bypasses :func:`.load` in ``__init__``.
+
+        """
+        return cls(
+            filepath=Path(),
+            config=config,
+            freq_mhz=freq_mhz,
+            swr=swr,
+            info=info,
+            trigger=trigger,
+            is_raw=is_raw,
+            create_virtual_instruments=create_virtual_instruments,
+            trigger_policy=trigger_policy,
+            _df_data=df_data,
+        )
+
+    @classmethod
+    def from_folder(
+        cls,
+        folder: Path,
+        config: dict[str, Any] | str | Path,
+        freq_mhz: float | None = None,
+        swr: float = 1.0,
+        info: str = "",
+        sep: str = "\t",
+        index_col: str = "Index",
+        out_index_col: str = "Sample index",
+        file_recognizer: POWERSTEP_FILE_RECOGNIZER_T | None = None,
+        comment: str = "#",
+        create_virtual_instruments: bool = True,
+        are_raw: bool = True,
+        reducer: REDUCER_T | None = None,
+        special_reducers: (
+            Mapping[str | type[Instrument], REDUCER_T] | None
+        ) = None,
+        trigger_policy: TRIGGER_POLICIES = "keep_all",
+        reduced_csv: Path | None = None,
+        **kwargs,
+    ) -> MultipactorTest:
+        """
+        Load object directly from a folder of PowerStep ``CSV``s.
+
+        Builds the summary DataFrame in memory without writing an intermediate
+        ``CSV``. Automatically sets :attr:`power_step_set` to enable
+        :meth:`interactive_sweet_plot`.
+
+        .. note::
+            Loading individual power step files is slower than loading a
+            pre-built summary ``CSV``. If you do not need interactive plots,
+            consider calling :meth:`PowerStepSet.to_multipactor_test_file`
+            once and then constructing from the resulting CSV directly.
+
+        Parameters
+        ----------
+        folder :
+            Directory holding all the power step ``CSV`` files.
+        config :
+            Configuration ``TOML`` of the testbench.
+        freq_mhz :
+            Explicit frequency override in :unit:`MHz`. Prefer defining a
+            :class:`.FrequencySetpoint` in the ``TOML``.
+        swr :
+            Expected Voltage Signal Wave Ratio.
+        info :
+            Human-readable label for this test.
+        sep :
+            Column delimiter in the power step ``CSV`` files.
+        index_col :
+            Name of the index column in power step files.
+        out_index_col :
+            Name of the index column in the resulting DataFrame.
+        file_recognizer :
+            Function to identify valid power step files.
+        comment :
+            Comment delimiter in power step ``CSV`` files.
+        create_virtual_instruments :
+            If virtual instruments should be created.
+        are_raw :
+            Whether power step files hold acquisition voltages.
+        reducer :
+            Passed to :meth:`.PowerStep.to_single_values`.
+        special_reducers :
+            Passed to :meth:`.PowerStep.to_single_values`.
+        trigger_policy :
+            Passed to :class:`.MultipactorTest`.
+        reduced_csv :
+            Path where the reduced ``CSV`` will be saved. Allows a faster
+            loading, but you looses ability to make interactive plots.
+        **kwargs :
+            Passed to :class:`.PowerStep`.
+
+        Returns
+        -------
+            A :class:`.MultipactorTest` with :attr:`power_step_set` set.
+
+        """
+        from multipac_testbench.multipactor_test.power_step import PowerStepSet
+
+        power_step_set = PowerStepSet(
+            folder=folder,
+            config=config,
+            freq_mhz=freq_mhz,
+            swr=swr,
+            info=info,
+            sep=sep,
+            index_col=index_col,
+            out_index_col=out_index_col,
+            file_recognizer=file_recognizer,
+            comment=comment,
+            create_virtual_instruments=create_virtual_instruments,
+            are_raw=are_raw,
+            **kwargs,
+        )
+        if reduced_csv is not None:
+            df_data = power_step_set.to_multipactor_test_file(
+                csv_path=reduced_csv,
+                reducer=reducer,
+                special_reducers=special_reducers,
+                index_col=index_col,
+            )
+        else:
+            df_data = power_step_set.to_dataframe(
+                reducer=reducer,
+                special_reducers=special_reducers,
+                index_col=out_index_col,
+            )
+        test = cls._from_dataframe(
+            df_data=df_data,
+            config=config,
+            freq_mhz=freq_mhz,
+            swr=swr,
+            info=info,
+            trigger=power_step_set._trigger,
+            is_raw=are_raw,
+            create_virtual_instruments=create_virtual_instruments,
+            trigger_policy=trigger_policy,
+        )
+        test.power_step_set = power_step_set
+
+        if power_step_set._power_steps:
+            info_by_name = {
+                instrument.name: instrument.reduction_info
+                for instrument in power_step_set._power_steps[0].instruments
+                if instrument.reduction_info is not None
+            }
+            for instrument in test.instruments:
+                instrument.reduction_info = info_by_name.get(instrument.name)
+
+        return test
 
     def add_post_treater(
         self,
