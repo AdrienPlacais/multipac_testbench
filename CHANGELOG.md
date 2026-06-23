@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.9]
+
+### Added
+
+- `TestCampaign.from_folders` to create the object from several folders holding
+  all the `CSV` power step files.
+
+### Fixed
+
+- `FrequencySetpoint` data can be used for the electric field probes
+  calibration.
+
 ## [2.0.8] - 2026-06-12
 
 ### Fixed
