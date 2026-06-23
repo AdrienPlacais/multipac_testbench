@@ -1294,7 +1294,7 @@ class MultipactorTest:
     def output_filepath(self, out_folder: Path | str, extension: str) -> Path:
         """Create consistent path for output files."""
         filepath = output_filepath(
-            self.filepath, self.swr, self.freq_mhz, out_folder, extension
+            self.swr, self.freq_mhz, self.info, out_folder, extension
         )
         return filepath
 

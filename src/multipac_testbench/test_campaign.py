@@ -172,7 +172,7 @@ class TestCampaign(list[MultipactorTest]):
                     ),
                     freq_mhz=freq_mhz,
                     swr=swr,
-                    info=info,
+                    info=info or str(folder.stem),
                     sep=sep,
                     trigger_policy=trigger_policy,
                     **kwargs,
