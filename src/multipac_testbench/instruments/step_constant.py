@@ -111,9 +111,7 @@ class CurrentCalibre(StepConstant):
 
 
 class FrequencySetpoint(StepConstant):
-    """Store the frequency set by the user.
-
-    By default, the frequency is in :unit:`MHz`.
+    """Store the frequency read in the header, in :unit:`MHz`.
 
     The header key should in general be ``SM300_Frequency``.
 
@@ -140,6 +138,10 @@ class FrequencySetpoint(StepConstant):
     def ylabel(cls) -> str:
         """Label used for plots."""
         return r"RF frequency $f~[\mathrm{MHz}]$"
+
+
+class MissingFrequencyError(ValueError):
+    """Error raise when frequency is mandatory but unknown."""
 
 
 class Frequency(FrequencySetpoint):

@@ -10,7 +10,10 @@ import pandas as pd
 from multipac_testbench.instruments.instrument import Instrument
 from multipac_testbench.instruments.penning import DiffPenning, Penning
 from multipac_testbench.instruments.rpa import RPA
-from multipac_testbench.instruments.step_constant import StepConstant
+from multipac_testbench.instruments.step_constant import (
+    FrequencySetpoint,
+    StepConstant,
+)
 
 STRING_TO_INSTRUMENT_CLASS = {
     "CurrentCalibre": ins.CurrentCalibre,

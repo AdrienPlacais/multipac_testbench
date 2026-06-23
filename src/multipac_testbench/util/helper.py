@@ -122,9 +122,9 @@ def split_rows_by_masks(
 
 
 def output_filepath(
-    filepath: Path,
     swr: float,
     freq_mhz: float,
+    info: str,
     out_folder: str | Path,
     extension: str,
 ) -> Path:
@@ -132,12 +132,12 @@ def output_filepath(
 
     Parameters
     ----------
-    filepath :
-        Name of the data ``CSV`` file from LabViewer.
     swr :
         Theoretical :math:`SWR` to add to the output file name.
     freq_mhz :
         Theoretical rf frequency to add to the output file name.
+    info :
+
     out_folder :
         Relative name of the folder where data will be saved; it is defined
         w.r.t. to the parent folder of ``filepath`` if it is a string. If it
@@ -156,22 +156,14 @@ def output_filepath(
         swr_str = f"SWR_{int(swr):05.0f}"
     freq_str = f"freq_{freq_mhz:03.0f}MHz"
 
-    filename = (
-        filepath.with_stem(("_").join((swr_str, freq_str, filepath.stem)))
-        .with_suffix(extension)
-        .name
-    )
+    filename = ("_").join((swr_str, freq_str, info)) + extension
 
-    folder = (
-        filepath.parent / out_folder
-        if isinstance(out_folder, str)
-        else out_folder
-    )
+    if isinstance(out_folder, str):
+        out_folder = Path(out_folder)
+    if not out_folder.is_dir():
+        out_folder.mkdir(parents=True)
 
-    if not folder.is_dir():
-        folder.mkdir(parents=True)
-
-    return folder / filename
+    return out_folder / filename
 
 
 def save_by_position(
