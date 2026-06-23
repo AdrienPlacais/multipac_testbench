@@ -12,7 +12,6 @@ import pandas as pd
 from multipac_testbench.instruments.power import Sync
 from multipac_testbench.instruments.virtual_instrument import VirtualInstrument
 from multipac_testbench.multipactor_test.helper import parse_header_value
-from multipac_testbench.util.filtering import not_noisy_array_is_growing
 from multipac_testbench.util.types import POST_TREATER_T
 from numpy.typing import NDArray
 
@@ -28,7 +27,7 @@ class StepConstant(VirtualInstrument):
     When associated with a :class:`.PowerStep`, this :class:`.Instrument`
     always store constant data.
     When associated with a :class:`.MultipactorTest`, it will generally be
-    constant (eg :class:`FrequencySetpoint`), but may vary (eg
+    constant (eg :class:`FrequencySetPoint`), but may vary (eg
     :class:`PolarizationSetpoint` studies).
 
     """
@@ -93,9 +92,6 @@ class StepConstant(VirtualInstrument):
         """
         return []
 
-    def growth_array(self, **kwargs) -> NDArray[np.float64]:
-        return not_noisy_array_is_growing(self.data, **kwargs)
-
 
 class CurrentCalibre(StepConstant):
     """Store the current calibre.
@@ -158,7 +154,7 @@ class PowerSetpoint(StepConstant):
 
     Note
     ----
-    Does not inherit from :class:`.Power`.
+    Does not inherit from :class:`Power`.
 
     """
 
@@ -175,7 +171,6 @@ class PowerSetpoint(StepConstant):
         width: int = 2,
         **kwargs,
     ) -> NDArray[np.bool]:
-        raise ValueError("should not be used i think")
         return super().growth_mask(
             minimum_number_of_points=minimum_number_of_points,
             n_trailing_points_to_check=n_trailing_points_to_check,

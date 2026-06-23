@@ -24,7 +24,6 @@ help:
 	@echo "  clean           Clean build artifacts"
 	@echo "  apidoc          Generate API documentation"
 	@echo "  html            Build unversioned HTML documentation"
-	@echo "  ci              Build versioned HTML, with Jupyter execution"
 
 # Clean build artifacts
 clean:
@@ -46,10 +45,6 @@ apidoc:
 html:
 	@echo "Building unversioned HTML documentation..."
 	@$(SPHINXBUILD) -b html "$(SOURCEDIR)" "$(BUILDDIR)/html" $(SPHINXOPTS) $(O)
-
-ci:
-	@echo "Building versioned HTML documentation, with Jupyter execution..."
-	@NB_EXEC=auto $(SPHINXBUILD) -b html "$(SOURCEDIR)" "$(BUILDDIR)/html" $(SPHINXOPTS) $(O)
 
 # Catch-all target: route all unknown targets to Sphinx using the new "make mode" option
 %:

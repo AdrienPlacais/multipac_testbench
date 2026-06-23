@@ -43,10 +43,9 @@ class ThresholdSet:
             :class:`.MultipactorTest`.
 
         """
-        self.thresholds = sorted(thresholds, key=lambda t: t.sample_index)
+        self._thresholds = sorted(thresholds, key=lambda t: t.sample_index)
         self.extrema = sorted(power_extrema, key=lambda p: p.sample_index)
         self._warn_instruments_at_same_position()
-        self._remove_thresholds_at_seesaw()
 
     @classmethod
     def from_instruments(
@@ -249,7 +248,7 @@ class ThresholdSet:
             The stored :class:`.Threshold` objects, sorted by sample index.
 
         """
-        return iter(self.thresholds)
+        return iter(self._thresholds)
 
     def remove_singularities(self, min_consecutive: int = 1) -> None:
         """Remove fugitive :class:`.Threshold`.
@@ -268,7 +267,7 @@ class ThresholdSet:
 
         """
         by_instr: dict[str, list[Threshold]] = defaultdict(list)
-        for t in self.thresholds:
+        for t in self._thresholds:
             by_instr[t.detecting_instrument].append(t)
 
         cleaned_thresholds = []
@@ -288,37 +287,13 @@ class ThresholdSet:
             cleaned = [t for t in thresholds if t not in to_remove]
             cleaned_thresholds.extend(cleaned)
 
-        self.thresholds = cleaned_thresholds
-
-    def _remove_thresholds_at_seesaw(self) -> None:
-        """Clean incorrect :class:`.Threshold` if power follows seesaw profile.
-
-        Consider this:
-        - ``i - 1``: max power of the seesaw profile, there is MP
-        - ``i``: new seesaw (min power of the profile), no MP
-
-        At ``i - 1``, we did not reach a threshold. But we have a
-        :class:`.Threshold` corresponding to it. So we have to remove it.
-
-        """
-        extrema = {
-            extremum.sample_index: extremum for extremum in self.extrema
-        }
-        for t in self.thresholds:
-            matching_extremum = extrema.get(t.sample_index)
-            if matching_extremum is None:
-                continue
-            if matching_extremum.smooth:
-                continue
-            if matching_extremum.nature == "maximum" and t.way == "exit":
-                logging.debug(f"Removed Threshold: {t}")
-                self.thresholds.remove(t)
+        self._thresholds = cleaned_thresholds
 
     def _warn_instruments_at_same_position(self) -> None:
         """Verify bijection between detecting instruments pos and name."""
         pos_to_names: dict[float, str] = {}
         warned_positions = set()
-        for threshold in self.thresholds:
+        for threshold in self._thresholds:
             name = threshold.detecting_instrument
             pos = threshold.position
             if pos in pos_to_names and pos_to_names[pos] != name:
@@ -371,7 +346,7 @@ class ThresholdSet:
         """
         return [
             thresh
-            for thresh in self.thresholds
+            for thresh in self._thresholds
             if math.isclose(thresh.position, position, abs_tol=tol)
             or return_global
             and (thresh.is_global or np.isnan(position))
@@ -478,7 +453,7 @@ class ThresholdSet:
         """Remove thresholds detected by ``instrument``."""
         to_remove = self.according_to(instrument)
         cleaned = [t for t in self if t not in to_remove]
-        self.thresholds = cleaned
+        self._thresholds = cleaned
         logging.info(
             f"Removed the {len(to_remove)} thresholds detected by {instrument}"
         )

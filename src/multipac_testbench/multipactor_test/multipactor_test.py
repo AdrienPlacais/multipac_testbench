@@ -224,8 +224,6 @@ class MultipactorTest:
         #: (e.g. forward/reflected power)
         self.global_diagnostics = imeasurement_points[0]
 
-        #: Store info read from power step headers (frequency, triggers, etc.)
-        self.test_conditions: TestConditions
         self.test_conditions = TestConditions.from_components(
             freq_mhz=freq_mhz,
             swr=swr,
@@ -710,6 +708,42 @@ class MultipactorTest:
             threshold_predicate=threshold_predicate,
         )
         return threshold_set
+
+    def _power_growth_mask(
+        self, growth_mask_kw: dict[str, Any] | None = None
+    ) -> NDArray[np.bool]:
+        """Determine where the power is growing.
+
+        Parameters
+        ----------
+        growth_mask_kw :
+            Keyword arguments passed to :meth:`.ForwardPower.growth_mask`.
+
+        Returns
+        -------
+            ``True`` where power increases, ``False`` where it decreases.
+
+        """
+        power_instrument = self.get_instrument(
+            PowerSetpoint, raise_missing_error=False
+        )
+        if power_instrument is None:
+            logging.warning(
+                "The power cycles will be determined using the ForwardPower "
+                "(NI9205_Power1) instead of the PowerSetpoint (NI9205_dBm). "
+                "This is more error-prone, in particular if consecutive Sample"
+                " index corresond to different powers. In this case, you may "
+                "see that all multipactor bands are merged. You can fix this by"
+                "setting ``consecutive_criterions`` to 0."
+            )
+            power_instrument = self.get_instrument(ForwardPower)
+
+        assert power_instrument is not None
+
+        if growth_mask_kw is None:
+            growth_mask_kw = {}
+        mask = power_instrument.growth_mask(**growth_mask_kw)
+        return mask
 
     def _power_growth_array(
         self, growth_array_kw: dict[str, Any] | None = None
@@ -1472,7 +1506,7 @@ class MultipactorTest:
             )
             df_to_plot = pd.concat([df_to_plot, df_thresholds], axis=1)
             for ax in dic_axes.values():
-                ax.legend(ncols=2, fontsize="xx-small")
+                ax.legend(loc="lower left", ncols=2, fontsize="xx-small")
 
         if png_path is not None:
             plot.save_figure(axes, png_path, **(png_kwargs or {}))
@@ -1523,6 +1557,13 @@ class MultipactorTest:
                 "before importing. Falling back to non-interactive sweet_plot."
             )
             return self.sweet_plot(*ydata, xdata=xdata, **kwargs)
+
+        if kwargs.get("threshold_set") is not None:
+            logging.warning(
+                "threshold_set is not supported in interactive_sweet_plot. "
+                "Ignoring."
+            )
+            kwargs.pop("threshold_set")
 
         power_step_set = self.power_step_set
         if power_step_set is None:

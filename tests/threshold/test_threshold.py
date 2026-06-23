@@ -20,9 +20,9 @@ def test_tresholds_creation() -> None:
     growth_array = np.array(
         [
             0.0, 1.0, 1.0, 1.0,
-            -1.0, -1.0, -1.0, -1.0,
-            1.0, 1.0, 1.0, 1.0,
-            -1.0, -1.0, -1.0, -1.0,
+            0.0, -1.0, -1.0, -1.0,
+            0.0, 1.0, 1.0, 1.0,
+            0.0, -1.0, -1.0, -1.0,
             0.0,
         ]
     )
@@ -49,11 +49,11 @@ def test_tresholds_creation() -> None:
 
 def test_power_extrema_creation() -> None:
     """Test normal behavior of extremum creation."""
-    growth_array = np.array([0.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0])
+    growth_array = np.array([0.0, 1.0, 1.0, 1.0, 0.0, -1.0, -1.0, -1.0])
     returned = create_power_extrema(growth_array)
     expected = [
-        PowerExtremum(0, "minimum", info="First point forced to a minimum"),
-        PowerExtremum(5, "maximum", info="Peak of a triangle profile"),
-        PowerExtremum(7, "minimum", info="Last point forced to a minimum"),
+        PowerExtremum(0, "minimum"),
+        PowerExtremum(4, "maximum"),
+        PowerExtremum(7, "minimum"),
     ]
     assert returned == expected

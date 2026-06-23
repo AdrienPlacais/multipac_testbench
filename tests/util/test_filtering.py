@@ -1,7 +1,7 @@
 """Provide test functions for the :mod:`.filtering` module."""
 
 import numpy as np
-from multipac_testbench.util.filtering import noisy_array_is_growing
+from multipac_testbench.util.filtering import array_is_growing
 
 
 def test_array_is_growing_classic() -> None:
@@ -15,7 +15,7 @@ def test_array_is_growing_classic() -> None:
     undetermined_value = None
 
     returned = [
-        noisy_array_is_growing(
+        array_is_growing(
             array,
             i,
             width=2,

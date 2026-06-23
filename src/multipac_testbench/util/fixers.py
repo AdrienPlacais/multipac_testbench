@@ -3,7 +3,6 @@
 import logging
 from pathlib import Path
 
-import numpy as np
 from multipac_testbench.instruments.electric_field.helper import (
     load_rf_calibration_files,
     read_e_field_probe_calibration,
@@ -14,7 +13,6 @@ from multipac_testbench.util.transfer_functions import (
     field_probe_inv,
 )
 from multipac_testbench.util.types import FIELD_PROBES
-from numpy.typing import NDArray
 
 
 def fix_wrong_e_field_calibration(
@@ -116,31 +114,3 @@ def fix_wrong_e_field_calibration(
         filepath_new = filepath_bad
 
     save(filepath_new, data, sep=sep, **kwargs)
-
-
-def fix_power_channel_b(
-    p_bad: NDArray[np.float64], k_fix: float, alpha_fix: float
-) -> NDArray[np.float64]:
-    r"""Fix power measured on channel B.
-
-    Transfer function proposed by M. Vénière.
-
-    .. math::
-        P_\mathrm{ok} =
-        k_\mathrm{fix} \times P_\mathrm{bad}^{\alpha_\mathrm{fix}}
-
-    Parameters
-    ----------
-    p_bad :
-        Power measured on channel B in :unit:`W`.
-    k_fix :
-        Fix slope constant.
-    alpha_fix :
-        Fix exponent constant.
-
-    Returns
-    -------
-        Fixed power in :unit:`W`.
-
-    """
-    return k_fix * p_bad**alpha_fix

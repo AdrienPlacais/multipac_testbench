@@ -15,12 +15,11 @@ from typing import Literal, Protocol
 import numpy as np
 from numpy.typing import NDArray
 
-_THRESHOLD_NATURE_T = Literal["upper", "lower"]
+THRESHOLD_NATURE_T = Literal["upper", "lower"]
 THRESHOLD_WAY_T = Literal["enter", "exit"]
 THRESHOLD_DETECTOR_T = Literal["any", "all"]
 THRESHOLD_DETECTOR = ("any", "all")
-_POWER_EXTREMUM_T = Literal["minimum", "maximum"]
-_GROWTH_STATUS_T = Literal["increasing", "decreasing", "constant"]
+POWER_EXTREMUM_T = Literal["minimum", "maximum"]
 
 #: Function taking in a :class:`.Threshold`, and returning a boolean.
 THRESHOLD_FILTER_T = Callable[["Threshold"], bool]
@@ -54,7 +53,7 @@ class Threshold:
     #: At which sample index the threshold was detected.
     sample_index: int
     #: If the threshold is a lower threshold or an upper threshold.
-    nature: _THRESHOLD_NATURE_T
+    nature: THRESHOLD_NATURE_T
     #: If the threshold was measured during an entry or an exit of the
     #: multipator band
     way: THRESHOLD_WAY_T
@@ -165,23 +164,10 @@ def create_thresholds(
 class PowerExtremum:
     """Place-holder for reaching a minimum or maximum of power."""
 
-    #: At which sample index the power reached an extremum.
+    #: At which sample index the power reached an extremum
     sample_index: int
     #: If the extremum is mini/maxi
-    nature: _POWER_EXTREMUM_T
-    #: Clear interpretation of what was detected
-    info: Literal[
-        "First point forced to a minimum",
-        "Trough of a seesaw profile",
-        "Trough of a triangle profile",
-        "Last point forced to a minimum",
-        "Peak of a seesaw profile",
-        "Peak of a triangle profile",
-    ]
-    #: If the extremum corresponds to a small power change (power follows a
-    #: triangular profile), in opposition to significant power change (seesaw
-    #: profile)
-    smooth: bool = True
+    nature: POWER_EXTREMUM_T
 
     def __eq__(self, other: object) -> bool:
         """Test that two extrema represent the same thing."""
@@ -190,7 +176,6 @@ class PowerExtremum:
         return (
             self.sample_index == other.sample_index
             and self.nature == other.nature
-            and self.smooth == other.smooth
         )
 
 
@@ -198,11 +183,6 @@ def create_power_extrema(
     growth_array: NDArray[np.float64],
 ) -> list[PowerExtremum]:
     """Create power extrema.
-
-    Supports triangular-like and seesaw profiles. Seesaw detection does not
-    work properly if ``growth_array`` was generated using
-    :func:`.noisy_array_is_growing` (:class:`.ForwardPower`). Prefer using
-    :func:`.not_noisy_array_is_growing` (:class:`.PowerSetpoint`).
 
     Parameters
     ----------
@@ -212,56 +192,35 @@ def create_power_extrema(
         power extrema.
 
     """
-    growth_status = np.empty(np.shape(growth_array), dtype=object)
-    growth_status[np.where(growth_array == -1.0)] = "decreasing"
-    growth_status[np.where(growth_array == 0.0)] = "constant"
-    growth_status[np.where(growth_array == 1.0)] = "increasing"
-
-    extrema: list[PowerExtremum] = [
-        PowerExtremum(0, "minimum", info="First point forced to a minimum")
-    ]
+    extrema: list[PowerExtremum] = [PowerExtremum(0, "minimum")]
     i_max = len(growth_array) - 1
 
-    if growth_status[1] != "increasing":
-        logging.info(
-            "Signal does not start rising. Consider trimming leading points."
+    if growth_array[1] != 1.0:
+        logging.warning(
+            "User should manually trim exceedent powers in order to avoid "
+            "flat minima at the start of the test."
         )
-    if growth_status[-1] != "decreasing":
-        logging.info(
-            "Signal does not end falling. Consider trimming trailing points."
+    if growth_array[-1] != -1.0:
+        logging.warning(
+            "User should manually trim exceedent powers in order to avoid "
+            "flat minima at the end of the test."
         )
-
-    current: _GROWTH_STATUS_T
-    prev: _GROWTH_STATUS_T
 
     for i in range(1, i_max):
-        prev, current = growth_status[i - 1 : i + 1]
-        if current == "constant":
+        if growth_array[i] != 0.0:
             continue
 
-        if prev == "increasing" and current == "decreasing":
-            extrema.append(
-                PowerExtremum(i, "maximum", info="Peak of a triangle profile")
-            )
+        prev = growth_array[i - 1]
+        next = growth_array[i + 1]
+
+        if prev == 1.0 and next == -1.0:
+            extrema.append(PowerExtremum(i, "maximum"))
             continue
-        elif prev == "decreasing" and current == "increasing":
-            extrema.append(
-                PowerExtremum(
-                    i, "minimum", info="Trough of a triangle profile"
-                )
-            )
+        if prev == -1.0 and next == 1.0:
+            extrema.append(PowerExtremum(i, "minimum"))
             continue
 
-    extrema.append(
-        PowerExtremum(i_max, "minimum", info="Last point forced to a minimum")
-    )
+        logging.debug(f"Detected noise or plateau around {i = }. Ignoring...")
 
-    # Post-process: adjacent extrema are seesaw pairs
-    for j in range(1, len(extrema)):
-        prev_extrem = extrema[j - 1]
-        curr_extrem = extrema[j]
-        if curr_extrem.sample_index - prev_extrem.sample_index == 1:
-            for ext in (curr_extrem, prev_extrem):
-                ext.smooth = False
-                ext.info = ext.info.replace("triangle", "seesaw")  # type: ignore
+    extrema.append(PowerExtremum(i_max, "minimum"))
     return extrema

@@ -22,6 +22,7 @@ Submodules
 
    multipac_testbench.instruments.current_probe
    multipac_testbench.instruments.factory
+   multipac_testbench.instruments.frequency
    multipac_testbench.instruments.instrument
    multipac_testbench.instruments.optical_fibre
    multipac_testbench.instruments.penning
@@ -29,6 +30,5 @@ Submodules
    multipac_testbench.instruments.predicates
    multipac_testbench.instruments.reflection_coefficient
    multipac_testbench.instruments.rpa
-   multipac_testbench.instruments.step_constant
    multipac_testbench.instruments.swr
    multipac_testbench.instruments.virtual_instrument

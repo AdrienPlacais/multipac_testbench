@@ -8,7 +8,6 @@ from collections.abc import Collection, Iterable, Sequence
 from pathlib import Path
 from typing import Any, TypeVar, cast
 
-import matplotlib
 import matplotlib.cm as cm
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
@@ -75,7 +74,7 @@ def plot_susceptibility_with_grad(
 
     scatter_kwargs = {
         "norm": mcolors.Normalize(vmin=zdata.min(), vmax=zdata.max()),
-        "cmap": cmap or matplotlib.colormaps.get_cmap("viridis"),
+        "cmap": cmap or cm.get_cmap("viridis"),
         "c": zdata,
         "x": df.index,
         "s": s,
