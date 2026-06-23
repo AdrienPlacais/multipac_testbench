@@ -533,6 +533,40 @@ class PowerStepSet:
                 return step
         raise KeyError(f"No PowerStep with {sample_index=} in {self}")
 
+    def to_dataframe(
+        self,
+        reducer: REDUCER_T | None = None,
+        special_reducers: (
+            Mapping[str | type[Instrument], REDUCER_T] | None
+        ) = None,
+        index_col: str = "Sample index",
+    ) -> pd.DataFrame:
+        """
+        Reduce all :class:`.PowerStep` to single :class:`pandas.DataFrame`.
+
+        Parameters
+        ----------
+        reducer :
+            Passed to :meth:`.PowerStep.to_single_values`.
+        special_reducers :
+            Passed to :meth:`.PowerStep.to_single_values`.
+        index_col :
+            Name of the column holding sample indexes.
+
+        Returns
+        -------
+            One row per :class:`.PowerStep`, one column per instrument.
+
+        """
+        series = (
+            power_step.to_single_values(
+                generic_reducer=reducer,
+                special_reducers=special_reducers,
+            )
+            for power_step in sorted(self, key=lambda step: step._sample_index)
+        )
+        return pd.concat(series, axis=1).transpose().set_index(index_col)
+
     def to_multipactor_test_file(
         self,
         csv_path: Path,
@@ -566,14 +600,11 @@ class PowerStepSet:
             :meth:`pandas.DataFrame.to_csv`.
 
         """
-        series = (
-            power_step.to_single_values(
-                generic_reducer=reducer,
-                special_reducers=special_reducers,
-            )
-            for power_step in sorted(self, key=lambda step: step._sample_index)
+        df = self.to_dataframe(
+            reducer=reducer,
+            special_reducers=special_reducers,
+            index_col=index_col,
         )
-        df = pd.concat(series, axis=1).transpose().set_index(index_col)
         save(csv_path, df, sep=sep, **kwargs)
         return
 
@@ -587,7 +618,7 @@ class PowerStepSet:
         **kwargs,
     ) -> MultipactorTest:
         """
-        Write the summary ``CSV`` and load it as a :class:`.MultipactorTest`.
+        Create a :class:`.MultipactorTest` from power step files.
 
         Convenience wrapper around :meth:`to_multipactor_test_file` that
         additionally back-links the returned :class:`.MultipactorTest` to this
@@ -612,6 +643,10 @@ class PowerStepSet:
             :attr:`~.MultipactorTest.power_step_set` set to ``self``.
 
         """
+        logging.warning(
+            "PowerStepSet.to_multipactor_test() is deprecated. Use "
+            "MultipactorTest.from_folder() instead."
+        )
         self.to_multipactor_test_file(
             csv_path,
             reducer=reducer,
