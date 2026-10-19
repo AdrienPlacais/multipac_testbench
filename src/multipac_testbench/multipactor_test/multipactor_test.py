@@ -1656,7 +1656,7 @@ class MultipactorTest:
 
                 cols = pos_to_cols.get(position, [])
                 if global_instruments and instr.is_global:
-                    cols.extend(*[col for col in pos_to_cols.values()])
+                    cols.extend(*[*pos_to_cols.values()])
 
                 if (
                     global_multipactor
