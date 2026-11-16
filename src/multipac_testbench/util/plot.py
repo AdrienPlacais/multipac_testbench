@@ -302,7 +302,7 @@ def finish_fig(
     png_path: Path | None = None,
 ) -> tuple[Figure, list[Axes]]:
     """Save the figure, create the legend."""
-    axes = [axe for axe in axes]
+    axes = [*axes]
     for axe in axes:
         axe.legend()
 
